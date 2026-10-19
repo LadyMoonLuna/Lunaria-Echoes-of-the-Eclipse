@@ -1,0 +1,23 @@
+# Binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server/server.exe
+
+# Test binaries
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Godot-specific ignores
+.godot/
+*.translation
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

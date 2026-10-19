@@ -1,0 +1,99 @@
+[gd_scene load_steps=12 format=3 uid="uid://bv83m1p5608j7"]
+
+[ext_resource type="Script" path="res://scripts/LocalPlayer.gd" id="1_lp"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lp"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
+albedo_color = Color(0.15, 0.5, 0.95, 1)
+roughness = 0.3
+metallic = 0.2
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_lp"]
+material = SubResource("StandardMaterial3D_blue")
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_visor"]
+albedo_color = Color(0.2, 0.85, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.85, 1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_visor"]
+material = SubResource("StandardMaterial3D_visor")
+size = Vector3(0.35, 0.15, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blade"]
+albedo_color = Color(0.85, 0.9, 1, 1)
+metallic = 0.85
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.25, 0.65, 1, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_blade"]
+material = SubResource("StandardMaterial3D_blade")
+size = Vector3(0.08, 0.95, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_guard"]
+albedo_color = Color(0.2, 0.22, 0.25, 1)
+metallic = 0.9
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_guard"]
+material = SubResource("StandardMaterial3D_guard")
+size = Vector3(0.28, 0.05, 0.1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_handle"]
+material = SubResource("StandardMaterial3D_guard")
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.28
+
+[node name="LocalPlayer" type="CharacterBody3D"]
+collision_layer = 2
+script = ExtResource("1_lp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_lp")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_lp")
+
+[node name="VisorIndicator" type="MeshInstance3D" parent="BodyMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.32)
+mesh = SubResource("BoxMesh_visor")
+
+[node name="WeaponPivot" type="Node3D" parent="BodyMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38, 0.1, -0.25)
+
+[node name="WeaponMesh" type="Node3D" parent="BodyMesh/WeaponPivot"]
+
+[node name="Blade" type="MeshInstance3D" parent="BodyMesh/WeaponPivot/WeaponMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_blade")
+
+[node name="Guard" type="MeshInstance3D" parent="BodyMesh/WeaponPivot/WeaponMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("BoxMesh_guard")
+
+[node name="Handle" type="MeshInstance3D" parent="BodyMesh/WeaponPivot/WeaponMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.14, 0)
+mesh = SubResource("CylinderMesh_handle")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 4.0
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+current = true
+fov = 75.0

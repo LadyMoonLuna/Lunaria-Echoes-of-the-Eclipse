@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://dm0h284pld7yg"]
+
+[ext_resource type="Script" path="res://scripts/RemotePlayer.gd" id="1_rp"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_red"]
+albedo_color = Color(0.9, 0.2, 0.25, 1)
+roughness = 0.35
+metallic = 0.1
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_rp"]
+material = SubResource("StandardMaterial3D_red")
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_visor_red"]
+albedo_color = Color(1, 0.6, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.6, 0.1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_visor_red"]
+material = SubResource("StandardMaterial3D_visor_red")
+size = Vector3(0.35, 0.15, 0.3)
+
+[node name="RemotePlayer" type="Node3D"]
+script = ExtResource("1_rp")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_rp")
+
+[node name="VisorIndicator" type="MeshInstance3D" parent="BodyMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.32)
+mesh = SubResource("BoxMesh_visor_red")
+
+[node name="NameTag" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+billboard = 1
+text = "Player"
+font_size = 28
+outline_size = 6
+outline_modulate = Color(0, 0, 0, 1)
