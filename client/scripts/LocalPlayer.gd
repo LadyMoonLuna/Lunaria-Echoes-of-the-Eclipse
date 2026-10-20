@@ -48,8 +48,8 @@ var default_weapon_rot: Vector3 = Vector3.ZERO
 var default_weapon_pos: Vector3 = Vector3.ZERO
 var default_weapon_scale: Vector3 = Vector3.ONE
 
-const RaceModel = preload("res://scripts/models/RaceModel.gd")
-var race_model: RaceModel = null
+const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
+var race_model: LunariaModel = null
 var _capsule_mesh: Mesh = null
 
 func _ready() -> void:
@@ -739,12 +739,16 @@ func _spawn_chrono_dial_fx(pos: Vector3) -> void:
 	tw.chain().tween_callback(dial.queue_free)
 
 func _animate_racial_skill_visual() -> void:
+	if race_model:
+		race_model.play_action(6)
 	var tw := create_tween().set_parallel(false)
 	tw.tween_property(self, "scale", Vector3(1.15, 1.15, 1.15), 0.18).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "scale", Vector3.ONE, 0.22)
 	tw.finished.connect(func(): is_attacking = false)
 
 func _animate_attack_visual(action_type: int) -> void:
+	if race_model:
+		race_model.play_action(action_type)
 	if not weapon_pivot:
 		is_attacking = false
 		return
@@ -854,7 +858,13 @@ func _perform_dodge_roll() -> void:
 	if NetworkManager and NetworkManager.my_player_id > 0:
 		NetworkManager.send_player_action(2, dodge_direction)
 
-	if body_mesh:
+	if race_model:
+		# O clipe dodge_roll do modelo faz o rolamento; o timer só libera a esquiva
+		race_model.play_action(2)
+		var tw_dodge := create_tween()
+		tw_dodge.tween_interval(0.35)
+		tw_dodge.finished.connect(func(): is_dodging = false)
+	elif body_mesh:
 		var tw := create_tween()
 		tw.tween_property(body_mesh, "rotation:x", deg_to_rad(360.0), 0.35)
 		tw.finished.connect(func():
@@ -1040,14 +1050,14 @@ func _apply_race_visuals() -> void:
 	_update_race_model()
 
 func _update_race_model() -> void:
-	# Raças com modelo 3D próprio (19-28) substituem a cápsula padrão
+	# Todas as raças têm modelo 3D próprio; a cápsula fica só como reserva
 	if race_model and is_instance_valid(race_model):
 		race_model.queue_free()
 	race_model = null
 	if _capsule_mesh == null:
 		_capsule_mesh = body_mesh.mesh
-	if RaceModel.has_model(current_race_id):
-		race_model = RaceModel.create(current_race_id) as RaceModel
+	if LunariaModel.has_model(LunariaModel.race_uid(current_race_id)):
+		race_model = LunariaModel.create_race(current_race_id, current_class_id) as LunariaModel
 		race_model.position = Vector3(0, -0.9, 0)
 		body_mesh.add_child(race_model)
 		body_mesh.mesh = null
@@ -1073,6 +1083,10 @@ func _apply_class_visuals() -> void:
 	if homunculus_orbiter and is_instance_valid(homunculus_orbiter):
 		homunculus_orbiter.queue_free()
 		homunculus_orbiter = null
+
+	if race_model and is_instance_valid(race_model):
+		race_model.set_class(current_class_id)
+		return
 
 	match current_class_id:
 		1: # Espadachim: Espada Longa Prateada + Escudo na mão esquerda

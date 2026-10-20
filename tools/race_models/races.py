@@ -65,6 +65,11 @@ def sylvari():
     flower(m, (0.27, 1.585, 0.0), 0.05, petal, sap, petals=6, group="arm_r")
     flower(m, (-0.1, 1.86, -0.03), 0.04, petal, sap, petals=5, tilt=35, group="hair")
     flower(m, (-0.05, 1.37, -0.16), 0.03, petal, sap, petals=5, tilt=60)
+    petal_b = m.mat("petal_blue", "#e1f5fe", rough=0.5, emit="#40c4ff", energy=1.8, double=True)
+    petal_y = m.mat("petal_yellow", "#fff9c4", rough=0.5, emit="#ffd600", energy=1.8, double=True)
+    flower(m, (0.09, 1.85, 0.06), 0.032, petal_b, sap, petals=5, tilt=30, group="hair")
+    flower(m, (-0.04, 1.66, 0.14), 0.03, petal_y, sap, petals=5, tilt=70, group="hair")
+    flower(m, (0.12, 1.7, 0.09), 0.026, petal_y, sap, petals=5, tilt=60, group="hair")
 
     # Raízes nos pés
     for ang in (-35, 15):
@@ -86,7 +91,7 @@ def myconid():
               "Ao longo de séculos, o micélio absorveu as memórias e almas dos mortos, erguendo-se em corpos "
               "humanoides cobertos por mantos de cogumelos azuis e violetas que brilham no escuro.",
               "#9c27b0", scale=0.97, seed=20)
-    flesh = m.mat("flesh", "#c8b8ae", rough=0.9)
+    flesh = m.mat("flesh", "#dbe6ee", rough=0.9)
     flesh_d = m.mat("flesh_dark", "#7d6458", rough=0.9)
     cap = m.mat("cap_violet", "#5e35b1", rough=0.5, emit="#7c4dff", energy=0.7)
     cap_b = m.mat("cap_blue", "#1565c0", rough=0.5, emit="#40c4ff", energy=0.9)
@@ -99,7 +104,7 @@ def myconid():
                   anim={"type": "glow", "speed": 2.4, "min": 0.3, "max": 1.4})
     myc = m.mat("mycelium", "#e8eaf6", rough=0.6, emit="#b2ebf2", energy=0.8)
 
-    humanoid(m, flesh, mantle, flesh_d, flesh_d, w=1.18, head=False)
+    humanoid(m, flesh, mantle, flesh_d, flesh_d, w=1.0, head=False)
 
     # Cabeça: rosto fúngico sob um enorme chapéu de cogumelo
     m.part("sphere", [0.12], (0, 1.69, 0), flesh, scale=(1.05, 1.0, 1.0))
@@ -165,7 +170,7 @@ def aracne():
               "rubros (quatro menores na testa) e a capacidade de produzir seda mais resistente que o aço de "
               "Garrick e veneno neurotóxico.",
               "#eceff1", scale=1.02, seed=21)
-    skin = m.mat("porcelain", "#f4efea", rough=0.22)
+    skin = m.mat("porcelain", "#e3e1df", rough=0.22)
     cloth = m.mat("silk_black", "#18181d", rough=0.45, metal=0.15)
     silver = m.mat("silver", "#d5dde2", rough=0.18, metal=0.95)
     chitin = m.mat("chitin", "#1d1d24", rough=0.25, metal=0.35)
@@ -270,6 +275,8 @@ def draconato():
     m.part("box", [0.02, 0.32, 0.02], (0.13, 1.26, -0.13), magma, rot=(0, 25, 14), mirror=True)
     m.part("box", [0.016, 0.24, 0.016], (0.32, 1.05, -0.1), magma, rot=(30, 0, 6), group="arm_r", mirror=True)
     m.part("box", [0.016, 0.3, 0.016], (0.14, 0.7, -0.08), magma, rot=(0, 0, 5), group="leg_r", mirror=True)
+    for i in range(3):
+        m.part("torus", [0.054, 0.06], (0, 1.53 + i * 0.035, 0), magma, scale=(1, 0.4, 1))
 
     # Garras
     for dx in (-0.02, 0.0, 0.02):
@@ -312,8 +319,8 @@ def quimera():
     claw = m.mat("claw", "#20262b", rough=0.3, metal=0.3)
     acid = m.mat("acid", "#b2ff59", emit="#64dd17", energy=3.2,
                  anim={"type": "glow", "speed": 2.6, "min": 0.4, "max": 1.4})
-    eye_g = m.mat("eye_acid", "#ccff90", emit="#76ff03", energy=6.0)
-    eye_y = m.mat("eye_yellow", "#ffff8d", emit="#ffea00", energy=5.0)
+    eye_g = m.mat("eye_beast", "#ffff8d", emit="#ffd600", energy=6.0)
+    eye_y = m.mat("eye_human", "#90caf9", emit="#2979ff", energy=3.0)
     leather = m.mat("leather", "#3e2c22", rough=0.8)
 
     # Corpo humano costurado; braço direito será substituído por um membro bestial
@@ -349,15 +356,19 @@ def quimera():
     m.group("arm_l", (-0.27, 1.47, 0))
     m.part("sphere", [0.082], (-0.27, 1.47, 0), flesh, group="arm_l")
     m.part("torus", [0.075, 0.088], (-0.28, 1.4, 0), scar, rot=(0, 0, 8), group="arm_l")
-    m.part("capsule", [0.056, 0.34], (-0.29, 1.3, 0), flesh, rot=(0, 0, -8), group="arm_l")
-    m.part("capsule", [0.05, 0.3], (-0.32, 1.05, -0.06), flesh, rot=(30, 0, -6), group="arm_l")
+    scales_g = m.mat("green_scales", "#2e6b3a", rough=0.35, metal=0.25)
+    m.part("capsule", [0.058, 0.34], (-0.29, 1.3, 0), scales_g, rot=(0, 0, -8), group="arm_l")
+    m.part("capsule", [0.052, 0.3], (-0.32, 1.05, -0.06), scales_g, rot=(30, 0, -6), group="arm_l")
+    for i in range(2):
+        m.part("cylinder", [0.012, 0.012, 0.42], (-0.35 + i * 0.03, 1.18, 0.03 + i * 0.02), acid, rot=(12, 0, -8), group="arm_l")
+    m.part("sphere", [0.03], (-0.36, 1.4, 0.04), acid, group="arm_l")
     m.part("sphere", [0.052], (-0.33, 0.9, -0.14), flesh, scale=(0.9, 1.15, 0.9), group="arm_l")
 
     # Braço direito bestial com garra gigante
     m.group("arm_r", (0.3, 1.5, 0))
     m.part("sphere", [0.13], (0.31, 1.5, 0.0), fur, scale=(1.1, 1.0, 1.1), group="arm_r")
-    m.part("capsule", [0.095, 0.38], (0.36, 1.28, 0), mut, rot=(0, 0, 12), group="arm_r")
-    m.part("capsule", [0.09, 0.36], (0.4, 1.0, -0.07), mut, rot=(28, 0, 8), group="arm_r")
+    m.part("capsule", [0.095, 0.38], (0.36, 1.28, 0), fur, rot=(0, 0, 12), group="arm_r")
+    m.part("capsule", [0.09, 0.36], (0.4, 1.0, -0.07), fur, rot=(28, 0, 8), group="arm_r")
     m.part("sphere", [0.1], (0.42, 0.82, -0.16), mut, scale=(1.1, 0.9, 1.2), group="arm_r")
     for i, (dx, dz) in enumerate(((-0.06, -0.06), (0.0, -0.09), (0.06, -0.06), (0.08, 0.04))):
         p0 = (0.42 + dx, 0.8, -0.16 + dz)
@@ -388,6 +399,10 @@ def quimera():
     m.part("sphere", [0.04], pts[-1], acid, group=parent)
     m.seg(pts[-1], (0.14, 0.68, 1.02), 0.022, 0.0, bone, group=parent)
 
+    m.body_w = 1.1
+    m.anchor("hand_r", "arm_r", (0.42, 0.8, -0.18))
+    m.anchor("hand_l", "arm_l", (-0.33, 0.88, -0.15))
+    m.anchor("back", None, (0, 1.32, 0.22))
     m.light("#76ff03", 0.6, 2.5, (0, 1.3, 0.5))
     return m
 
@@ -418,6 +433,13 @@ def boreal():
     m.part("sphere", [0.134], (0, 1.74, 0.025), hair, scale=(1.04, 1.05, 1.04))
     m.group("hair", (0, 1.72, 0.08), anim={"type": "sway", "axis": [1, 0, 0], "amp": 2.5, "speed": 1.1})
     m.part("capsule", [0.11, 0.78], (0, 1.38, 0.13), hair, scale=(1.3, 1, 0.42), rot=(-6, 0, 0), group="hair")
+    for i in range(9):
+        a = math.radians(30 + i * 15)
+        m.part("cylinder", [0.0, 0.028, 0.12], (math.cos(a) * 0.1, 1.84, math.sin(a) * 0.1 + 0.02), hair,
+               rot=(35 * math.sin(a), 0, -35 * math.cos(a)))
+    for i in range(3):
+        m.part("cylinder", [0.0, 0.022, 0.1 - i * 0.015], (0.34, 1.12 - i * 0.07, -0.02 - i * 0.03), crystal,
+               rot=(30, 0, -55), group="arm_r", mirror=True)
     m.part("capsule", [0.04, 0.4], (0.1, 1.56, -0.03), hair, rot=(0, 0, -5), mirror=True)
 
     # Coroa de gelo
@@ -476,8 +498,10 @@ def thalassiano():
               "e escamas, criando uma raça anfíbia de olhos bioluminescentes que governa a pressão dos oceanos "
               "e a fúria das tempestades.",
               "#006064", scale=1.05, seed=25)
-    skin = m.mat("scale_teal", "#0f8c96", rough=0.28, metal=0.3)
-    dark = m.mat("scale_dark", "#06474f", rough=0.35, metal=0.3)
+    skin = m.mat("scale_teal", "#123d6e", rough=0.28, metal=0.3)
+    dark = m.mat("scale_dark", "#0a2240", rough=0.35, metal=0.3)
+    stripe = m.mat("neon_stripe", "#b3e5fc", emit="#00b0ff", energy=3.5,
+                   anim={"type": "glow", "speed": 1.2, "min": 0.5, "max": 1.3})
     belly = m.mat("belly", "#8fd3c9", rough=0.4)
     fin = m.mat("fin", "#4dd0e1", rough=0.2, emit="#00e5ff", energy=0.7, alpha=0.82, double=True)
     glow = m.mat("biolum", "#a7ffeb", emit="#1de9b6", energy=4.0,
@@ -506,6 +530,9 @@ def thalassiano():
         m.part("sphere", [0.012], p, glow, mirror=True)
     for i in range(3):
         m.part("sphere", [0.01], (0.335, 1.32 - i * 0.07, -0.03), glow, group="arm_r", mirror=True)
+    m.part("box", [0.012, 0.36, 0.012], (0.2, 1.24, -0.06), stripe, rot=(0, -30, 4), mirror=True)
+    m.part("box", [0.01, 0.28, 0.01], (0.32, 1.06, -0.1), stripe, rot=(30, 0, 6), group="arm_r", mirror=True)
+    m.part("box", [0.01, 0.34, 0.01], (0.16, 0.5, -0.06), stripe, group="leg_r", mirror=True)
 
     # Barbatana dorsal, barbatanas dos antebraços e panturrilhas
     m.part("prism", [0.36, 0.34, 0.015], (0, 1.32, 0.2), fin, rot=(15, 90, 0))
@@ -562,6 +589,13 @@ def cambion():
     # Chifres recurvados para trás
     m.chain([(0.055, 1.81, -0.05), (0.09, 1.91, 0.0), (0.12, 1.96, 0.11), (0.125, 1.92, 0.23), (0.11, 1.83, 0.29)],
             [0.036, 0.03, 0.022, 0.012, 0.0], horn, mirror=True)
+    for p, r in (((0.075, 1.86, -0.025), 0.036), ((0.105, 1.935, 0.05), 0.03), ((0.123, 1.95, 0.15), 0.024)):
+        m.part("torus", [r * 0.8, r * 1.05], p, horn, rot=(40, 0, -30), mirror=True)
+    iron = m.mat("broken_chain", "#55575c", rough=0.4, metal=0.85)
+    for i in range(3):
+        m.part("torus", [0.02, 0.03], (0.33 + i * 0.015, 0.95 - i * 0.05, -0.1 - i * 0.02), iron,
+               rot=(0, 90 * (i % 2), 70), group="arm_r", mirror=True)
+    m.part("torus", [0.05, 0.065], (0.32, 0.97, -0.11), iron, rot=(30, 0, 6), group="arm_r", mirror=True)
     # Marcas carmesim no rosto e brasas pelo corpo
     m.part("box", [0.008, 0.06, 0.01], (0.045, 1.68, -0.115), ember, mirror=True)
     m.part("box", [0.012, 0.18, 0.012], (0.31, 1.06, -0.1), ember, rot=(30, 0, 6), group="arm_r", mirror=True)
@@ -634,7 +668,7 @@ def nephilim():
     white = m.mat("robe_white", "#f6f1e3", rough=0.7)
     black = m.mat("robe_black", "#16121c", rough=0.6)
     gold = m.mat("gold", "#ffc107", rough=0.2, metal=0.9, emit="#ffb300", energy=0.35)
-    hair = m.mat("hair", "#efe0b4", rough=0.5)
+    hair = m.mat("hair", "#f5f2ea", rough=0.5)
     light_f = m.mat("feather_light", "#fff8c4", rough=0.3, emit="#ffd54f", energy=3.2, alpha=0.88, double=True,
                     anim={"type": "glow", "speed": 1.4, "min": 0.75, "max": 1.25})
     dark_f = m.mat("feather_dark", "#0e0b14", rough=0.35, metal=0.3, emit="#4a148c", energy=0.35, double=True)
@@ -654,9 +688,13 @@ def nephilim():
     # Olhos de cores opostas e cabelo platinado
     m.part("sphere", [0.02], (0.045, 1.72, -0.112), eye_g)
     m.part("sphere", [0.02], (-0.045, 1.72, -0.112), eye_v)
-    m.part("sphere", [0.133], (0, 1.745, 0.025), hair, scale=(1.04, 1.03, 1.04))
-    m.part("capsule", [0.09, 0.36], (0, 1.6, 0.1), hair, scale=(1.3, 1, 0.5))
-    m.part("capsule", [0.03, 0.22], (0.1, 1.66, -0.04), hair, rot=(0, 0, -8), mirror=True)
+    hair_b = m.mat("hair_black", "#121016", rough=0.45)
+    m.part("sphere", [0.133], (0.012, 1.745, 0.025), hair, scale=(0.55, 1.03, 1.04))
+    m.part("sphere", [0.133], (-0.012, 1.745, 0.025), hair_b, scale=(0.55, 1.03, 1.04))
+    m.part("capsule", [0.07, 0.36], (0.045, 1.6, 0.1), hair, scale=(1.0, 1, 0.5))
+    m.part("capsule", [0.07, 0.36], (-0.045, 1.6, 0.1), hair_b, scale=(1.0, 1, 0.5))
+    m.part("capsule", [0.03, 0.22], (0.1, 1.66, -0.04), hair, rot=(0, 0, -8))
+    m.part("capsule", [0.03, 0.22], (-0.1, 1.66, -0.04), hair_b, rot=(0, 0, 8))
 
     # Auréola partida: metade de luz, metade de vazio
     m.group("halo", (0, 2.0, 0.08), anim={"type": "bob", "amp": 0.015, "speed": 1.4})
@@ -687,6 +725,28 @@ def nephilim():
 # ---------------------------------------------------------------------------
 # 28 — Cronomante / Errante Temporal
 # ---------------------------------------------------------------------------
+def _roman(m, text, center, angle, mat, group):
+    """Escreve um numeral romano com traços (I, V, X) girado tangente ao anel."""
+    strokes = []
+    x = 0.0
+    for ch in text:
+        if ch == "I":
+            strokes.append((x, 0.0, 0.0))
+            x += 0.022
+        elif ch == "V":
+            strokes += [(x - 0.008, 0.0, 14), (x + 0.008, 0.0, -14)]
+            x += 0.034
+        elif ch == "X":
+            strokes += [(x, 0.0, 28), (x, 0.0, -28)]
+            x += 0.034
+    width = x - 0.022 if x else 0
+    rot = euler_to_mat((0, 0, angle))
+    for sx, sy, sa in strokes:
+        lx = sx - width / 2
+        off = (rot[0][0] * lx + rot[0][1] * sy, rot[1][0] * lx + rot[1][1] * sy, 0)
+        m.part("box", [0.008, 0.05, 0.008], v_add(center, off), mat, rot=(0, 0, angle + sa), group=group)
+
+
 def cronomante():
     m = Model(28, "cronomante", "Cronomante", "Errante Temporal — O Eco do Relógio Quebrado",
               "Você já se perguntou por que o Dia em Lunaria dura 80 minutos e a Noite dura 40 minutos? Na Guerra "
@@ -728,25 +788,32 @@ def cronomante():
     m.part("cylinder", [0.004, 0.032, 0.064], v_add(hg, (0, -0.033, 0)), dial)
     m.part("cylinder", [0.02, 0.028, 0.025], v_add(hg, (0, -0.05, 0)), sand)
 
-    # Mostrador do Relógio Astral quebrado atrás da cabeça
-    c = (0, 1.78, 0.26)
+    # Anel do Relógio Astral em algarismos romanos dourados, girando lentamente atrás das costas
+    c = (0, 1.6, 0.3)
     m.group("dial", c, anim={"type": "bob", "amp": 0.02, "speed": 1.2})
-    m.part("cylinder", [0.27, 0.27, 0.012], c, dial, rot=(90, 0, 0), group="dial")
-    m.part("torus", [0.265, 0.29], c, brass, rot=(90, 0, 0), group="dial")
-    m.part("torus", [0.07, 0.08], c, brass, rot=(90, 0, 0), group="dial")
-    for i in range(12):
+    m.group("clock_ring", c, "dial", anim={"type": "spin", "axis": [0, 0, 1], "speed": 8})
+    m.part("torus", [0.4, 0.425], c, brass, rot=(90, 0, 0), group="clock_ring")
+    m.part("torus", [0.29, 0.3], c, trim, rot=(90, 0, 0), group="clock_ring")
+    numerals = ["XII", "I", "II", "III", "IIII", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
+    for i, text in enumerate(numerals):
+        if i == 7:
+            continue  # numeral perdido na quebra do relógio
         a = math.radians(i * 30)
-        p = v_add(c, (math.sin(a) * 0.23, math.cos(a) * 0.23, -0.008))
-        big = i % 3 == 0
-        m.part("box", [0.012 if not big else 0.02, 0.04 if not big else 0.055, 0.008], p, ink,
-               rot=(0, 0, -math.degrees(a)), group="dial")
-    m.part("box", [0.012, 0.36, 0.014], v_add(c, (0.05, -0.02, -0.01)), ink, rot=(0, 0, 32), group="dial")
-    m.part("box", [0.01, 0.16, 0.014], v_add(c, (0.13, 0.05, -0.01)), ink, rot=(0, 0, -20), group="dial")
+        center = v_add(c, (math.sin(a) * 0.35, math.cos(a) * 0.35, 0))
+        _roman(m, text, center, -math.degrees(a), trim, "clock_ring")
     m.group("hand_hour", c, "dial", anim={"type": "spin", "axis": [0, 0, 1], "speed": -12})
-    m.part("box", [0.018, 0.13, 0.008], v_add(c, (0, 0.055, -0.014)), brass, group="hand_hour")
+    m.part("box", [0.018, 0.16, 0.008], v_add(c, (0, 0.07, -0.014)), brass, group="hand_hour")
     m.group("hand_min", c, "dial", anim={"type": "spin", "axis": [0, 0, 1], "speed": 70})
-    m.part("box", [0.01, 0.2, 0.008], v_add(c, (0, 0.09, -0.02)), sand, group="hand_min")
-    m.part("sphere", [0.018], v_add(c, (0, 0, -0.02)), brass, group="dial")
+    m.part("box", [0.01, 0.25, 0.008], v_add(c, (0, 0.115, -0.02)), sand, group="hand_min")
+    m.part("sphere", [0.022], v_add(c, (0, 0, -0.02)), brass, group="dial")
+    m.part("cylinder", [0.06, 0.06, 0.01], c, dial, rot=(90, 0, 0), group="dial")
+
+    # Areia dourada escorrendo das mãos e dos pés
+    for side in ("arm_r", "leg_r"):
+        base = (0.32, 0.86, -0.15) if side == "arm_r" else (0.11, 0.05, -0.05)
+        for i in range(4):
+            m.part("sphere", [0.008 + 0.003 * (i % 2)], v_add(base, (0.02 * (i - 1.5), -0.04 * i - 0.02, 0.01 * i)),
+                   sand, group=side, mirror=True)
 
     # Engrenagens quebradas orbitando
     m.group("gears", (0, 1.15, 0), anim={"type": "spin", "axis": [0, 1, 0], "speed": 16})

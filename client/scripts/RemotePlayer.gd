@@ -19,8 +19,8 @@ var offhand_pivot: Node3D = null
 var homunculus_orbiter: MeshInstance3D = null
 var homunculus_anim_time: float = 0.0
 
-const RaceModel = preload("res://scripts/models/RaceModel.gd")
-var race_model: RaceModel = null
+const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
+var race_model: LunariaModel = null
 var _capsule_mesh: Mesh = null
 
 func _ready() -> void:
@@ -71,6 +71,9 @@ func update_label() -> void:
 			"Ferreiro", "Alquimista", "Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos"
 		]
 		var r_str: String = r_names[current_race_id] if current_race_id < r_names.size() else "Valeriano"
+		var race_info := LunariaModel.get_info(LunariaModel.race_uid(current_race_id))
+		if not race_info.is_empty():
+			r_str = race_info["name"]
 		var c_str: String = c_names[current_class_id] if current_class_id < c_names.size() else "Espadachim"
 		label.text = "Player #%d\n[%s - %s]" % [player_id, r_str, c_str]
 
@@ -249,14 +252,14 @@ func _apply_race_visuals() -> void:
 	_update_race_model()
 
 func _update_race_model() -> void:
-	# Raças com modelo 3D próprio (19-28) substituem a cápsula padrão
+	# Todas as raças têm modelo 3D próprio; a cápsula fica só como reserva
 	if race_model and is_instance_valid(race_model):
 		race_model.queue_free()
 	race_model = null
 	if _capsule_mesh == null:
 		_capsule_mesh = body_mesh.mesh
-	if RaceModel.has_model(current_race_id):
-		race_model = RaceModel.create(current_race_id) as RaceModel
+	if LunariaModel.has_model(LunariaModel.race_uid(current_race_id)):
+		race_model = LunariaModel.create_race(current_race_id, current_class_id) as LunariaModel
 		race_model.position = Vector3(0, -0.9, 0)
 		body_mesh.add_child(race_model)
 		body_mesh.mesh = null
@@ -281,6 +284,10 @@ func _apply_class_visuals() -> void:
 	if homunculus_orbiter and is_instance_valid(homunculus_orbiter):
 		homunculus_orbiter.queue_free()
 		homunculus_orbiter = null
+
+	if race_model and is_instance_valid(race_model):
+		race_model.set_class(current_class_id)
+		return
 
 	match current_class_id:
 		1: # Espadachim
@@ -619,6 +626,8 @@ func _build_homunculus_orb() -> void:
 	add_child(homunculus_orbiter)
 
 func play_skill_animation(action_type: int) -> void:
+	if race_model:
+		race_model.play_action(action_type)
 	match action_type:
 		1:
 			_animate_attack()
@@ -705,7 +714,7 @@ func _animate_attack() -> void:
 	tw.tween_property(weapon_pivot, "rotation:x", 0.0, 0.1)
 
 func _animate_dodge() -> void:
-	if body_mesh:
+	if body_mesh and not race_model:
 		var tw := create_tween()
 		tw.tween_property(body_mesh, "rotation:x", deg_to_rad(360.0), 0.35)
 		tw.finished.connect(func(): if body_mesh: body_mesh.rotation.x = 0.0)

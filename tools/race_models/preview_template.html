@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-  /* Layout: palco 3D à esquerda (eclipse ao fundo), grimório lateral com raças e lore à direita; empilha no celular. */
+  /* Layout: palco 3D à esquerda com o eclipse ao fundo; grimório lateral com catálogo, classe, animações e lore. Empilha no celular. */
   :root {
     --night: #0b0a14;
     --night-2: #13111f;
@@ -20,125 +20,100 @@
     color-scheme: dark;
   }
   html, body { height: 100%; }
-  body {
-    background: var(--night);
-    color: var(--moon);
-    font-family: var(--body);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  .app {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    height: 100%;
-    min-height: 560px;
-  }
+  body { background: var(--night); color: var(--moon); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+  .app { display: grid; grid-template-columns: minmax(0, 1fr) 380px; height: 100%; min-height: 600px; }
   .stage { position: relative; min-width: 0; overflow: hidden; background: radial-gradient(120% 90% at 50% 15%, #1d1934 0%, var(--night) 60%); }
   .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   .stage-head {
-    position: absolute; inset: 0 0 auto 0;
-    padding-block: 18px;
-    padding-left: max(20px, env(safe-area-inset-left, 0px));
-    padding-right: 20px;
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
-    pointer-events: none;
+    position: absolute; inset: 0 0 auto 0; pointer-events: none;
+    padding-block: 18px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: 20px;
   }
   .race-id { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
   .race-name { font-family: var(--display); font-size: clamp(28px, 4vw, 46px); line-height: 1.05; margin: 4px 0 2px; text-wrap: balance; }
   .race-title { color: var(--mist); font-size: 15px; }
   .controls {
     position: absolute; left: 0; right: 0; bottom: 0;
-    padding-block: 14px;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: 16px;
+    padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px;
     display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   }
   .chip {
-    font: 500 13px var(--body);
-    color: var(--moon);
-    background: rgba(23, 20, 39, 0.82);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 6px 14px;
-    cursor: pointer;
-    backdrop-filter: blur(6px);
+    font: 500 13px var(--body); color: var(--moon);
+    background: rgba(23, 20, 39, 0.82); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; cursor: pointer; backdrop-filter: blur(6px);
   }
   .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
-  .chip:focus-visible, .race:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip:focus-visible, .race:focus-visible, .tab:focus-visible, .clip:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .hint { color: var(--dim); font-size: 12px; margin-left: auto; }
   .status[hidden] { display: none; }
   .status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mist); font-family: var(--mono); font-size: 13px; text-align: center; padding: 24px; }
 
-  aside {
-    background: var(--panel);
-    border-left: 1px solid var(--line);
-    display: flex; flex-direction: column;
-    min-width: 0; min-height: 0;
-  }
+  aside { background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
   .aside-inner {
-    overflow-y: auto;
-    padding-block: 20px 24px;
-    padding-left: 20px;
-    padding-right: max(20px, env(safe-area-inset-right, 0px));
-    display: flex; flex-direction: column; gap: 20px;
+    overflow-y: auto; padding-block: 18px 24px; padding-left: 20px; padding-right: max(20px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 18px;
   }
   .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
-  .races { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+  .tab {
+    flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--mist);
+    font: 500 14px var(--body); padding: 8px 4px; cursor: pointer;
+  }
+  .tab[aria-selected="true"] { color: var(--moon); border-bottom-color: var(--accent); }
+  .tab small { font-family: var(--mono); color: var(--dim); font-size: 11px; margin-left: 4px; }
+  .races { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 10px; max-height: 300px; overflow-y: auto; padding-right: 2px; }
   .race {
-    display: flex; align-items: center; gap: 8px;
-    text-align: left;
-    background: var(--night-2);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    color: var(--moon);
-    padding: 8px 10px;
-    font: 500 14px var(--body);
-    cursor: pointer;
-    min-width: 0;
+    display: flex; align-items: center; gap: 8px; text-align: left;
+    background: var(--night-2); border: 1px solid var(--line); border-radius: 8px; color: var(--moon);
+    padding: 7px 10px; font: 500 13.5px var(--body); cursor: pointer; min-width: 0;
   }
   .race span.n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .race .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: 0 0 8px currentColor; }
+  .race .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; box-shadow: 0 0 8px currentColor; }
   .race .num { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-left: auto; font-variant-numeric: tabular-nums; }
   .race[aria-current="true"] { border-color: var(--accent); background: #211c38; }
-  .lore { font-size: 15.5px; color: var(--moon); max-width: 62ch; }
-  .lore::first-letter { font-family: var(--display); font-size: 2.3em; float: left; line-height: 0.9; padding: 4px 6px 0 0; color: var(--accent); }
+  .field { display: grid; gap: 6px; }
+  select {
+    width: 100%; background: var(--night-2); color: var(--moon); border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 10px; font: 500 14px var(--body);
+  }
+  .clips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .clip {
+    background: var(--night-2); border: 1px solid var(--line); border-radius: 6px; color: var(--mist);
+    font: 12px var(--mono); padding: 4px 8px; cursor: pointer;
+  }
+  .clip[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+  .clip-desc { color: var(--mist); font-size: 13px; min-height: 2.6em; }
+  .lore { font-size: 15px; color: var(--moon); max-width: 62ch; }
+  .lore::first-letter { font-family: var(--display); font-size: 2.2em; float: left; line-height: 0.9; padding: 4px 6px 0 0; color: var(--accent); }
   .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .fact { border-top: 1px solid var(--line); padding-top: 6px; }
   .fact b { display: block; font-family: var(--mono); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .fact small { color: var(--dim); font-size: 12px; }
-  .swatches { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-  .swatch { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.12); }
   pre {
-    margin: 8px 0 0; padding: 10px 12px;
-    background: var(--night); border: 1px solid var(--line); border-radius: 6px;
-    font: 12px/1.6 var(--mono); color: var(--mist);
-    overflow-x: auto;
+    margin: 8px 0 0; padding: 10px 12px; background: var(--night); border: 1px solid var(--line); border-radius: 6px;
+    font: 12px/1.6 var(--mono); color: var(--mist); overflow-x: auto;
   }
   pre .k { color: var(--accent); }
-
   @media (max-width: 860px) {
     .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: 62vh auto; height: auto; }
     aside { border-left: 0; border-top: 1px solid var(--line); }
     .aside-inner { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
     .hint { display: none; }
   }
-  @media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
 </style>
 
 <div class="app">
   <section class="stage" id="stage">
     <div class="stage-head">
-      <div>
-        <div class="race-id" id="raceId">Raça #19</div>
-        <h1 class="race-name" id="raceName">Sylvari</h1>
-        <div class="race-title" id="raceTitle"></div>
-      </div>
+      <div class="race-id" id="raceId">Raça #1</div>
+      <h1 class="race-name" id="raceName">Valeriano</h1>
+      <div class="race-title" id="raceTitle"></div>
     </div>
     <div class="status" id="status">Carregando o palco 3D…</div>
     <div class="controls">
       <button class="chip" id="btnSpin" aria-pressed="true">Girar</button>
       <button class="chip" id="btnWalk" aria-pressed="false">Andar</button>
-      <button class="chip" id="btnLineup" aria-pressed="false">Desfile das 10 raças</button>
+      <button class="chip" id="btnRun" aria-pressed="false">Correr</button>
+      <button class="chip" id="btnLineup" aria-pressed="false">Desfile</button>
       <span class="hint">Arraste para orbitar · role para aproximar</span>
     </div>
   </section>
@@ -146,8 +121,21 @@
   <aside>
     <div class="aside-inner">
       <div>
-        <div class="eyebrow">Raças lendárias · IDs 19–28</div>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" id="tab-race" data-kind="race" aria-selected="true">Raças<small id="cnt-race"></small></button>
+          <button class="tab" role="tab" id="tab-npc" data-kind="npc" aria-selected="false">NPCs<small id="cnt-npc"></small></button>
+          <button class="tab" role="tab" id="tab-weapon" data-kind="weapon" aria-selected="false">Armas<small id="cnt-weapon"></small></button>
+        </div>
         <div class="races" id="raceList"></div>
+      </div>
+      <div class="field" id="classField">
+        <label class="eyebrow" for="classSelect">Classe (traje e armas)</label>
+        <select id="classSelect"></select>
+      </div>
+      <div class="field" id="clipField">
+        <div class="eyebrow">Animações</div>
+        <div class="clips" id="clipList"></div>
+        <div class="clip-desc" id="clipDesc">Escolha um clipe para tocar. Parado, andando e correndo se misturam sozinhos.</div>
       </div>
       <div>
         <div class="eyebrow">Crônica</div>
@@ -155,12 +143,8 @@
       </div>
       <div class="facts">
         <div class="fact"><b id="fParts">0</b><small>primitivas</small></div>
-        <div class="fact"><b id="fGroups">0</b><small>pivôs animados</small></div>
+        <div class="fact"><b id="fGroups">0</b><small>pivôs</small></div>
         <div class="fact"><b id="fScale">1.00</b><small>escala</small></div>
-      </div>
-      <div>
-        <div class="eyebrow">Paleta de materiais</div>
-        <div class="swatches" id="swatches"></div>
       </div>
       <div>
         <div class="eyebrow">No Godot</div>
@@ -184,19 +168,28 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
-const MODELS = /*__RACE_DATA__*/null;
-const WALK_GROUPS = { leg_r: 1, leg_l: -1, arm_r: -0.8, arm_l: 0.8 };
+const DATA = /*__LUNARIA_DATA__*/null;
+const BY_UID = Object.fromEntries(DATA.models.map((m) => [m.uid, m]));
+const CLIPS = DATA.clips, LOADOUTS = DATA.loadouts;
 const DEG = Math.PI / 180;
+const LIMBS = ["torso", "arm_r", "arm_l", "leg_r", "leg_l"];
+const BLEND = 0.15;
+const LOCO = ["idle", "walk", "run"];
+const CLIP_LABELS = {
+  idle: "Idle", walk: "Walk", run: "Run", dodge_roll: "Dodge_Roll", attack_1h: "Attack_Melee_1H",
+  attack_2h_heavy: "Attack_2H_Heavy", attack_2h_sweep: "Attack_2H_Sweep", attack_bow: "Attack_Bow_Shoot",
+  attack_cast: "Attack_Cast", attack_throw: "Attack_Throw", skill_q: "Skill_Q_Strike", skill_q_support: "Skill_Q_Support",
+  skill_r_shield: "Skill_R_Parry", skill_r_sharpen: "Skill_R_Afiação", skill_r_backflip: "Skill_R_Salto",
+  skill_f_spin: "Skill_F_Furacão", skill_f_slam: "Skill_F_Slam", skill_z: "Skill_Z_Racial",
+  kneel_autopsy: "Interact_Autopsy", death_fall: "Death_Fall",
+};
 
-// ---------- Construção de modelo (espelha client/scripts/models/RaceModel.gd) ----------
+// ---------- Geometria e materiais (espelha client/scripts/models/LunariaModel.gd) ----------
 const geoCache = new Map();
 function prismGeometry(w, h, d) {
-  const x = w / 2, y = h / 2, z = d / 2;
-  const A = [-x, -y], B = [x, -y], C = [0, y];
-  const v = [];
+  const x = w / 2, y = h / 2, z = d / 2, A = [-x, -y], B = [x, -y], C = [0, y], v = [];
   const tri = (p, q, r) => v.push(...p, ...q, ...r);
-  tri([...A, z], [...B, z], [...C, z]);
-  tri([...A, -z], [...C, -z], [...B, -z]);
+  tri([...A, z], [...B, z], [...C, z]); tri([...A, -z], [...C, -z], [...B, -z]);
   const quad = (P, Q) => { tri([...P, z], [...P, -z], [...Q, -z]); tri([...P, z], [...Q, -z], [...Q, z]); };
   quad(A, C); quad(C, B); quad(B, A);
   const g = new THREE.BufferGeometry();
@@ -220,16 +213,12 @@ function geometry(shape, s) {
   geoCache.set(key, g);
   return g;
 }
-
 function makeMaterial(m) {
   const alpha = m.alpha ?? 1;
   let mat;
-  if (m.unshaded) {
-    mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(m.emit || m.color) });
-  } else {
-    mat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(m.color), roughness: m.rough, metalness: m.metal,
-    });
+  if (m.unshaded) mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(m.emit || m.color) });
+  else {
+    mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(m.color), roughness: m.rough, metalness: m.metal });
     if (m.emit) { mat.emissive = new THREE.Color(m.emit); mat.emissiveIntensity = m.energy; }
   }
   if (alpha < 1) { mat.transparent = true; mat.opacity = alpha; mat.depthWrite = false; }
@@ -237,79 +226,191 @@ function makeMaterial(m) {
   mat.userData = { spec: m, baseEnergy: m.energy ?? 0, baseAlpha: alpha };
   return mat;
 }
+const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+const ZERO = new THREE.Vector3();
+const smooth = (t) => t * t * (3 - 2 * t);
+const lerpAngle = (a, b, t) => a + ((((b - a + 540) % 360) + 360) % 360 - 180) * t;
 
-function buildModel(def) {
-  const root = new THREE.Group();
-  root.scale.setScalar(def.scale || 1);
-  const mats = {};
-  for (const [k, m] of Object.entries(def.materials)) mats[k] = makeMaterial(m);
-  const groups = {}, pivots = {}, animated = [], walkers = [];
-  for (const g of def.groups) {
-    const node = new THREE.Group();
-    const parentPivot = g.parent ? pivots[g.parent] : [0, 0, 0];
-    node.position.set(g.pivot[0] - parentPivot[0], g.pivot[1] - parentPivot[1], g.pivot[2] - parentPivot[2]);
-    (g.parent ? groups[g.parent] : root).add(node);
-    groups[g.name] = node; pivots[g.name] = g.pivot;
-    if (g.anim) animated.push({ node, anim: g.anim, base: node.position.clone() });
-    if (g.name in WALK_GROUPS) walkers.push({ node, sign: WALK_GROUPS[g.name] });
-  }
-  for (const p of def.parts) {
-    const mesh = new THREE.Mesh(geometry(p.shape, p.size), mats[p.mat]);
-    const gp = p.group ? pivots[p.group] : [0, 0, 0];
-    mesh.position.set(p.pos[0] - gp[0], p.pos[1] - gp[1], p.pos[2] - gp[2]);
-    mesh.rotation.order = "YXZ";
-    if (p.rot) mesh.rotation.set(p.rot[0] * DEG, p.rot[1] * DEG, p.rot[2] * DEG);
-    if (p.scale) mesh.scale.set(p.scale[0], p.scale[1], p.scale[2]);
-    mesh.castShadow = !mats[p.mat].transparent;
-    (p.group ? groups[p.group] : root).add(mesh);
-  }
-  for (const l of def.lights) {
-    const light = new THREE.PointLight(new THREE.Color(l.color), l.energy * 0.6, l.range * 1.3, 2);
-    light.position.set(...l.pos);
-    root.add(light);
-  }
-  const animMats = Object.values(mats).filter((m) => m.userData.spec.anim);
-  const q = new THREE.Quaternion(), axis = new THREE.Vector3();
-
-  function update(t, walk) {
-    for (const a of animated) {
-      const an = a.anim, ph = an.phase || 0;
-      if (an.type === "spin" || an.type === "sway") {
-        axis.set(...an.axis).normalize();
-        const ang = an.type === "spin" ? an.speed * t * DEG : an.amp * DEG * Math.sin(an.speed * t + ph);
-        a.node.quaternion.copy(q.setFromAxisAngle(axis, ang));
-      } else if (an.type === "bob") {
-        a.node.position.y = a.base.y + an.amp * Math.sin(an.speed * t + ph);
-      } else if (an.type === "pulse") {
-        a.node.scale.setScalar(1 + an.amp * Math.sin(an.speed * t + ph));
+function sampleClip(clip, t) {
+  const keys = clip.keys;
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 0; i < keys.length - 1; i++) {
+    const [t0, p0] = keys[i], [t1, p1] = keys[i + 1];
+    if (t <= t1) {
+      const f = t1 > t0 ? smooth((t - t0) / (t1 - t0)) : 1, out = {};
+      for (const ch of [...LIMBS, "root"]) {
+        if (p0[ch] || p1[ch]) { const a = p0[ch] || [0, 0, 0], b = p1[ch] || [0, 0, 0]; out[ch] = a.map((v, j) => v + (b[j] - v) * f); }
       }
-    }
-    const swing = walk * 32 * DEG * Math.sin(t * 7);
-    for (const w of walkers) w.node.rotation.x = swing * w.sign;
-    for (const m of animMats) {
-      const an = m.userData.spec.anim;
-      if (an.type === "glow") {
-        const k = an.min + (an.max - an.min) * (0.5 + 0.5 * Math.sin(an.speed * t));
-        if (m.emissive) m.emissiveIntensity = m.userData.baseEnergy * k;
-      } else if (an.type === "flicker") {
-        const n = 0.5 + 0.5 * Math.sin(an.speed * t) * Math.sin(an.speed * 1.73 * t + 1.3);
-        m.opacity = m.userData.baseAlpha * (an.min + (an.max - an.min) * n);
-      }
+      if ("root_y" in p0 || "root_y" in p1) out.root_y = (p0.root_y || 0) + ((p1.root_y || 0) - (p0.root_y || 0)) * f;
+      return out;
     }
   }
-  return { root, update, def };
+  return keys[keys.length - 1][1];
+}
+function addWeighted(acc, pose, w) {
+  if (w <= 0) return;
+  for (const ch in pose) {
+    if (ch === "root_y") acc.root_y = (acc.root_y || 0) + pose[ch] * w;
+    else { const a = acc[ch] || [0, 0, 0]; acc[ch] = a.map((v, j) => v + pose[ch][j] * w); }
+  }
+}
+
+class LunariaModel {
+  constructor(def) {
+    this.def = def;
+    this.root = new THREE.Group();
+    this.root.scale.setScalar(def.scale || 1);
+    this.groups = {}; this.pivots = {}; this.anchors = {};
+    this.anims = []; this.matAnims = []; this.gear = []; this.gearAnims = []; this.subModels = [];
+    this.rest = def.rest_pose || {};
+    this.time = 0; this.speed = 0; this.phase = 0;
+    this.oneshot = null; this.oneT = 0; this.hold = false; this.loopOverride = null;
+    this.source = ""; this.blendFrom = {}; this.blendT = 1; this.applied = {};
+    const mats = this.makeMats(def.materials, this.matAnims);
+    this.addGroups(def.groups, 1, null, this.anims);
+    this.addParts(def.parts, mats, 1, null);
+    this.articulated = !!this.groups.pose;
+    for (const [name, a] of Object.entries(def.anchors || {})) {
+      const n = new THREE.Group();
+      n.position.copy(v3(a.pos).sub(this.pivots[a.group] || ZERO));
+      n.rotation.order = "YXZ"; n.rotation.set(a.rot[0] * DEG, a.rot[1] * DEG, a.rot[2] * DEG);
+      (this.groups[a.group] || this.root).add(n);
+      this.anchors[name] = n;
+    }
+    for (const l of def.lights || []) {
+      const light = new THREE.PointLight(new THREE.Color(l.color), l.energy * 0.6, l.range * 1.3, 2);
+      light.position.set(...l.pos); this.root.add(light);
+    }
+  }
+  makeMats(specs, list) {
+    const out = {};
+    for (const [k, m] of Object.entries(specs)) { out[k] = makeMaterial(m); if (m.anim) list.push({ mat: out[k] }); }
+    return out;
+  }
+  addGroups(groups, xs, created, list) {
+    for (const g of groups) {
+      const node = new THREE.Group();
+      const pivot = v3(g.pivot); pivot.x *= xs;
+      node.position.copy(pivot.clone().sub(this.pivots[g.parent] || ZERO));
+      (this.groups[g.parent] || this.root).add(node);
+      this.groups[g.name] = node; this.pivots[g.name] = pivot;
+      if (created) created.push(node);
+      if (g.anim) list.push({ node, anim: g.anim, base: node.position.clone() });
+    }
+  }
+  addParts(parts, mats, xs, created) {
+    for (const p of parts) {
+      const mat = mats[p.mat];
+      const mesh = new THREE.Mesh(geometry(p.shape, p.size), mat);
+      const pos = v3(p.pos); pos.x *= xs;
+      mesh.position.copy(pos.sub(this.pivots[p.group] || ZERO));
+      mesh.rotation.order = "YXZ";
+      if (p.rot) mesh.rotation.set(p.rot[0] * DEG, p.rot[1] * DEG, p.rot[2] * DEG);
+      if (p.scale) mesh.scale.set(p.scale[0], p.scale[1], p.scale[2]);
+      mesh.scale.x *= xs;
+      mesh.castShadow = !mat.transparent;
+      (this.groups[p.group] || this.root).add(mesh);
+      if (created) created.push(mesh);
+    }
+  }
+  setClass(id) {
+    for (const n of this.gear) n.removeFromParent();
+    this.gear = []; this.gearAnims = []; this.subModels = [];
+    const lo = LOADOUTS[String(id)];
+    if (!lo) return;
+    const od = BY_UID[lo.outfit];
+    if (od) {
+      const mats = this.makeMats(od.materials, this.gearAnims);
+      const g0 = { ...this.groups }, p0 = { ...this.pivots };
+      this.addGroups(od.groups, this.def.body_w || 1, this.gear, this.gearAnims);
+      this.addParts(od.parts, mats, this.def.body_w || 1, this.gear);
+      this.groups = g0; this.pivots = p0;
+    }
+    for (const slot of ["hand_r", "hand_l"]) {
+      if (!lo[slot] || !this.anchors[slot]) continue;
+      const w = new LunariaModel(BY_UID[lo[slot].weapon]);
+      w.root.position.copy(v3(lo[slot].offset));
+      w.root.rotation.order = "YXZ"; w.root.rotation.set(...lo[slot].rot.map((v) => v * DEG));
+      this.anchors[slot].add(w.root); this.gear.push(w.root); this.subModels.push(w);
+    }
+    if (lo.companion) { const c = new LunariaModel(BY_UID[lo.companion]); this.root.add(c.root); this.gear.push(c.root); this.subModels.push(c); }
+  }
+  play(name, hold = false) {
+    const clip = CLIPS[name];
+    if (!clip) return;
+    if (clip.loop) { this.loopOverride = name; this.oneshot = null; return; }
+    this.oneshot = name; this.oneT = 0; this.hold = hold;
+  }
+  stop() { this.oneshot = null; this.hold = false; this.loopOverride = null; }
+  setSource(s) { if (s !== this.source) { this.source = s; this.blendFrom = JSON.parse(JSON.stringify(this.applied)); this.blendT = 0; } }
+  targetPose(dt) {
+    if (this.oneshot) {
+      const clip = CLIPS[this.oneshot];
+      this.oneT += dt;
+      if (this.oneT >= clip.length && !this.hold) this.oneshot = null;
+      else { this.setSource(this.oneshot); return sampleClip(clip, Math.min(this.oneT, clip.length)); }
+    }
+    if (this.loopOverride) { this.setSource(this.loopOverride); const c = CLIPS[this.loopOverride]; return sampleClip(c, this.time % c.length); }
+    this.setSource("loco");
+    const s = this.speed;
+    const runW = Math.min(Math.max((s - 3) / 3, 0), 1);
+    const walkW = Math.min(Math.max(s / 2, 0), 1) * (1 - runW);
+    const idleW = 1 - walkW - runW;
+    this.phase = (this.phase + dt * (1 + (1 / 0.7 - 1) * runW) * (s > 0.15 ? 1 : 0)) % 1;
+    const pose = {};
+    addWeighted(pose, sampleClip(CLIPS.idle, this.time % 2), idleW);
+    addWeighted(pose, sampleClip(CLIPS.walk, this.phase), walkW);
+    addWeighted(pose, sampleClip(CLIPS.run, this.phase * 0.7), runW);
+    return pose;
+  }
+  applyPose(target, dt) {
+    this.blendT = Math.min(this.blendT + dt / BLEND, 1);
+    const w = smooth(this.blendT);
+    for (const ch of [...LIMBS, "root"]) {
+      const tv = target[ch] || [0, 0, 0], fv = this.blendFrom[ch] || tv;
+      const v = tv.map((x, j) => lerpAngle(fv[j], x, w));
+      this.applied[ch] = v;
+      const rest = this.rest[ch] || [0, 0, 0];
+      const node = this.groups[ch === "root" ? "pose" : ch];
+      if (node) { node.rotation.order = "YXZ"; node.rotation.set((v[0] + rest[0]) * DEG, (v[1] + rest[1]) * DEG, (v[2] + rest[2]) * DEG); }
+    }
+    const ty = target.root_y || 0, fy = this.blendFrom.root_y ?? ty;
+    const y = fy + (ty - fy) * w;
+    this.applied.root_y = y;
+    this.groups.pose.position.y = this.pivots.pose.y + y + (this.rest.root_y || 0);
+  }
+  update(dt) {
+    this.time += dt;
+    const t = this.time;
+    if (this.articulated) this.applyPose(this.targetPose(dt), dt);
+    const q = new THREE.Quaternion(), axis = new THREE.Vector3();
+    for (const list of [this.anims, this.gearAnims, this.matAnims]) {
+      for (const a of list) {
+        if (a.node) {
+          const an = a.anim, ph = an.phase || 0;
+          if (an.type === "spin" || an.type === "sway") {
+            axis.set(...an.axis).normalize();
+            const ang = an.type === "spin" ? an.speed * t * DEG : an.amp * DEG * Math.sin(an.speed * t + ph);
+            a.node.quaternion.copy(q.setFromAxisAngle(axis, ang));
+          } else if (an.type === "bob") a.node.position.y = a.base.y + an.amp * Math.sin(an.speed * t + ph);
+          else if (an.type === "pulse") a.node.scale.setScalar(1 + an.amp * Math.sin(an.speed * t + ph));
+        } else {
+          const m = a.mat, an = m.userData.spec.anim;
+          if (an.type === "glow") { if (m.emissive) m.emissiveIntensity = m.userData.baseEnergy * (an.min + (an.max - an.min) * (0.5 + 0.5 * Math.sin(an.speed * t))); }
+          else if (an.type === "flicker") { const n = 0.5 + 0.5 * Math.sin(an.speed * t) * Math.sin(an.speed * 1.73 * t + 1.3); m.opacity = m.userData.baseAlpha * (an.min + (an.max - an.min) * n); }
+        }
+      }
+    }
+    for (const sm of this.subModels) sm.update(dt);
+  }
 }
 
 // ---------- Cena ----------
 const stage = document.getElementById("stage");
 const statusEl = document.getElementById("status");
 let renderer;
-try {
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-} catch (e) {
-  statusEl.textContent = "Este navegador não conseguiu iniciar o WebGL, então o palco 3D não pode ser exibido.";
-  throw e;
-}
+try { renderer = new THREE.WebGLRenderer({ antialias: true }); }
+catch (e) { statusEl.textContent = "Este navegador não conseguiu iniciar o WebGL, então o palco 3D não pode ser exibido."; throw e; }
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -318,163 +419,178 @@ renderer.toneMappingExposure = 1.2;
 stage.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x0b0a14, 9, 26);
-const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 100);
+scene.fog = new THREE.Fog(0x0b0a14, 12, 34);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 120);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.minDistance = 1.2;
-controls.maxDistance = 22;
-controls.maxPolarAngle = Math.PI * 0.53;
-
+controls.enableDamping = true; controls.minDistance = 0.8; controls.maxDistance = 30; controls.maxPolarAngle = Math.PI * 0.53;
 scene.add(new THREE.HemisphereLight(0xa9a5dc, 0x2a2232, 1.7));
 const moon = new THREE.DirectionalLight(0xdcd8ff, 1.6);
-moon.position.set(-3, 6, -4);
-moon.castShadow = true;
-moon.shadow.mapSize.set(2048, 2048);
-Object.assign(moon.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9 });
+moon.position.set(-3, 6, -4); moon.castShadow = true; moon.shadow.mapSize.set(2048, 2048);
+Object.assign(moon.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12 });
 scene.add(moon);
-const rim = new THREE.DirectionalLight(0x9f7bff, 1.2);
-rim.position.set(3, 3, 5);
-scene.add(rim);
-const fill = new THREE.DirectionalLight(0xfff1e0, 1.1);
-fill.position.set(1.5, 3, -6);
-scene.add(fill);
-
-// Chão: pedra lunar com círculo rúnico
-const ground = new THREE.Mesh(new THREE.CircleGeometry(30, 64), new THREE.MeshStandardMaterial({ color: 0x15131f, roughness: 0.95 }));
-ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
-scene.add(ground);
+const rim = new THREE.DirectionalLight(0x9f7bff, 1.2); rim.position.set(3, 3, 5); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xfff1e0, 1.1); fill.position.set(1.5, 3, -6); scene.add(fill);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x15131f, roughness: 0.95 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
 const runeMat = new THREE.MeshBasicMaterial({ color: 0xffd54f, transparent: true, opacity: 0.35 });
 const rune = new THREE.Mesh(new THREE.RingGeometry(0.95, 1.0, 72), runeMat);
-rune.rotation.x = -Math.PI / 2; rune.position.y = 0.005;
-scene.add(rune);
+rune.rotation.x = -Math.PI / 2; rune.position.y = 0.005; scene.add(rune);
 const rune2 = new THREE.Mesh(new THREE.RingGeometry(1.12, 1.135, 72), runeMat);
-rune2.rotation.x = -Math.PI / 2; rune2.position.y = 0.005;
-scene.add(rune2);
-
-// Eclipse ao fundo
+rune2.rotation.x = -Math.PI / 2; rune2.position.y = 0.005; scene.add(rune2);
 const eclipse = new THREE.Group();
 eclipse.add(new THREE.Mesh(new THREE.RingGeometry(2.0, 2.35, 96), new THREE.MeshBasicMaterial({ color: 0xffe9a8, transparent: true, opacity: 0.75, fog: false })));
 eclipse.add(new THREE.Mesh(new THREE.CircleGeometry(2.0, 96), new THREE.MeshBasicMaterial({ color: 0x07060d, fog: false })));
-eclipse.position.set(0, 6.5, 16);
-scene.add(eclipse);
-
+eclipse.position.set(0, 6.5, 20); scene.add(eclipse);
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.4, 0.9);
-composer.addPass(bloom);
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.4, 0.9));
 composer.addPass(new OutputPass());
 
 // ---------- Estado e UI ----------
-const built = MODELS.map(buildModel);
-const byKey = Object.fromEntries(built.map((b, i) => [b.def.key, i]));
-let current = 0, spin = true, walk = false, lineup = false;
-let walkAmount = 0;
-const holder = new THREE.Group();
-scene.add(holder);
-
+const CATALOG = {
+  race: DATA.models.filter((m) => m.kind === "race").sort((a, b) => a.id - b.id),
+  npc: DATA.models.filter((m) => m.kind === "npc").sort((a, b) => a.id - b.id),
+  weapon: DATA.models.filter((m) => m.kind === "weapon" || m.kind === "companion"),
+};
+let kind = "race", current = 0, classId = 1, spin = true, walk = false, run = false, lineup = false, activeClip = null;
+let shown = [];
+const holder = new THREE.Group(); scene.add(holder);
 const list = document.getElementById("raceList");
-built.forEach((b, i) => {
-  const btn = document.createElement("button");
-  btn.className = "race";
-  btn.id = "race-" + b.def.key;
-  btn.innerHTML = `<span class="dot" style="background:${b.def.color};color:${b.def.color}"></span><span class="n">${b.def.name}</span><span class="num">${b.def.id}</span>`;
-  btn.addEventListener("click", () => select(i, true));
-  list.appendChild(btn);
-});
+const classSelect = document.getElementById("classSelect");
+for (const [id, lo] of Object.entries(LOADOUTS)) {
+  const o = document.createElement("option"); o.value = id; o.textContent = `${id} · ${lo.name}`; classSelect.appendChild(o);
+}
+classSelect.value = "1";
+for (const k of Object.keys(CATALOG)) document.getElementById("cnt-" + k).textContent = CATALOG[k].length;
+const clipList = document.getElementById("clipList");
+for (const name of Object.keys(CLIPS)) {
+  const b = document.createElement("button");
+  b.className = "clip"; b.textContent = CLIP_LABELS[name] || name; b.dataset.clip = name; b.setAttribute("aria-pressed", "false");
+  b.addEventListener("click", () => playClip(name));
+  clipList.appendChild(b);
+}
+function playClip(name) {
+  activeClip = name;
+  for (const m of shown) { m.stop(); if (!LOCO.includes(name)) m.play(name, name === "death_fall"); }
+  if (name === "walk") setMove(true, false); else if (name === "run") setMove(true, true); else if (name === "idle") setMove(false, false);
+  clipList.querySelectorAll(".clip").forEach((el) => el.setAttribute("aria-pressed", el.dataset.clip === name ? "true" : "false"));
+  document.getElementById("clipDesc").textContent = CLIPS[name].desc;
+}
 
-function layout() {
+function renderList() {
+  list.innerHTML = "";
+  CATALOG[kind].forEach((d, i) => {
+    const btn = document.createElement("button");
+    btn.className = "race"; btn.id = "item-" + d.uid;
+    const num = d.kind === "race" || d.kind === "npc" ? d.id : "";
+    btn.innerHTML = `<span class="dot" style="background:${d.color};color:${d.color}"></span><span class="n">${d.name}</span><span class="num">${num}</span>`;
+    btn.addEventListener("click", () => select(i, true));
+    list.appendChild(btn);
+  });
+  document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.kind === kind ? "true" : "false"));
+  document.getElementById("classField").hidden = kind !== "race";
+  document.getElementById("clipField").hidden = kind === "weapon";
+}
+
+function makeShown() {
+  shown = [];
   holder.clear();
-  if (lineup) {
-    const n = built.length, gap = 1.55;
-    built.forEach((b, i) => {
-      b.root.position.set((i - (n - 1) / 2) * gap, 0, i === current ? -0.4 : 0);
-      b.root.rotation.y = Math.PI;
-      holder.add(b.root);
-    });
-    rune.visible = rune2.visible = false;
-    controls.target.set(0, 1.0, 0);
-    camera.position.set(0, 2.6, -11.5);
-  } else {
-    const b = built[current];
-    b.root.position.set(0, 0, 0);
-    holder.add(b.root);
-    rune.visible = rune2.visible = true;
-    controls.target.set(0, 1.05, 0);
-    camera.position.set(1.4, 1.75, -3.9);
-  }
+  const defs = lineup ? CATALOG[kind] : [CATALOG[kind][current]];
+  const cols = 7;
+  defs.forEach((d, i) => {
+    const m = new LunariaModel(d);
+    if (d.kind === "race") m.setClass(classId);
+    if (lineup) {
+      const row = Math.floor(i / cols), col = i % cols, inRow = Math.min(cols, defs.length - row * cols);
+      m.root.position.set((col - (inRow - 1) / 2) * 1.6, 0, row * 2.3);
+    }
+    if (d.kind === "weapon") m.root.position.y += 0.9;
+    holder.add(m.root); shown.push(m);
+  });
+  if (activeClip && !LOCO.includes(activeClip)) for (const m of shown) m.play(activeClip, activeClip === "death_fall");
+  rune.visible = rune2.visible = !lineup;
+  const isW = kind === "weapon";
+  if (lineup) { controls.target.set(0, isW ? 1.1 : 1.0, defs.length > 7 ? 2.3 : 0); camera.position.set(0, isW ? 3.2 : 4.5, isW ? -7.5 : -13.5); }
+  else if (isW) { controls.target.set(0, 1.2, 0); camera.position.set(0.9, 1.6, -2.1); }
+  else { controls.target.set(0, 1.05, 0); camera.position.set(1.4, 1.75, -3.9); }
   controls.update();
 }
 
 function select(i, fromClick) {
   current = i;
-  const d = built[i].def;
-  document.documentElement.style.setProperty("--accent", d.color === "#006064" ? "#26c6da" : d.color === "#c62828" ? "#ff5f52" : d.color);
-  runeMat.color.set(d.color === "#006064" ? "#26c6da" : d.color);
-  document.getElementById("raceId").textContent = `Raça #${d.id} · ${d.key}`;
+  const d = CATALOG[kind][i];
+  const accent = d.color === "#006064" ? "#26c6da" : d.color === "#c62828" ? "#ff5f52" : d.color;
+  document.documentElement.style.setProperty("--accent", accent);
+  runeMat.color.set(accent);
+  const kindLabel = { race: "Raça", npc: "NPC", weapon: "Arma", companion: "Companheiro" }[d.kind];
+  document.getElementById("raceId").textContent = d.kind === "weapon" || d.kind === "companion" ? `${kindLabel} · ${d.key}` : `${kindLabel} #${d.id} · ${d.key}`;
   document.getElementById("raceName").textContent = d.name;
   document.getElementById("raceTitle").textContent = d.title;
   document.getElementById("lore").textContent = d.lore;
   document.getElementById("fParts").textContent = d.parts.length;
   document.getElementById("fGroups").textContent = d.groups.length;
-  document.getElementById("fScale").textContent = d.scale.toFixed(2);
-  const sw = document.getElementById("swatches");
-  sw.innerHTML = "";
-  for (const [k, m] of Object.entries(d.materials)) {
-    const s = document.createElement("span");
-    s.className = "swatch";
-    s.title = k;
-    s.style.background = m.emit ? `radial-gradient(circle, ${m.emit} 0%, ${m.color} 70%)` : m.color;
-    sw.appendChild(s);
-  }
+  document.getElementById("fScale").textContent = (d.scale || 1).toFixed(2);
+  const call = d.kind === "race" ? `LunariaModel.create_race(${d.id}, ${classId})` : d.kind === "npc" ? `LunariaModel.create_npc(${d.id})` : `LunariaModel.create("${d.uid}")`;
+  const glb = { race: "races", npc: "npcs", weapon: "weapons", companion: "weapons" }[d.kind];
+  const file = d.kind === "race" ? `${String(d.id).padStart(2, "0")}_${d.key}` : d.kind === "npc" ? `${d.id}_${d.key}` : d.key;
   document.getElementById("snippet").innerHTML =
-    `<span class="k">const</span> RaceModel = preload("res://scripts/models/RaceModel.gd")\n` +
-    `<span class="k">var</span> modelo = RaceModel.create(${d.id})  <span style="color:var(--dim)"># ${d.name}</span>\n` +
-    `add_child(modelo)\nmodelo.set_move_speed(velocity.length())`;
+    `<span class="k">const</span> LunariaModel = preload("res://scripts/models/LunariaModel.gd")\n` +
+    `<span class="k">var</span> m := ${call}\nadd_child(m)\n` +
+    (d.kind === "race" || d.kind === "npc" ? `m.set_move_speed(velocity.length())\nm.play_action(1)  # ataque da classe\n` : "") +
+    `# arquivo: res://assets/models/${glb}/${file}.glb`;
   list.querySelectorAll(".race").forEach((el, j) => el.setAttribute("aria-current", j === i ? "true" : "false"));
   if (fromClick) { try { history.replaceState(null, "", "#" + d.key); } catch (e) {} }
-  layout();
+  makeShown();
 }
 
-function toggle(btn, val) { btn.setAttribute("aria-pressed", val ? "true" : "false"); }
-const btnSpin = document.getElementById("btnSpin"), btnWalk = document.getElementById("btnWalk"), btnLineup = document.getElementById("btnLineup");
-btnSpin.addEventListener("click", () => { spin = !spin; toggle(btnSpin, spin); });
-btnWalk.addEventListener("click", () => { walk = !walk; toggle(btnWalk, walk); });
-btnLineup.addEventListener("click", () => { lineup = !lineup; toggle(btnLineup, lineup); layout(); });
+function setKind(k) { kind = k; current = 0; renderList(); select(0, false); }
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => setKind(t.dataset.kind)));
+classSelect.addEventListener("change", () => { classId = Number(classSelect.value); select(current, false); });
 
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-if (reduceMotion) { spin = false; toggle(btnSpin, false); }
+const toggle = (btn, val) => btn.setAttribute("aria-pressed", val ? "true" : "false");
+const btnSpin = document.getElementById("btnSpin"), btnWalk = document.getElementById("btnWalk"), btnRun = document.getElementById("btnRun"), btnLineup = document.getElementById("btnLineup");
+function setMove(w, r) { walk = w; run = r; toggle(btnWalk, walk && !run); toggle(btnRun, run); }
+btnSpin.addEventListener("click", () => { spin = !spin; toggle(btnSpin, spin); });
+btnWalk.addEventListener("click", () => setMove(!(walk && !run), false));
+btnRun.addEventListener("click", () => setMove(!run, !run));
+btnLineup.addEventListener("click", () => { lineup = !lineup; toggle(btnLineup, lineup); makeShown(); });
+if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { spin = false; toggle(btnSpin, false); }
 
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
-  renderer.setSize(w, h, false);
-  composer.setSize(w, h);
-  camera.aspect = w / Math.max(1, h);
-  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false); composer.setSize(w, h);
+  camera.aspect = w / Math.max(1, h); camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(stage);
 resize();
 
-const start = byKey[(location.hash || "").slice(1)];
-select(start ?? 0, false);
-window.addEventListener("hashchange", () => {
-  const i = byKey[(location.hash || "").slice(1)];
-  if (i !== undefined && i !== current) select(i, false);
-});
+function openFromHash() {
+  const key = (location.hash || "").slice(1);
+  for (const k of Object.keys(CATALOG)) {
+    const i = CATALOG[k].findIndex((d) => d.key === key);
+    if (i >= 0) { kind = k; renderList(); select(i, false); return true; }
+  }
+  return false;
+}
+if (!openFromHash()) { renderList(); select(0, false); }
+window.addEventListener("hashchange", openFromHash);
 statusEl.hidden = true;
 
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
-  const t = clock.elapsedTime;
-  walkAmount += ((walk ? 1 : 0) - walkAmount) * Math.min(1, dt * 6);
-  if (spin && !lineup) built[current].root.rotation.y += dt * 0.45;
-  if (lineup) built.forEach((b) => b.update(t, walkAmount));
-  else built[current].update(t, walkAmount);
+  const speed = walk ? (run ? 7 : 1.8) : 0;
+  for (const m of shown) { m.speed = speed; m.update(dt); }
+  if (spin && !lineup && shown[0]) shown[0].root.rotation.y += dt * 0.45;
   rune.rotation.z += dt * 0.15;
   controls.update();
   composer.render();
 });
+window.__lunaria = {
+  playClip, setKind, select,
+  setClass: (c) => { classSelect.value = String(c); classSelect.dispatchEvent(new Event("change")); },
+  setLineup: (v) => { lineup = v; toggle(btnLineup, v); makeShown(); },
+  stopSpin: () => { spin = false; toggle(btnSpin, false); },
+};
 window.__lunariaReady = true;
 </script>

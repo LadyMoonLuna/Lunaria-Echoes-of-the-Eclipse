@@ -119,7 +119,11 @@ def _mirror_anim(anim):
 
 
 class Model:
-    def __init__(self, race_id, key, name, title, lore, color, scale=1.0, seed=7):
+    def __init__(self, race_id, key, name, title, lore, color, scale=1.0, seed=7, kind="race"):
+        self.kind = kind
+        self.body_w = 1.0
+        self.anchors = {}
+        self.rest_pose = None
         self.race_id = race_id
         self.key = key
         self.name = name
@@ -212,12 +216,62 @@ class Model:
                 self.part("sphere", [radii[i + 1] * 1.15], points[i + 1], joints,
                           group=group, mirror=mirror)
 
+    def anchor(self, name, group, pos, rot=(0, 0, 0)):
+        """Ponto de encaixe (mão, costas) onde armas e acessórios são presos."""
+        self.anchors[name] = {"group": group, "pos": _r(list(pos)), "rot": _r(list(rot))}
+
+    @property
+    def uid(self):
+        if self.kind in ("race", "npc"):
+            return "%s_%d" % (self.kind, self.race_id)
+        return "%s_%s" % (self.kind, self.key)
+
+    def _articulate(self):
+        """Insere os pivôs 'pose' (corpo inteiro) e 'torso' para as animações.
+
+        Tudo acima do quadril passa a seguir o tronco; pernas, caudas e saias
+        seguem o pivô do corpo. Trajes (kind=outfit) usam a mesma regra, mas
+        apontam para os pivôs do corpo onde serão vestidos.
+        """
+        def target(y, name=None):
+            if name and (name in ("leg_l", "leg_r") or name.startswith("tail")):
+                return "pose"
+            return "torso" if y > 0.97 else "pose"
+
+        groups = []
+        if self.kind != "outfit":
+            groups = [{"name": "pose", "pivot": [0.0, 0.6, 0.0]},
+                      {"name": "torso", "pivot": [0.0, 0.98, 0.0], "parent": "pose"}]
+        for g in self.groups:
+            g = dict(g)
+            if "parent" not in g:
+                g["parent"] = target(g["pivot"][1], g["name"])
+            groups.append(g)
+        parts = []
+        for p in self.parts:
+            p = dict(p)
+            if "group" not in p:
+                p["group"] = "torso" if p["pos"][1] > 1.0 else "pose"
+            parts.append(p)
+        return groups, parts
+
     def light(self, color, energy, rng, pos):
         self.lights.append({"color": color, "energy": energy, "range": rng, "pos": _r(list(pos))})
 
     # -- exportação ----------------------------------------------------------
     def to_dict(self):
-        return {
+        groups, parts = self.groups, self.parts
+        if self.kind in ("race", "npc", "outfit"):
+            groups, parts = self._articulate()
+        anchors = {}
+        for k, a in self.anchors.items():
+            a = dict(a)
+            if a["group"] is None and self.kind in ("race", "npc"):
+                a["group"] = "torso" if a["pos"][1] > 0.97 else "pose"
+            anchors[k] = a
+        out = {
+            "uid": self.uid,
+            "kind": self.kind,
             "id": self.race_id,
             "key": self.key,
             "name": self.name,
@@ -226,10 +280,15 @@ class Model:
             "color": self.color,
             "scale": self.scale,
             "materials": self.mats,
-            "groups": self.groups,
-            "parts": self.parts,
+            "groups": groups,
+            "parts": parts,
             "lights": self.lights,
+            "body_w": self.body_w,
+            "anchors": anchors,
         }
+        if self.rest_pose:
+            out["rest_pose"] = self.rest_pose
+        return out
 
 
 # ---------------------------------------------------------------------------
@@ -242,6 +301,10 @@ def humanoid(m, skin, top, bottom, boots, hands=None, forearm=None, eye=None,
     """Corpo humanoide padrão. Retorna pontos de referência úteis."""
     hands = hands or skin
     forearm = forearm or skin
+    m.body_w = w
+    m.anchor("hand_r", "arm_r", (0.32 * w, 0.88, -0.15))
+    m.anchor("hand_l", "arm_l", (-0.32 * w, 0.88, -0.15))
+    m.anchor("back", None, (0, 1.32, 0.19))
     m.group("leg_r", (0.11 * w, 0.94, 0), mirror=True)
     m.part("capsule", [0.085 * w, 0.5], (0.11 * w, 0.7, 0), bottom, group="leg_r", mirror=True)
     m.part("capsule", [0.07 * w, 0.46], (0.11 * w, 0.3, 0), boots, group="leg_r", mirror=True)

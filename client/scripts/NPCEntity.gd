@@ -33,6 +33,10 @@ var is_varis: bool = false
 var time_accum: float = 0.0
 
 const INTERPOLATION_SPEED: float = 15.0
+const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
+
+var npc_model: LunariaModel = null
+var _npc_capsule: Mesh = null
 
 @onready var body_mesh: MeshInstance3D = get_node_or_null("BodyMesh")
 @onready var apron_mesh: MeshInstance3D = get_node_or_null("BodyMesh/ApronMesh")
@@ -622,6 +626,38 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 		head.material_override = hd_mat
 		hammer_root.add_child(head)
 
+	var model_id := 100
+	if is_dummy_check:
+		model_id = -1
+	elif is_lyra:
+		model_id = 103
+	elif is_varis:
+		model_id = 104
+	elif is_randel:
+		model_id = 105
+	elif is_valen:
+		model_id = 106
+	_apply_npc_model(model_id)
+
+func _apply_npc_model(model_id: int) -> void:
+	# NPCs com modelo 3D (Art Bible) substituem a cápsula e os adereços simples
+	if npc_model and is_instance_valid(npc_model):
+		npc_model.queue_free()
+	npc_model = null
+	if _npc_capsule == null:
+		_npc_capsule = body_mesh.mesh
+	if model_id < 0 or not LunariaModel.has_model(LunariaModel.npc_uid(model_id)):
+		body_mesh.mesh = _npc_capsule
+		return
+	_clear_props()
+	body_mesh.mesh = null
+	if apron_mesh:
+		apron_mesh.visible = false
+	if visor_mesh:
+		visor_mesh.visible = false
+	npc_model = LunariaModel.create_npc(model_id) as LunariaModel
+	add_child(npc_model)
+
 func set_npc_info(p_id: int, p_name: String = "", script_path: String = "") -> void:
 	npc_id = p_id
 	npc_script_path = script_path
@@ -797,7 +833,11 @@ func _on_dialogue_timer_timeout() -> void:
 
 func _process(delta: float) -> void:
 	time_accum += delta
+	var prev_pos: Vector3 = global_position
 	global_position = global_position.lerp(target_position, INTERPOLATION_SPEED * delta)
+	if npc_model and delta > 0.0:
+		var step := global_position - prev_pos
+		npc_model.set_move_speed(Vector2(step.x, step.z).length() / delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
 
 	# Animação suave do frasco luminoso de Lyra
