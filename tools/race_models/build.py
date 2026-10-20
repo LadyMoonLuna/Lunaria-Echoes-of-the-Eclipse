@@ -69,11 +69,11 @@ def main():
                 assert lo[slot]["weapon"] in by_uid, lo[slot]["weapon"]
         assert lo["outfit"] in by_uid, lo["outfit"]
         assert lo.get("companion", "weapon_iron_dagger") in by_uid
+        for clip in lo["actions"].values():
+            assert clip in CLIPS, clip
     for m in models:
         for h in (m.get("gear") or {}).values():
             assert h["weapon"] in by_uid, (m["uid"], h["weapon"])
-        for clip in lo["actions"].values():
-            assert clip in CLIPS, clip
 
     os.makedirs(os.path.dirname(GD_OUT), exist_ok=True)
     with open(GD_OUT, "w", encoding="utf-8") as f:
