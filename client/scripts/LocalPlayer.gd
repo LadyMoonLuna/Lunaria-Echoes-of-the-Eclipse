@@ -48,6 +48,10 @@ var default_weapon_rot: Vector3 = Vector3.ZERO
 var default_weapon_pos: Vector3 = Vector3.ZERO
 var default_weapon_scale: Vector3 = Vector3.ONE
 
+const RaceModel = preload("res://scripts/models/RaceModel.gd")
+var race_model: RaceModel = null
+var _capsule_mesh: Mesh = null
+
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	load_skill_keybinds()
@@ -1033,6 +1037,26 @@ func _apply_race_visuals() -> void:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd54f"), 3.0)
 
 	body_mesh.material_override = mat
+	_update_race_model()
+
+func _update_race_model() -> void:
+	# Raças com modelo 3D próprio (19-28) substituem a cápsula padrão
+	if race_model and is_instance_valid(race_model):
+		race_model.queue_free()
+	race_model = null
+	if _capsule_mesh == null:
+		_capsule_mesh = body_mesh.mesh
+	if RaceModel.has_model(current_race_id):
+		race_model = RaceModel.create(current_race_id) as RaceModel
+		race_model.position = Vector3(0, -0.9, 0)
+		body_mesh.add_child(race_model)
+		body_mesh.mesh = null
+		if visor_mesh:
+			visor_mesh.visible = false
+	else:
+		body_mesh.mesh = _capsule_mesh
+		if visor_mesh:
+			visor_mesh.visible = true
 
 func _apply_class_visuals() -> void:
 	if not weapon_mesh:
@@ -1692,6 +1716,8 @@ func _physics_process(delta: float) -> void:
 				velocity.z = move_toward(velocity.z, 0.0, SPEED * 2.0 * delta)
 
 	move_and_slide()
+	if race_model:
+		race_model.set_move_speed(Vector2(velocity.x, velocity.z).length())
 
 	network_timer += delta
 	if network_timer >= NETWORK_TICK_INTERVAL:

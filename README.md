@@ -34,6 +34,8 @@ O projeto foi construído do zero com foco em desempenho, separação estrita de
 - **NPCs Vivos e Reatividade Racial:** Garrick, o Ferreiro patrulha a vila, defende o vilarejo de invasores e altera suas falas e relações de acordo com a raça e classe de cada aventureiro.
 - **Menu Visual de Identidade (Tecla `C` ou `Tab`):** Interface modal medieval com seleção interativa de linhagem e vocação.
 
+- **Modelos 3D das Raças Lendárias:** as raças 19–28 (Sylvari, Myconid, Aracne, Draconato de Cinzas, Quimera, Boreal, Thalassiano, Cambion, Nephilim e Cronomante) têm modelos 3D procedurais animados. Veja `tools/race_models/README.md`, a vitrine `client/scenes/RacePreview.tscn` e o preview web `docs/previews/racas_3d_preview.html`.
+
 ---
 
 ## 🎮 Controles do Jogo

@@ -19,6 +19,10 @@ var offhand_pivot: Node3D = null
 var homunculus_orbiter: MeshInstance3D = null
 var homunculus_anim_time: float = 0.0
 
+const RaceModel = preload("res://scripts/models/RaceModel.gd")
+var race_model: RaceModel = null
+var _capsule_mesh: Mesh = null
+
 func _ready() -> void:
 	target_position = global_position
 	target_rotation_y = rotation.y
@@ -75,7 +79,11 @@ func update_network_transform(new_pos: Vector3, new_rot_y: float) -> void:
 	target_rotation_y = new_rot_y
 
 func _process(delta: float) -> void:
+	var prev_pos: Vector3 = global_position
 	global_position = global_position.lerp(target_position, INTERPOLATION_SPEED * delta)
+	if race_model and delta > 0.0:
+		var step := global_position - prev_pos
+		race_model.set_move_speed(Vector2(step.x, step.z).length() / delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
 
 	if current_class_id == 9 and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
@@ -238,6 +246,26 @@ func _apply_race_visuals() -> void:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd54f"), 3.0)
 
 	body_mesh.material_override = mat
+	_update_race_model()
+
+func _update_race_model() -> void:
+	# Raças com modelo 3D próprio (19-28) substituem a cápsula padrão
+	if race_model and is_instance_valid(race_model):
+		race_model.queue_free()
+	race_model = null
+	if _capsule_mesh == null:
+		_capsule_mesh = body_mesh.mesh
+	if RaceModel.has_model(current_race_id):
+		race_model = RaceModel.create(current_race_id) as RaceModel
+		race_model.position = Vector3(0, -0.9, 0)
+		body_mesh.add_child(race_model)
+		body_mesh.mesh = null
+		if visor_mesh:
+			visor_mesh.visible = false
+	else:
+		body_mesh.mesh = _capsule_mesh
+		if visor_mesh:
+			visor_mesh.visible = true
 
 func _apply_class_visuals() -> void:
 	if not weapon_mesh:
