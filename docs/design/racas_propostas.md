@@ -52,6 +52,9 @@ Os bônus de Vida/Mana/Stamina somam-se à base da classe (ex.: Espadachim 140 V
 | Demi-humano Tartaruga | Secreta | Grande | +65 | +5 | +0 | 8 | 3 | 15 | 3 | 5 | 8 | 10 | 6 | **Implementar** |
 | Meio-Demônio (Súcubo/Íncubo) | Evolução de Caos do Cambion | Médio | +25 | +50 | +25 | 6 | 11 | 7 | 11 | 11 | 7 | 6 | 11 | **Implementar como evolução** |
 | Demi-humano Lobo | Fundir no Varkai | Médio | +15 | +5 | +20 | 9 | 8 | 7 | 9 | 3 | 4 | 6 | 4 | **Fundir** (Varkai + Licantropo já cobrem) |
+| Manamante | Secreta | Médio | (+60)* | (unida) | +10 | 3 | 6 | 8 | 6 | 13 | 11 | 7 | 4 | **Implementar** (depende da barra de Mana) |
+
+\* Manamante: Vida e Mana viram uma reserva só (+60 na reserva).
 
 Somas conferidas: atributos = 50 (base), 58 (secreta), 70 (evolução); Vida + Mana + Stamina = 40 (base) / 70 (secreta) / 100 (evolução).
 
@@ -190,6 +193,30 @@ Sugestão: o Varkai ganha a parte social e de rastreio, e o Licantropo vira a "F
 - **Z — Forma Bestial:** 30 Mana + 2 por nível; grátis na Lua Cheia. Durante a forma: +60% de velocidade de ataque, sem
   habilidades de classe (o antigo Irracional). Prata causa +50% de dano; outros danos físicos −10%.
 
+### Manamante — Secreta (desbloqueio: absorver um Cristal de Renascimento corrompido no Santuário)
+Raça de "canhão de vidro" mágico: muito poder, mas cada magia gasta a própria vida.
+- **Coração de Mana:** não existe barra de Vida. Vida e Mana viram uma **reserva única**:
+  reserva = (Vida da classe + Mana da classe) × 0,9 + 60 + CON × 10. Poções de vida e de mana e escudos de vida
+  temporária enchem a reserva. Magias gastam a reserva. **Trava de segurança:** nenhuma magia pode ser lançada
+  com a reserva abaixo de 15% (evita morrer lançando a própria magia sem querer).
+- **Afinidade Mágica:** escolhe uma escola no despertar (Fogo, Gelo, Raio, Luz, Trevas ou Arcano):
+  +15% de dano nessa escola e −10% de resistência dos inimigos contra ela. (Original: +1 dado e desvantagem nos testes.)
+- **Sangue Azul:** +6 na reserva por nível (as outras raças ganham +5 de Vida e um pouco de Mana).
+  O limite de 3 PM por magia no nível 1 não faz sentido em tempo real; vira a trava de 15% acima.
+- *Desvantagem:* efeitos que drenam ou queimam Mana (Dreno do Súcubo, magias anti-mago) atingem a reserva inteira
+  e causam +25% de efeito. Silêncio também interrompe a regeneração da reserva.
+- **Karma (escolha permanente no despertar; pode ser trocada por uma missão difícil):**
+
+| Karma Ativo — Guardião de Mana | Karma Passivo — Forja de Mana |
+| :--- | :--- |
+| **Z:** gasta 40% da reserva para invocar uma armadura viva de mana, com vida = 50% do gasto. | **Z (escudo):** gasta até 30% da reserva; cria escudo com o dobro do gasto em vida, até 9 m (pode proteger aliados). |
+| Ela absorve o dano antes de você e ataca sozinha. Na escolha, o jogador define o estilo: **Guerreiro** (golpes corpo a corpo) ou **Bruxo** (projéteis). | **Arma de Mana** (secundária): +10% de dano por cada 10% da reserva gasta (máx. +30%) por 20 s. |
+| **Traço exótico** (escolhido no despertar, não pelo mestre): Espinhos (reflete 15% do dano), Espelho (bloqueia 1 magia a cada 20 s), Vínculo (20% do dano que você cura vira vida do Guardião) ou Fúria (+25% de velocidade dele). | **Cópia de Objeto** (fora de combate): copia um item comum que você já viu. A cópia dura 1 h, não pode ser vendida, trocada nem usada em criação (evita duplicar itens e quebrar a economia). |
+| Ao chegar a 0, o Guardião volta à marca; recarga 90 s. Golpes críticos recebidos por você ferem a marca (−10% da vida dele). Sem perda permanente. | Poções copiadas dão só Mana temporária (+5%), não empilham, e não funcionam em outro Manamante. |
+
+- *Por que é secreta:* sem barra de vida separada, ela é a raça mais forte e a mais frágil ao mesmo tempo; precisa ser testada
+  isolada antes de ser liberada.
+
 ## 4. Mana no jogo
 
 As raças acima usam **Mana**, mas o jogo hoje só tem **Stamina**. Proposta:
@@ -206,7 +233,8 @@ As raças acima usam **Mana**, mas o jogo hoje só tem **Stamina**. Proposta:
 2. **Depois (secretas):** Drago com 4 linhagens, Pyromante, Escorpião e Tartaruga.
 3. **Ligadas a raças existentes:** Meio-Celestial (antes do Celestino), Gigante de Gelo (Boreal), Súcubo/Íncubo (Cambion).
 4. **Fundir, sem raça nova:** Anão → Kharad e Demi-humano Lobo → Varkai/Licantropo.
-5. **Fadinha:** só depois de testar a hitbox e a câmera de personagens pequenos.
+5. **Manamante:** logo depois da barra de Mana, já que ela é a raça que mais depende dela.
+6. **Fadinha:** só depois de testar a hitbox e a câmera de personagens pequenos.
 
-Com isso o jogo passa de 28 para cerca de 40 raças. Se a lista ficar grande demais para a tela de seleção, as secretas podem
+Com isso o jogo passa de 28 para cerca de 41 raças. Se a lista ficar grande demais para a tela de seleção, as secretas podem
 aparecer só depois de desbloqueadas.
