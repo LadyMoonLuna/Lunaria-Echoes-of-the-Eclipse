@@ -117,3 +117,28 @@ Todas as alterações notáveis, arquiteturas e sistemas desenvolvidos desde o m
   - Interface rica com bordas douradas e estilo medieval escuro.
   - Abre automaticamente ao iniciar a sessão e pode ser aberto/fechado a qualquer momento com as teclas **`C` ou `Tab`**.
   - Duas colunas com cartões interativos, painel de resumo dinâmico das estatísticas totais combinadas e botão de confirmação que transmite a identidade ao servidor.
+
+---
+
+## [Marco 7] — Novos NPCs Vivos, Ciclos de Rotina e Defesa Perimetral da Vila
+
+- **Lyra, a Alquimista (ID 102 — `scripts/npcs/lyra.lua`):**
+  - **Rotina Diurna (07h às 18h):** Atende na Tenda de Alquimia em `(10.0, 0.0, -6.0)`, vendendo frascos e convidando o jogador a negociar materiais de monstros.
+  - **Rotina Noturna (19h às 06h):** Retorna para sua casa em `(12.0, 0.0, -14.0)` para descansar e destilar essências.
+  - **Reatividade Alquímica:** Reconhece jogadores da classe Alquimista (6) ou com alta Perícia (`MAS >= 12`), oferecendo a receita e transmutando *Sangue Lupino Fresco* e *Frascos Vazios* em *Poções de Sangue Lupino* (+20% Velocidade e Crítico).
+  - Landmark 3D na Vila: Tenda de Alquimia com toldo esmeralda e lanternas de destilação.
+
+- **Varis, o Mercador Sombrio (ID 103 — `scripts/npcs/shadow_merchant.lua`):**
+  - **Ciclo Noturno Exclusivo (18h às 05h):** Surge oculto nos fundos da Taverna em `(-10.0, 0.0, -8.0)`.
+  - **Ocultamento Diurno (06h às 17h):** Fica desativado (`IsActive = false`), invisível no cliente e com colisão desligada (`State = 255`).
+  - **Reatividade com Raças Secretas:** Sussurra apenas na escuridão (*"Pssiu... O que brilha na escuridão me interessa."*), reconhece Dhampirs (5) e Revenants (7) com cumprimentos sombrios e comercializa o lendário *Cálice da Alma Partida*.
+
+- **Guardas da Patrulha Real (IDs 104 e 105 — `scripts/npcs/guard.lua`):**
+  - **Patrulha 24h Contínua:** Ronda entre o Portão da Vila `(0.0, 0.0, 10.0)` e a Praça da Forja `(6.0, 0.0, 6.0)`.
+  - **Reatividade às Raças e Prontidão Armada:** Detecta se o jogador se aproxima armado ou se pertence às raças Varkai (4) ou Dhampir (5), advertindo: *"Mantenha a linha, viajante. Sem problemas na nossa vila."*
+  - **Defesa Ativa contra Mobs (1 a 7):** Scaneia mobs invasores no raio de 7m ou reage imediatamente a ataques no perímetro com espada em riste e dano autoritativo.
+
+- **Suporte no Cliente Godot 4 & Servidor Go:**
+  - Ajuste do Boneco de Treino Beta para ID 100, liberando ID 102 para Lyra.
+  - Visualização customizada no cliente: Lyra com avental verde de herbologia, Varis com manto púrpura sombrio e Guardas com armadura azul de aço real e tabardo dourado.
+

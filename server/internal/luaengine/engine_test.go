@@ -3,6 +3,7 @@ package luaengine
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"lunaria/server/internal/world"
@@ -99,3 +100,170 @@ end
 		t.Fatalf("alvo de taverna incorreto: (%f, %f) a %f m/s", npc.TargetX, npc.TargetZ, npc.MoveSpeed)
 	}
 }
+
+func TestLivingNPCScripts(t *testing.T) {
+	clock := world.NewWorldClock(12.0)
+	engine := NewEngine(clock)
+	defer engine.Close()
+
+	scriptsDir := FindNPCScriptsDir()
+
+	// 1. Lyra, a Alquimista (103)
+	var lyraSaid string
+	lyra := world.NewNPC(103, "Lyra, a Alquimista", 10.0, 0.0, -10.0, filepath.Join(scriptsDir, "lyra.lua"), clock, func(id uint32, msg string) {
+		lyraSaid = msg
+	})
+	defer lyra.Close()
+
+	if err := engine.BindNPC(lyra); err != nil {
+		t.Fatalf("falha ao vincular lyra: %v", err)
+	}
+
+	// De dia (10h): Primeiro waypoint para o Laboratório respeitando as vielas
+	_ = CallOnTick(lyra, 10)
+	if lyra.TargetX != 14.0 || lyra.TargetZ != -18.0 {
+		t.Errorf("esperava primeiro waypoint do laboratorio (14, -18), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
+	}
+
+	// Interação com Alquimista (classe 6) ou alta perícia MAS (12)
+	_ = CallOnPlayerInteract(lyra, 1, 10, 1, 6, 5)
+	if lyraSaid == "" || !strings.Contains(lyraSaid, "Poção de Sangue Lupino") {
+		t.Errorf("fala de alquimia inesperada: %s", lyraSaid)
+	}
+
+	// De noite (20h): Primeiro waypoint para Casa Residencial respeitando as vielas
+	_ = CallOnTick(lyra, 20)
+	if lyra.TargetX != 10.0 || lyra.TargetZ != -18.0 {
+		t.Errorf("esperava primeiro waypoint da casa (10, -18), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
+	}
+
+	// 2. Varis, o Contrabandista (104)
+	var varisSaid string
+	varis := world.NewNPC(104, "Varis, o Contrabandista", -19.0, 0.0, 17.0, filepath.Join(scriptsDir, "shadow_merchant.lua"), clock, func(id uint32, msg string) {
+		varisSaid = msg
+	})
+	defer varis.Close()
+
+	if err := engine.BindNPC(varis); err != nil {
+		t.Fatalf("falha ao vincular varis: %v", err)
+	}
+
+	// De dia (12h): Deve ficar inativo nos esgotos (-22, -22)
+	_ = CallOnTick(varis, 12)
+	if varis.GetActive() {
+		t.Errorf("esperava Varis inativo de dia")
+	}
+	snap := varis.ToSnapshot()
+	if snap.State != 255 || snap.PosY != -100.0 {
+		t.Errorf("esperava snapshot inativo (255, -100), obteve state=%d, y=%f", snap.State, snap.PosY)
+	}
+
+	// De noite (22h): Deve ficar ativo em (-19, 17)
+	_ = CallOnTick(varis, 22)
+	if !varis.GetActive() {
+		t.Errorf("esperava Varis ativo de noite")
+	}
+	if varis.PosX != -19.0 || varis.PosZ != 17.0 {
+		t.Errorf("esperava Varis em (-19, 17) de noite, obteve (%f, %f)", varis.PosX, varis.PosZ)
+	}
+	// Reatividade com Dhampir (raça 5) e Revenant (raça 7)
+	_ = CallOnPlayerInteract(varis, 1, 22, 5, 1, 5)
+	if !strings.Contains(varisSaid, "Dhampir") {
+		t.Errorf("esperava reatividade com Dhampir, obteve: %s", varisSaid)
+	}
+	_ = CallOnPlayerInteract(varis, 1, 22, 7, 1, 5)
+	if !strings.Contains(varisSaid, "Revenant") {
+		t.Errorf("esperava reatividade com Revenant, obteve: %s", varisSaid)
+	}
+
+	// 3. Guarda da Patrulha Real (105)
+	var guardSaid string
+	guard := world.NewNPC(105, "Capitão Randel", 0.0, 0.0, 24.0, filepath.Join(scriptsDir, "guard.lua"), clock, func(id uint32, msg string) {
+		guardSaid = msg
+	})
+	defer guard.Close()
+
+	if err := engine.BindNPC(guard); err != nil {
+		t.Fatalf("falha ao vincular guard: %v", err)
+	}
+
+	// Aproximação com arma em riste (is_armed = true)
+	_ = CallOnPlayerApproach(guard, 1, 2.0, 1, true)
+	if !strings.Contains(guardSaid, "Mantenha a linha, viajante. Sem problemas na nossa vila.") {
+		t.Errorf("aviso de guarda inesperado para armado: %s", guardSaid)
+	}
+
+	// Aproximação de raça Varkai (raça 4)
+	_ = CallOnPlayerApproach(guard, 1, 2.0, 4, false)
+	if !strings.Contains(guardSaid, "Mantenha a linha, viajante. Sem problemas na nossa vila.") {
+		t.Errorf("aviso de guarda inesperado para Varkai: %s", guardSaid)
+	}
+
+	// Aproximação de raça Dhampir (raça 5)
+	_ = CallOnPlayerApproach(guard, 1, 2.0, 5, false)
+	if !strings.Contains(guardSaid, "Mantenha a linha, viajante. Sem problemas na nossa vila.") {
+		t.Errorf("aviso de guarda inesperado para Dhampir: %s", guardSaid)
+	}
+}
+
+func TestNPCFriendshipAndClassRestrictionsLua(t *testing.T) {
+	clock := world.NewWorldClock(12.0)
+	engine := NewEngine(clock)
+	defer engine.Close()
+
+	scriptsDir := FindNPCScriptsDir()
+
+	// 1. Garrick (100) - Regra de exclusividade e receita secreta
+	var garrickSaid string
+	garrick := world.NewNPC(100, "Garrick, o Ferreiro", 10.0, 0.0, 9.0, filepath.Join(scriptsDir, "garrick.lua"), clock, func(id uint32, msg string) {
+		garrickSaid = msg
+	})
+	defer garrick.Close()
+
+	if err := engine.BindNPC(garrick); err != nil {
+		t.Fatalf("falha ao vincular garrick: %v", err)
+	}
+
+	// Alquimista (Classe 6) tentando interagir com Garrick: bloqueado com desprezo
+	_ = CallOnPlayerInteract(garrick, 1, 12, 1, 6, 5, 0)
+	if !strings.Contains(garrickSaid, "misturando fumacinhas em frascos") {
+		t.Errorf("esperava recusa ao Alquimista por Garrick, obteve: %s", garrickSaid)
+	}
+
+	// Ferreiro (Classe 5) com Afiança Nível 1 (< 3): reconhecido como colega
+	_ = CallOnPlayerInteract(garrick, 1, 12, 1, 5, 5, 1)
+	if !strings.Contains(garrickSaid, "irmão da bigorna") {
+		t.Errorf("esperava saudação de colega ferreiro, obteve: %s", garrickSaid)
+	}
+
+	// Ferreiro (Classe 5) com Afiança Nível 3+: ensina o Malho de Batalha Rúnico
+	_ = CallOnPlayerInteract(garrick, 1, 12, 1, 5, 5, 3)
+	if !strings.Contains(garrickSaid, "Malho de Batalha Rúnico") {
+		t.Errorf("esperava ensinamento do Malho de Batalha Rúnico, obteve: %s", garrickSaid)
+	}
+
+	// 2. Lyra (103) - Restrição de Ferreiros e Segredo das 03:00 da manhã
+	var lyraSaid string
+	lyra := world.NewNPC(103, "Lyra, a Alquimista", 10.0, 0.0, -6.5, filepath.Join(scriptsDir, "lyra.lua"), clock, func(id uint32, msg string) {
+		lyraSaid = msg
+	})
+	defer lyra.Close()
+
+	if err := engine.BindNPC(lyra); err != nil {
+		t.Fatalf("falha ao vincular lyra: %v", err)
+	}
+
+	// Ferreiro (Classe 5) com Afiança Nível 1 (<= 2): comércio fechado
+	_ = CallOnPlayerInteract(lyra, 1, 12, 1, 5, 5, 1)
+	if !strings.Contains(lyraSaid, "luvas sujas") {
+		t.Errorf("esperava recusa ao ferreiro bruto por Lyra, obteve: %s", lyraSaid)
+	}
+
+	// Jogador com Afiança Nível 3+: Revela a história do mestre traído jogado nos esgotos às 03:00
+	_ = CallOnPlayerInteract(lyra, 1, 12, 1, 1, 5, 3)
+	if !strings.Contains(lyraSaid, "03:00 da manhã") || !strings.Contains(lyraSaid, "esgotos") {
+		t.Errorf("esperava segredo do mestre traído às 03:00 da manhã, obteve: %s", lyraSaid)
+	}
+}
+
+

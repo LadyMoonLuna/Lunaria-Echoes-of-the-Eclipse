@@ -235,8 +235,9 @@ func TestSelectIdentityPacket(t *testing.T) {
 	playerID := uint32(99)
 	raceID := RaceNoctari
 	classID := ClassScout
+	actionMode := IdentityModeEvolveClass
 
-	data := SerializeSelectIdentity(playerID, raceID, classID)
+	data := SerializeSelectIdentity(playerID, raceID, classID, actionMode)
 	if len(data) != SelectIdentityPacketSize {
 		t.Fatalf("esperava %d bytes, obteve %d", SelectIdentityPacketSize, len(data))
 	}
@@ -248,8 +249,18 @@ func TestSelectIdentityPacket(t *testing.T) {
 	if err := DeserializeSelectIdentity(data[:], &parsed); err != nil {
 		t.Fatalf("erro ao decodificar SELECT_IDENTITY: %v", err)
 	}
-	if parsed.PlayerID != playerID || parsed.RaceID != raceID || parsed.ClassID != classID {
+	if parsed.PlayerID != playerID || parsed.RaceID != raceID || parsed.ClassID != classID || parsed.ActionMode != actionMode {
 		t.Fatalf("dados divergentes em SELECT_IDENTITY: %+v", parsed)
+	}
+
+	// Teste de retrocompatibilidade com payload legado de 7 bytes
+	legacy7 := data[:7]
+	var parsedLegacy SelectIdentityPacket
+	if err := DeserializeSelectIdentity(legacy7, &parsedLegacy); err != nil {
+		t.Fatalf("erro ao decodificar SELECT_IDENTITY legado de 7 bytes: %v", err)
+	}
+	if parsedLegacy.ActionMode != IdentityModeInitialChange {
+		t.Fatalf("esperava ActionMode default 0 no legado, obteve %d", parsedLegacy.ActionMode)
 	}
 }
 
@@ -310,12 +321,26 @@ func TestPlayerStatsPacket(t *testing.T) {
 	playerID := uint32(7)
 	raceID := RaceValerian
 	classID := ClassSwordsman
-	hp := uint16(100)
-	maxHP := uint16(100)
+	classTier := TierRare // 3
+	level := uint8(12)
+	hp := uint16(180)
+	maxHP := uint16(200)
 	stamina := uint16(85)
-	maxStamina := uint16(100)
+	maxStamina := uint16(120)
+	buffActive := uint8(1)
+	xp := uint16(450)
+	nextLevelXP := uint16(650)
+	statPoints := uint8(10)
+	str := uint8(15)
+	dex := uint8(8)
+	con := uint8(12)
+	agi := uint8(10)
+	intStat := uint8(5)
+	spi := uint8(6)
+	mas := uint8(7)
+	lck := uint8(9)
 
-	data := SerializePlayerStats(playerID, raceID, classID, hp, maxHP, stamina, maxStamina)
+	data := SerializePlayerStats(playerID, raceID, classID, classTier, level, hp, maxHP, stamina, maxStamina, buffActive, xp, nextLevelXP, statPoints, str, dex, con, agi, intStat, spi, mas, lck)
 	if len(data) != PlayerStatsPacketSize {
 		t.Fatalf("esperava %d bytes, obteve %d", PlayerStatsPacketSize, len(data))
 	}
@@ -328,8 +353,59 @@ func TestPlayerStatsPacket(t *testing.T) {
 		t.Fatalf("erro ao decodificar PLAYER_STATS: %v", err)
 	}
 	if parsed.PlayerID != playerID || parsed.RaceID != raceID || parsed.ClassID != classID ||
-		parsed.HP != hp || parsed.MaxHP != maxHP || parsed.Stamina != stamina || parsed.MaxStamina != maxStamina {
+		parsed.ClassTier != classTier || parsed.Level != level ||
+		parsed.HP != hp || parsed.MaxHP != maxHP || parsed.Stamina != stamina || parsed.MaxStamina != maxStamina ||
+		parsed.BuffActive != buffActive || parsed.XP != xp || parsed.NextLevelXP != nextLevelXP ||
+		parsed.StatPoints != statPoints || parsed.STR != str || parsed.DEX != dex || parsed.CON != con ||
+		parsed.AGI != agi || parsed.INT != intStat || parsed.SPI != spi || parsed.MAS != mas || parsed.LCK != lck {
 		t.Fatalf("dados divergentes em PLAYER_STATS: %+v", parsed)
+	}
+}
+
+func TestAllocateStatPacket(t *testing.T) {
+	playerID := uint32(101)
+	statID := StatIDCON // 3
+
+	data := SerializeAllocateStat(playerID, statID)
+	if len(data) != AllocateStatPacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", AllocateStatPacketSize, len(data))
+	}
+	if data[0] != PacketTypeAllocateStat {
+		t.Fatalf("esperava opcode 0x37, obteve 0x%02x", data[0])
+	}
+
+	var parsed AllocateStatPacket
+	if err := DeserializeAllocateStat(data[:], &parsed); err != nil {
+		t.Fatalf("erro ao decodificar ALLOCATE_STAT: %v", err)
+	}
+	if parsed.PlayerID != playerID || parsed.StatID != statID {
+		t.Fatalf("dados divergentes em ALLOCATE_STAT: %+v", parsed)
+	}
+}
+
+func TestPlayerRespawnPacket(t *testing.T) {
+	playerID := uint32(5)
+	posX := float32(0.0)
+	posY := float32(1.5)
+	posZ := float32(0.0)
+
+	data := SerializePlayerRespawn(playerID, posX, posY, posZ)
+	if len(data) != PlayerRespawnPacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", PlayerRespawnPacketSize, len(data))
+	}
+	if data[0] != PacketTypePlayerRespawn {
+		t.Fatalf("esperava opcode 0x36, obteve 0x%02x", data[0])
+	}
+
+	var parsed PlayerRespawnPacket
+	if err := DeserializePlayerRespawn(data[:], &parsed); err != nil {
+		t.Fatalf("erro ao decodificar PLAYER_RESPAWN: %v", err)
+	}
+	if parsed.PlayerID != playerID ||
+		math.Abs(float64(parsed.PosX-posX)) > 0.001 ||
+		math.Abs(float64(parsed.PosY-posY)) > 0.001 ||
+		math.Abs(float64(parsed.PosZ-posZ)) > 0.001 {
+		t.Fatalf("dados divergentes em PLAYER_RESPAWN: %+v", parsed)
 	}
 }
 
@@ -460,4 +536,278 @@ func TestProjectileSpawnPacket(t *testing.T) {
 	}
 }
 
+func TestInventorySyncPacket(t *testing.T) {
+	var equippedSlots [12]uint8
+	equippedSlots[SlotHelmet] = ItemVigilHelmet
+	equippedSlots[SlotChest] = ItemSteelChestplate
+	equippedSlots[SlotLegs] = ItemWolfLeatherPants
+	equippedSlots[SlotBoots] = ItemMistwalkerBoots
+	equippedSlots[SlotGloves] = ItemBlacksmithGauntlets
+	equippedSlots[SlotBelt] = ItemAlchemistBelt
+	equippedSlots[SlotAmulet] = ItemSilverMoonAmulet
+	equippedSlots[SlotRing1] = ItemAncestralFangRing
+	equippedSlots[SlotRing2] = ItemBloodRubyRing
+	equippedSlots[SlotRing3] = ItemObsidianRing
+	equippedSlots[SlotRing4] = ItemStarlightRing
+	equippedSlots[SlotCloak] = ItemAlphaPeltCloak
+
+	slots := []InventorySlot{
+		{ItemID: ItemEmptyFlask, Quantity: 3},
+		{ItemID: ItemRawWolfMeat, Quantity: 2},
+		{ItemID: ItemFreshWolfBlood, Quantity: 1},
+	}
+
+	data := SerializeInventorySync(equippedSlots, slots)
+	expectedLen := InventorySyncHeaderSize + len(slots)*InventorySlotEntrySize
+	if len(data) != expectedLen {
+		t.Fatalf("esperava tamanho %d, obteve %d", expectedLen, len(data))
+	}
+	if data[0] != PacketTypeInventorySync {
+		t.Fatalf("esperava opcode 0x38, obteve 0x%02x", data[0])
+	}
+
+	var parsed InventorySyncPacket
+	if err := DeserializeInventorySync(data, &parsed); err != nil {
+		t.Fatalf("erro ao decodificar INVENTORY_SYNC: %v", err)
+	}
+
+	for i := 0; i < 12; i++ {
+		if parsed.EquippedSlots[i] != equippedSlots[i] {
+			t.Fatalf("slot de equipamento %d divergente: %d vs %d", i, parsed.EquippedSlots[i], equippedSlots[i])
+		}
+	}
+	if parsed.EquippedArmorID != ItemSteelChestplate || parsed.EquippedAccessoryID != ItemAncestralFangRing {
+		t.Fatalf("alias de armadura/acessorio divergente: armor=%d, acc=%d", parsed.EquippedArmorID, parsed.EquippedAccessoryID)
+	}
+	if parsed.SlotCount != uint8(len(slots)) {
+		t.Fatalf("slot count divergente: %d vs %d", parsed.SlotCount, len(slots))
+	}
+
+	for i, s := range slots {
+		if parsed.Slots[i].ItemID != s.ItemID || parsed.Slots[i].Quantity != s.Quantity {
+			t.Fatalf("slot %d divergente: %+v vs %+v", i, parsed.Slots[i], s)
+		}
+	}
+
+	// Testa também o serializador legado de 2 slots
+	legacyData := SerializeInventorySyncLegacy(ItemAlphaWolfPelt, ItemAncestralFangRing, slots)
+	var parsedLegacy InventorySyncPacket
+	if err := DeserializeInventorySync(legacyData, &parsedLegacy); err != nil {
+		t.Fatalf("erro ao decodificar legado: %v", err)
+	}
+	if parsedLegacy.EquippedArmorID != ItemAlphaWolfPelt || parsedLegacy.EquippedAccessoryID != ItemAncestralFangRing {
+		t.Fatalf("legado divergente: %+v", parsedLegacy)
+	}
+}
+
+func TestUseOrEquipItemPacket(t *testing.T) {
+	playerID := uint32(42)
+	itemID := ItemWolfBloodPotion
+
+	data := SerializeUseOrEquipItem(playerID, itemID)
+	if len(data) != UseOrEquipItemPacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", UseOrEquipItemPacketSize, len(data))
+	}
+	if data[0] != PacketTypeUseOrEquipItem {
+		t.Fatalf("esperava opcode 0x39, obteve 0x%02x", data[0])
+	}
+
+	var parsed UseOrEquipItemPacket
+	if err := DeserializeUseOrEquipItem(data[:], &parsed); err != nil {
+		t.Fatalf("erro ao decodificar USE_OR_EQUIP_ITEM: %v", err)
+	}
+
+	if parsed.PlayerID != playerID || parsed.ItemID != itemID {
+		t.Fatalf("dados divergentes em USE_OR_EQUIP_ITEM: %+v", parsed)
+	}
+}
+
+func TestEvolutionOfferPacket(t *testing.T) {
+	offerType := OfferTypeRace
+	optA := RaceHighValerian
+	optB := RaceAetherWalker
+
+	data := SerializeEvolutionOffer(offerType, optA, optB)
+	if len(data) != EvolutionOfferPacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", EvolutionOfferPacketSize, len(data))
+	}
+	if data[0] != PacketTypeEvolutionOffer {
+		t.Fatalf("esperava opcode 0x40, obteve 0x%02x", data[0])
+	}
+
+	var parsed EvolutionOfferPacket
+	if err := DeserializeEvolutionOffer(data[:], &parsed); err != nil {
+		t.Fatalf("erro ao decodificar EVOLUTION_OFFER: %v", err)
+	}
+
+	if parsed.OfferType != offerType || parsed.OptionAID != optA || parsed.OptionBID != optB {
+		t.Fatalf("dados divergentes em EVOLUTION_OFFER: %+v", parsed)
+	}
+}
+
+func TestDevGetDropRatesPacket(t *testing.T) {
+	playerID := uint32(99)
+	req := SerializeDevGetDropRatesRequest(playerID)
+	if len(req) != DevGetDropRatesPacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", DevGetDropRatesPacketSize, len(req))
+	}
+	if req[0] != PacketTypeDevGetDropRates {
+		t.Fatalf("esperava opcode 0x3A, obteve 0x%02x", req[0])
+	}
+
+	var parsedReq DevGetDropRatesPacket
+	if err := DeserializeDevGetDropRatesRequest(req[:], &parsedReq); err != nil {
+		t.Fatalf("erro ao decodificar DEV_GET_DROP_RATES request: %v", err)
+	}
+	if parsedReq.PlayerID != playerID {
+		t.Fatalf("esperava playerID %d, obteve %d", playerID, parsedReq.PlayerID)
+	}
+
+	reportMsg := "[DEV] Item Drops: Mob 1 -> Meat (100%), Fang (25%)"
+	resp := SerializeDevGetDropRatesResponse(reportMsg)
+	if resp[0] != PacketTypeDevGetDropRates {
+		t.Fatalf("esperava opcode 0x3A na resposta, obteve 0x%02x", resp[0])
+	}
+
+	parsedReport, err := DeserializeDevGetDropRatesResponse(resp)
+	if err != nil {
+		t.Fatalf("erro ao decodificar DEV_GET_DROP_RATES response: %v", err)
+	}
+	if parsedReport != reportMsg {
+		t.Fatalf("esperava '%s', obteve '%s'", reportMsg, parsedReport)
+	}
+}
+
+func TestInteractCorpsePacket(t *testing.T) {
+	playerID := uint32(101)
+	corpseID := uint32(5002)
+
+	data := SerializeInteractCorpse(playerID, corpseID)
+	if len(data) != InteractCorpsePacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", InteractCorpsePacketSize, len(data))
+	}
+	if data[0] != PacketTypeInteractCorpse {
+		t.Fatalf("esperava opcode 0x3B, obteve 0x%02x", data[0])
+	}
+
+	var parsed InteractCorpsePacket
+	if err := DeserializeInteractCorpse(data[:], &parsed); err != nil {
+		t.Fatalf("erro ao decodificar INTERACT_CORPSE: %v", err)
+	}
+	if parsed.PlayerID != playerID || parsed.CorpseID != corpseID {
+		t.Fatalf("dados divergentes em INTERACT_CORPSE: %+v vs (%d, %d)", parsed, playerID, corpseID)
+	}
+}
+
+func TestOpenAutopsyUIPacket(t *testing.T) {
+	corpseID := uint32(2048)
+	mobType := MobTypeAlphaWolf
+	seed := uint32(889911)
+
+	organs := []AutopsyOrganEntry{
+		{OrganIndex: 0, OrganType: 1, ItemReward: ItemAlphaWolfPelt, Difficulty: 6, QualityTier: 0},
+		{OrganIndex: 1, OrganType: 4, ItemReward: ItemPureLunarBlood, Difficulty: 7, QualityTier: 1},
+		{OrganIndex: 2, OrganType: 5, ItemReward: ItemAncestralFangRing, Difficulty: 8, QualityTier: 2},
+	}
+
+	data := SerializeOpenAutopsyUI(corpseID, mobType, seed, organs)
+	expectedSize := OpenAutopsyUIHeaderSize + len(organs)*AutopsyOrganEntrySize
+	if len(data) != expectedSize {
+		t.Fatalf("esperava %d bytes, obteve %d", expectedSize, len(data))
+	}
+	if data[0] != PacketTypeOpenAutopsyUI {
+		t.Fatalf("esperava opcode 0x3C, obteve 0x%02x", data[0])
+	}
+
+	var parsed OpenAutopsyUIPacket
+	if err := DeserializeOpenAutopsyUI(data, &parsed); err != nil {
+		t.Fatalf("erro ao decodificar OPEN_AUTOPSY_UI: %v", err)
+	}
+
+	if parsed.CorpseID != corpseID || parsed.MobType != mobType || parsed.DifficultySeed != seed || int(parsed.OrganCount) != len(organs) {
+		t.Fatalf("cabeçalho divergente: %+v", parsed)
+	}
+	for i, o := range organs {
+		po := parsed.Organs[i]
+		if po.OrganIndex != o.OrganIndex || po.OrganType != o.OrganType || po.ItemReward != o.ItemReward || po.Difficulty != o.Difficulty || po.QualityTier != o.QualityTier {
+			t.Fatalf("órgão #%d divergente: %+v vs %+v", i, po, o)
+		}
+	}
+}
+
+func TestSubmitAutopsyResultPacket(t *testing.T) {
+	playerID := uint32(77)
+	corpseID := uint32(3333)
+	organIndex := uint8(2)
+	resultTier := QualityPerfect // 1
+
+	data := SerializeSubmitAutopsyResult(playerID, corpseID, organIndex, resultTier)
+	if len(data) != SubmitAutopsyResultPacketSize {
+		t.Fatalf("esperava %d bytes, obteve %d", SubmitAutopsyResultPacketSize, len(data))
+	}
+	if data[0] != PacketTypeSubmitAutopsyResult {
+		t.Fatalf("esperava opcode 0x3D, obteve 0x%02x", data[0])
+	}
+
+	var parsed SubmitAutopsyResultPacket
+	if err := DeserializeSubmitAutopsyResult(data[:], &parsed); err != nil {
+		t.Fatalf("erro ao decodificar SUBMIT_AUTOPSY_RESULT: %v", err)
+	}
+	if parsed.PlayerID != playerID || parsed.CorpseID != corpseID || parsed.OrganIndex != organIndex || parsed.ResultTier != resultTier {
+		t.Fatalf("dados divergentes: %+v", parsed)
+	}
+}
+
+func TestCorpseSnapshotPacket(t *testing.T) {
+	snapshots := []CorpseSnapshot{
+		{
+			CorpseID:         1001,
+			MobID:            5,
+			MobType:          MobTypeMistWolf,
+			PosX:             10.5,
+			PosY:             0.0,
+			PosZ:             -15.2,
+			RotY:             45.0,
+			IsLooted:         false,
+			RemainingSeconds: 118,
+		},
+		{
+			CorpseID:         1002,
+			MobID:            9,
+			MobType:          MobTypeAlphaWolf,
+			PosX:             -22.0,
+			PosY:             1.5,
+			PosZ:             30.0,
+			RotY:             90.0,
+			IsLooted:         true,
+			RemainingSeconds: 45,
+		},
+	}
+
+	data := SerializeCorpseSnapshot(snapshots)
+	expectedSize := CorpseSnapshotHeaderSize + len(snapshots)*CorpseSnapshotEntrySize
+	if len(data) != expectedSize {
+		t.Fatalf("esperava %d bytes, obteve %d", expectedSize, len(data))
+	}
+	if data[0] != PacketTypeCorpseSnapshot {
+		t.Fatalf("esperava opcode 0x3E, obteve 0x%02x", data[0])
+	}
+
+	parsed, err := DeserializeCorpseSnapshot(data)
+	if err != nil {
+		t.Fatalf("erro ao decodificar CORPSE_SNAPSHOT: %v", err)
+	}
+	if len(parsed) != len(snapshots) {
+		t.Fatalf("esperava %d snapshots, obteve %d", len(snapshots), len(parsed))
+	}
+	for i, s := range snapshots {
+		p := parsed[i]
+		if p.CorpseID != s.CorpseID || p.MobID != s.MobID || p.MobType != s.MobType ||
+			math.Abs(float64(p.PosX-s.PosX)) > 0.001 ||
+			math.Abs(float64(p.PosZ-s.PosZ)) > 0.001 ||
+			p.IsLooted != s.IsLooted || p.RemainingSeconds != s.RemainingSeconds {
+			t.Fatalf("snapshot #%d divergente: %+v vs %+v", i, p, s)
+		}
+	}
+}
 

@@ -3,118 +3,106 @@ extends CanvasLayer
 signal identity_confirmed(race_id: int, class_id: int)
 
 var selected_race: int = 1
-var selected_class: int = 1
 var is_open: bool = false
 
-# Metadados de Raças
+# Metadados Completos das Raças de Lunaria Online
 const RACES_DATA := {
 	1: {
 		"name": "Valeriano",
-		"sub": "Humano — Cidadão do Reino",
-		"hp_mod": 10,
-		"stam_mod": 10,
-		"passive": "Fôlego Real: +15% de regeneração contínua de Stamina.",
-		"npc_reaction": "Garrick: 'Honrado cidadão de Valéria. As forjas do reino estão a seu serviço!'",
-		"color": Color("#40c4ff")
+		"title": "Humano — Nobreza da Coroa Solar",
+		"lore": "Descendentes do império solar dourado de Valéria. Disciplinados, honrados e equilibrados em corpo e mente.",
+		"color": Color("#4fc3f7"),
+		"accent": Color("#ffd54f"),
+		"stats": {
+			"FOR": 6, "DES": 6, "CON": 6, "AGI": 6,
+			"INT": 6, "ESP": 6, "PER": 7, "SOR": 7
+		},
+		"skill_z_name": "Ímpeto Valeriano",
+		"skill_z_desc": "Restaura +40 Stamina, cura +25 HP e concede +25% de dano bônus por 10s (Recarga: 10s).",
+		"passive_name": "Fôlego Real",
+		"passive_desc": "+15% de regeneração contínua de Stamina em combate.",
+		"order_evo": "Alto Valeriano (Ordem: Estandarte Dourado da Coroa, Liderança Imperial)",
+		"chaos_evo": "Andarilho do Éter (Caos: Rasga fendas no espaço, distorção e dano etéreo)",
+		"npc_reaction": "Garrick: 'Cidadão de Valéria! Nossas forjas forjaram o império. Venha aprender o aço comigo!'"
 	},
 	2: {
 		"name": "Noctari",
-		"sub": "Elfo da Lua — Guardião Astral",
-		"hp_mod": 0,
-		"stam_mod": 20,
-		"passive": "Passo Astral: +25% de dano e crítico sob o luar (dobrado na Lua Cheia).",
-		"npc_reaction": "Garrick: 'Um Elfo da Lua... Suas lâminas e cajados brilham diferente sob o luar.'",
-		"color": Color("#b388ff")
+		"title": "Elfo da Lua — Guardião Astral do Véu",
+		"lore": "Filhos da Noite Eterna e das estrelas cadentes. Canalizadores naturais de energias astrais e magias lunares.",
+		"color": Color("#b388ff"),
+		"accent": Color("#ea80fc"),
+		"stats": {
+			"FOR": 4, "DES": 8, "CON": 4, "AGI": 9,
+			"INT": 8, "ESP": 8, "PER": 8, "SOR": 5
+		},
+		"skill_z_name": "Explosão Lunar / Umbral",
+		"skill_z_desc": "Onda estelar radial (5.5m) que causa dano mágico elevado e cura +30 HP (Recarga: 10s).",
+		"passive_name": "Passo Astral",
+		"passive_desc": "+25% de dano e chance crítica sob a noite (dobrado na Lua Cheia).",
+		"order_evo": "Arconte Lunar (Ordem: Brilho sagrado de Selene, cura e purificação celestial)",
+		"chaos_evo": "Espectro Umbral (Caos: Véu de Nyx, passos invisíveis e emboscada nas trevas)",
+		"npc_reaction": "Lyra: 'Ah, sangue Noctari... O luar em suas veias ressoa perfeitamente com a Alquimia!'"
 	},
 	3: {
 		"name": "Kharad",
-		"sub": "Forjado das Cinzas — Artífice Pétreo",
-		"hp_mod": 30,
-		"stam_mod": 0,
-		"passive": "Postura de Rocha: Reduz 20% de todo dano recebido de Mobs e bônus em golpes pesados.",
-		"npc_reaction": "Garrick: 'Um irmão Kharad! Reconheço a fuligem das forjas ancestrais no seu sangue. Desconto em reparos!'",
-		"color": Color("#ffb74d")
+		"title": "Forjado das Cinzas — Artífice Pétreo da Montanha",
+		"lore": "Nascidos nas forjas profundas e fortalezas subterrâneas. Sua pele é dura como granito e seu coração arde como magma.",
+		"color": Color("#ffb74d"),
+		"accent": Color("#ff9800"),
+		"stats": {
+			"FOR": 9, "DES": 4, "CON": 9, "AGI": 4,
+			"INT": 5, "ESP": 6, "PER": 5, "SOR": 8
+		},
+		"skill_z_name": "Baluarte Rúnico / Erupção",
+		"skill_z_desc": "Onda de choque vulcânica (4.5m) de dano sísmico e escudo de 70% de redução por 5s (Recarga: 10s).",
+		"passive_name": "Postura de Rocha",
+		"passive_desc": "Reduz passivamente 20% de todo dano recebido e concede firmeza contra atordoamento.",
+		"order_evo": "Guardião Rúnico (Ordem: Aço sagrado e runas defensivas intransponíveis)",
+		"chaos_evo": "Titã de Obsidiana (Caos: Magma ardente das profundezas e cataclismos de fogo)",
+		"npc_reaction": "Garrick: 'Irmão Kharad! O calor da bigorna queima no seu peito! A forja te aguarda!'"
 	},
 	4: {
 		"name": "Varkai",
-		"sub": "Sangue-Feral — Caçador Primordial",
-		"hp_mod": 15,
-		"stam_mod": 10,
-		"passive": "Sangue Fervilhante: +20% de dano feroz quando a vida cai abaixo de 35%.",
-		"npc_reaction": "Garrick: 'Mantenha essas garras e esse sangue feroz longe dos cidadãos da vila, Varkai, e nos daremos bem.'",
-		"color": Color("#ff5252")
-	},
-	5: {
-		"name": "Dhampir [Secreta]",
-		"sub": "Linhagem da Noite Eterna",
-		"hp_mod": 10,
-		"stam_mod": 15,
-		"passive": "Sede de Sangue: Lifesteal (+8 HP por golpe/flecha/magia) e +40% dano na Lua de Sangue.",
-		"npc_reaction": "Garrick: 'Pelos deuses... Você não tem pulso! Afaste essa sede de sangue da minha forja!'",
-		"color": Color("#ff1744")
-	}
-}
-
-# Metadados de Classes
-const CLASSES_DATA := {
-	1: {
-		"name": "Espadachim",
-		"style": "Corpo-a-Corpo | Espada Longa & Escudo",
-		"hp_base": 140,
-		"stam_base": 100,
-		"range_desc": "Curta Distância (3.8m)",
-		"skill_q": "Corte Crescente [Q]: Golpe em arco amplo com alta sobrevivência defensiva.",
-		"evolutions": "Vanguarda Real ou Espadachim Mágico",
-		"color": Color("#64b5f6")
-	},
-	2: {
-		"name": "Batedor",
-		"style": "Distância Física | Arco de Caça Rápido",
-		"hp_base": 105,
-		"stam_base": 135,
-		"range_desc": "Longo Alcance (16.0m)",
-		"skill_q": "Disparo Perfurante [Q]: Flecha perfurante veloz a 22m que atravessa múltiplos inimigos.",
-		"evolutions": "Lâmina Sombria ou Franco-Atirador Rúnico",
-		"color": Color("#69f0ae")
-	},
-	3: {
-		"name": "Iniciado",
-		"style": "Distância Mágica | Cajado Rúnico Arcano",
-		"hp_base": 95,
-		"stam_base": 110,
-		"range_desc": "Médio/Longo Alcance (14.0m)",
-		"skill_q": "Cometa Elemental [Q]: Esfera flamejante/arcana que explode em área de 2.8m ao atingir.",
-		"evolutions": "Arcanista ou Mago de Batalha",
-		"color": Color("#ea80fc")
-	},
-	4: {
-		"name": "Acólito",
-		"style": "Híbrido Sagrado | Maça Dourada & Talismã",
-		"hp_base": 125,
-		"stam_base": 105,
-		"range_desc": "Médio Alcance (4.5m)",
-		"skill_q": "Círculo de Luz [Q]: Golpe sagrado e oração que cura +40 HP em área para o grupo.",
-		"evolutions": "Oráculo da Luz ou Paladino do Juramento",
-		"color": Color("#ffd54f")
+		"title": "Sangue-Feral — Predador Primordial das Selvas",
+		"lore": "Descendentes de linhagens draconianas e lupinas ancestrais. Dotados de sentidos apurados e ferocidade selvagem.",
+		"color": Color("#ff5252"),
+		"accent": Color("#ff1744"),
+		"stats": {
+			"FOR": 8, "DES": 7, "CON": 8, "AGI": 8,
+			"INT": 3, "ESP": 4, "PER": 7, "SOR": 5
+		},
+		"skill_z_name": "Sopro Dracônico / Rugido Predatório",
+		"skill_z_desc": "Cone frontal feroz (5.5m) de alto impacto com roubo de vida por inimigo atingido (Recarga: 10s).",
+		"passive_name": "Sangue Fervilhante",
+		"passive_desc": "+20% de dano aumentado e tenacidade quando a vida cair abaixo de 35%.",
+		"order_evo": "Soberano Dracônico (Ordem: Chamas reais ancestrais, nobreza e asas de dragão)",
+		"chaos_evo": "Fera do Frenesi (Caos: Instinto sanguinário incontrolável e fúria devastadora)",
+		"npc_reaction": "Capitão Randel: 'Controle seus instintos ferozes dentro das muralhas, Varkai, e você será um grande trunfo!'"
 	}
 }
 
 # Referências de Nós UI
 var main_panel: PanelContainer = null
-var race_buttons: Dictionary = {}
-var class_buttons: Dictionary = {}
-var summary_title: Label = null
-var stats_breakdown_label: Label = null
-var weapon_details_label: Label = null
-var skill_details_label: Label = null
+var race_cards: Dictionary = {}
+var race_title_label: Label = null
+var race_subtitle_label: Label = null
+var race_lore_label: Label = null
+var stats_grid: GridContainer = null
+var stat_labels: Dictionary = {}
+var skill_z_card: PanelContainer = null
+var skill_z_label: Label = null
+var passive_card: PanelContainer = null
+var passive_label: Label = null
+var evo_order_label: Label = null
+var evo_chaos_label: Label = null
 var npc_reaction_label: Label = null
+var traveler_notice_panel: PanelContainer = null
 var confirm_button: Button = null
 
 func _ready() -> void:
 	layer = 25
 	_build_ui()
-	_update_selection_states()
-	_update_summary()
+	_select_race(selected_race)
 	open_menu()
 
 func _input(event: InputEvent) -> void:
@@ -145,7 +133,7 @@ func close_menu() -> void:
 func _build_ui() -> void:
 	# Fundo Escurecido Scrim
 	var scrim := ColorRect.new()
-	scrim.color = Color(0.02, 0.03, 0.05, 0.78)
+	scrim.color = Color(0.02, 0.03, 0.05, 0.85)
 	scrim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scrim.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(scrim)
@@ -155,283 +143,362 @@ func _build_ui() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scrim.add_child(center)
 
-	# Painel Principal Estilizado com Borda Dourada Medieval
+	# Painel Principal com Borda Dourada Imperial
 	main_panel = PanelContainer.new()
-	main_panel.custom_minimum_size = Vector2(980, 610)
+	main_panel.custom_minimum_size = Vector2(980, 620)
 	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.06, 0.08, 0.12, 0.96)
+	panel_style.bg_color = Color(0.05, 0.07, 0.11, 0.98)
 	panel_style.border_color = Color(0.85, 0.72, 0.28, 0.95)
 	panel_style.set_border_width_all(2)
 	panel_style.set_corner_radius_all(10)
-	panel_style.shadow_color = Color(0, 0, 0, 0.7)
-	panel_style.shadow_size = 14
-	panel_style.content_margin_left = 20
-	panel_style.content_margin_right = 20
-	panel_style.content_margin_top = 16
-	panel_style.content_margin_bottom = 16
+	panel_style.shadow_color = Color(0, 0, 0, 0.8)
+	panel_style.shadow_size = 18
+	panel_style.content_margin_left = 22
+	panel_style.content_margin_right = 22
+	panel_style.content_margin_top = 18
+	panel_style.content_margin_bottom = 18
 	main_panel.add_theme_stylebox_override("panel", panel_style)
 	center.add_child(main_panel)
 
 	var root_vbox := VBoxContainer.new()
-	root_vbox.add_theme_constant_override("separation", 10)
+	root_vbox.add_theme_constant_override("separation", 12)
 	main_panel.add_child(root_vbox)
 
-	# Cabeçalho
+	# Cabeçalho Cinematográfico
 	var header_vbox := VBoxContainer.new()
 	header_vbox.add_theme_constant_override("separation", 2)
 	root_vbox.add_child(header_vbox)
 
 	var title_lbl := Label.new()
-	title_lbl.text = "✦  LUNARIA: ESCOLHA SUA IDENTIDADE  ✦"
+	title_lbl.text = "LUNARIA: DESPERTAR DAS LINHAGENS"
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_lbl.add_theme_font_size_override("font_size", 19)
+	title_lbl.add_theme_font_size_override("font_size", 22)
 	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
-	title_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	title_lbl.add_theme_constant_override("shadow_offset_y", 1)
 	header_vbox.add_child(title_lbl)
 
 	var subtitle_lbl := Label.new()
-	subtitle_lbl.text = "Selecione sua Raça e Classe inicial para calibrar atributos, estilo de combate e a reação de Garrick e dos aldeões"
+	subtitle_lbl.text = "Escolha sua Raça Ancestral. Seu sangue ditará suas habilidades inatas e provações divinas."
 	subtitle_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle_lbl.add_theme_font_size_override("font_size", 12)
-	subtitle_lbl.add_theme_color_override("font_color", Color(0.75, 0.82, 0.92))
+	subtitle_lbl.add_theme_color_override("font_color", Color(0.72, 0.78, 0.88))
 	header_vbox.add_child(subtitle_lbl)
 
-	# Colunas de Seleção (Lado a Lado)
-	var columns_hbox := HBoxContainer.new()
-	columns_hbox.add_theme_constant_override("separation", 16)
-	columns_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root_vbox.add_child(columns_hbox)
+	# Seletor das 4 Raças Base (Botões/Cartões Horizontais Grandes)
+	var races_hbox := HBoxContainer.new()
+	races_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	races_hbox.add_theme_constant_override("separation", 12)
+	root_vbox.add_child(races_hbox)
 
-	# Coluna 1: Raças
-	var race_col := VBoxContainer.new()
-	race_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	race_col.add_theme_constant_override("separation", 6)
-	columns_hbox.add_child(race_col)
+	for rid in [1, 2, 3, 4]:
+		var r_info: Dictionary = RACES_DATA[rid]
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(220, 56)
+		btn.text = "%s\n[%s]" % [r_info["name"].to_upper(), r_info["title"].split("—")[0].strip_edges()]
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		btn.pressed.connect(func(): _select_race(rid))
+		races_hbox.add_child(btn)
+		race_cards[rid] = btn
 
-	var race_col_title := Label.new()
-	race_col_title.text = "LINHAGENS ANCESTRAIS (RAÇAS)"
-	race_col_title.add_theme_font_size_override("font_size", 13)
-	race_col_title.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
-	race_col.add_child(race_col_title)
+	# Área de Detalhes da Linhagem (Dividida em 2 Colunas: Esquerda Atributos & Lore, Direita Habilidades & Evoluções)
+	var details_hbox := HBoxContainer.new()
+	details_hbox.add_theme_constant_override("separation", 18)
+	details_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root_vbox.add_child(details_hbox)
 
-	for r_id in [1, 2, 3, 4, 5]:
-		var r_data: Dictionary = RACES_DATA[r_id]
-		var btn := _create_card_button(r_id, r_data["name"], r_data["sub"], "HP %+d | Stamina %+d" % [r_data["hp_mod"], r_data["stam_mod"]], r_data["color"], true)
-		race_col.add_child(btn)
-		race_buttons[r_id] = btn
+	# COLUNA ESQUERDA: Lore, Subtítulo e Atributos Iniciais
+	var col_left := VBoxContainer.new()
+	col_left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col_left.add_theme_constant_override("separation", 8)
+	details_hbox.add_child(col_left)
 
-	# Coluna 2: Classes
-	var class_col := VBoxContainer.new()
-	class_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	class_col.add_theme_constant_override("separation", 6)
-	columns_hbox.add_child(class_col)
+	var lore_panel := PanelContainer.new()
+	var lore_style := StyleBoxFlat.new()
+	lore_style.bg_color = Color(0.08, 0.11, 0.16, 0.9)
+	lore_style.border_color = Color(0.3, 0.42, 0.6, 0.5)
+	lore_style.set_border_width_all(1)
+	lore_style.set_corner_radius_all(6)
+	lore_style.content_margin_left = 12
+	lore_style.content_margin_right = 12
+	lore_style.content_margin_top = 10
+	lore_style.content_margin_bottom = 10
+	lore_panel.add_theme_stylebox_override("panel", lore_style)
+	col_left.add_child(lore_panel)
 
-	var class_col_title := Label.new()
-	class_col_title.text = "VOCAÇÕES INICIAIS (CLASSES)"
-	class_col_title.add_theme_font_size_override("font_size", 13)
-	class_col_title.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
-	class_col.add_child(class_col_title)
+	var lore_vbox := VBoxContainer.new()
+	lore_vbox.add_theme_constant_override("separation", 4)
+	lore_panel.add_child(lore_vbox)
 
-	for c_id in [1, 2, 3, 4]:
-		var c_data: Dictionary = CLASSES_DATA[c_id]
-		var btn := _create_card_button(c_id, c_data["name"], c_data["style"], "HP Base: %d | Stamina: %d" % [c_data["hp_base"], c_data["stam_base"]], c_data["color"], false)
-		class_col.add_child(btn)
-		class_buttons[c_id] = btn
+	race_title_label = Label.new()
+	race_title_label.text = "Linhagem: Valeriano"
+	race_title_label.add_theme_font_size_override("font_size", 16)
+	race_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
+	lore_vbox.add_child(race_title_label)
 
-	# Painel Inferior: Resumo Detalhado Dinâmico
-	var summary_panel := PanelContainer.new()
-	var sum_style := StyleBoxFlat.new()
-	sum_style.bg_color = Color(0.04, 0.05, 0.08, 0.9)
-	sum_style.border_color = Color(0.35, 0.45, 0.65, 0.5)
-	sum_style.set_border_width_all(1)
-	sum_style.set_corner_radius_all(6)
-	sum_style.content_margin_left = 14
-	sum_style.content_margin_right = 14
-	sum_style.content_margin_top = 8
-	sum_style.content_margin_bottom = 8
-	summary_panel.add_theme_stylebox_override("panel", sum_style)
-	root_vbox.add_child(summary_panel)
+	race_subtitle_label = Label.new()
+	race_subtitle_label.text = "Humano — Cidadão da Coroa"
+	race_subtitle_label.add_theme_font_size_override("font_size", 11)
+	race_subtitle_label.add_theme_color_override("font_color", Color(0.65, 0.8, 1.0))
+	lore_vbox.add_child(race_subtitle_label)
 
-	var sum_vbox := VBoxContainer.new()
-	sum_vbox.add_theme_constant_override("separation", 3)
-	summary_panel.add_child(sum_vbox)
+	race_lore_label = Label.new()
+	race_lore_label.text = "Lore da Raça..."
+	race_lore_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	race_lore_label.add_theme_font_size_override("font_size", 11)
+	race_lore_label.add_theme_color_override("font_color", Color(0.85, 0.88, 0.94))
+	lore_vbox.add_child(race_lore_label)
 
-	summary_title = Label.new()
-	summary_title.add_theme_font_size_override("font_size", 13)
-	summary_title.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
-	sum_vbox.add_child(summary_title)
+	# Grid de Atributos Base Iniciais (8 atributos)
+	var stats_title := Label.new()
+	stats_title.text = "ATRIBUTOS BASE INICIAIS DA RAÇA:"
+	stats_title.add_theme_font_size_override("font_size", 11)
+	stats_title.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3))
+	col_left.add_child(stats_title)
 
-	stats_breakdown_label = Label.new()
-	stats_breakdown_label.add_theme_font_size_override("font_size", 12)
-	stats_breakdown_label.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0))
-	sum_vbox.add_child(stats_breakdown_label)
+	var stats_panel := PanelContainer.new()
+	stats_panel.add_theme_stylebox_override("panel", lore_style)
+	col_left.add_child(stats_panel)
 
-	weapon_details_label = Label.new()
-	weapon_details_label.add_theme_font_size_override("font_size", 11)
-	weapon_details_label.add_theme_color_override("font_color", Color(0.8, 0.88, 0.95))
-	sum_vbox.add_child(weapon_details_label)
+	stats_grid = GridContainer.new()
+	stats_grid.columns = 4
+	stats_grid.add_theme_constant_override("h_separation", 10)
+	stats_grid.add_theme_constant_override("v_separation", 6)
+	stats_panel.add_child(stats_grid)
 
-	skill_details_label = Label.new()
-	skill_details_label.add_theme_font_size_override("font_size", 11)
-	skill_details_label.add_theme_color_override("font_color", Color(0.75, 0.95, 0.75))
-	sum_vbox.add_child(skill_details_label)
+	stat_labels.clear()
+	var stat_keys := ["FOR", "DES", "CON", "AGI", "INT", "ESP", "PER", "SOR"]
+	for k in stat_keys:
+		var slot := PanelContainer.new()
+		var slot_style := StyleBoxFlat.new()
+		slot_style.bg_color = Color(0.12, 0.15, 0.22, 0.85)
+		slot_style.border_color = Color(0.35, 0.45, 0.65, 0.4)
+		slot_style.set_border_width_all(1)
+		slot_style.set_corner_radius_all(4)
+		slot_style.content_margin_left = 6
+		slot_style.content_margin_right = 6
+		slot_style.content_margin_top = 4
+		slot_style.content_margin_bottom = 4
+		slot.add_theme_stylebox_override("panel", slot_style)
+		stats_grid.add_child(slot)
 
+		var lbl := Label.new()
+		lbl.text = "%s: 10" % k
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 11)
+		slot.add_child(lbl)
+		stat_labels[k] = lbl
+
+	# COLUNA DIREITA: Skill [Z], Passiva Inata, Caminho da Ordem vs Caos, e Reação dos NPCs
+	var col_right := VBoxContainer.new()
+	col_right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col_right.add_theme_constant_override("separation", 8)
+	details_hbox.add_child(col_right)
+
+	# Card Skill Z
+	skill_z_card = PanelContainer.new()
+	var skill_style := StyleBoxFlat.new()
+	skill_style.bg_color = Color(0.08, 0.12, 0.18, 0.9)
+	skill_style.border_color = Color(0.2, 0.7, 0.9, 0.6)
+	skill_style.set_border_width_all(1)
+	skill_style.set_corner_radius_all(6)
+	skill_style.content_margin_left = 12
+	skill_style.content_margin_right = 12
+	skill_style.content_margin_top = 8
+	skill_style.content_margin_bottom = 8
+	skill_z_card.add_theme_stylebox_override("panel", skill_style)
+	col_right.add_child(skill_z_card)
+
+	var sz_vbox := VBoxContainer.new()
+	sz_vbox.add_theme_constant_override("separation", 2)
+	skill_z_card.add_child(sz_vbox)
+
+	var sz_head := Label.new()
+	sz_head.text = "⚡ HABILIDADE RACIAL ATIVA [TECLA Z]:"
+	sz_head.add_theme_font_size_override("font_size", 11)
+	sz_head.add_theme_color_override("font_color", Color(0.3, 0.85, 1.0))
+	sz_vbox.add_child(sz_head)
+
+	skill_z_label = Label.new()
+	skill_z_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	skill_z_label.add_theme_font_size_override("font_size", 11)
+	sz_vbox.add_child(skill_z_label)
+
+	# Card Passiva Inata
+	passive_card = PanelContainer.new()
+	var pass_style := skill_style.duplicate()
+	pass_style.border_color = Color(0.4, 0.85, 0.4, 0.6)
+	passive_card.add_theme_stylebox_override("panel", pass_style)
+	col_right.add_child(passive_card)
+
+	var pass_vbox := VBoxContainer.new()
+	pass_vbox.add_theme_constant_override("separation", 2)
+	passive_card.add_child(pass_vbox)
+
+	var pass_head := Label.new()
+	pass_head.text = "🛡️ PASSIVA DE LINHAGEM INATA:"
+	pass_head.add_theme_font_size_override("font_size", 11)
+	pass_head.add_theme_color_override("font_color", Color(0.4, 0.95, 0.5))
+	pass_vbox.add_child(pass_head)
+
+	passive_label = Label.new()
+	passive_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	passive_label.add_theme_font_size_override("font_size", 11)
+	pass_vbox.add_child(passive_label)
+
+	# Card Futuras Evoluções (Ordem vs Caos)
+	var evo_card := PanelContainer.new()
+	var evo_style := skill_style.duplicate()
+	evo_style.border_color = Color(0.85, 0.65, 0.25, 0.6)
+	evo_card.add_theme_stylebox_override("panel", evo_style)
+	col_right.add_child(evo_card)
+
+	var evo_vbox := VBoxContainer.new()
+	evo_vbox.add_theme_constant_override("separation", 4)
+	evo_card.add_child(evo_vbox)
+
+	var evo_head := Label.new()
+	evo_head.text = "🌌 EVOLUÇÕES CÓSMICAS FUTURAS (NÍVEL 10+):"
+	evo_head.add_theme_font_size_override("font_size", 11)
+	evo_head.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	evo_vbox.add_child(evo_head)
+
+	evo_order_label = Label.new()
+	evo_order_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	evo_order_label.add_theme_font_size_override("font_size", 11)
+	evo_order_label.add_theme_color_override("font_color", Color(0.95, 0.9, 0.6))
+	evo_vbox.add_child(evo_order_label)
+
+	evo_chaos_label = Label.new()
+	evo_chaos_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	evo_chaos_label.add_theme_font_size_override("font_size", 11)
+	evo_chaos_label.add_theme_color_override("font_color", Color(0.95, 0.5, 0.6))
+	evo_vbox.add_child(evo_chaos_label)
+
+	# Reação dos NPCs
 	npc_reaction_label = Label.new()
+	npc_reaction_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	npc_reaction_label.add_theme_font_size_override("font_size", 11)
-	npc_reaction_label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.6))
-	sum_vbox.add_child(npc_reaction_label)
+	npc_reaction_label.add_theme_color_override("font_color", Color(0.75, 0.82, 0.95))
+	col_right.add_child(npc_reaction_label)
 
-	# Botão de Confirmação Grande
+	# Banner de Explicação Obrigatória do Viajante Sem Classe
+	traveler_notice_panel = PanelContainer.new()
+	var notice_style := StyleBoxFlat.new()
+	notice_style.bg_color = Color(0.16, 0.11, 0.04, 0.95)
+	notice_style.border_color = Color(0.95, 0.75, 0.25, 0.9)
+	notice_style.set_border_width_all(1)
+	notice_style.set_corner_radius_all(6)
+	notice_style.content_margin_left = 12
+	notice_style.content_margin_right = 12
+	notice_style.content_margin_top = 8
+	notice_style.content_margin_bottom = 8
+	traveler_notice_panel.add_theme_stylebox_override("panel", notice_style)
+	root_vbox.add_child(traveler_notice_panel)
+
+	var notice_lbl := Label.new()
+	notice_lbl.text = "⚔️ AVISO DE JORNADA: Você iniciará sua jornada como um Viajante (Sem Classe). Procure os Mestres na Vila do Refúgio (Garrick, Lyra, Randel) para aprender sua Classe Básica!"
+	notice_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	notice_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	notice_lbl.add_theme_font_size_override("font_size", 11)
+	notice_lbl.add_theme_color_override("font_color", Color(1.0, 0.92, 0.65))
+	traveler_notice_panel.add_child(notice_lbl)
+
+	# Botão de Confirmação da Linhagem
+	var footer_hbox := HBoxContainer.new()
+	footer_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	root_vbox.add_child(footer_hbox)
+
 	confirm_button = Button.new()
-	confirm_button.custom_minimum_size = Vector2(0, 42)
-	confirm_button.text = "✦  Confirmar Identidade e Entrar em Lunaria [Enter]  ✦"
-	confirm_button.add_theme_font_size_override("font_size", 14)
+	confirm_button.custom_minimum_size = Vector2(400, 44)
+	confirm_button.text = "DESPERTAR COMO VIAJANTE (CONFIRMAR RAÇA)"
+	confirm_button.add_theme_font_size_override("font_size", 13)
 	confirm_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-
-	var btn_normal := StyleBoxFlat.new()
-	btn_normal.bg_color = Color(0.12, 0.25, 0.42, 0.9)
-	btn_normal.border_color = Color(0.9, 0.75, 0.3, 0.95)
-	btn_normal.set_border_width_all(2)
-	btn_normal.set_corner_radius_all(6)
-
-	var btn_hover := StyleBoxFlat.new()
-	btn_hover.bg_color = Color(0.18, 0.35, 0.58, 0.95)
-	btn_hover.border_color = Color(1.0, 0.9, 0.4, 1.0)
-	btn_hover.set_border_width_all(2)
-	btn_hover.set_corner_radius_all(6)
-
-	confirm_button.add_theme_stylebox_override("normal", btn_normal)
-	confirm_button.add_theme_stylebox_override("hover", btn_hover)
-	confirm_button.add_theme_color_override("font_color", Color(1.0, 0.95, 0.8))
+	var btn_style := StyleBoxFlat.new()
+	btn_style.bg_color = Color(0.2, 0.45, 0.22, 0.95)
+	btn_style.border_color = Color(0.4, 0.9, 0.45, 0.95)
+	btn_style.set_border_width_all(2)
+	btn_style.set_corner_radius_all(6)
+	var btn_hov := btn_style.duplicate()
+	btn_hov.bg_color = Color(0.25, 0.55, 0.28, 1.0)
+	confirm_button.add_theme_stylebox_override("normal", btn_style)
+	confirm_button.add_theme_stylebox_override("hover", btn_hov)
+	confirm_button.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 	confirm_button.pressed.connect(_on_confirm_pressed)
-	root_vbox.add_child(confirm_button)
+	footer_hbox.add_child(confirm_button)
 
-func _create_card_button(id: int, title: String, sub: String, stat_tag: String, accent_col: Color, is_race: bool) -> Button:
-	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(0, 48)
-	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+func _select_race(rid: int) -> void:
+	selected_race = rid
+	_update_race_button_states()
+	_update_race_details()
 
-	var vbox := VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_theme_constant_override("separation", 1)
-	vbox.offset_left = 10
-	vbox.offset_right = -10
-	vbox.offset_top = 4
-	vbox.offset_bottom = -4
-	btn.add_child(vbox)
-
-	var row := HBoxContainer.new()
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_child(row)
-
-	var title_lbl := Label.new()
-	title_lbl.text = title
-	title_lbl.add_theme_font_size_override("font_size", 13)
-	title_lbl.add_theme_color_override("font_color", accent_col)
-	row.add_child(title_lbl)
-
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(spacer)
-
-	var tag_lbl := Label.new()
-	tag_lbl.text = stat_tag
-	tag_lbl.add_theme_font_size_override("font_size", 11)
-	tag_lbl.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0, 0.9))
-	row.add_child(tag_lbl)
-
-	var sub_lbl := Label.new()
-	sub_lbl.text = sub
-	sub_lbl.add_theme_font_size_override("font_size", 10)
-	sub_lbl.add_theme_color_override("font_color", Color(0.65, 0.72, 0.8))
-	vbox.add_child(sub_lbl)
-
-	if is_race:
-		btn.pressed.connect(func(): _select_race(id))
-	else:
-		btn.pressed.connect(func(): _select_class(id))
-
-	return btn
-
-func _select_race(race_id: int) -> void:
-	selected_race = race_id
-	_update_selection_states()
-	_update_summary()
-
-func _select_class(class_id: int) -> void:
-	selected_class = class_id
-	_update_selection_states()
-	_update_summary()
-
-func _update_selection_states() -> void:
-	for r_id in race_buttons.keys():
-		var btn: Button = race_buttons[r_id]
-		var is_sel: bool = (r_id == selected_race)
+func _update_race_button_states() -> void:
+	for rid in race_cards.keys():
+		var btn: Button = race_cards[rid]
+		var r_data: Dictionary = RACES_DATA[rid]
+		var is_sel: bool = (rid == selected_race)
 		var style := StyleBoxFlat.new()
-		style.set_corner_radius_all(5)
+		style.set_corner_radius_all(6)
+		style.content_margin_left = 6
+		style.content_margin_right = 6
+		style.content_margin_top = 4
+		style.content_margin_bottom = 4
+
 		if is_sel:
-			style.bg_color = Color(0.15, 0.22, 0.35, 0.95)
-			style.border_color = Color(0.95, 0.82, 0.35, 1.0)
+			style.bg_color = r_data["color"].darkened(0.65)
+			style.border_color = r_data["accent"]
 			style.set_border_width_all(2)
+			btn.add_theme_color_override("font_color", Color(1.0, 0.95, 0.7))
 		else:
-			style.bg_color = Color(0.08, 0.1, 0.14, 0.8)
+			style.bg_color = Color(0.08, 0.1, 0.15, 0.75)
 			style.border_color = Color(0.25, 0.32, 0.45, 0.4)
 			style.set_border_width_all(1)
+			btn.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
+
 		btn.add_theme_stylebox_override("normal", style)
 		btn.add_theme_stylebox_override("hover", style)
 		btn.add_theme_stylebox_override("pressed", style)
 
-	for c_id in class_buttons.keys():
-		var btn: Button = class_buttons[c_id]
-		var is_sel: bool = (c_id == selected_class)
-		var style := StyleBoxFlat.new()
-		style.set_corner_radius_all(5)
-		if is_sel:
-			style.bg_color = Color(0.15, 0.22, 0.35, 0.95)
-			style.border_color = Color(0.95, 0.82, 0.35, 1.0)
-			style.set_border_width_all(2)
-		else:
-			style.bg_color = Color(0.08, 0.1, 0.14, 0.8)
-			style.border_color = Color(0.25, 0.32, 0.45, 0.4)
-			style.set_border_width_all(1)
-		btn.add_theme_stylebox_override("normal", style)
-		btn.add_theme_stylebox_override("hover", style)
-		btn.add_theme_stylebox_override("pressed", style)
-
-func _update_summary() -> void:
+func _update_race_details() -> void:
 	var r_data: Dictionary = RACES_DATA.get(selected_race, RACES_DATA[1])
-	var c_data: Dictionary = CLASSES_DATA.get(selected_class, CLASSES_DATA[1])
 
-	var total_hp: int = c_data["hp_base"] + r_data["hp_mod"]
-	var total_stam: int = c_data["stam_base"] + r_data["stam_mod"]
+	if race_title_label:
+		race_title_label.text = "Linhagem Ancestral: %s" % r_data["name"]
+		race_title_label.add_theme_color_override("font_color", r_data["accent"])
 
-	if summary_title:
-		summary_title.text = "Identidade Selecionada: [%s] %s" % [r_data["name"], c_data["name"]]
+	if race_subtitle_label:
+		race_subtitle_label.text = r_data["title"]
 
-	if stats_breakdown_label:
-		stats_breakdown_label.text = "Atributos: Max HP: %d (Base %d %+d Raça)  |  Max Stamina: %d (Base %d %+d Raça)  |  Alcance: %s" % [
-			total_hp, c_data["hp_base"], r_data["hp_mod"],
-			total_stam, c_data["stam_base"], r_data["stam_mod"],
-			c_data["range_desc"]
-		]
+	if race_lore_label:
+		race_lore_label.text = r_data["lore"]
 
-	if weapon_details_label:
-		weapon_details_label.text = "Armamento: %s  |  Passiva Racial: %s" % [c_data["style"], r_data["passive"]]
+	if stats_grid:
+		var st: Dictionary = r_data["stats"]
+		for k in st.keys():
+			if stat_labels.has(k):
+				stat_labels[k].text = "%s: %d" % [k, st[k]]
 
-	if skill_details_label:
-		skill_details_label.text = "Habilidade [Q]: %s (Evoluções: %s)" % [c_data["skill_q"], c_data["evolutions"]]
+	if skill_z_label:
+		skill_z_label.text = "%s\n%s" % [r_data["skill_z_name"], r_data["skill_z_desc"]]
+
+	if passive_label:
+		passive_label.text = "%s\n%s" % [r_data["passive_name"], r_data["passive_desc"]]
+
+	if evo_order_label:
+		evo_order_label.text = "⚖️ Ordem: %s" % r_data["order_evo"]
+
+	if evo_chaos_label:
+		evo_chaos_label.text = "🔥 Caos: %s" % r_data["chaos_evo"]
 
 	if npc_reaction_label:
-		npc_reaction_label.text = "Reação de Garrick (Ferreiro): %s" % r_data["npc_reaction"]
+		npc_reaction_label.text = "🗣️ %s" % r_data["npc_reaction"]
+
+	if confirm_button:
+		confirm_button.text = "DESPERTAR COMO VIAJANTE (%s)" % r_data["name"].to_upper()
 
 func _on_confirm_pressed() -> void:
-	print("[CharacterSelectUI] Identidade confirmada: Raça %d, Classe %d" % [selected_race, selected_class])
-	identity_confirmed.emit(selected_race, selected_class)
+	print("[CharacterSelectUI] Linhagem confirmada: Raça %d (Iniciando como Viajante / Sem Classe 0)" % selected_race)
+	identity_confirmed.emit(selected_race, 0)
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm and nm.get("my_player_id") and nm.my_player_id > 0:
-		nm.send_select_identity(selected_race, selected_class)
+		nm.send_select_identity(selected_race, 0, 0)
 	close_menu()

@@ -48,10 +48,12 @@ echo ============================================================
 echo   Ambiente pronto para testes do Marco 3!
 echo   - LMB (Botao Esquerdo) = Ataque Basico autoritativo
 echo   - Tecla Q = Habilidade Especial (1.75x dano)
-echo   - 2 Bonecos de Treino (IDs 101 e 102) em (4, 4) e (4, 1)
+echo   - 2 Bonecos de Treino (IDs 100 e 101) em (4, 4) e (4, 1)
+echo   - Novos NPCs Vivos: Lyra (102), Varis (103) e Guardas da Patrulha Real (104, 105)
 echo   - Tecla F6 = Avancar +6 Horas no Relogio Assimetrico
 echo   - Tecla F7 = Ciclar 10 Fases da Lua (Nova -> Eclipse)
 echo   - Tecla F8 = Ciclar 4 Climas (Limpo, Chuva, Neblina, Nevoa)
-echo   - Tecla E = Falar com Garrick (Dialogos Lunares Dinamicos)
+echo   - Tecla E = Falar com NPCs (Garrick, Lyra, Varis, Guardas)
+echo   - Tecla K = Menu de Atributos | Tecla I = Inventario Anatômico
 echo ============================================================
 timeout /t 5 >nul

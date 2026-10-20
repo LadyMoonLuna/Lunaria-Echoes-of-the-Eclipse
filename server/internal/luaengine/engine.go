@@ -21,13 +21,17 @@ type Engine struct {
 	clock       *world.WorldClock
 	watcher     *fsnotify.Watcher
 	watchedDirs []string
-	npcByScript map[string]*world.NPC
+	npcsByScript map[string][]*world.NPC
 	lastReload  map[string]time.Time
 	stopChan    chan struct{}
 
 	combatMu         sync.RWMutex
 	combatState      *lua.LState
 	combatScriptPath string
+
+	autopsyMu         sync.RWMutex
+	autopsyState      *lua.LState
+	autopsyScriptPath string
 
 	mobAIMu         sync.RWMutex
 	mobAIState      *lua.LState
@@ -37,17 +41,25 @@ type Engine struct {
 	onTelegraph     func(sourceID uint32, x, z, radius float32, durationMs uint16)
 	onAOEDamage     func(sourceID uint32, x, z, radius float32, damage uint16)
 	onMobSay        func(mobID uint32, text string)
+	onNPCAttackMob  func(npcID, mobID uint32, damage uint16)
 	currentDelta    float32
 }
 
 // NewEngine cria uma nova instância do gerenciador de scripts Lua.
 func NewEngine(clock *world.WorldClock) *Engine {
 	return &Engine{
-		clock:       clock,
-		npcByScript: make(map[string]*world.NPC),
-		lastReload:  make(map[string]time.Time),
-		stopChan:    make(chan struct{}),
+		clock:        clock,
+		npcsByScript: make(map[string][]*world.NPC),
+		lastReload:   make(map[string]time.Time),
+		stopChan:     make(chan struct{}),
 	}
+}
+
+// SetNPCAttackCallback define o manipulador para ataques de NPCs contra mobs.
+func (e *Engine) SetNPCAttackCallback(cb func(npcID, mobID uint32, damage uint16)) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.onNPCAttackMob = cb
 }
 
 // BindNPC inicializa a VM Lua dedicada do NPC e registra as funções da API Go.
@@ -60,7 +72,104 @@ func (e *Engine) BindNPC(npc *world.NPC) error {
 		x := float32(L.CheckNumber(1))
 		z := float32(L.CheckNumber(2))
 		speed := float32(L.CheckNumber(3))
+		x, z = world.ClampToMapBounds(x, z)
 		npc.SetTarget(x, z, speed)
+		return 0
+	}))
+
+	// npc_teleport(x, y, z)
+	L.SetGlobal("npc_teleport", L.NewFunction(func(L *lua.LState) int {
+		x := float32(L.CheckNumber(1))
+		y := float32(L.CheckNumber(2))
+		z := float32(L.CheckNumber(3))
+		x, z = world.ClampToMapBounds(x, z)
+		npc.Teleport(x, y, z)
+		return 0
+	}))
+
+	// npc_set_active(active_bool)
+	L.SetGlobal("npc_set_active", L.NewFunction(func(L *lua.LState) int {
+		active := L.CheckBool(1)
+		npc.SetActive(active)
+		return 0
+	}))
+
+	// npc_get_id()
+	L.SetGlobal("npc_get_id", L.NewFunction(func(L *lua.LState) int {
+		L.Push(lua.LNumber(npc.ID))
+		return 1
+	}))
+
+	// npc_get_pos() -> x, y, z
+	L.SetGlobal("npc_get_pos", L.NewFunction(func(L *lua.LState) int {
+		x, y, z := npc.GetPos()
+		L.Push(lua.LNumber(x))
+		L.Push(lua.LNumber(y))
+		L.Push(lua.LNumber(z))
+		return 3
+	}))
+
+	// get_nearby_mob(radius) -> mob_id, mob_type, dist, mob_x, mob_z
+	L.SetGlobal("get_nearby_mob", L.NewFunction(func(L *lua.LState) int {
+		radius := float32(L.OptNumber(1, 8.0))
+		if e.mobManager == nil {
+			L.Push(lua.LNil)
+			return 1
+		}
+		nx, _, nz := npc.GetPos()
+		e.mobManager.Mu.RLock()
+		defer e.mobManager.Mu.RUnlock()
+
+		var nearestID uint32
+		var nearestType uint8
+		var nearestDist float32 = 999999
+		var nearestX, nearestZ float32
+
+		for _, m := range e.mobManager.Mobs {
+			m.Mu.RLock()
+			alive := m.IsAlive && m.IsActive
+			mx, mz := m.PosX, m.PosZ
+			mType := m.MobType
+			mID := m.ID
+			m.Mu.RUnlock()
+
+			if !alive {
+				continue
+			}
+			dx := mx - nx
+			dz := mz - nz
+			dist := float32(math.Sqrt(float64(dx*dx + dz*dz)))
+			if dist <= radius && dist < nearestDist {
+				nearestDist = dist
+				nearestID = mID
+				nearestType = mType
+				nearestX = mx
+				nearestZ = mz
+			}
+		}
+
+		if nearestID > 0 {
+			L.Push(lua.LNumber(nearestID))
+			L.Push(lua.LNumber(nearestType))
+			L.Push(lua.LNumber(nearestDist))
+			L.Push(lua.LNumber(nearestX))
+			L.Push(lua.LNumber(nearestZ))
+			return 5
+		}
+		L.Push(lua.LNil)
+		return 1
+	}))
+
+	// npc_attack_mob(mob_id, damage)
+	L.SetGlobal("npc_attack_mob", L.NewFunction(func(L *lua.LState) int {
+		mobID := uint32(L.CheckInt(1))
+		dmg := uint16(L.CheckInt(2))
+		e.mu.RLock()
+		cb := e.onNPCAttackMob
+		e.mu.RUnlock()
+		if cb != nil {
+			cb(npc.ID, mobID, dmg)
+		}
 		return 0
 	}))
 
@@ -112,7 +221,7 @@ func (e *Engine) BindNPC(npc *world.NPC) error {
 	// Registra para o watcher de Hot-Reload
 	baseName := strings.ToLower(filepath.Base(npc.ScriptPath))
 	e.mu.Lock()
-	e.npcByScript[baseName] = npc
+	e.npcsByScript[baseName] = append(e.npcsByScript[baseName], npc)
 	e.mu.Unlock()
 
 	log.Printf("[LUA] Script '%s' vinculado com sucesso ao NPC '%s' (ID %d)\n", filepath.Base(npc.ScriptPath), npc.Name, npc.ID)
@@ -153,6 +262,99 @@ func (e *Engine) LoadCombatScript(scriptPath string) error {
 	return nil
 }
 
+// LoadAutopsyScript carrega o script autoritativo de autópsia e desmantelamento (autopsy.lua).
+func (e *Engine) LoadAutopsyScript(scriptPath string) error {
+	L := lua.NewState()
+
+	if err := L.DoFile(scriptPath); err != nil {
+		L.Close()
+		return fmt.Errorf("falha ao carregar script de autópsia '%s': %w", scriptPath, err)
+	}
+
+	e.autopsyMu.Lock()
+	if e.autopsyState != nil {
+		e.autopsyState.Close()
+	}
+	e.autopsyState = L
+	e.autopsyScriptPath = scriptPath
+	e.autopsyMu.Unlock()
+
+	log.Printf("[AUTOPSIA] Script de autópsia carregado com sucesso: %s\n", filepath.Base(scriptPath))
+	return nil
+}
+
+// ReloadAutopsyScript recarrega o script de autópsia após alteração no disco.
+func (e *Engine) ReloadAutopsyScript(fullPath string) {
+	e.autopsyMu.Lock()
+	defer e.autopsyMu.Unlock()
+
+	if e.autopsyState == nil {
+		return
+	}
+
+	if err := e.autopsyState.DoFile(e.autopsyScriptPath); err != nil {
+		log.Printf("[HOT-RELOAD] Erro ao recarregar script de autópsia %s: %v\n", filepath.Base(fullPath), err)
+		return
+	}
+
+	log.Printf("[HOT-RELOAD] Script de autópsia recarregado com sucesso: %s\n", filepath.Base(fullPath))
+}
+
+// CallCalculateAutopsyResult executa CalculateAutopsyResult no script autopsy.lua.
+// Retorna quality_tier (1=Perfeito, 2=Comum, 3=Destruído).
+func (e *Engine) CallCalculateAutopsyResult(mas, luck, organType uint8, accuracy float32, raceID ...uint8) uint8 {
+	e.autopsyMu.Lock()
+	defer e.autopsyMu.Unlock()
+
+	var pRace uint8 = 0
+	if len(raceID) > 0 {
+		pRace = raceID[0]
+	}
+
+	if e.autopsyState == nil {
+		greenThresh := float32(0.85) - float32(mas)*0.025
+		if pRace == 21 { // Aracne: +35% Zona Verde maior
+			greenThresh -= 0.12
+		}
+		if accuracy >= greenThresh {
+			return 1
+		}
+		if accuracy >= 0.50 {
+			return 2
+		}
+		return 3
+	}
+
+	fn := e.autopsyState.GetGlobal("CalculateAutopsyResult")
+	if fn.Type() != lua.LTFunction {
+		return 2
+	}
+
+	err := e.autopsyState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    1,
+		Protect: true,
+	}, lua.LNumber(mas), lua.LNumber(luck), lua.LNumber(organType), lua.LNumber(accuracy), lua.LNumber(pRace))
+
+	if err != nil {
+		log.Printf("[AUTOPSIA] Erro ao executar CalculateAutopsyResult: %v\n", err)
+		return 2
+	}
+
+	res := e.autopsyState.Get(-1)
+	e.autopsyState.Pop(1)
+
+	if num, ok := res.(lua.LNumber); ok {
+		tier := uint8(num)
+		if tier < 1 || tier > 3 {
+			return 2
+		}
+		return tier
+	}
+
+	return 2
+}
+
 // ReloadCombatScript recarrega o script de combate após alteração no disco.
 func (e *Engine) ReloadCombatScript(fullPath string) {
 	e.combatMu.Lock()
@@ -171,7 +373,15 @@ func (e *Engine) ReloadCombatScript(fullPath string) {
 }
 
 // CallCalculateDamage executa CalculateDamage no script combat.lua e retorna (damage, isCrit).
-func (e *Engine) CallCalculateDamage(raceID, classID, actionType uint8, hpPct float32, worldHour int, moonPhase, weatherType uint8) (uint16, uint8) {
+// Aceita opcionalmente os atributos alocáveis (str, dex, intStat, spi, mas, lck).
+func (e *Engine) CallCalculateDamage(
+	raceID, classID, actionType uint8,
+	hpPct float32,
+	worldHour int,
+	moonPhase, weatherType uint8,
+	classTier, level, buffActive uint8,
+	attrs ...uint8,
+) (uint16, uint8) {
 	e.combatMu.Lock()
 	defer e.combatMu.Unlock()
 
@@ -182,6 +392,18 @@ func (e *Engine) CallCalculateDamage(raceID, classID, actionType uint8, hpPct fl
 	fn := e.combatState.GetGlobal("CalculateDamage")
 	if fn.Type() != lua.LTFunction {
 		return 20, 0
+	}
+
+	if classTier < 1 {
+		classTier = 1
+	}
+	if level < 1 {
+		level = 1
+	}
+
+	var str, dex, intStat, spi, mas, lck uint8 = 5, 5, 5, 5, 5, 5
+	if len(attrs) >= 6 {
+		str, dex, intStat, spi, mas, lck = attrs[0], attrs[1], attrs[2], attrs[3], attrs[4], attrs[5]
 	}
 
 	err := e.combatState.CallByParam(lua.P{
@@ -196,6 +418,15 @@ func (e *Engine) CallCalculateDamage(raceID, classID, actionType uint8, hpPct fl
 		lua.LNumber(worldHour),
 		lua.LNumber(moonPhase),
 		lua.LNumber(weatherType),
+		lua.LNumber(classTier),
+		lua.LNumber(level),
+		lua.LNumber(buffActive),
+		lua.LNumber(str),
+		lua.LNumber(dex),
+		lua.LNumber(intStat),
+		lua.LNumber(spi),
+		lua.LNumber(mas),
+		lua.LNumber(lck),
 	)
 
 	if err != nil {
@@ -258,15 +489,21 @@ func (e *Engine) runWatcherLoop() {
 					continue
 				}
 				e.lastReload[baseName] = now
-				npc, found := e.npcByScript[baseName]
+				npcs, found := e.npcsByScript[baseName]
 				e.mu.Unlock()
 
 				if baseName == "combat.lua" {
 					e.ReloadCombatScript(event.Name)
+				} else if baseName == "autopsy.lua" {
+					e.ReloadAutopsyScript(event.Name)
 				} else if baseName == "mobs_ai.lua" {
 					e.ReloadMobAIScript(event.Name)
-				} else if found && npc != nil {
-					e.reloadNPCScript(npc, event.Name)
+				} else if found {
+					for _, npc := range npcs {
+						if npc != nil {
+							e.reloadNPCScript(npc, event.Name)
+						}
+					}
 				}
 			}
 		case err, ok := <-e.watcher.Errors:
@@ -288,14 +525,14 @@ func (e *Engine) reloadNPCScript(npc *world.NPC, fullPath string) {
 	}
 
 	if err := npc.LuaState.DoFile(npc.ScriptPath); err != nil {
-		log.Printf("[HOT-RELOAD] Erro ao recarregar script %s: %v\n", filepath.Base(fullPath), err)
+		log.Printf("[HOT-RELOAD] Erro ao recarregar script %s (NPC %d): %v\n", filepath.Base(fullPath), npc.ID, err)
 		return
 	}
 
-	log.Printf("[HOT-RELOAD] Script recarregado com sucesso: %s\n", filepath.Base(fullPath))
+	log.Printf("[HOT-RELOAD] Script recarregado com sucesso: %s (NPC %d - %s)\n", filepath.Base(fullPath), npc.ID, npc.Name)
 }
 
-// CallOnTick invoca a função Lua OnTick(world_hour) do NPC.
+// CallOnTick invoca a função Lua OnTick(world_hour, [npc_id, pos_x, pos_z]) do NPC.
 func CallOnTick(npc *world.NPC, worldHour int) error {
 	npc.LuaMu.Lock()
 	defer npc.LuaMu.Unlock()
@@ -309,15 +546,16 @@ func CallOnTick(npc *world.NPC, worldHour int) error {
 		return nil
 	}
 
+	x, _, z := npc.GetPos()
 	return npc.LuaState.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    0,
 		Protect: true,
-	}, lua.LNumber(worldHour), lua.LNumber(worldHour))
+	}, lua.LNumber(worldHour), lua.LNumber(worldHour), lua.LNumber(npc.ID), lua.LNumber(x), lua.LNumber(z))
 }
 
-// CallOnPlayerApproach invoca a função Lua OnPlayerApproach(player_id, distance, player_race) do NPC.
-func CallOnPlayerApproach(npc *world.NPC, playerID uint32, distance float32, playerRace uint8) error {
+// CallOnPlayerApproach invoca a função Lua OnPlayerApproach(player_id, distance, player_race, is_armed) do NPC.
+func CallOnPlayerApproach(npc *world.NPC, playerID uint32, distance float32, playerRace uint8, isArmed ...bool) error {
 	npc.LuaMu.Lock()
 	defer npc.LuaMu.Unlock()
 
@@ -330,15 +568,20 @@ func CallOnPlayerApproach(npc *world.NPC, playerID uint32, distance float32, pla
 		return nil
 	}
 
+	armed := false
+	if len(isArmed) > 0 {
+		armed = isArmed[0]
+	}
+
 	return npc.LuaState.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    0,
 		Protect: true,
-	}, lua.LNumber(playerID), lua.LNumber(distance), lua.LNumber(playerRace))
+	}, lua.LNumber(playerID), lua.LNumber(distance), lua.LNumber(playerRace), lua.LBool(armed))
 }
 
-// CallOnPlayerInteract invoca a função Lua OnPlayerInteract(player_id, world_hour, player_race, player_class) do NPC.
-func CallOnPlayerInteract(npc *world.NPC, playerID uint32, worldHour int, playerRace, playerClass uint8) error {
+// CallOnPlayerInteract invoca a função Lua OnPlayerInteract(player_id, world_hour, player_race, player_class, player_mas, friendship_level) do NPC.
+func CallOnPlayerInteract(npc *world.NPC, playerID uint32, worldHour int, playerRace, playerClass uint8, extraArgs ...uint8) error {
 	npc.LuaMu.Lock()
 	defer npc.LuaMu.Unlock()
 
@@ -351,11 +594,41 @@ func CallOnPlayerInteract(npc *world.NPC, playerID uint32, worldHour int, player
 		return nil
 	}
 
+	var mas uint8 = 5
+	var friendshipLevel uint8 = 0
+	if len(extraArgs) > 0 {
+		mas = extraArgs[0]
+	}
+	if len(extraArgs) > 1 {
+		friendshipLevel = extraArgs[1]
+	}
+
 	return npc.LuaState.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    0,
 		Protect: true,
-	}, lua.LNumber(playerID), lua.LNumber(worldHour), lua.LNumber(playerRace), lua.LNumber(playerClass))
+	}, lua.LNumber(playerID), lua.LNumber(worldHour), lua.LNumber(playerRace), lua.LNumber(playerClass), lua.LNumber(mas), lua.LNumber(friendshipLevel))
+}
+
+// CallOnMobAttackNearby invoca OnMobAttackNearby(mob_id, mob_type, dist) do NPC se definido.
+func CallOnMobAttackNearby(npc *world.NPC, mobID uint32, mobType uint8, dist float32) error {
+	npc.LuaMu.Lock()
+	defer npc.LuaMu.Unlock()
+
+	if npc.LuaState == nil {
+		return nil
+	}
+
+	fn := npc.LuaState.GetGlobal("OnMobAttackNearby")
+	if fn.Type() != lua.LTFunction {
+		return nil
+	}
+
+	return npc.LuaState.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    0,
+		Protect: true,
+	}, lua.LNumber(mobID), lua.LNumber(mobType), lua.LNumber(dist))
 }
 
 // Close finaliza o watcher e as VMs Lua.
@@ -371,6 +644,13 @@ func (e *Engine) Close() {
 		e.combatState = nil
 	}
 	e.combatMu.Unlock()
+
+	e.autopsyMu.Lock()
+	if e.autopsyState != nil {
+		e.autopsyState.Close()
+		e.autopsyState = nil
+	}
+	e.autopsyMu.Unlock()
 
 	e.mobAIMu.Lock()
 	if e.mobAIState != nil {
@@ -401,6 +681,7 @@ func (e *Engine) LoadMobAIScript(scriptPath string, mobManager *world.MobManager
 		tx := float32(L.CheckNumber(2))
 		tz := float32(L.CheckNumber(3))
 		speed := float32(L.CheckNumber(4))
+		tx, tz = world.ClampToMapBounds(tx, tz)
 		if e.mobManager != nil {
 			mob := e.mobManager.GetMob(mobID)
 			if mob != nil {

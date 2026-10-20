@@ -269,5 +269,565 @@ function UpdateMob(mob_id, mob_type, mob_x, mob_z, mob_hp, mob_max_hp, current_s
             mob_set_state(mob_id, 0)
             mob_move_to(mob_id, spawn_x, spawn_z, 1.8)
         end
+
+    -- ------------------------------------------------------------------------
+    -- 6. LOBO ALFA (MobType == 6 — Ativo na Lua Cheia)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 6 then
+        local aggro_radius = 15.0
+        local move_speed = 4.6
+        local bite_damage = 35
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            -- Uivo Alfa a cada 10 segundos para fortalecer a alcateia
+            if data.special_cd <= 0 then
+                mob_say(mob_id, "*UIVO ALFA! O Lobo Alfa faz o bosque sussurrar em terror!*")
+                data.special_cd = 10.0
+            end
+
+            if player_dist > 2.2 then
+                mob_set_state(mob_id, 1) -- Chasing
+                mob_move_to(mob_id, player_x, player_z, move_speed)
+            else
+                if data.attack_cd <= 0 then
+                    mob_set_state(mob_id, 2) -- Attacking
+                    mob_attack_player(mob_id, nearest_player_id, bite_damage)
+                    data.attack_cd = 1.3
+                else
+                    mob_set_state(mob_id, 1)
+                end
+            end
+        else
+            local dist_to_spawn = math.sqrt((spawn_x - mob_x)^2 + (spawn_z - mob_z)^2)
+            if dist_to_spawn > 1.0 then
+                mob_set_state(mob_id, 0)
+                mob_move_to(mob_id, spawn_x, spawn_z, 2.5)
+            else
+                mob_set_state(mob_id, 0) -- Idle
+            end
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 7. LICANTROPO ALFA (MobType == 7 — Boss de Raid Secreto da Lua de Sangue)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 7 then
+        local aggro_radius = 18.0
+        local move_speed = 4.4
+        local claw_damage = 45
+
+        -- 1. Canalização do Salto Sanguinário (AoE Telegraph 5.0m, 75 dano)
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2) -- Carregando Salto
+                return
+            end
+
+            -- Impacto do Salto Sanguinário no local telegrafado!
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_move_to(mob_id, data.telegraph_x, data.telegraph_z, 25.0)
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 5.0, 75)
+            mob_say(mob_id, "*SALTO SANGUINÁRIO! A fera colide com o solo em uma onda carmesim!*")
+            data.special_cd = 6.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        -- 2. Combate Regular e Decisão de Habilidade
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            -- Salto Sanguinário disponível a cada 6.0s
+            if data.special_cd <= 0 and player_dist <= 14.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.6 -- 1.6s até o impacto
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 5.0, 1600)
+                mob_say(mob_id, "*O Licantropo Alfa salta em direção à presa!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.6 then
+                    mob_set_state(mob_id, 1) -- Chasing
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2) -- Attacking
+                        mob_attack_player(mob_id, nearest_player_id, claw_damage)
+                        data.attack_cd = 1.4
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            local dist_to_spawn = math.sqrt((spawn_x - mob_x)^2 + (spawn_z - mob_z)^2)
+            if dist_to_spawn > 1.0 then
+                mob_set_state(mob_id, 0)
+                mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+            else
+                mob_set_state(mob_id, 0)
+            end
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 10. CULTISTA SOMBRIO (MobType == 10 — HP 400, Projéteis de Trevas)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 10 then
+        local aggro_radius = 14.0
+        local move_speed = 3.2
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if player_dist < 3.2 then
+                -- Recuo tático para manter distância de conjuração
+                local dx = mob_x - player_x
+                local dz = mob_z - player_z
+                local len = math.sqrt(dx * dx + dz * dz)
+                if len < 0.01 then len = 1.0; dx = 1.0 end
+                local retreat_x = mob_x + (dx / len) * 4.5
+                local retreat_z = mob_z + (dz / len) * 4.5
+                mob_set_state(mob_id, 4) -- Recuando
+                mob_move_to(mob_id, retreat_x, retreat_z, 4.0)
+            else
+                if player_dist <= 12.0 then
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2) -- Atacando
+                        mob_spawn_telegraph(mob_id, player_x, player_z, 2.0, 700)
+                        mob_attack_player(mob_id, nearest_player_id, 24)
+                        data.attack_cd = 1.8
+                    end
+                else
+                    mob_set_state(mob_id, 1) -- Perseguindo
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 11. GÁRGULA DE PEDRA (MobType == 11 — HP 580, Alta Defesa, Mergulho)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 11 then
+        local aggro_radius = 15.0
+        local move_speed = 3.8
+
+        -- Mergulho Aéreo Telegrafado
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            -- Impacto do Mergulho da Gárgula
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_move_to(mob_id, data.telegraph_x, data.telegraph_z, 20.0)
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 3.5, 42)
+            mob_say(mob_id, "*A Gárgula de Pedra despenca dos céus em um impacto esmagador!*")
+            data.special_cd = 5.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            -- Dispara Mergulho Telegrafado a cada 5.0s
+            if data.special_cd <= 0 and player_dist <= 11.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.2
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 3.5, 1200)
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.2 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 26)
+                        data.attack_cd = 1.5
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 12. MINI-BOSS INQUISIDOR VEX (MobType == 12 — HP 1.400, Foice e Correntes)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 12 then
+        local aggro_radius = 16.0
+        local move_speed = 3.4
+
+        -- Correntes de Sombra (AoE Telegraph)
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 4.0, 48)
+            mob_say(mob_id, "*Inquisidor Vex: 'Suas correntes estão atadas à escuridão!'*")
+            data.special_cd = 5.5
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 10.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.4
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 4.0, 1400)
+                mob_say(mob_id, "*Inquisidor Vex ergue sua foice envolta em correntes sombrias!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.6 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 36)
+                        data.attack_cd = 1.4
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 13. BOSS NORMAL COMANDANTE VAELEN (MobType == 13 — HP 3.200, Espada & Investidas)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 13 then
+        local hp_pct = mob_hp / mob_max_hp
+        local aggro_radius = 18.0
+        local move_speed = 3.5
+
+        -- Ao atingir 50% de HP chama reforços de besteiros
+        if hp_pct <= 0.50 and not data.has_called_minions then
+            data.has_called_minions = true
+            mob_say(mob_id, "*Comandante Vaelen: 'Besteiros da Vigília, cerquem estes insolentes! Fogo à vontade!'*")
+        end
+
+        -- Investida Voraz com Espada (AoE Slam)
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_move_to(mob_id, data.telegraph_x, data.telegraph_z, 16.0)
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 4.0, 56)
+            data.special_cd = 6.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 12.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.3
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 4.0, 1300)
+                mob_say(mob_id, "*Comandante Vaelen prepara uma investida devastadora com sua lâmina pesada!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.6 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 42)
+                        data.attack_cd = 1.3
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 14. RAID BOSS MALAKOR, O ARAUTO DO ECLIPSE (MobType == 14 — HP 7.500)
+    -- Desafio de 3 Fases para 5 Jogadores
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 14 then
+        local hp_pct = mob_hp / mob_max_hp
+        local aggro_radius = 22.0
+        local move_speed = 3.0
+
+        -- Determina a fase atual
+        local current_phase = 1
+        if hp_pct <= 0.30 then
+            current_phase = 3
+        elseif hp_pct <= 0.70 then
+            current_phase = 2
+        end
+
+        -- Transição de Fases com avisos narrativos
+        if not data.last_phase then data.last_phase = 1 end
+        if current_phase ~= data.last_phase then
+            if current_phase == 2 then
+                mob_say(mob_id, "*MALAKOR [FASE 2]: 'Correntes do Eclipse, aprisionem suas almas! Destruam os 4 Cristais ou pereçam!'*")
+            elseif current_phase == 3 then
+                mob_say(mob_id, "*MALAKOR [FASE 3]: 'ECLIPSE TOTAL! A noite eterna recai sobre Lunaria! Permaneçam na luz da Tocha Sagrada!'*")
+            end
+            data.last_phase = current_phase
+        end
+
+        -- Canalização de Habilidade AoE Ativa
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+
+            if current_phase == 1 then
+                -- Fase 1: Clivagem em Arco de 180 graus (Raio 5.0m, 62 dano)
+                mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 5.0, 62)
+                mob_say(mob_id, "*Malakor desfere um golpe em arco de 180° exigindo a contenção do Tank!*")
+                data.special_cd = 4.0
+            elseif current_phase == 2 then
+                -- Fase 2: Detonação dos Cristais de Sombra
+                mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 4.0, 50)
+                data.special_cd = 5.0
+            elseif current_phase == 3 then
+                -- Fase 3: Pulso Abissal do Eclipse Total
+                mob_trigger_slam_damage(mob_id, mob_x, mob_z, 7.5, 45)
+                data.special_cd = 3.5
+            end
+
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            -- FASE 1: Golpes em arco de 180° e aggro frontal
+            if current_phase == 1 then
+                if data.special_cd <= 0 and player_dist <= 8.0 then
+                    data.is_charging_aoe = true
+                    data.state_timer = 1.4
+                    data.telegraph_x = player_x
+                    data.telegraph_z = player_z
+                    mob_spawn_telegraph(mob_id, player_x, player_z, 5.0, 1400)
+                    mob_set_state(mob_id, 2)
+                    return
+                end
+
+            -- FASE 2: Correntes de Sombra & Cristais Cardeais
+            elseif current_phase == 2 then
+                if data.special_cd <= 0 then
+                    data.is_charging_aoe = true
+                    data.state_timer = 1.6
+                    data.telegraph_x = player_x
+                    data.telegraph_z = player_z
+                    -- Sinaliza os 4 Cristais de Sombra ao redor da arena
+                    mob_spawn_telegraph(mob_id, -76.0, 75.0, 2.0, 1600)
+                    mob_spawn_telegraph(mob_id, -68.0, 75.0, 2.0, 1600)
+                    mob_spawn_telegraph(mob_id, -72.0, 79.0, 2.0, 1600)
+                    mob_spawn_telegraph(mob_id, -72.0, 71.0, 2.0, 1600)
+                    mob_set_state(mob_id, 2)
+                    return
+                end
+
+            -- FASE 3: Eclipse Total (Escuro absoluto, pulsos constantes na arena)
+            elseif current_phase == 3 then
+                if data.special_cd <= 0 then
+                    data.is_charging_aoe = true
+                    data.state_timer = 1.5
+                    data.telegraph_x = mob_x
+                    data.telegraph_z = mob_z
+                    mob_spawn_telegraph(mob_id, mob_x, mob_z, 7.5, 1500)
+                    mob_set_state(mob_id, 2)
+                    return
+                end
+            end
+
+            -- Ataque Básico Corpo a Corpo
+            if player_dist > 2.8 then
+                mob_set_state(mob_id, 1)
+                mob_move_to(mob_id, player_x, player_z, move_speed)
+            else
+                if data.attack_cd <= 0 then
+                    mob_set_state(mob_id, 2)
+                    local base_dmg = (current_phase == 3) and 58 or 46
+                    mob_attack_player(mob_id, nearest_player_id, base_dmg)
+                    data.attack_cd = (current_phase == 3) and 1.1 or 1.3
+                else
+                    mob_set_state(mob_id, 1)
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
     end
+end
+
+-- ============================================================================
+-- TABELAS DE DROP BALANCDEADAS (TAXAS RARAS REDUZIDAS PARA 2% A 8%)
+-- ============================================================================
+DropTables = {
+    [1] = {
+        name = "Lobo da Bruma",
+        drops = {
+            { item_id = 1, name = "Carne Crua de Lobo", rate = 1.00, rare = false },
+            { item_id = 2, name = "Pelagem Cinzenta", rate = 1.00, rare = false },
+            { item_id = 3, name = "Presa Lupina Afiada", rate = 0.25, rare = false },
+            { item_id = 4, name = "Garra de Fera", rate = 0.20, rare = false },
+            { item_id = 9, name = "Anel de Presa Ancestral", rate = 0.03, rare = true }, -- 3% raro
+        }
+    },
+    [2] = {
+        name = "Saqueador Deserdado",
+        drops = {
+            { item_id = 5, name = "Frasco de Vidro Vazio", rate = 0.80, rare = false },
+            { item_id = 10, name = "Carne Nobre Assada", rate = 0.70, rare = false },
+            { item_id = 9, name = "Anel de Presa Ancestral", rate = 0.04, rare = true }, -- 4% raro
+        }
+    },
+    [3] = {
+        name = "Besteiro da Vigília",
+        drops = {
+            { item_id = 5, name = "Frasco de Vidro Vazio", rate = 0.80, rare = false },
+            { item_id = 10, name = "Carne Nobre Assada", rate = 0.70, rare = false },
+            { item_id = 9, name = "Anel de Presa Ancestral", rate = 0.05, rare = true }, -- 5% raro
+        }
+    },
+    [4] = {
+        name = "Acólito do Eclipse",
+        drops = {
+            { item_id = 13, name = "Cálice da Alma Partida", rate = 0.08, rare = true }, -- 8% raro
+            { item_id = 17, name = "Tomo da Foice do Eclipse", rate = 0.03, rare = true }, -- 3% raro
+        }
+    },
+    [5] = {
+        name = "Executor de Ferro",
+        drops = {
+            { item_id = 11, name = "Placa de Aço Pesada", rate = 0.60, rare = false },
+            { item_id = 5, name = "Frasco de Vidro Vazio", rate = 0.80, rare = false },
+            { item_id = 18, name = "Tomo do Martelo Titânico", rate = 0.04, rare = true }, -- 4% raro
+        }
+    },
+    [6] = {
+        name = "Lobo Alfa",
+        drops = {
+            { item_id = 12, name = "Pele Intacta de Lobo Alfa", rate = 1.00, rare = false },
+            { item_id = 9, name = "Anel de Presa Ancestral", rate = 0.06, rare = true }, -- 6% raro
+        }
+    },
+    [7] = {
+        name = "Licantropo Alfa",
+        drops = {
+            { item_id = 14, name = "Coração do Licantropo Alfa", rate = 1.00, rare = false },
+            { item_id = 18, name = "Tomo do Martelo Titânico", rate = 0.07, rare = true }, -- 7% raro
+        }
+    },
+    [10] = {
+        name = "Cultista Sombrio",
+        drops = {
+            { item_id = 5, name = "Frasco de Vidro Vazio", rate = 0.60, rare = false },
+            { item_id = 19, name = "Manto do Cultista Sombrio", rate = 0.05, rare = true }, -- 5% raro
+            { item_id = 17, name = "Tomo da Foice do Eclipse", rate = 0.04, rare = true }, -- 4% raro
+        }
+    },
+    [11] = {
+        name = "Gárgula de Pedra",
+        drops = {
+            { item_id = 11, name = "Placa de Aço Pesada", rate = 0.70, rare = false },
+            { item_id = 20, name = "Coração Pétreo da Gárgula", rate = 0.06, rare = true }, -- 6% raro
+        }
+    },
+    [12] = {
+        name = "Inquisidor Vex (Mini-Boss)",
+        drops = {
+            { item_id = 21, name = "Foice Sombria do Inquisidor", rate = 0.06, rare = true }, -- 6% raro
+            { item_id = 13, name = "Cálice da Alma Partida", rate = 0.07, rare = true }, -- 7% raro
+        }
+    },
+    [13] = {
+        name = "Comandante Vaelen, o Traidor (Boss Normal)",
+        drops = {
+            { item_id = 22, name = "Insígnia do Traidor Vaelen", rate = 0.05, rare = true }, -- 5% raro
+            { item_id = 18, name = "Tomo do Martelo Titânico", rate = 0.04, rare = true }, -- 4% raro
+            { item_id = 17, name = "Tomo da Foice do Eclipse", rate = 0.04, rare = true }, -- 4% raro
+        }
+    },
+    [14] = {
+        name = "Malakor, o Arauto do Eclipse (Raid Boss)",
+        drops = {
+            { item_id = 23, name = "Olho do Arauto do Eclipse", rate = 0.08, rare = true }, -- 8% raro
+            { item_id = 24, name = "Tocha Sagrada do Santuário", rate = 1.00, rare = false },
+            { item_id = 21, name = "Foice Sombria do Inquisidor", rate = 0.06, rare = true }, -- 6% raro
+            { item_id = 14, name = "Coração do Licantropo Alfa", rate = 0.05, rare = true }, -- 5% raro
+        }
+    }
+}
+
+-- Gera o relatório consolidado de taxas de drop para o desenvolvedor
+function GetDropRatesReport()
+    local lines = {}
+    table.insert(lines, "==================================================")
+    table.insert(lines, "    LUNARIA ONLINE — TABELA DE TAXAS DE DROP (DEV)")
+    table.insert(lines, "==================================================")
+
+    local sorted_types = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14}
+    for _, t in ipairs(sorted_types) do
+        local entry = DropTables[t]
+        if entry then
+            table.insert(lines, string.format("[Mob %d] %s:", t, entry.name))
+            for _, d in ipairs(entry.drops) do
+                local rare_tag = d.rare and " [RARO]" or ""
+                table.insert(lines, string.format("  - Item #%d (%s): %.1f%%%s", d.item_id, d.name, d.rate * 100.0, rare_tag))
+            end
+        end
+    end
+    table.insert(lines, "==================================================")
+    return table.concat(lines, "\n")
 end
