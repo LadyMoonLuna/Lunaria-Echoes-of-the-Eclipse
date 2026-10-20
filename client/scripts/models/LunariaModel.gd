@@ -13,6 +13,7 @@ extends Node3D
 ##   heroi.play("death_fall", true)                 # cai e mantém o último quadro
 
 const Data = preload("res://scripts/models/LunariaModelData.gd")
+const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
 const SCRIPT_PATH: String = "res://scripts/models/LunariaModel.gd"
 const BLEND_TIME: float = 0.15
 const LIMB_CHANNELS: Array = ["torso", "arm_r", "arm_l", "leg_r", "leg_l"]
@@ -305,6 +306,8 @@ func _make_materials(specs: Dictionary, anim_list: Array) -> Dictionary:
 			mat.albedo_color.a = alpha
 		if spec.get("double", false):
 			mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		if spec.has("tex"):
+			LunariaTextures.apply(mat, spec["tex"], float(spec.get("tile", 0.0)))
 		if spec.has("anim"):
 			anim_list.append({"mat": mat, "anim": spec["anim"], "energy": energy, "alpha": alpha})
 		out[key] = mat

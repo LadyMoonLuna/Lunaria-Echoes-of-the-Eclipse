@@ -169,6 +169,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 const DATA = /*__LUNARIA_DATA__*/null;
+const TEXTURES = /*__LUNARIA_TEX__*/null;
 const BY_UID = Object.fromEntries(DATA.models.map((m) => [m.uid, m]));
 const CLIPS = DATA.clips, LOADOUTS = DATA.loadouts;
 const DEG = Math.PI / 180;
@@ -210,8 +211,37 @@ function geometry(shape, s) {
     case "prism": g = prismGeometry(s[0], s[1], s[2]); break;
     default: g = new THREE.BoxGeometry(0.05, 0.05, 0.05);
   }
+  boxUV(g);
   geoCache.set(key, g);
   return g;
+}
+// UV em metros por projeção de caixa (mesma ideia do triplanar do Godot e do .glb)
+function boxUV(g) {
+  if (!g.attributes.normal) g.computeVertexNormals();
+  const p = g.attributes.position, n = g.attributes.normal, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) {
+    const nx = n.getX(i), ny = n.getY(i), nz = n.getZ(i), ax = Math.abs(nx), ay = Math.abs(ny), az = Math.abs(nz);
+    if (ax >= ay && ax >= az) { uv[i * 2] = p.getZ(i) * (nx < 0 ? 1 : -1); uv[i * 2 + 1] = -p.getY(i); }
+    else if (ay >= az) { uv[i * 2] = p.getX(i); uv[i * 2 + 1] = p.getZ(i) * (ny > 0 ? 1 : -1); }
+    else { uv[i * 2] = p.getX(i) * (nz > 0 ? 1 : -1); uv[i * 2 + 1] = -p.getY(i); }
+  }
+  g.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+}
+const texLoader = new THREE.TextureLoader();
+const texBase = {};
+function texFor(name, kind, tile) {
+  const k = name + ":" + kind;
+  if (!texBase[k]) {
+    const t = texLoader.load(TEXTURES[name][kind]);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = kind === "albedo" ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+    t.anisotropy = 4;
+    texBase[k] = t;
+  }
+  const t = texBase[k].clone();
+  t.repeat.set(1 / tile, 1 / tile);
+  t.needsUpdate = true;
+  return t;
 }
 function makeMaterial(m) {
   const alpha = m.alpha ?? 1;
@@ -220,6 +250,11 @@ function makeMaterial(m) {
   else {
     mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(m.color), roughness: m.rough, metalness: m.metal });
     if (m.emit) { mat.emissive = new THREE.Color(m.emit); mat.emissiveIntensity = m.energy; }
+    if (m.tex && TEXTURES && TEXTURES[m.tex]) {
+      mat.map = texFor(m.tex, "albedo", m.tile || 0.5);
+      mat.normalMap = texFor(m.tex, "normal", m.tile || 0.5);
+      mat.normalScale.set(1, 1);
+    }
   }
   if (alpha < 1) { mat.transparent = true; mat.opacity = alpha; mat.depthWrite = false; }
   if (m.double) mat.side = THREE.DoubleSide;

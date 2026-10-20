@@ -1,6 +1,13 @@
 class_name MobEntity
 extends Node3D
 
+const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
+## Textura do corpo principal de cada tipo de mob
+const MOB_TEXTURES := {
+	1: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
+	10: "cloth", 11: "stone", 12: "cloth", 13: "metal_hammered", 14: "obsidian",
+}
+
 var mob_id: int = 0
 var mob_type: int = 1
 var current_state: int = 0
@@ -110,6 +117,7 @@ func _build_visuals() -> void:
 
 	main_mat = StandardMaterial3D.new()
 	main_mesh.material_override = main_mat
+	LunariaTextures.apply(main_mat, MOB_TEXTURES.get(mob_type, ""))
 
 	match mob_type:
 		1: # Lobo da Bruma (Quadrúpede ágil, malha baixa e alongada)

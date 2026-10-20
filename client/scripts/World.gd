@@ -4,6 +4,7 @@ extends Node3D
 @export var remote_player_scene: PackedScene = preload("res://scenes/RemotePlayer.tscn")
 @export var npc_scene: PackedScene = preload("res://scenes/NPC.tscn")
 const MobEntityScript = preload("res://scripts/MobEntity.gd")
+const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
 const CharacterSelectUIScript = preload("res://scripts/CharacterSelectUI.gd")
 const AttributesUIScript = preload("res://scripts/AttributesUI.gd")
 const InventoryUIScript = preload("res://scripts/InventoryUI.gd")
@@ -210,6 +211,7 @@ var action_bar_slots: Array[PanelContainer] = []
 var action_bar_name_labels: Array[Label] = []
 
 func _ready() -> void:
+	_apply_floor_texture()
 	mobs_container = Node3D.new()
 	mobs_container.name = "Mobs"
 	add_child(mobs_container)
@@ -280,6 +282,17 @@ func _ready() -> void:
 	_spawn_local_player(Vector3(0, 1.5, 0))
 	_update_hud()
 	_update_clock_hud()
+
+func _apply_floor_texture() -> void:
+	# Piso principal: terra batida com textura em coordenadas do mundo (sem repetição visível por tile)
+	var floor_mesh := get_node_or_null("Floor/MeshInstance3D") as MeshInstance3D
+	if floor_mesh and floor_mesh.mesh:
+		var fmat := floor_mesh.get_active_material(0) as StandardMaterial3D
+		if fmat:
+			fmat = fmat.duplicate()
+			fmat.albedo_color = Color(0.36, 0.33, 0.28, 1.0)
+			LunariaTextures.apply(fmat, "ground", 3.0, true)
+			floor_mesh.material_override = fmat
 
 func _process(delta: float) -> void:
 	# 1. Lógica de atualização de tempo, clima e iluminação do mundo
@@ -1279,6 +1292,7 @@ func _create_zone_landmarks() -> void:
 	bp_mesh.size = Vector3(1.0, 2.4, 1.0)
 	b_pilar.mesh = bp_mesh
 	var bp_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(bp_mat, "moss", 0.6, false)
 	bp_mat.albedo_color = Color(0.2, 0.38, 0.22, 1.0)
 	bp_mat.roughness = 0.85
 	b_pilar.material_override = bp_mat
@@ -1306,6 +1320,7 @@ func _create_zone_landmarks() -> void:
 	rp_mesh.size = Vector3(1.2, 2.6, 1.2)
 	r_pilar.mesh = rp_mesh
 	var rp_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(rp_mat, "stone_blocks", 1.2, false)
 	rp_mat.albedo_color = Color(0.35, 0.28, 0.24, 1.0)
 	rp_mat.roughness = 0.9
 	r_pilar.material_override = rp_mat
@@ -1329,6 +1344,7 @@ func _create_zone_landmarks() -> void:
 	zone_marker_nodes.append(sanctuary_root)
 
 	var obs_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(obs_mat, "obsidian", 1.0, false)
 	obs_mat.albedo_color = Color(0.12, 0.08, 0.16, 1.0)
 	obs_mat.metallic = 0.85
 	obs_mat.roughness = 0.25
@@ -1720,6 +1736,7 @@ func _create_rebirth_crystal() -> void:
 	base_cyl.height = 0.4
 	base_pedestal.mesh = base_cyl
 	var dark_stone := StandardMaterial3D.new()
+	LunariaTextures.apply(dark_stone, "stone", 0.9, false)
 	dark_stone.albedo_color = Color("#1a1e24")
 	dark_stone.roughness = 0.5
 	dark_stone.metallic = 0.4
@@ -1785,6 +1802,7 @@ func _create_perimeter_walls() -> void:
 	add_child(walls_node)
 
 	var stone_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(stone_mat, "stone_blocks", 2.4, true)
 	stone_mat.albedo_color = Color(0.16, 0.18, 0.21, 1.0) # Rocha escura
 	stone_mat.roughness = 0.9
 	stone_mat.metallic = 0.15
@@ -2142,19 +2160,23 @@ func _build_symmetric_village() -> void:
 
 	# Materiais medievais compartilhados
 	var stone_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(stone_mat, "stone_blocks", 2.4, true)
 	stone_mat.albedo_color = Color(0.28, 0.3, 0.34, 1.0) # Pedra medieval
 	stone_mat.roughness = 0.85
 	stone_mat.metallic = 0.15
 
 	var cobblestone_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(cobblestone_mat, "cobblestone", 1.8, true)
 	cobblestone_mat.albedo_color = Color(0.42, 0.44, 0.48, 1.0) # Calçamento cinza-claro
 	cobblestone_mat.roughness = 0.8
 
 	var dark_cobble_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(dark_cobble_mat, "cobblestone", 1.5, true)
 	dark_cobble_mat.albedo_color = Color(0.24, 0.25, 0.28, 1.0) # Pedra da praça central
 	dark_cobble_mat.roughness = 0.85
 
 	var wood_beam_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(wood_beam_mat, "wood", 0.8, false)
 	wood_beam_mat.albedo_color = Color(0.25, 0.16, 0.1, 1.0) # Vigas de madeira
 	wood_beam_mat.roughness = 0.75
 
@@ -2282,6 +2304,7 @@ func _build_symmetric_village() -> void:
 	av_mesh.size = Vector3(0.9, 0.8, 0.6)
 	anvil_mesh.mesh = av_mesh
 	var av_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(av_mat, "metal_hammered", 0.5, false)
 	av_mat.albedo_color = Color(0.18, 0.19, 0.22, 1.0)
 	av_mat.metallic = 0.92
 	av_mat.roughness = 0.22
@@ -2310,6 +2333,7 @@ func _build_symmetric_village() -> void:
 	fn_mesh.mesh = fn_bmesh
 	fn_mesh.position = Vector3(0, 1.7, 0)
 	var fn_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(fn_mat, "stone_blocks", 1.0, false)
 	fn_mat.albedo_color = Color(0.2, 0.18, 0.19, 1.0)
 	fn_mat.roughness = 0.9
 	fn_mesh.material_override = fn_mat
@@ -2504,6 +2528,7 @@ func _build_symmetric_village() -> void:
 	sp_bmesh.size = Vector3(2.8, 0.4, 2.8)
 	sp_mesh.mesh = sp_bmesh
 	var sp_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(sp_mat, "stone", 0.9, false)
 	sp_mat.albedo_color = Color(0.12, 0.14, 0.16, 1.0)
 	sp_mat.roughness = 0.95
 	sp_mesh.material_override = sp_mat
@@ -2516,6 +2541,7 @@ func _build_symmetric_village() -> void:
 	grate.mesh = gr_box
 	grate.position = Vector3(0, 0.21, 0)
 	var gr_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(gr_mat, "metal_hammered", 0.5, false)
 	gr_mat.albedo_color = Color(0.08, 0.09, 0.11, 1.0)
 	gr_mat.metallic = 0.95
 	gr_mat.roughness = 0.3
@@ -2668,6 +2694,7 @@ func _create_solid_building(parent: Node3D, b_name: String, pos: Vector3, size: 
 	parent.add_child(body)
 
 	var wall_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(wall_mat, "plaster", 1.5, true)
 	wall_mat.albedo_color = wall_col
 	wall_mat.roughness = 0.8
 
@@ -2682,6 +2709,7 @@ func _create_solid_building(parent: Node3D, b_name: String, pos: Vector3, size: 
 	floor_inst.mesh = fmesh
 	floor_inst.position = Vector3(0, 0.015, 0)
 	var floor_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(floor_mat, "planks", 1.2, false)
 	floor_mat.albedo_color = Color(0.25, 0.18, 0.12, 1.0)
 	floor_mat.roughness = 0.7
 	floor_inst.material_override = floor_mat
@@ -2740,6 +2768,7 @@ func _create_solid_building(parent: Node3D, b_name: String, pos: Vector3, size: 
 	roof.mesh = rmesh
 	roof.position = Vector3(0, size.y + 0.5, 0)
 	var roof_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(roof_mat, "roof_tiles", 1.6, false)
 	roof_mat.albedo_color = roof_col
 	roof_mat.roughness = 0.75
 	roof.material_override = roof_mat
@@ -2776,6 +2805,7 @@ func _create_furniture_piece(parent: Node3D, pos: Vector3, size: Vector3, col: C
 	bmesh.size = size
 	mesh_inst.mesh = bmesh
 	var mat := StandardMaterial3D.new()
+	LunariaTextures.apply(mat, "wood", 0.6, false)
 	mat.albedo_color = col
 	mat.roughness = roughness
 	mesh_inst.material_override = mat
@@ -2790,6 +2820,7 @@ func _create_interactive_door(parent: Node3D, house_id: String, house_name: Stri
 	parent.add_child(door_root)
 
 	var frame_mat := StandardMaterial3D.new()
+	LunariaTextures.apply(frame_mat, "wood", 0.6, false)
 	frame_mat.albedo_color = Color(0.22, 0.14, 0.09, 1.0)
 	frame_mat.roughness = 0.85
 

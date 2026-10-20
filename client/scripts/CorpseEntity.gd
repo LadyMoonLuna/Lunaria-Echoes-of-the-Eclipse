@@ -1,6 +1,13 @@
 class_name CorpseEntity
 extends Node3D
 
+const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
+## Textura do corpo principal de cada tipo de mob
+const MOB_TEXTURES := {
+	1: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
+	10: "cloth", 11: "stone", 12: "cloth", 13: "metal_hammered", 14: "obsidian",
+}
+
 var corpse_id: int = 0
 var mob_id: int = 0
 var mob_type: int = 1
@@ -70,6 +77,7 @@ func _build_visuals() -> void:
 	main_mesh.name = "CorpseMesh"
 	main_mat = StandardMaterial3D.new()
 	main_mesh.material_override = main_mat
+	LunariaTextures.apply(main_mat, MOB_TEXTURES.get(mob_type, ""))
 	body_pivot.add_child(main_mesh)
 
 	# Deita a malha horizontalmente no solo (Y = 0.1 com rotação horizontal)

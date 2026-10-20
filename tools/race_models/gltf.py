@@ -10,6 +10,7 @@ Blender pronto para ajustes, rigging ou para virar referência de escultura.
 
 import json
 import math
+import os
 import struct
 
 
@@ -245,11 +246,37 @@ class _Buf:
         return len(self.accessors) - 1
 
 
-def export_glb(model, path, clips=None):
+def box_uv(pos, nor):
+    """UV em metros por projeção de caixa (eixo dominante da normal), como o triplanar do Godot."""
+    uv = []
+    for p, n in zip(pos, nor):
+        ax = max(range(3), key=lambda i: abs(n[i]))
+        if ax == 0:
+            uv.append([p[2] * (1 if n[0] < 0 else -1), -p[1]])
+        elif ax == 1:
+            uv.append([p[0], p[2] * (1 if n[1] > 0 else -1)])
+        else:
+            uv.append([p[0] * (1 if n[2] > 0 else -1), -p[1]])
+    return uv
+
+
+def export_glb(model, path, clips=None, tex_dir=None):
+    """tex_dir: pasta com as texturas PNG; o .glb as referencia por caminho relativo."""
     buf = _Buf()
     gl = {"asset": {"version": "2.0", "generator": "Lunaria race_models"}, "scene": 0,
           "scenes": [{"name": model["name"], "nodes": [0]}], "nodes": [], "meshes": [], "materials": []}
     used_ext = set()
+
+    tex_index = {}
+
+    def texture(name):
+        if name not in tex_index:
+            rel = os.path.relpath(os.path.join(tex_dir, name + ".png"), os.path.dirname(path)).replace(os.sep, "/")
+            gl.setdefault("images", []).append({"uri": rel})
+            gl.setdefault("samplers", [{"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497}])
+            gl.setdefault("textures", []).append({"source": len(gl["images"]) - 1, "sampler": 0})
+            tex_index[name] = len(gl["textures"]) - 1
+        return tex_index[name]
 
     mat_index = {}
     for key, m in model["materials"].items():
@@ -269,6 +296,15 @@ def export_glb(model, path, clips=None):
         if m.get("unshaded"):
             mat.setdefault("extensions", {})["KHR_materials_unlit"] = {}
             used_ext.add("KHR_materials_unlit")
+        if m.get("tex") and tex_dir:
+            inv = 1.0 / m.get("tile", 0.5)
+            xf = {"KHR_texture_transform": {"scale": [inv, inv]}}
+            used_ext.add("KHR_texture_transform")
+            pbr = mat["pbrMetallicRoughness"]
+            pbr["baseColorTexture"] = {"index": texture(m["tex"] + "_albedo"), "extensions": xf}
+            pbr["metallicRoughnessTexture"] = {"index": texture(m["tex"] + "_orm"), "extensions": xf}
+            mat["normalTexture"] = {"index": texture(m["tex"] + "_normal"), "extensions": xf}
+            mat["occlusionTexture"] = {"index": texture(m["tex"] + "_orm"), "strength": 0.6, "extensions": xf}
         mat_index[key] = len(gl["materials"])
         gl["materials"].append(mat)
 
@@ -284,16 +320,18 @@ def export_glb(model, path, clips=None):
             mx = [max(p[i] for p in pos) for i in range(3)]
             a_p = buf.add("f", flat_p, len(pos), 5126, "VEC3", 34962, (mn, mx))
             a_n = buf.add("f", flat_n, len(nor), 5126, "VEC3", 34962)
+            a_t = buf.add("f", [c for t in box_uv(pos, nor) for c in t], len(pos), 5126, "VEC2", 34962)
             if len(pos) < 65536:
                 a_i = buf.add("H", idx, len(idx), 5123, "SCALAR", 34963)
             else:
                 a_i = buf.add("I", idx, len(idx), 5125, "SCALAR", 34963)
-            geo_cache[gkey] = (a_p, a_n, a_i)
+            geo_cache[gkey] = (a_p, a_n, a_t, a_i)
         mkey = (gkey, mat)
         if mkey not in mesh_cache:
-            a_p, a_n, a_i = geo_cache[gkey]
+            a_p, a_n, a_t, a_i = geo_cache[gkey]
             gl["meshes"].append({"name": "%s_%s" % (shape, mat), "primitives": [
-                {"attributes": {"POSITION": a_p, "NORMAL": a_n}, "indices": a_i, "material": mat_index[mat]}]})
+                {"attributes": {"POSITION": a_p, "NORMAL": a_n, "TEXCOORD_0": a_t}, "indices": a_i,
+                 "material": mat_index[mat]}]})
             mesh_cache[mkey] = len(gl["meshes"]) - 1
         return mesh_cache[mkey]
 
