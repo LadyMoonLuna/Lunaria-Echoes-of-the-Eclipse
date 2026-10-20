@@ -7,7 +7,7 @@ olhos luminosos, runas, fogo, magia e partículas não recebem textura.
 # (palavras-chave, textura) — a primeira regra que casar vence
 RULES = [
     (("chainmail", "mail"), "chainmail"),
-    (("feather",), "feather"),
+    (("feather", "covert"), "feather"),
     (("scale",), "scales"),
     (("bark",), "bark"),
     (("moss",), "moss"),
@@ -22,7 +22,10 @@ RULES = [
     (("coin",), "metal_hammered"),
     (("crystal", "glass", "lens", "pearl", "tank_glass"), "crystal"),
     (("basalt", "rock", "stone", "censer"), "stone"),
-    (("bone", "skull", "claw", "fang", "nail", "horn", "beak", "rib"), "bone"),
+    (("bone", "skull", "claw", "fang", "nail", "horn", "beak", "rib", "spike"), "bone"),
+    (("membrane",), "leather"),
+    (("notch", "dagger"), "metal_hammered"),
+    (("bolt",), "wood"),
     (("steel_boots",), "metal_hammered"),
     (("leather", "boots", "glove", "belt", "strap", "apron", "bandolier", "grip", "wrap", "pouch",
       "suede", "kilt", "steel_toe", "hilt", "cork"), "leather"),

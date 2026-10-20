@@ -2,6 +2,7 @@ class_name CorpseEntity
 extends Node3D
 
 const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
+const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
 ## Textura do corpo principal de cada tipo de mob
 const MOB_TEXTURES := {
 	1: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
@@ -151,6 +152,20 @@ func _build_visuals() -> void:
 			main_mesh.position = Vector3(0, 0.2, 0)
 			main_mat.albedo_color = Color(0.2, 0.18, 0.18, 1.0) # Tecido/couro escurecido
 			main_mat.roughness = 0.85
+
+	# Cadáver 3D detalhado: a própria criatura no último quadro da animação de morte
+	if LunariaModel.has_model(LunariaModel.mob_uid(mob_type)):
+		for c in body_pivot.get_children():
+			c.queue_free()
+		body_pivot.scale = Vector3.ONE
+		var corpse_model := LunariaModel.create_mob(mob_type, false) as LunariaModel
+		corpse_model.position.y = -0.1
+		body_pivot.add_child(corpse_model)
+		corpse_model.pose_dead()
+		var primary := corpse_model.get_primary_material()
+		if primary:
+			primary.albedo_color = primary.albedo_color.darkened(0.35)
+			primary.emission_enabled = false
 
 	# Label 3D Flutuante no topo do corpo
 	if label_3d == null:

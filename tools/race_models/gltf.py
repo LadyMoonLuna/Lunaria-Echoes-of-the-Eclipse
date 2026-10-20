@@ -57,7 +57,7 @@ def _lathe(profile, segs):
     return pos, nor, idx
 
 
-def _sphere(r, segs=16, rings=10):
+def _sphere(r, segs=32, rings=18):
     prof = []
     for i in range(rings + 1):
         phi = math.pi * i / rings
@@ -67,7 +67,7 @@ def _sphere(r, segs=16, rings=10):
     return pos, nor, [i for t in range(0, len(idx), 3) for i in (idx[t], idx[t + 2], idx[t + 1])]
 
 
-def _cylinder(top, bottom, h, segs=14):
+def _cylinder(top, bottom, h, segs=24):
     hy = h / 2
     slope = (bottom - top) / h if h else 0
     ln = math.sqrt(1 + slope * slope)
@@ -92,7 +92,7 @@ def _cylinder(top, bottom, h, segs=14):
     return pos, nor, idx
 
 
-def _capsule(r, h, segs=14, rings=5):
+def _capsule(r, h, segs=24, rings=8):
     mid = max(0.0, h / 2 - r)
     prof = []
     for i in range(rings + 1):
@@ -105,7 +105,7 @@ def _capsule(r, h, segs=14, rings=5):
     return pos, nor, [i for t in range(0, len(idx), 3) for i in (idx[t], idx[t + 2], idx[t + 1])]
 
 
-def _torus(inner, outer, rings=24, segs=8):
+def _torus(inner, outer, rings=36, segs=12):
     R, t = (inner + outer) / 2, (outer - inner) / 2
     pos, nor, idx = [], [], []
     for i in range(rings + 1):
@@ -409,6 +409,9 @@ def export_glb(model, path, clips=None, tex_dir=None):
             anims.append({"name": name, "channels": channels, "samplers": samplers})
         gl["animations"] = anims
 
+    for node in nodes:
+        if "children" in node and not node["children"]:
+            del node["children"]  # glTF não aceita lista de filhos vazia
     if used_ext:
         gl["extensionsUsed"] = sorted(used_ext)
     while len(buf.data) % 4:

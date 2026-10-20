@@ -16,9 +16,17 @@ em Python como um conjunto de primitivas com pivôs animáveis. Um único build 
 | Raças 1–18 (base, evoluções e secretas) | 18 | `races_base.py` |
 | Raças lendárias 19–28 | 10 | `races.py` |
 | NPCs (Garrick 100, Lyra 103, Varis 104, Randel 105, Valen 106, Alquimista Fantasma 107) | 6 | `npcs.py` |
-| Armas (pivô na empunhadura, +Y ao longo da lâmina) + Mini-Homúnculo | 16 + 1 | `gear.py` |
+| Criaturas / mobs 1–14 (pelagem em tufos, asas de penas e membrana, armas próprias) | 12 | `mobs.py` |
+| Armas (pivô na empunhadura, +Y ao longo da lâmina) + Mini-Homúnculo | 24 + 1 | `gear.py` |
 | Trajes das classes 0–9 | 10 | `gear.py` |
-| Clipes de animação | 20 | `clips.py` |
+| Clipes de animação (inclui mordida e morte de quadrúpede) | 22 | `clips.py` |
+
+## Estilo anime e modelos HD
+
+- Todos os modelos usam cel-shading (sombra em faixas), luz de recorte e contorno de tinta (`LunariaStyle.gd`).
+- Para o nível de detalhe de *Sword Art Online*, gere modelos esculpidos com os prompts de `docs/art/prompts_3d.md`
+  e salve em `client/assets/models/hd/<uid>.glb`: o jogo usa o arquivo no lugar do procedural
+  (passo a passo em `docs/art/README.md`).
 
 Os números de raça seguem os IDs do servidor (`server/internal/protocol/packets.go`): no Art Bible o Sylvari aparece
 como “11”, mas no jogo ele é a raça 19, e assim por diante até o Cronomante (28).

@@ -177,4 +177,18 @@ CLIPS = {
         k(0.65, torso=(10, 0, 0), leg_r=(20, 0, 0), leg_l=(10, 0, 0), arm_r=(40, 0, 50), arm_l=(40, 0, -50), root=(55, 0, 10), root_y=-0.3),
         k(1.0, torso=(5, 0, 0), leg_r=(8, 0, 0), leg_l=(-4, 0, 0), arm_r=(30, 0, 70), arm_l=(20, 0, -60), root=(90, 0, 8), root_y=-0.47),
     ], "Perde as forças nos joelhos e cai de costas, mantendo o último quadro."),
+
+    "beast_bite": clip(0.55, False, [
+        k(0.0),
+        k(0.15, root=(10, 0, 0), arm_r=(25, 0, 0), arm_l=(25, 0, 0), leg_r=(-15, 0, 0), leg_l=(-15, 0, 0), root_y=0.04),
+        k(0.3, root=(-14, 0, 0), arm_r=(-25, 0, 0), arm_l=(-25, 0, 0), leg_r=(20, 0, 0), leg_l=(20, 0, 0), root_y=-0.05),
+        k(0.38, root=(-12, 0, 0), arm_r=(-22, 0, 0), arm_l=(-22, 0, 0), leg_r=(18, 0, 0), leg_l=(18, 0, 0), root_y=-0.05),
+        k(0.55),
+    ], "Investida com mordida (quadrúpedes)."),
+
+    "beast_death": clip(0.9, False, [
+        k(0.0),
+        k(0.3, root=(0, 0, 35), arm_r=(20, 0, 10), arm_l=(15, 0, -10), root_y=-0.12),
+        k(0.9, root=(0, 0, 86), arm_r=(25, 0, 25), arm_l=(10, 0, -15), leg_r=(20, 0, 0), leg_l=(5, 0, 0), root_y=-0.36),
+    ], "Tomba de lado e mantém o último quadro (cadáver de quadrúpede)."),
 }

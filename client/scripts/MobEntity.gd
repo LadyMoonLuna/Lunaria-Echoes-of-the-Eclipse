@@ -2,6 +2,7 @@ class_name MobEntity
 extends Node3D
 
 const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
+const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
 ## Textura do corpo principal de cada tipo de mob
 const MOB_TEXTURES := {
 	1: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
@@ -25,6 +26,7 @@ var main_mat: StandardMaterial3D = null
 var shield_mesh: MeshInstance3D = null
 var shield_mat: StandardMaterial3D = null
 var weapon_mesh: Node3D = null
+var creature_model: LunariaModel = null
 var name_tag: Label3D = null
 var current_moon_phase: int = 1
 
@@ -718,6 +720,8 @@ func _build_visuals() -> void:
 			main_mesh.position = Vector3(0, 0.9, 0)
 			main_mat.albedo_color = Color(0.4, 0.4, 0.4)
 
+	_apply_creature_model()
+
 	# Label 3D Billboard para Nome e HP
 	if name_tag == null:
 		name_tag = Label3D.new()
@@ -750,9 +754,30 @@ func _build_visuals() -> void:
 
 	_apply_lunar_glow()
 
+func _apply_creature_model() -> void:
+	# Criatura 3D detalhada (pelagem, asas, armas) substitui as formas simples
+	if not LunariaModel.has_model(LunariaModel.mob_uid(mob_type)):
+		return
+	for c in body_pivot.get_children():
+		c.queue_free()
+	body_pivot.scale = Vector3.ONE
+	creature_model = LunariaModel.create_mob(mob_type) as LunariaModel
+	body_pivot.add_child(creature_model)
+	var primary := creature_model.get_primary_material()
+	if primary:
+		main_mat = primary
+	var shield := creature_model.get_shield_material()
+	if shield:
+		shield_mat = shield
+
 func update_network_data(new_pos: Vector3, new_rot_y: float, state: int, hp: int, p_max_hp: int) -> void:
 	target_position = new_pos
 	target_rotation_y = new_rot_y
+	if creature_model and state != current_state:
+		if state == 2:
+			creature_model.play_creature("attack")
+		elif state == 3:
+			creature_model.play_creature("block")
 	current_state = state
 	current_hp = hp
 	max_hp = p_max_hp
@@ -890,5 +915,9 @@ func _spawn_floating_damage(damage: int, is_crit: bool) -> void:
 func _process(delta: float) -> void:
 	if not is_alive:
 		return
+	var prev_pos := position
 	position = position.lerp(target_position, INTERPOLATION_SPEED * delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
+	if creature_model and delta > 0.0:
+		var step := position - prev_pos
+		creature_model.set_move_speed(Vector2(step.x, step.z).length() / delta)

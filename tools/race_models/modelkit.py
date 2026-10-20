@@ -64,6 +64,25 @@ def align_y(d, roll=0.0):
     return mat_to_euler(mmul(_ry(b), mmul(_rx(a), _ry(math.radians(roll)))))
 
 
+def basis_euler(y_dir, z_hint=(0, 0, 1)):
+    """Euler YXZ de uma base com +Y ao longo de y_dir e +Z o mais próximo possível de z_hint."""
+    def norm(v):
+        l = math.sqrt(sum(c * c for c in v)) or 1.0
+        return tuple(c / l for c in v)
+
+    def cross(a, b):
+        return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+    y = norm(y_dir)
+    x = cross(y, z_hint)
+    if math.sqrt(sum(c * c for c in x)) < 1e-6:
+        x = cross(y, (1, 0, 0))
+    x = norm(x)
+    z = cross(x, y)
+    mat = [[x[0], y[0], z[0]], [x[1], y[1], z[1]], [x[2], y[2], z[2]]]
+    return mat_to_euler(mat)
+
+
 def v_add(a, b):
     return tuple(x + y for x, y in zip(a, b))
 
@@ -121,6 +140,10 @@ def _mirror_anim(anim):
 class Model:
     def __init__(self, race_id, key, name, title, lore, color, scale=1.0, seed=7, kind="race"):
         self.kind = kind
+        self.gear = None
+        self.extra_actions = None
+        self.primary = None
+        self.shield_material = None
         self.body_w = 1.0
         self.anchors = {}
         self.rest_pose = None
@@ -222,7 +245,7 @@ class Model:
 
     @property
     def uid(self):
-        if self.kind in ("race", "npc"):
+        if self.kind in ("race", "npc", "mob"):
             return "%s_%d" % (self.kind, self.race_id)
         return "%s_%s" % (self.kind, self.key)
 
@@ -261,12 +284,12 @@ class Model:
     # -- exportação ----------------------------------------------------------
     def to_dict(self):
         groups, parts = self.groups, self.parts
-        if self.kind in ("race", "npc", "outfit"):
+        if self.kind in ("race", "npc", "mob", "outfit"):
             groups, parts = self._articulate()
         anchors = {}
         for k, a in self.anchors.items():
             a = dict(a)
-            if a["group"] is None and self.kind in ("race", "npc"):
+            if a["group"] is None and self.kind in ("race", "npc", "mob"):
                 a["group"] = "torso" if a["pos"][1] > 0.97 else "pose"
             anchors[k] = a
         out = {
@@ -288,6 +311,9 @@ class Model:
         }
         if self.rest_pose:
             out["rest_pose"] = self.rest_pose
+        for key in ("gear", "extra_actions", "primary", "shield_material"):
+            if getattr(self, key):
+                out[key] = getattr(self, key)
         return out
 
 
@@ -367,3 +393,91 @@ def ghost_copy(m, ghost_mat, offset):
         q["pos"] = _r(list(v_add(p["pos"], offset)))
         q["mat"] = ghost_mat
         m.parts.append(q)
+
+
+# ---------------------------------------------------------------------------
+# Detalhes: pelagem, penas e membranas
+# ---------------------------------------------------------------------------
+
+
+def fur_tufts(m, center, radii, count, mat, group=None, length=0.08, thickness=0.022,
+              bias=(0, 0, 0.6), region=None, seed=0, mirror=False):
+    """Tufos de pelo (cones) espalhados sobre um elipsoide, apontando para fora + bias.
+
+    region(nx, ny, nz) -> bool limita onde nascem os tufos (ex.: só nas costas).
+    """
+    rng = random.Random(seed or len(m.parts) + 17)
+    count = int(count * 1.7)  # pelagem densa
+    placed, tries = 0, 0
+    while placed < count and tries < count * 20:
+        tries += 1
+        u, v = rng.uniform(-1, 1), rng.uniform(0, 2 * math.pi)
+        r = math.sqrt(1 - u * u)
+        n = (r * math.cos(v), u, r * math.sin(v))
+        if region and not region(*n):
+            continue
+        p = (center[0] + n[0] * radii[0], center[1] + n[1] * radii[1], center[2] + n[2] * radii[2])
+        d = (n[0] + bias[0], n[1] + bias[1], n[2] + bias[2])
+        ln = length * rng.uniform(0.7, 1.3)
+        dn = v_scale(d, 1.0 / (v_len(d) or 1))
+        mid = v_add(p, v_scale(dn, ln * 0.45))
+        th = thickness * rng.uniform(0.8, 1.25)
+        # Mecha macia: elipsoide alongado e achatado, deitado na direção do pelo
+        m.part("sphere", [ln * 0.5], mid, mat, rot=basis_euler(dn, n),
+               scale=(th / ln * 2.6, 1.0, th / ln * 1.6), group=group, mirror=mirror)
+        placed += 1
+
+
+def feather_wing(m, root, side, span, feather_mat, covert_mat, bone_mat, group, droop=0.0, layers=3):
+    """Asa de ave em camadas: ossos, rêmiges primárias/secundárias e coberteiras arredondadas."""
+    elbow = (root[0] + side * span * 0.42, root[1] + span * 0.34, root[2] + span * 0.18)
+    tip = (root[0] + side * span, root[1] + span * 0.42 - droop, root[2] + span * 0.3)
+    m.chain([root, elbow, tip], [0.045, 0.032, 0.01], bone_mat, group=group, joints=bone_mat)
+    rows = [(1.0, 16, feather_mat, 0.0), (0.62, 13, covert_mat, 0.035), (0.36, 11, covert_mat, 0.07)][:layers]
+    for scale_len, n, mat, zoff in rows:
+        for i in range(n):
+            t = i / (n - 1)
+            base = v_lerp(root, elbow, t * 2) if t < 0.5 else v_lerp(elbow, tip, (t - 0.5) * 2)
+            base = v_add(base, (0, -zoff * 0.5, -zoff))
+            length = span * (0.32 + 0.55 * t) * scale_len
+            ang = math.radians(-6 - 40 * t)
+            d = (-math.sin(ang) * side, -math.cos(ang), 0.12 + 0.1 * t)
+            end = v_add(base, v_scale(d, length / v_len(d)))
+            width = span * (0.1 + 0.045 * t) * (0.8 + 0.4 * scale_len)
+            m.plank(base, end, width, 0.01, mat, group=group)
+            m.part("sphere", [width * 0.5], end, mat, scale=(1, 0.5, 0.25), group=group)
+            if scale_len == 1.0:
+                m.seg(base, end, 0.004, 0.002, bone_mat, group=group)
+
+
+def membrane_wing(m, root, side, span, bone_mat, membrane_mat, group, fingers=4):
+    """Asa de morcego/gárgula: braço ósseo, dedos longos e painéis de membrana entre eles."""
+    wrist = (root[0] + side * span * 0.45, root[1] + span * 0.38, root[2] + span * 0.2)
+    m.chain([root, wrist], [0.05, 0.035], bone_mat, group=group)
+    m.part("sphere", [0.04], wrist, bone_mat, group=group)
+    tips = []
+    for f in range(fingers):
+        t = f / (fingers - 1)
+        ang = math.radians(15 - 105 * t)
+        d = (math.cos(ang) * side, math.sin(ang), 0.15)
+        length = span * (0.75 - 0.18 * t)
+        mid = v_add(wrist, v_scale(d, length * 0.5))
+        tipp = v_add(v_add(wrist, v_scale(d, length)), (0, -span * 0.05 * t, 0.02))
+        m.chain([wrist, mid, tipp], [0.022, 0.016, 0.004], bone_mat, group=group, joints=bone_mat)
+        m.part("cylinder", [0.0, 0.012, 0.06], v_add(tipp, (side * 0.02, 0, 0)), bone_mat,
+               rot=(0, 0, -90 * side), group=group)
+        tips.append((mid, tipp))
+    body_anchor = (root[0], root[1] - span * 0.45, root[2] + 0.02)
+    edges = [body_anchor] + [t[1] for t in reversed(tips)]
+    for i in range(len(edges) - 1):
+        a, b = edges[i], edges[i + 1]
+        steps = 8
+        for s in range(steps):
+            f0 = (s + 0.5) / steps
+            pa = v_lerp(wrist, a, f0)
+            pb = v_lerp(wrist, b, f0)
+            width = v_len(v_sub(pa, pb))
+            if width < 0.01:
+                continue
+            m.part("box", (span / steps * 1.15, width, 0.008), v_lerp(pa, pb, 0.5), membrane_mat,
+                   basis_euler(v_sub(pb, pa), (0, 0, 1)), group=group)

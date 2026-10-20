@@ -7,7 +7,7 @@ extends Node3D
 ##   Arraste com o mouse para girar · roda do mouse aproxima
 
 const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
-const CATEGORIES: Array = [["race", "Raças"], ["npc", "NPCs"], ["weapon", "Armas"]]
+const CATEGORIES: Array = [["race", "Raças"], ["npc", "NPCs"], ["mob", "Criaturas"], ["weapon", "Armas"]]
 const LINEUP_GAP: float = 1.6
 
 var category: int = 0
@@ -149,7 +149,8 @@ func _layout() -> void:
 			var row := j / cols
 			var col := j % cols
 			var count_in_row := mini(cols, models.size() - row * cols)
-			m.position = Vector3((col - (count_in_row - 1) / 2.0) * LINEUP_GAP, 0, row * 2.2)
+			var gap: float = LINEUP_GAP * (1.8 if CATEGORIES[category][0] == "mob" else 1.0)
+			m.position = Vector3((col - (count_in_row - 1) / 2.0) * gap, 0, row * 2.2 * (1.5 if CATEGORIES[category][0] == "mob" else 1.0))
 		else:
 			m.visible = j == index
 			m.position = Vector3.ZERO

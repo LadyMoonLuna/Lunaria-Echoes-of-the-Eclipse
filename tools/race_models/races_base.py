@@ -5,7 +5,7 @@ Descrições seguem o Guia de Direção de Arte (Art Bible) do projeto.
 
 import math
 
-from modelkit import Model, humanoid, v_add, v_lerp
+from modelkit import Model, humanoid, fur_tufts, v_add, v_lerp
 
 
 # ---------------------------------------------------------------------------
@@ -333,7 +333,14 @@ def _varkai(m, ears=True, fur_tail=True, fur_col="#8d6e4c"):
         m.part("cylinder", [0.0, 0.006, 0.04], (0.32 + dx, 0.84, -0.17), claw, rot=(25, 0, 0), group="arm_r", mirror=True)
     m.part("sphere", [0.2], (0, 1.3, -0.01), leather, scale=(1.22, 1.2, 0.8))
     if fur_tail:
-        tail(m, [(0, 0.98, 0.12), (0, 0.8, 0.32), (0.05, 0.6, 0.5), (0.1, 0.5, 0.72)], [0.05, 0.055, 0.05, 0.035], fur)
+        last = tail(m, [(0, 0.98, 0.12), (0, 0.8, 0.32), (0.05, 0.6, 0.5), (0.1, 0.5, 0.72)], [0.05, 0.055, 0.05, 0.035], fur)
+        fur_tufts(m, (0.03, 0.7, 0.42), (0.05, 0.1, 0.1), 22, fur, group="tail1", length=0.05, bias=(0, -0.3, 0.6))
+        fur_tufts(m, (0.08, 0.55, 0.62), (0.05, 0.06, 0.08), 16, fur, group=last, length=0.05, bias=(0.2, -0.3, 0.7))
+    if ears:
+        fur_tufts(m, (0.08, 1.87, 0.02), (0.035, 0.05, 0.02), 6, fur, length=0.03, thickness=0.012,
+                  bias=(0.3, 0.6, 0), mirror=True)
+    fur_tufts(m, (0, 1.76, 0.03), (0.13, 0.11, 0.13), 26, fur, length=0.05, bias=(0, 0.2, 0.6),
+              region=lambda x, y, z: y > -0.1 and z > -0.4)
     return skin, fur, claw
 
 
@@ -379,6 +386,9 @@ def fera_frenesi():
     blood = m.mat("blood_claw", "#7f0000", rough=0.3, emit="#b71c1c", energy=0.6)
     m.part("box", [0.1, 0.07, 0.1], (0, 1.68, -0.15), fur, rot=(10, 0, 0))
     m.part("sphere", [0.02], (0, 1.69, -0.205), claw)
+    fur_tufts(m, (0, 1.42, 0.06), (0.26, 0.16, 0.16), 70, fur, length=0.09, bias=(0, 0.3, 0.7),
+              region=lambda x, y, z: y > -0.2 and z > -0.3)
+    fur_tufts(m, (0.3, 1.38, 0), (0.08, 0.16, 0.08), 20, fur, group="arm_r", length=0.06, bias=(0.5, -0.4, 0.3), mirror=True)
     for i in range(18):
         a = math.radians(-70 + i * 140 / 17)
         y = 1.42 + 0.12 * math.sin(i * 1.7)
@@ -465,6 +475,12 @@ def licantropo():
     m.part("sphere", [0.085], (0.49, 0.72, -0.16), skin, scale=(1, 0.9, 1.2), group="arm_r", mirror=True)
     for dx in (-0.04, 0.0, 0.04):
         m.part("cylinder", [0.0, 0.014, 0.12], (0.49 + dx, 0.62, -0.22), claw, rot=(20, 0, 0), group="arm_r", mirror=True)
+    fur_tufts(m, (0, 1.4, 0.02), (0.36, 0.3, 0.26), 110, fur, length=0.09, bias=(0, 0.3, 0.7),
+              region=lambda x, y, z: z > -0.5, seed=61)
+    fur_tufts(m, (0, 1.36, -0.12), (0.26, 0.24, 0.12), 40, fur_r, length=0.07, bias=(0, -0.5, -0.4), seed=62)
+    fur_tufts(m, (0, 1.7, -0.1), (0.15, 0.13, 0.14), 34, fur, length=0.07, bias=(0, 0.2, 0.8), seed=63)
+    fur_tufts(m, (0.15, 0.7, -0.05), (0.12, 0.25, 0.12), 26, fur, group="leg_r", length=0.06, bias=(0, -0.4, 0.4),
+              seed=64, mirror=True)
     m.anchor("hand_r", "arm_r", (0.49, 0.7, -0.17))
     m.anchor("hand_l", "arm_l", (-0.49, 0.7, -0.17))
     m.anchor("back", None, (0, 1.4, 0.3))

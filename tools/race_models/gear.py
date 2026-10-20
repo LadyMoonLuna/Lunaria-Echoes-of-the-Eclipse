@@ -290,9 +290,131 @@ def homunculus():
     return m
 
 
-WEAPONS = [iron_dagger, wooden_staff, knight_longsword, heater_shield, recurve_bow, steel_arrow, crystal_staff,
+WEAPONS_BASE = [iron_dagger, wooden_staff, knight_longsword, heater_shield, recurve_bow, steel_arrow, crystal_staff,
            holy_mace, solar_talisman, forge_warhammer, alchemy_flask, injector_gauntlet, eclipse_scythe,
            hammer_cannon, philosopher_chalice, hunting_knife, homunculus]
+
+
+# ---------------------------------------------------------------------------
+# Armas das criaturas
+# ---------------------------------------------------------------------------
+
+def raider_short_sword():
+    m = W("raider_short_sword", "Espada Curta Lascada", "Lâmina de ferro cheia de lascas do Saqueador Deserdado.", "#90a4ae")
+    iron = m.mat("chipped_iron", "#8c9399", rough=0.45, metal=0.8)
+    grip = m.mat("grip_wrap", "#3b2a1e", rough=0.9)
+    m.part("cylinder", [0.018, 0.02, 0.14], (0, 0, 0), grip)
+    m.part("box", [0.16, 0.03, 0.04], (0, 0.08, 0), iron)
+    m.part("box", [0.05, 0.5, 0.01], (0, 0.34, 0), iron)
+    m.part("prism", [0.05, 0.08, 0.01], (0, 0.63, 0), iron)
+    for y in (0.22, 0.4, 0.52):
+        m.part("box", [0.015, 0.02, 0.012], (0.026, y, 0), m.mat("notch", "#3a3d40", rough=0.6), rot=(0, 0, 40))
+    return m
+
+
+def raider_round_shield():
+    m = W("raider_round_shield", "Escudo Redondo Amassado", "Escudo de ferro com cravos; brilha em azul quando o Saqueador bloqueia.", "#78909c")
+    iron = m.mat("dented_iron", "#6f767c", rough=0.5, metal=0.8)
+    wood = m.mat("shield_wood", "#5a3f2b", rough=0.85)
+    z = -0.06
+    m.part("cylinder", [0.3, 0.3, 0.04], (0, 0.06, z), wood, rot=(90, 0, 0))
+    m.part("torus", [0.28, 0.32], (0, 0.06, z), iron, rot=(90, 0, 0))
+    m.part("sphere", [0.08], (0, 0.06, z - 0.02), iron, scale=(1, 1, 0.6))
+    for i in range(8):
+        a = math.radians(i * 45)
+        m.part("cylinder", [0.0, 0.02, 0.06], (math.cos(a) * 0.2, 0.06 + math.sin(a) * 0.2, z - 0.04), iron, rot=(-90, 0, 0))
+    m.part("box", [0.06, 0.12, 0.02], (0, 0, -0.03), m.mat("strap", "#3b2a1e", rough=0.9))
+    return m
+
+
+def heavy_crossbow():
+    m = W("heavy_crossbow", "Besta Pesada da Vigília", "Coronha de madeira e braços de ferro, segurada à frente.", "#8d6e63")
+    wood = m.mat("crossbow_wood", "#6b4a32", rough=0.7)
+    iron = m.mat("crossbow_iron", "#4a4f55", rough=0.4, metal=0.85)
+    string = m.mat("bowstring", "#e8e2d0", rough=0.7)
+    m.part("box", [0.06, 0.7, 0.07], (0, 0.2, 0), wood)
+    m.part("box", [0.62, 0.035, 0.035], (0, 0.5, 0), iron)
+    m.plank((0.31, 0.5, 0), (0.0, 0.32, 0.0), 0.004, 0.004, string)
+    m.plank((-0.31, 0.5, 0), (0.0, 0.32, 0.0), 0.004, 0.004, string)
+    m.part("cylinder", [0.006, 0.006, 0.4], (0, 0.38, -0.04), m.mat("bolt", "#b08a5a", rough=0.7))
+    m.part("box", [0.05, 0.08, 0.04], (0, 0.02, 0.05), iron)
+    return m
+
+
+def shadow_orb_staff():
+    m = W("shadow_orb_staff", "Cajado do Orbe Sombrio", "Cajado retorcido com um orbe de sombras flutuante.", "#7e57c2")
+    wood = m.mat("dark_wood", "#24161f", rough=0.7)
+    orb = m.mat("shadow_orb", "#e1bee7", emit="#aa00ff", energy=4.0, anim={"type": "glow", "speed": 2.0, "min": 0.6, "max": 1.4})
+    m.chain([(0, -0.7, 0), (0.02, 0.0, 0.0), (-0.02, 0.6, 0), (0, 0.95, 0)], [0.022, 0.024, 0.022, 0.03], wood)
+    for i in range(3):
+        a = math.radians(i * 120)
+        m.chain([(0, 0.93, 0), (math.cos(a) * 0.06, 1.02, math.sin(a) * 0.06), (math.cos(a) * 0.03, 1.12, math.sin(a) * 0.03)], [0.012, 0.008, 0.0], wood)
+    m.group("orb", (0, 1.08, 0), anim={"type": "bob", "amp": 0.03, "speed": 2.0})
+    m.part("sphere", [0.06], (0, 1.08, 0), orb, group="orb")
+    m.light("#aa00ff", 0.5, 2.0, (0, 1.08, 0))
+    return m
+
+
+def darkness_orb():
+    m = W("darkness_orb", "Orbe de Trevas", "Orbe de trevas flutuando acima da mão do Cultista.", "#4a148c")
+    orb = m.mat("darkness_core", "#120018", rough=0.2, emit="#4a148c", energy=1.5)
+    halo = m.mat("darkness_halo", "#ce93d8", emit="#d500f9", energy=3.0, alpha=0.5)
+    m.group("orb", (0, 0.2, 0), anim={"type": "spin", "axis": [0, 1, 0], "speed": 70})
+    m.part("sphere", [0.08], (0, 0.2, 0), orb, group="orb")
+    m.part("torus", [0.1, 0.115], (0, 0.2, 0), halo, rot=(60, 0, 0), group="orb")
+    m.part("torus", [0.1, 0.115], (0, 0.2, 0), halo, rot=(-60, 0, 0), group="orb")
+    m.light("#d500f9", 0.5, 2.0, (0, 0.2, 0))
+    return m
+
+
+def executioner_mace():
+    m = W("executioner_mace", "Maça do Executor", "Maça de ferro colossal com aletas, de duas mãos.", "#455a64")
+    iron = m.mat("black_iron", "#24262a", rough=0.45, metal=0.85)
+    leather = m.mat("grip_leather", "#3b2a1e", rough=0.9)
+    m.part("cylinder", [0.03, 0.034, 1.0], (0, 0.25, 0), leather)
+    m.part("sphere", [0.15], (0, 0.82, 0), iron)
+    for i in range(8):
+        a = math.radians(i * 45)
+        m.part("box", [0.02, 0.26, 0.12], (math.cos(a) * 0.14, 0.82, math.sin(a) * 0.14), iron, rot=(0, -math.degrees(a), 0))
+    m.part("cylinder", [0.0, 0.04, 0.12], (0, 1.0, 0), iron)
+    return m
+
+
+def traitor_greatsword():
+    m = W("traitor_greatsword", "Espadão do Traidor", "Espadão largo do Comandante Vaelen, com o brasão riscado.", "#cfd8dc")
+    steel = m.mat("greatsword_steel", "#d5dde4", rough=0.18, metal=0.95)
+    gold = m.mat("tarnished_gold", "#9c7c22", rough=0.35, metal=0.9)
+    grip = m.mat("grip", "#2a1d14", rough=0.9)
+    m.part("cylinder", [0.022, 0.024, 0.32], (0, 0.02, 0), grip)
+    m.part("sphere", [0.04], (0, -0.16, 0), gold)
+    m.part("box", [0.36, 0.05, 0.06], (0, 0.2, 0), gold)
+    m.part("box", [0.1, 1.1, 0.016], (0, 0.78, 0), steel)
+    m.part("box", [0.02, 1.0, 0.02], (0, 0.75, 0), gold)
+    m.part("prism", [0.1, 0.16, 0.016], (0, 1.41, 0), steel)
+    return m
+
+
+def primordial_scythe():
+    m = W("primordial_scythe", "Foice Primordial do Eclipse", "Foice de Malakor, haste negra e lâmina violeta radiante.", "#aa00ff")
+    haft = m.mat("void_haft", "#140a1e", rough=0.4, metal=0.5)
+    blade = m.mat("eclipse_blade", "#e1bee7", emit="#aa00ff", energy=4.0, double=True,
+                  anim={"type": "glow", "speed": 1.6, "min": 0.6, "max": 1.4})
+    m.chain([(0, -0.7, 0), (0.03, 0.2, 0), (-0.03, 0.9, 0), (0, 1.5, 0)], [0.03, 0.033, 0.03, 0.035], haft)
+    arc = [(0, 1.52, 0)]
+    for i in range(1, 10):
+        t = i / 9
+        arc.append((0, 1.52 + 0.3 * math.sin(t * math.pi * 0.9), -0.95 * t))
+    for i in range(len(arc) - 1):
+        m.plank(arc[i], arc[i + 1], 0.012, 0.18 * (1 - i / 9) + 0.03, blade)
+    m.light("#aa00ff", 0.8, 3.0, (0, 1.6, -0.4))
+    return m
+
+
+MOB_WEAPONS = [raider_short_sword, raider_round_shield, heavy_crossbow, shadow_orb_staff, darkness_orb,
+               executioner_mace, traitor_greatsword, primordial_scythe]
+
+
+WEAPONS = WEAPONS_BASE + MOB_WEAPONS
 
 
 # ---------------------------------------------------------------------------

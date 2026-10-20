@@ -11,6 +11,7 @@ extends RefCounted
 ##   LunariaTextures.apply(mat, "wood", 0.8)          # 1 repetição a cada 0,8 m
 ##   LunariaTextures.apply(mat, "stone", 0.9, true)   # coordenadas do mundo (cenário)
 
+const LunariaStyle = preload("res://scripts/models/LunariaStyle.gd")
 const TEX_DIR: String = "res://assets/textures/"
 const DEFAULT_TILE: Dictionary = {
 	"chainmail": 0.22, "cloth": 0.35, "linen": 0.35, "leather": 0.45, "scales": 0.35, "feather": 0.3,
@@ -64,3 +65,6 @@ static func apply(mat: StandardMaterial3D, tex_name: String, tile_m: float = 0.0
 	mat.uv1_triplanar_sharpness = 4.0
 	mat.uv1_scale = Vector3.ONE / tile
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	# Cenário e objetos texturizados também ganham o sombreamento anime (sem contorno)
+	if mat.diffuse_mode != BaseMaterial3D.DIFFUSE_TOON:
+		LunariaStyle.anime(mat, false)

@@ -22,6 +22,7 @@ sys.path.insert(0, HERE)
 from clips import CLIPS  # noqa: E402
 from gear import LOADOUTS, OUTFITS, WEAPONS  # noqa: E402
 from gltf import export_glb  # noqa: E402
+from mobs import MOBS  # noqa: E402
 from npcs import NPCS  # noqa: E402
 from races import ALL as LEGENDARY  # noqa: E402
 from races_base import ALL_BASE  # noqa: E402
@@ -32,7 +33,7 @@ GLB_DIR = os.path.join(REPO, "client", "assets", "models")
 TEX_DIR = os.path.join(REPO, "client", "assets", "textures")
 HTML_TEMPLATE = os.path.join(HERE, "preview_template.html")
 HTML_OUT = os.path.join(REPO, "docs", "previews", "racas_3d_preview.html")
-GLB_FOLDERS = {"race": "races", "npc": "npcs", "weapon": "weapons", "companion": "weapons", "outfit": "outfits"}
+GLB_FOLDERS = {"race": "races", "npc": "npcs", "mob": "mobs", "weapon": "weapons", "companion": "weapons", "outfit": "outfits"}
 
 
 def _dump(v):
@@ -57,8 +58,8 @@ def _preview_textures(models):
 
 def main():
     races = sorted((fn().to_dict() for fn in ALL_BASE + LEGENDARY), key=lambda d: d["id"])
-    models = races + [fn().to_dict() for fn in NPCS] + [fn().to_dict() for fn in WEAPONS] + \
-        [fn().to_dict() for fn in OUTFITS]
+    models = races + [fn().to_dict() for fn in NPCS] + [fn().to_dict() for fn in MOBS] + \
+        [fn().to_dict() for fn in WEAPONS] + [fn().to_dict() for fn in OUTFITS]
     plain = assign(models)
     by_uid = {m["uid"]: m for m in models}
     assert len(by_uid) == len(models), "uid duplicado"
@@ -68,6 +69,9 @@ def main():
                 assert lo[slot]["weapon"] in by_uid, lo[slot]["weapon"]
         assert lo["outfit"] in by_uid, lo["outfit"]
         assert lo.get("companion", "weapon_iron_dagger") in by_uid
+    for m in models:
+        for h in (m.get("gear") or {}).values():
+            assert h["weapon"] in by_uid, (m["uid"], h["weapon"])
         for clip in lo["actions"].values():
             assert clip in CLIPS, clip
 
@@ -98,7 +102,7 @@ def main():
             os.makedirs(folder, exist_ok=True)
             name = m["key"] if m["kind"] in ("weapon", "companion", "outfit") else "%02d_%s" % (m["id"], m["key"]) \
                 if m["kind"] == "race" else "%d_%s" % (m["id"], m["key"])
-            export_glb(m, os.path.join(folder, name + ".glb"), CLIPS if m["kind"] in ("race", "npc") else None,
+            export_glb(m, os.path.join(folder, name + ".glb"), CLIPS if m["kind"] in ("race", "npc", "mob") else None,
                        tex_dir=TEX_DIR)
 
     counts = {}

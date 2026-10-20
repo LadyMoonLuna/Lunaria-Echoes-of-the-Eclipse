@@ -2,7 +2,7 @@
 
 import math
 
-from modelkit import (Model, humanoid, flower, mushroom, ghost_copy,
+from modelkit import (Model, humanoid, flower, mushroom, ghost_copy, fur_tufts,
                       v_add, v_lerp, euler_to_mat, mmul, mat_to_euler, align_y)
 
 
@@ -453,6 +453,7 @@ def boreal():
 
     # Manto de pele e capa
     m.part("torus", [0.12, 0.27], (0, 1.53, 0.01), fur, scale=(1.05, 1.4, 0.95))
+    fur_tufts(m, (0, 1.53, 0.01), (0.27, 0.07, 0.24), 60, fur, length=0.05, bias=(0, 0.2, 0.3), seed=24)
     m.group("cape", (0, 1.52, 0.17), anim={"type": "sway", "axis": [1, 0, 0], "amp": 3.0, "speed": 1.2})
     m.part("box", [0.52, 1.1, 0.03], (0, 0.98, 0.21), cloth, rot=(-7, 0, 0), group="cape")
     m.part("box", [0.54, 0.06, 0.05], (0, 0.44, 0.27), fur, rot=(-7, 0, 0), group="cape")

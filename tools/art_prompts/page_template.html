@@ -1,0 +1,128 @@
+<title>Prompts 3D de Lunaria</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: cabeçalho com busca e filtros; lista de cartões de prompt por grupo, cada um com o arquivo .glb esperado e botão de copiar. */
+  :root {
+    --night: #0b0a14;
+    --panel: #161327;
+    --panel-2: #1d1934;
+    --line: #2c2742;
+    --moon: #e8e4f4;
+    --mist: #a49fbd;
+    --dim: #6e6889;
+    --accent: #ffd54f;
+    --ok: #69f0ae;
+    --display: "Marcellus", "Palatino Linotype", Georgia, serif;
+    --body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    color-scheme: dark;
+  }
+  body { background: var(--night); color: var(--moon); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  header { display: grid; gap: 10px; margin-bottom: 18px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 5vw, 48px); line-height: 1.05; margin: 0; text-wrap: balance; }
+  .lede { color: var(--mist); max-width: 68ch; margin: 0; }
+  .lede code { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--night);
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 12px; border-bottom: 1px solid var(--line); margin-bottom: 18px;
+  }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--night); }
+  input[type="search"] {
+    flex: 1 1 240px; min-width: 0; background: var(--panel); color: var(--moon); border: 1px solid var(--line); border-radius: 8px;
+    padding: 9px 12px; font: 15px var(--body);
+  }
+  .chip {
+    font: 500 13px var(--body); color: var(--mist); background: var(--panel); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+  .chip small { font-family: var(--mono); color: var(--dim); margin-left: 4px; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: 26px; margin: 26px 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+  .card-head { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+  .card h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .file { font-family: var(--mono); font-size: 12px; color: var(--dim); overflow-wrap: anywhere; }
+  .prompt { font: 13px/1.6 var(--mono); color: var(--mist); background: var(--night); border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; user-select: all; }
+  .copy { justify-self: start; font: 600 13px var(--body); color: var(--night); background: var(--accent); border: 0; border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+  .copy.done { background: var(--ok); }
+  .empty { color: var(--mist); padding: 24px 0; }
+  .note { color: var(--dim); font-size: 13px; margin-top: 30px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Lunaria · Echoes of the Eclipse</div>
+    <h1>Prompts 3D de Lunaria</h1>
+    <p class="lede">Prompts prontos para Meshy, Tripo3D, Rodin ou CSM, no modelo de arte do projeto. Gere o modelo, faça o rig no Mixamo e salve com o nome indicado em <code>client/assets/models/hd/</code>. O jogo passa a usar o modelo novo no lugar do atual.</p>
+  </header>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Buscar por nome ou detalhe (ex.: asas, Garrick, foice)" aria-label="Buscar prompts">
+    <div id="filters" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
+  <main id="list"></main>
+  <p class="note">Gerado por tools/art_prompts/prompts.py. Para mudar um prompt, edite a entrada correspondente no arquivo e rode o script de novo.</p>
+</div>
+
+<script>
+const PROMPTS = /*__PROMPTS__*/null;
+const groups = [...new Set(PROMPTS.map((p) => p.group))];
+let active = "Todos";
+const filters = document.getElementById("filters");
+const list = document.getElementById("list");
+const q = document.getElementById("q");
+
+function chip(label, count) {
+  const b = document.createElement("button");
+  b.className = "chip"; b.setAttribute("aria-pressed", label === active ? "true" : "false");
+  b.innerHTML = `${label}<small>${count}</small>`;
+  b.addEventListener("click", () => { active = label; renderFilters(); render(); });
+  return b;
+}
+function renderFilters() {
+  filters.innerHTML = "";
+  filters.appendChild(chip("Todos", PROMPTS.length));
+  for (const g of groups) filters.appendChild(chip(g, PROMPTS.filter((p) => p.group === g).length));
+}
+async function copyText(text, btn, pre) {
+  try { await navigator.clipboard.writeText(text); btn.textContent = "Copiado"; btn.classList.add("done"); }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents(pre);
+    const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = "Selecionado: use Ctrl+C";
+  }
+  setTimeout(() => { btn.textContent = "Copiar prompt"; btn.classList.remove("done"); }, 1800);
+}
+function render() {
+  const term = q.value.trim().toLowerCase();
+  list.innerHTML = "";
+  let shown = 0;
+  for (const g of groups) {
+    if (active !== "Todos" && active !== g) continue;
+    const items = PROMPTS.filter((p) => p.group === g && (!term || (p.name + " " + p.prompt + " " + p.uid).toLowerCase().includes(term)));
+    if (!items.length) continue;
+    const h = document.createElement("h2"); h.textContent = `${g} (${items.length})`; list.appendChild(h);
+    const grid = document.createElement("div"); grid.className = "grid";
+    for (const p of items) {
+      const card = document.createElement("article"); card.className = "card";
+      card.innerHTML = `<div class="card-head"><h3></h3><span class="file"></span></div><pre class="prompt"></pre><button class="copy">Copiar prompt</button>`;
+      card.querySelector("h3").textContent = p.name;
+      card.querySelector(".file").textContent = `hd/${p.uid}.glb`;
+      const pre = card.querySelector("pre"); pre.textContent = p.prompt;
+      const btn = card.querySelector(".copy");
+      btn.addEventListener("click", () => copyText(p.prompt, btn, pre));
+      grid.appendChild(card); shown++;
+    }
+    list.appendChild(grid);
+  }
+  if (!shown) list.innerHTML = `<p class="empty">Nenhum prompt encontrado para “${term.replace(/</g, "&lt;")}”. Tente outra palavra ou limpe a busca.</p>`;
+}
+q.addEventListener("input", render);
+renderFilters(); render();
+</script>

@@ -34,7 +34,7 @@ O projeto foi construído do zero com foco em desempenho, separação estrita de
 - **NPCs Vivos e Reatividade Racial:** Garrick, o Ferreiro patrulha a vila, defende o vilarejo de invasores e altera suas falas e relações de acordo com a raça e classe de cada aventureiro.
 - **Menu Visual de Identidade (Tecla `C` ou `Tab`):** Interface modal medieval com seleção interativa de linhagem e vocação.
 
-- **Modelos 3D (Art Bible):** as 28 raças, 6 NPCs, 16 armas, os trajes das 10 classes e 20 clipes de animação, montados em tempo de execução por `LunariaModel.gd` e exportados também como `.glb` em `client/assets/models/`. Personagens, cenário, mobs e cadáveres usam 27 texturas PBR tileáveis (`tools/textures/README.md`). Veja `tools/race_models/README.md`, a vitrine `client/scenes/RacePreview.tscn` e o preview web `docs/previews/racas_3d_preview.html`.
+- **Modelos 3D (Art Bible):** as 28 raças, 6 NPCs, 16 armas, os trajes das 10 classes e 20 clipes de animação, montados em tempo de execução por `LunariaModel.gd` e exportados também como `.glb` em `client/assets/models/`. Personagens, cenário, mobs e cadáveres usam 27 texturas PBR tileáveis (`tools/textures/README.md`). Estilo anime com cel-shading e contorno; prompts de geração 3D no estilo do projeto em `docs/art/prompts_3d.md`, com troca automática por modelos HD (`docs/art/README.md`). Veja `tools/race_models/README.md`, a vitrine `client/scenes/RacePreview.tscn` e o preview web `docs/previews/racas_3d_preview.html`.
 
 ---
 

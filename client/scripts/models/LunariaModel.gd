@@ -14,6 +14,7 @@ extends Node3D
 
 const Data = preload("res://scripts/models/LunariaModelData.gd")
 const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
+const LunariaStyle = preload("res://scripts/models/LunariaStyle.gd")
 const SCRIPT_PATH: String = "res://scripts/models/LunariaModel.gd"
 const BLEND_TIME: float = 0.15
 const LIMB_CHANNELS: Array = ["torso", "arm_r", "arm_l", "leg_r", "leg_l"]
@@ -21,6 +22,28 @@ const DEFAULT_ACTIONS: Dictionary = {
 	"1": "attack_1h", "2": "dodge_roll", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_spin", "6": "skill_z"
 }
 
+const HD_DIR: String = "res://assets/models/hd/"
+## Nomes aceitos para as animações de um .glb HD (Mixamo/Blender), por clipe do jogo.
+const HD_ANIM_NAMES: Dictionary = {
+	"idle": ["Idle"], "walk": ["Walk"], "run": ["Run"], "dodge_roll": ["Dodge_Roll", "Roll"],
+	"attack_1h": ["Attack_Melee_1H", "Attack"], "attack_2h_heavy": ["Attack_Melee_2H_Heavy", "Attack_2H_Heavy", "Attack"],
+	"attack_2h_sweep": ["Attack_Melee_2H_Heavy", "Attack_2H_Sweep", "Attack"], "attack_bow": ["Attack_Bow_Shoot", "Attack"],
+	"attack_cast": ["Attack_Cast_Throw", "Attack_Cast", "Attack"], "attack_throw": ["Attack_Cast_Throw", "Attack_Throw", "Attack"],
+	"skill_q": ["Skill_Q_Strike"], "skill_q_support": ["Skill_Q_Strike", "Skill_Q_Support"],
+	"skill_r_shield": ["Skill_R_Tactical"], "skill_r_sharpen": ["Skill_R_Tactical"], "skill_r_backflip": ["Skill_R_Tactical"],
+	"skill_f_spin": ["Skill_F_Ultimate"], "skill_f_slam": ["Skill_F_Ultimate"], "skill_z": ["Skill_Z_Racial"],
+	"kneel_autopsy": ["Interact_Autopsy_Kneel"], "death_fall": ["Death_Fall", "Death"],
+	"beast_bite": ["Attack", "Bite"], "beast_death": ["Death_Fall", "Death"],
+}
+## Ossos das mãos/costas procurados num esqueleto HD (Mixamo, Blender Rigify, genérico).
+const HD_BONES: Dictionary = {
+	"hand_r": ["mixamorig_RightHand", "mixamorig:RightHand", "RightHand", "hand.R", "Hand_R", "hand_r"],
+	"hand_l": ["mixamorig_LeftHand", "mixamorig:LeftHand", "LeftHand", "hand.L", "Hand_L", "hand_l"],
+	"back": ["mixamorig_Spine2", "mixamorig:Spine2", "Spine2", "spine.003", "Chest", "chest"],
+}
+
+## false = ignora os .glb HD e usa sempre os modelos procedurais.
+static var use_hd: bool = true
 static var _mesh_cache: Dictionary = {}
 
 var uid: String = ""
@@ -29,11 +52,17 @@ var model_name: String = ""
 var body_w: float = 1.0
 var class_id: int = -1
 
+var _data: Dictionary = {}
+var _materials: Dictionary = {}    # nome -> StandardMaterial3D
+var _weapons: Dictionary = {}      # encaixe -> modelo da arma
 var _groups: Dictionary = {}       # nome -> Node3D
 var _pivots: Dictionary = {}       # nome -> Vector3 (posição no modelo)
 var _anchors: Dictionary = {}      # nome -> Node3D
 var _anim_groups: Array = []       # [{node, anim, base_pos}]
 var _anim_materials: Array = []    # [{mat, anim, energy, alpha}]
+var _hd: bool = false
+var _hd_anim: AnimationPlayer = null
+var _hd_current: String = ""
 var _gear_nodes: Array = []
 var _gear_anims: Array = []
 var _rest_pose: Dictionary = {}
@@ -90,11 +119,26 @@ static func get_info(model_uid: String) -> Dictionary:
 
 ## Cria qualquer modelo pelo uid ("race_19", "npc_100", "weapon_knight_longsword"...).
 static func create(model_uid: String, with_lights: bool = true) -> Node3D:
-	if not has_model(model_uid):
+	var hd := hd_path(model_uid)
+	if not has_model(model_uid) and hd == "":
 		return null
 	var m: Node3D = load(SCRIPT_PATH).new()
-	m._build(Data.MODELS[model_uid], with_lights)
+	if hd != "":
+		m._build_hd(Data.MODELS.get(model_uid, {"uid": model_uid, "kind": "", "name": model_uid, "key": model_uid}), load(hd))
+	else:
+		m._build(Data.MODELS[model_uid], with_lights)
 	return m
+
+
+## Caminho do .glb detalhado (HD) deste modelo, se existir. Raças aceitam variantes _m e _f.
+static func hd_path(model_uid: String) -> String:
+	if not use_hd:
+		return ""
+	for cand in [model_uid, model_uid + "_m", model_uid + "_f"]:
+		var path: String = HD_DIR + cand + ".glb"
+		if ResourceLoader.exists(path):
+			return path
+	return ""
 
 
 ## Cria uma raça já vestida e armada com a classe indicada (-1 = sem equipamento).
@@ -107,6 +151,15 @@ static func create_race(race_id: int, p_class_id: int = -1, with_lights: bool = 
 
 static func create_npc(npc_id: int, with_lights: bool = true) -> Node3D:
 	return create(npc_uid(npc_id), with_lights)
+
+
+static func mob_uid(mob_type: int) -> String:
+	return "mob_%d" % mob_type
+
+
+## Cria uma criatura (mob) com suas armas próprias já nas mãos.
+static func create_mob(mob_type: int, with_lights: bool = true) -> Node3D:
+	return create(mob_uid(mob_type), with_lights)
 
 
 # ---------------------------------------------------------------------------
@@ -160,17 +213,11 @@ func set_class(p_class_id: int) -> void:
 	if not Data.LOADOUTS.has(key):
 		return
 	var lo: Dictionary = Data.LOADOUTS[key]
-	if lo.has("outfit") and has_model(lo["outfit"]):
+	if lo.has("outfit") and has_model(lo["outfit"]) and not _hd:
 		_add_outfit(Data.MODELS[lo["outfit"]])
 	for slot in ["hand_r", "hand_l"]:
-		if lo.has(slot) and _anchors.has(slot):
-			var h: Dictionary = lo[slot]
-			var weapon := create(h["weapon"], true)
-			if weapon:
-				weapon.position = _vec(h["offset"])
-				weapon.rotation_degrees = _vec(h["rot"])
-				_anchors[slot].add_child(weapon)
-				_gear_nodes.append(weapon)
+		if lo.has(slot):
+			_attach(slot, lo[slot])
 	if lo.has("companion"):
 		var comp := create(lo["companion"], true)
 		if comp:
@@ -181,6 +228,59 @@ func set_class(p_class_id: int) -> void:
 ## Ponto de encaixe (hand_r, hand_l, back) para prender itens extras.
 func get_anchor(anchor_name: String) -> Node3D:
 	return _anchors.get(anchor_name, null)
+
+
+## Material do modelo pelo nome (ex.: "fur_grey"), para efeitos de brilho no jogo.
+func get_material(mat_name: String) -> StandardMaterial3D:
+	return _materials.get(mat_name, null)
+
+
+## Material principal (pelagem, armadura...) usado pelos efeitos de lua e estado dos mobs.
+func get_primary_material() -> StandardMaterial3D:
+	return _materials.get(_data.get("primary", ""), null)
+
+
+## Material do escudo da criatura (brilha quando ela bloqueia).
+func get_shield_material() -> StandardMaterial3D:
+	var sm: Array = _data.get("shield_material", [])
+	if sm.size() < 2:
+		return null
+	for w in _weapons.values():
+		if is_instance_valid(w) and w.uid == sm[0]:
+			return w.get_material(sm[1])
+	return null
+
+
+## Ações das criaturas: "attack", "block", "hit", "death".
+func play_creature(action: String) -> void:
+	var actions: Dictionary = _data.get("extra_actions", {})
+	var clip: String = actions.get(action, "")
+	if clip == "":
+		return
+	play(clip, action == "death")
+
+
+## Coloca o modelo direto no último quadro da animação de morte (cadáveres).
+func pose_dead() -> void:
+	var clip: String = _data.get("extra_actions", {}).get("death", "death_fall")
+	if not Data.CLIPS.has(clip):
+		return
+	play(clip, true)
+	_oneshot_t = float(Data.CLIPS[clip]["length"])
+	_source = clip
+	_blend_t = 1.0
+
+
+func _attach(slot: String, h: Dictionary) -> void:
+	if not _anchors.has(slot):
+		return
+	var weapon := create(h["weapon"], true)
+	if weapon:
+		weapon.position = _vec(h["offset"])
+		weapon.rotation_degrees = _vec(h["rot"])
+		_anchors[slot].add_child(weapon)
+		_gear_nodes.append(weapon)
+		_weapons[slot] = weapon
 
 
 # ---------------------------------------------------------------------------
@@ -196,7 +296,9 @@ func _build(d: Dictionary, with_lights: bool) -> void:
 	scale = Vector3.ONE * float(d.get("scale", 1.0))
 	_rest_pose = d.get("rest_pose", {})
 
+	_data = d
 	var mats := _make_materials(d["materials"], _anim_materials)
+	_materials = mats
 	_add_groups(d["groups"], 1.0, null, _anim_groups)
 	_add_parts(d["parts"], mats, 1.0, null)
 	_articulated = _groups.has("pose")
@@ -211,6 +313,10 @@ func _build(d: Dictionary, with_lights: bool) -> void:
 		node.rotation_degrees = _vec(a["rot"])
 		_groups.get(group_name, self).add_child(node)
 		_anchors[anchor_name] = node
+
+	# Armas próprias das criaturas (mobs não usam set_class)
+	for slot in d.get("gear", {}):
+		_attach(slot, d["gear"][slot])
 
 	if with_lights:
 		for l in d.get("lights", []):
@@ -276,6 +382,7 @@ func _add_outfit(od: Dictionary) -> void:
 
 
 func _clear_gear() -> void:
+	_weapons.clear()
 	for n in _gear_nodes:
 		if is_instance_valid(n):
 			n.queue_free()
@@ -308,6 +415,7 @@ func _make_materials(specs: Dictionary, anim_list: Array) -> Dictionary:
 			mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 		if spec.has("tex"):
 			LunariaTextures.apply(mat, spec["tex"], float(spec.get("tile", 0.0)))
+		LunariaStyle.anime(mat, not spec.get("no_outline", false), float(spec.get("outline", LunariaStyle.OUTLINE_WIDTH)))
 		if spec.has("anim"):
 			anim_list.append({"mat": mat, "anim": spec["anim"], "energy": energy, "alpha": alpha})
 		out[key] = mat
@@ -328,30 +436,30 @@ static func _get_mesh(shape: String, s: Array) -> Mesh:
 			var sp := SphereMesh.new()
 			sp.radius = s[0]
 			sp.height = s[0] * 2.0
-			sp.radial_segments = 16
-			sp.rings = 8
+			sp.radial_segments = 32
+			sp.rings = 16
 			mesh = sp
 		"cylinder":
 			var c := CylinderMesh.new()
 			c.top_radius = s[0]
 			c.bottom_radius = s[1]
 			c.height = s[2]
-			c.radial_segments = 12
+			c.radial_segments = 24
 			c.rings = 1
 			mesh = c
 		"capsule":
 			var cap := CapsuleMesh.new()
 			cap.radius = s[0]
 			cap.height = maxf(s[1], s[0] * 2.0 + 0.001)
-			cap.radial_segments = 12
-			cap.rings = 4
+			cap.radial_segments = 24
+			cap.rings = 8
 			mesh = cap
 		"torus":
 			var t := TorusMesh.new()
 			t.inner_radius = s[0]
 			t.outer_radius = s[1]
-			t.rings = 20
-			t.ring_segments = 8
+			t.rings = 36
+			t.ring_segments = 12
 			mesh = t
 		"prism":
 			var pr := PrismMesh.new()
@@ -467,9 +575,111 @@ func _apply_pose(target: Dictionary, delta: float) -> void:
 	pose_node.position.y = _pivots["pose"].y + y + float(_rest_pose.get("root_y", 0.0))
 
 
+# ---------------------------------------------------------------------------
+# Modelos HD (.glb esculpido + rig)
+# ---------------------------------------------------------------------------
+
+func _build_hd(d: Dictionary, scene: PackedScene) -> void:
+	_hd = true
+	_data = d
+	uid = d.get("uid", "")
+	kind = d.get("kind", "")
+	model_name = d.get("name", uid)
+	name = "LunariaHD_%s" % d.get("key", uid)
+	var inst := scene.instantiate() as Node3D
+	add_child(inst)
+	# Altura alvo: humanoides ~1,85 m x escala da raça; armas mantêm o tamanho do arquivo
+	if kind in ["race", "npc", "mob"]:
+		var box := _local_aabb(inst, Transform3D.IDENTITY)
+		if box.size.y > 0.001:
+			var target_h := 1.85 * float(d.get("scale", 1.0))
+			inst.scale = Vector3.ONE * (target_h / box.size.y)
+			inst.position.y = -box.position.y * inst.scale.y
+	_hd_anim = _find_child_of_type(inst, "AnimationPlayer") as AnimationPlayer
+	var skel := _find_child_of_type(inst, "Skeleton3D") as Skeleton3D
+	if skel:
+		for slot in HD_BONES:
+			for bone_name in HD_BONES[slot]:
+				if skel.find_bone(bone_name) >= 0:
+					var att := BoneAttachment3D.new()
+					att.bone_name = bone_name
+					skel.add_child(att)
+					var holder := Node3D.new()
+					holder.name = "Anchor_" + slot
+					att.add_child(holder)
+					_anchors[slot] = holder
+					break
+	for slot in d.get("gear", {}):
+		_attach(slot, d["gear"][slot])
+
+
+func _hd_anim_name(clip: String) -> String:
+	if _hd_anim == null:
+		return ""
+	var wanted: Array = HD_ANIM_NAMES.get(clip, [clip])
+	for anim_name in _hd_anim.get_animation_list():
+		var short: String = anim_name.get_slice("|", anim_name.get_slice_count("|") - 1)
+		for w in wanted + [clip]:
+			if short.to_lower() == String(w).to_lower():
+				return anim_name
+	return ""
+
+
+func _process_hd(delta: float) -> void:
+	if _hd_anim == null:
+		return
+	var clip := ""
+	if _oneshot != "":
+		_oneshot_t += delta
+		var length := float(Data.CLIPS.get(_oneshot, {"length": 0.6})["length"])
+		var anim_name := _hd_anim_name(_oneshot)
+		if anim_name != "":
+			length = _hd_anim.get_animation(anim_name).length
+		if _oneshot_t >= length and not _oneshot_hold:
+			_oneshot = ""
+		else:
+			clip = _oneshot
+	if clip == "":
+		clip = _loop_override if _loop_override != "" else ("run" if _move_speed > 3.0 else ("walk" if _move_speed > 0.15 else "idle"))
+	var target := _hd_anim_name(clip)
+	if target != "" and target != _hd_current:
+		_hd_current = target
+		_hd_anim.play(target, BLEND_TIME)
+
+
+static func _find_child_of_type(node: Node, type_name: String) -> Node:
+	for c in node.get_children():
+		if c.is_class(type_name):
+			return c
+		var found := _find_child_of_type(c, type_name)
+		if found:
+			return found
+	return null
+
+
+static func _local_aabb(node: Node, xform: Transform3D) -> AABB:
+	var box := AABB()
+	var has := false
+	var t := xform
+	if node is Node3D:
+		t = xform * (node as Node3D).transform
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh:
+		box = t * (node as MeshInstance3D).mesh.get_aabb()
+		has = true
+	for c in node.get_children():
+		var cb := _local_aabb(c, t)
+		if cb.size != Vector3.ZERO:
+			box = cb if not has else box.merge(cb)
+			has = true
+	return box
+
+
 func _process(delta: float) -> void:
 	_time += delta
 	var t := _time
+	if _hd:
+		_process_hd(delta)
+		return
 	if _articulated:
 		_apply_pose(_target_pose(delta), delta)
 
