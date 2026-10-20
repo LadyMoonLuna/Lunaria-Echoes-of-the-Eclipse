@@ -371,6 +371,7 @@ func close_menu() -> void:
 		if world.get("attributes_ui") and world.attributes_ui.get("is_open"): any_other_open = true
 		if world.get("skills_ui") and world.skills_ui.get("is_open"): any_other_open = true
 		if world.get("dev_drop_rates_ui") and world.dev_drop_rates_ui.get("is_open"): any_other_open = true
+		if world.get("dev_manager_ui") and world.dev_manager_ui.get("is_open"): any_other_open = true
 		if world.get("dev_race_menu_ui") and world.dev_race_menu_ui.get("is_open"): any_other_open = true
 	if not any_other_open:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

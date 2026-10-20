@@ -86,6 +86,13 @@ type Player struct {
 	NPCFriendship   map[uint32]int // NPCID -> Pontos de Afiança (0 a 100)
 	UnlockedRecipes map[uint8]bool // RecipeID -> Desbloqueada
 
+	// Desafios de Obtenção das Classes Secretas (10 a 15)
+	UntouchedKills         int  // Abates sem sofrer dano (Dançarino Astral - Classe 10)
+	LowHPKills             int  // Abates com HP <= 30% (Inquisidor das Cinzas - Classe 11)
+	PerfectAutopsiesStreak int  // Sequência de autópsias perfeitas na Zona Verde (Necromante de Ossos - Classe 12)
+	SoloAlphaWolfKilled    bool // Lobo Alfa derrotado 100% Solo (Domador Primordial - Classe 13)
+	BlockedBossRupture     bool // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro da Ruptura - Classe 14)
+
 	// Cooldowns das Habilidades
 	LastActionTimes map[uint8]time.Time
 }
@@ -193,6 +200,18 @@ func GetClassBaseAttributes(classID uint8) (str, dex, con, agi, intStat, spi, ma
 		return 4, 1, 4, 1, 4, 0, 4, 2
 	case protocol.ClassHomunculusCreator: // 9: Criador (Tier 5 Única: +1 FOR, +1 DES, +3 CON, +1 AGI, +5 INT, +3 ESP, +4 PER, +2 SOR)
 		return 1, 1, 3, 1, 5, 3, 4, 2
+	case protocol.ClassAstralDancer: // 10: Dançarino Astral (Tier 5 Única: +2 FOR, +6 DES, +2 CON, +6 AGI, +2 INT, +2 PER, +3 SOR)
+		return 2, 6, 2, 6, 2, 0, 2, 3
+	case protocol.ClassAshInquisitor: // 11: Inquisidor das Cinzas (Tier 5 Única: +4 FOR, +2 DES, +4 CON, +2 AGI, +3 INT, +5 ESP, +2 PER, +1 SOR)
+		return 4, 2, 4, 2, 3, 5, 2, 1
+	case protocol.ClassBoneNecromancer: // 12: Necromante de Ossos (Tier 5 Única: +1 FOR, +2 DES, +3 CON, +1 AGI, +6 INT, +5 ESP, +3 PER, +2 SOR)
+		return 1, 2, 3, 1, 6, 5, 3, 2
+	case protocol.ClassPrimordialTamer: // 13: Domador Primordial (Tier 5 Única: +6 FOR, +3 DES, +5 CON, +4 AGI, +1 INT, +4 ESP, +3 PER, +1 SOR)
+		return 6, 3, 5, 4, 1, 4, 3, 1
+	case protocol.ClassRiftKnight: // 14: Cavaleiro da Ruptura (Tier 5 Única: +5 FOR, +1 DES, +7 CON, +1 AGI, +3 INT, +2 ESP, +3 PER, +1 SOR)
+		return 5, 1, 7, 1, 3, 2, 3, 1
+	case protocol.ClassStormHerald: // 15: Arauto da Tempestade (Tier 5 Única: +2 FOR, +3 DES, +2 CON, +4 AGI, +6 INT, +4 ESP, +3 PER, +3 SOR)
+		return 2, 3, 2, 4, 6, 4, 3, 3
 	default: // 0: Viajante / Sem Classe
 		return 0, 0, 0, 0, 0, 0, 0, 0
 	}
@@ -266,6 +285,24 @@ func CalculateStats(classID, raceID, classTier, level uint8) (uint16, uint16) {
 	case protocol.ClassHomunculusCreator: // 9 (Criador de Homúnculos)
 		baseHP = 130
 		baseStamina = 125
+	case protocol.ClassAstralDancer: // 10 (Dançarino Astral)
+		baseHP = 135
+		baseStamina = 140
+	case protocol.ClassAshInquisitor: // 11 (Inquisidor das Cinzas)
+		baseHP = 145
+		baseStamina = 115
+	case protocol.ClassBoneNecromancer: // 12 (Necromante de Ossos)
+		baseHP = 130
+		baseStamina = 120
+	case protocol.ClassPrimordialTamer: // 13 (Domador Primordial)
+		baseHP = 165
+		baseStamina = 120
+	case protocol.ClassRiftKnight: // 14 (Cavaleiro da Ruptura)
+		baseHP = 180
+		baseStamina = 100
+	case protocol.ClassStormHerald: // 15 (Arauto da Tempestade)
+		baseHP = 125
+		baseStamina = 130
 	}
 
 	var modHP uint16 = 10
@@ -572,8 +609,8 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8) {
 			if p.ClassTier < protocol.TierEpic {
 				p.ClassTier++
 			}
-		} else if p.ClassID >= 7 && p.ClassID <= 9 {
-			// Se for Classe Secreta (7 a 9) e Tier 5: evolui para Lendária (Tier 6) mantendo nível
+		} else if p.ClassID >= 7 && p.ClassID <= 15 {
+			// Se for Classe Secreta (7 a 15) e Tier 5: evolui para Lendária (Tier 6) mantendo nível
 			if p.ClassTier == protocol.TierUnique {
 				p.ClassTier = protocol.TierLegendary
 			}
@@ -585,7 +622,7 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8) {
 		}
 
 	case protocol.IdentityModeSecretReset: // 2: Trocar para Classe Secreta com Reset de Nível
-		if classID >= protocol.ClassEclipseReaper && classID <= protocol.ClassHomunculusCreator {
+		if classID >= protocol.ClassEclipseReaper && classID <= protocol.ClassStormHerald {
 			p.ClassID = classID
 			if raceID > 0 {
 				p.RaceID = raceID
@@ -603,14 +640,24 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8) {
 		p.Level += 5
 		p.StatPoints += StatPointsPerLevel(p.ClassTier) * 5
 		p.NextLevelXP = 100 + uint16(p.Level-1)*50
+
+	case protocol.IdentityModeDevDirect: // 98: Ajuste Direto via Menu Dev (Classes 1..15, Tiers 1..6)
+		if classID >= 1 && classID <= 15 {
+			p.ClassID = classID
+			if raceID >= 1 && raceID <= 6 {
+				p.ClassTier = raceID
+			} else if p.ClassTier == 0 {
+				p.ClassTier = protocol.TierCommon
+			}
+		}
 	}
 
 	p.recalculateStatsLocked()
 
-	if p.HP > p.MaxHP || actionMode == protocol.IdentityModeInitialChange || actionMode == protocol.IdentityModeSecretReset || actionMode == protocol.IdentityModeTrainLevel5 {
+	if p.HP > p.MaxHP || actionMode == protocol.IdentityModeInitialChange || actionMode == protocol.IdentityModeSecretReset || actionMode == protocol.IdentityModeTrainLevel5 || actionMode == protocol.IdentityModeDevDirect {
 		p.HP = p.MaxHP
 	}
-	if p.Stamina > float32(p.MaxStamina) || actionMode == protocol.IdentityModeInitialChange || actionMode == protocol.IdentityModeSecretReset || actionMode == protocol.IdentityModeTrainLevel5 {
+	if p.Stamina > float32(p.MaxStamina) || actionMode == protocol.IdentityModeInitialChange || actionMode == protocol.IdentityModeSecretReset || actionMode == protocol.IdentityModeTrainLevel5 || actionMode == protocol.IdentityModeDevDirect {
 		p.Stamina = float32(p.MaxStamina)
 	}
 }
@@ -637,6 +684,93 @@ func (p *Player) AddLevel(amount uint8) {
 		p.HP = p.MaxHP
 	}
 }
+
+// DevControlLevelAndStats processa comandos de desenvolvimento para nível e atributos (CommandType 8).
+// - Value 1: Sobe +1 Nível com os StatPoints do Tier atual.
+// - Value 5: Sobe +5 Níveis com os StatPoints do Tier atual.
+// - Value 50: Define Level = 50 (Nível Máximo).
+// - Value 99: Restaura 100% de HP/Stamina e concede +20 StatPoints livres.
+// - Value 0: Reseta Level = 1 e todos os atributos alocados.
+func (p *Player) DevControlLevelAndStats(val uint8) {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+
+	switch val {
+	case 1:
+		p.Level++
+		pts := StatPointsPerLevel(p.ClassTier)
+		if uint16(p.StatPoints)+uint16(pts) > 255 {
+			p.StatPoints = 255
+		} else {
+			p.StatPoints += pts
+		}
+		p.NextLevelXP = 100 + uint16(p.Level-1)*50
+		p.recalculateStatsLocked()
+		p.HP = p.MaxHP
+		p.Stamina = float32(p.MaxStamina)
+
+	case 5:
+		for i := 0; i < 5; i++ {
+			p.Level++
+			pts := StatPointsPerLevel(p.ClassTier)
+			if uint16(p.StatPoints)+uint16(pts) > 255 {
+				p.StatPoints = 255
+			} else {
+				p.StatPoints += pts
+			}
+		}
+		p.NextLevelXP = 100 + uint16(p.Level-1)*50
+		p.recalculateStatsLocked()
+		p.HP = p.MaxHP
+		p.Stamina = float32(p.MaxStamina)
+
+	case 50:
+		if p.Level < 50 {
+			diff := uint16(50 - p.Level)
+			p.Level = 50
+			pts := uint16(StatPointsPerLevel(p.ClassTier)) * diff
+			if uint16(p.StatPoints)+pts > 255 {
+				p.StatPoints = 255
+			} else {
+				p.StatPoints += uint8(pts)
+			}
+		} else {
+			p.Level = 50
+		}
+		p.XP = 0
+		p.NextLevelXP = 100 + uint16(50-1)*50
+		p.recalculateStatsLocked()
+		p.HP = p.MaxHP
+		p.Stamina = float32(p.MaxStamina)
+
+	case 99:
+		p.HP = p.MaxHP
+		p.Stamina = float32(p.MaxStamina)
+		if p.StatPoints > 235 {
+			p.StatPoints = 255
+		} else {
+			p.StatPoints += 20
+		}
+
+	case 0:
+		p.Level = 1
+		p.XP = 0
+		p.NextLevelXP = 100
+		p.StatPoints = 0
+		p.AllocSTR = 0
+		p.AllocDEX = 0
+		p.AllocCON = 0
+		p.AllocAGI = 0
+		p.AllocINT = 0
+		p.AllocSPI = 0
+		p.AllocMAS = 0
+		p.AllocLCK = 0
+		p.recalculateStatsLocked()
+		p.HP = p.MaxHP
+		p.Stamina = float32(p.MaxStamina)
+	}
+}
+
 
 // AddXP adiciona experiência ao jogador e processa subida de nível quando XP >= NextLevelXP.
 // O ganho de StatPoints escala conforme a raridade da classe (Tier 0 a 6).
@@ -1014,6 +1148,19 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		if amount == 0 {
 			amount = 1
 		}
+	}
+
+	// Passiva Cavaleiro da Ruptura (Classe 14): reduz todo dano recebido em 30%
+	if p.ClassID == protocol.ClassRiftKnight && amount > 0 {
+		amount = uint16(float32(amount) * 0.70)
+		if amount == 0 {
+			amount = 1
+		}
+	}
+
+	if amount > 0 {
+		// Ao sofrer qualquer dano, zera a sequência de abates intocados (Dançarino Astral)
+		p.UntouchedKills = 0
 	}
 
 	if amount >= p.HP {

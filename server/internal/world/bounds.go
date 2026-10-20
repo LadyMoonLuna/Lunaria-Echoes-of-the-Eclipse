@@ -1,15 +1,15 @@
 package world
 
-// MapSize é a dimensão total do mapa expandido (180x180m, variando de -90.0 a +90.0 nos eixos X e Z).
-const MapSize float32 = 180.0
+// MapSize é a dimensão total do mapa expandido (260x260m, variando de -130.0 a +130.0 nos eixos X e Z).
+const MapSize float32 = 260.0
 
-// SafeMapMin e SafeMapMax definem o limite de segurança estrito [-86.0, +86.0] anti-abismo para Mobs e NPCs.
+// SafeMapMin e SafeMapMax definem o limite de segurança estrito [-120.0, +120.0] anti-abismo para Mobs e NPCs.
 const (
-	SafeMapMin float32 = -86.0
-	SafeMapMax float32 = 86.0
+	SafeMapMin float32 = -120.0
+	SafeMapMax float32 = 120.0
 )
 
-// ClampToMapBounds restringe coordenadas X e Z estritamente dentro da zona segura [-70.0, +70.0].
+// ClampToMapBounds restringe coordenadas X e Z estritamente dentro da zona segura [-120.0, +120.0].
 func ClampToMapBounds(x, z float32) (float32, float32) {
 	if x < SafeMapMin {
 		x = SafeMapMin

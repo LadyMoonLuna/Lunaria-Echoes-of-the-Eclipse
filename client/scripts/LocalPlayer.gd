@@ -13,7 +13,7 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9
 var network_timer: float = 0.0
 
 var current_race_id: int = 1   # 1=Valeriano, 2=Noctari, 3=Kharad, 4=Varkai, 5=Dhampir
-var current_class_id: int = 1  # 1..9
+var current_class_id: int = 1  # 1..15
 
 var is_attacking: bool = false
 var is_dodging: bool = false
@@ -31,6 +31,8 @@ var skill_slot_bindings: Dictionary = {
 
 var homunculus_orbiter: Node3D = null
 var homunculus_anim_time: float = 0.0
+var spirit_wolf_companion: Node3D = null
+var spirit_wolf_anim_time: float = 0.0
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
@@ -49,6 +51,7 @@ var default_weapon_pos: Vector3 = Vector3.ZERO
 var default_weapon_scale: Vector3 = Vector3.ONE
 
 func _ready() -> void:
+	_ensure_input_actions()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	load_skill_keybinds()
 	camera_pivot.top_level = true
@@ -73,6 +76,34 @@ func _ready() -> void:
 	_setup_crosshair()
 	_apply_race_visuals()
 	_apply_class_visuals()
+
+func _ensure_input_actions() -> void:
+	var required_actions := {
+		"attack_basic": MOUSE_BUTTON_LEFT,
+		"dodge_roll": KEY_SHIFT,
+		"skill_1": KEY_Q,
+		"skill_2": KEY_R,
+		"skill_3": KEY_F,
+		"skill_racial": KEY_Z,
+		"ui_cancel": KEY_ESCAPE,
+		"jump": KEY_SPACE,
+		"move_left": KEY_A,
+		"move_right": KEY_D,
+		"move_forward": KEY_W,
+		"move_back": KEY_S
+	}
+	for action_name in required_actions.keys():
+		if not InputMap.has_action(action_name):
+			InputMap.add_action(action_name)
+			var key_val = required_actions[action_name]
+			if key_val == MOUSE_BUTTON_LEFT:
+				var mb := InputEventMouseButton.new()
+				mb.button_index = MOUSE_BUTTON_LEFT
+				InputMap.action_add_event(action_name, mb)
+			else:
+				var k := InputEventKey.new()
+				k.physical_keycode = key_val
+				InputMap.action_add_event(action_name, k)
 
 func _on_player_respawned(pid: int, px: float, py: float, pz: float) -> void:
 	if NetworkManager and pid == NetworkManager.my_player_id:
@@ -111,6 +142,14 @@ func _process(_delta: float) -> void:
 		crosshair_layer.visible = (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not is_menu_open)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F9 or event.keycode == KEY_F10:
+			var world = get_parent()
+			if world and world.has_method("_toggle_dev_manager"):
+				world._toggle_dev_manager()
+				get_viewport().set_input_as_handled()
+				return
+
 	if is_menu_open:
 		return
 
@@ -119,7 +158,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		spring_arm.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		spring_arm.rotation.x = clamp(spring_arm.rotation.x, deg_to_rad(-70.0), deg_to_rad(55.0))
 
-	if event.is_action_pressed("ui_cancel"):
+	if (InputMap.has_action("ui_cancel") and event.is_action_pressed("ui_cancel")) or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		else:
@@ -127,35 +166,19 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# Action Combat Inputs (quando o cursor está capturado e menu fechado)
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		if event.is_action_pressed("attack_basic") or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		if (InputMap.has_action("attack_basic") and event.is_action_pressed("attack_basic")) or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 			trigger_action_by_id(skill_slot_bindings.get("LMB", 1))
-		elif event.is_action_pressed("dodge_roll") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SHIFT):
+		elif (InputMap.has_action("dodge_roll") and event.is_action_pressed("dodge_roll")) or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SHIFT):
 			_perform_dodge_roll()
-		elif event.is_action_pressed("skill_1") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q):
+		elif (InputMap.has_action("skill_1") and event.is_action_pressed("skill_1")) or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q):
 			trigger_action_by_id(skill_slot_bindings.get("Q", 3))
-		elif event.is_action_pressed("skill_2") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R):
+		elif (InputMap.has_action("skill_2") and event.is_action_pressed("skill_2")) or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R):
 			trigger_action_by_id(skill_slot_bindings.get("R", 4))
-		elif event.is_action_pressed("skill_3") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F):
+		elif (InputMap.has_action("skill_3") and event.is_action_pressed("skill_3")) or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F):
 			trigger_action_by_id(skill_slot_bindings.get("F", 5))
-		elif event.is_action_pressed("skill_racial") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z):
+		elif (InputMap.has_action("skill_racial") and event.is_action_pressed("skill_racial")) or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Z):
 			trigger_action_by_id(skill_slot_bindings.get("Z", 6))
 
-	if event is InputEventKey and event.pressed and not event.echo:
-		match event.keycode:
-			KEY_1: _change_class(1)
-			KEY_2: _change_class(2)
-			KEY_3: _change_class(3)
-			KEY_4: _change_class(4)
-			KEY_5: _change_class(5)
-			KEY_6: _change_class(6)
-			KEY_7: _change_class(7)
-			KEY_8: _change_class(8)
-			KEY_9: _change_class(9)
-			KEY_F1: _change_race(1)
-			KEY_F2: _change_race(2)
-			KEY_F3: _change_race(3)
-			KEY_F4: _change_race(4)
-			KEY_F5: _change_race(5)
 
 func _get_aim_direction() -> Vector3:
 	if camera:
@@ -177,6 +200,12 @@ func _get_class_color() -> Color:
 		7: return Color("#d500f9") # Púrpura Abissal Ceifador
 		8: return Color("#ffb300") # Dourado Mecânico Artífice
 		9: return Color("#00b0ff") # Ciano Quimérico Homúnculo
+		10: return Color("#00e5ff") # Ciano Estelar Dançarino Astral
+		11: return Color("#ff1744") # Carmesim Incandescente Inquisidor das Cinzas
+		12: return Color("#00e676") # Verde Esmeralda Necromante de Ossos
+		13: return Color("#80d8ff") # Azul Prateado Domador Primordial
+		14: return Color("#7c4dff") # Roxo Gravitacional Cavaleiro da Ruptura
+		15: return Color("#00b0ff") # Azul Relâmpago Arauto da Tempestade
 		_: return Color("#ffffff")
 
 func _spawn_skill_q_flash() -> void:
@@ -811,6 +840,59 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
+		10: # Dançarino Astral: Sequência acrobática com lâminas estelares duplas
+			var tw := create_tween().set_parallel(false)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-45.0), deg_to_rad(-80.0), deg_to_rad(60.0)), 0.08)
+			if offhand_pivot:
+				var tw_off := create_tween()
+				tw_off.tween_property(offhand_pivot, "rotation", Vector3(deg_to_rad(-35.0), deg_to_rad(70.0), deg_to_rad(-50.0)), 0.08)
+				tw_off.tween_property(offhand_pivot, "rotation", Vector3(deg_to_rad(65.0), deg_to_rad(-45.0), deg_to_rad(40.0)), 0.12)
+				tw_off.tween_property(offhand_pivot, "rotation", Vector3.ZERO, 0.12)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(65.0), deg_to_rad(60.0), deg_to_rad(-50.0)), 0.12)
+			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
+			tw.finished.connect(func(): is_attacking = false)
+
+		11: # Inquisidor das Cinzas: Chicoteada / arremesso do mangual em chamas
+			var tw := create_tween().set_parallel(false)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-80.0), deg_to_rad(15.0), deg_to_rad(-10.0)), 0.11)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(85.0), deg_to_rad(-25.0), 0.0), 0.13)
+			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.13)
+			tw.finished.connect(func(): is_attacking = false)
+
+		12: # Necromante de Ossos: Erguimento do Cajado com pulso necromântico
+			var tw := create_tween().set_parallel(false)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-75.0), deg_to_rad(20.0), deg_to_rad(-20.0)), 0.14)
+			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z - 0.3, 0.12)
+			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
+			tw.tween_property(weapon_pivot, "position", default_weapon_pos, 0.14)
+			tw.finished.connect(func(): is_attacking = false)
+
+		13: # Domador Primordial: Estocada feroz de lança
+			var tw := create_tween().set_parallel(false)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-85.0), 0.0, deg_to_rad(10.0)), 0.1)
+			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z - 0.45, 0.1)
+			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z, 0.14)
+			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
+			tw.finished.connect(func(): is_attacking = false)
+
+		14: # Cavaleiro da Ruptura: Golpe com Espada Colossal e avanço de Escudo
+			var tw := create_tween().set_parallel(false)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-90.0), deg_to_rad(15.0), deg_to_rad(-10.0)), 0.14)
+			if offhand_pivot:
+				var tw_off := create_tween()
+				tw_off.tween_property(offhand_pivot, "position:z", -0.35, 0.14)
+				tw_off.tween_property(offhand_pivot, "position:z", -0.2, 0.14)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(80.0), deg_to_rad(-10.0), 0.0), 0.15)
+			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
+			tw.finished.connect(func(): is_attacking = false)
+
+		15: # Arauto da Tempestade: Corte descendente e descarga da Alabarda
+			var tw := create_tween().set_parallel(false)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-70.0), deg_to_rad(-60.0), deg_to_rad(45.0)), 0.1)
+			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(75.0), deg_to_rad(40.0), deg_to_rad(-30.0)), 0.14)
+			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
+			tw.finished.connect(func(): is_attacking = false)
+
 		_: # Espadachim: Corte em arco e giro de 360
 			var tw := create_tween().set_parallel(false)
 			if action_type == 3 or action_type == 4 or action_type == 5:
@@ -1050,6 +1132,10 @@ func _apply_class_visuals() -> void:
 		homunculus_orbiter.queue_free()
 		homunculus_orbiter = null
 
+	if spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
+		spirit_wolf_companion.queue_free()
+		spirit_wolf_companion = null
+
 	match current_class_id:
 		1: # Espadachim: Espada Longa Prateada + Escudo na mão esquerda
 			_build_sword_and_shield()
@@ -1069,6 +1155,18 @@ func _apply_class_visuals() -> void:
 			_build_hammer_cannon()
 		9: # Criador de Homúnculos: Orbe Alquímico Carmesim + Mini-Homúnculo orbitando
 			_build_homunculus_orb()
+		10: # Dançarino Astral: Duas lâminas estelares finas brilhando em azul-ciano e prata nas duas mãos
+			_build_astral_blades()
+		11: # Inquisidor das Cinzas: Mangual/Correntes incandescentes carmesins
+			_build_ash_flail_and_chains()
+		12: # Necromante de Ossos: Cajado de osso pálido com crânio de cristal verde-esmeralda no topo
+			_build_bone_staff()
+		13: # Domador Primordial: Lança de caça selvagem + Lobo Espiritual Prateado Translúcido
+			_build_primordial_spear_and_wolf()
+		14: # Cavaleiro da Ruptura: Espada colossal negra com borda roxa gravitacional + Escudo pesado do Vazio
+			_build_void_greatsword_and_shield()
+		15: # Arauto da Tempestade: Alabarda longa dourada crepitando com eletricidade azul
+			_build_storm_halberd()
 
 func _build_sword_and_shield() -> void:
 	# Espada Longa
@@ -1626,6 +1724,697 @@ func _build_homunculus_orb() -> void:
 
 	add_child(homunculus_orbiter)
 
+func _build_astral_blades() -> void:
+	# Lâmina Estelar Principal (Mão Direita)
+	var silver_mat := StandardMaterial3D.new()
+	silver_mat.albedo_color = Color(0.92, 0.96, 1.0)
+	silver_mat.metallic = 0.95
+	silver_mat.roughness = 0.1
+	silver_mat.emission_enabled = true
+	silver_mat.emission = Color("#00e5ff")
+	silver_mat.emission_energy_multiplier = 2.4
+
+	var cyan_edge_mat := StandardMaterial3D.new()
+	cyan_edge_mat.albedo_color = Color("#18ffff")
+	cyan_edge_mat.emission_enabled = true
+	cyan_edge_mat.emission = Color("#00e5ff")
+	cyan_edge_mat.emission_energy_multiplier = 4.2
+
+	var dark_hilt_mat := StandardMaterial3D.new()
+	dark_hilt_mat.albedo_color = Color(0.18, 0.22, 0.28)
+	dark_hilt_mat.metallic = 0.9
+	dark_hilt_mat.roughness = 0.25
+
+	# Lâmina 1 (Mão Direita)
+	var blade := MeshInstance3D.new()
+	var blade_box := BoxMesh.new()
+	blade_box.size = Vector3(0.04, 1.05, 0.015)
+	blade.mesh = blade_box
+	blade.material_override = silver_mat
+	blade.position = Vector3(0, 0.52, 0)
+	weapon_mesh.add_child(blade)
+
+	var edge_glow := MeshInstance3D.new()
+	var edge_box := BoxMesh.new()
+	edge_box.size = Vector3(0.05, 1.06, 0.005)
+	edge_glow.mesh = edge_box
+	edge_glow.material_override = cyan_edge_mat
+	edge_glow.position = Vector3(0, 0.52, 0)
+	weapon_mesh.add_child(edge_glow)
+
+	var guard := MeshInstance3D.new()
+	var guard_torus := TorusMesh.new()
+	guard_torus.inner_radius = 0.04
+	guard_torus.outer_radius = 0.09
+	guard.mesh = guard_torus
+	guard.material_override = cyan_edge_mat
+	guard.rotation.x = deg_to_rad(90.0)
+	guard.position = Vector3(0, 0.02, 0)
+	weapon_mesh.add_child(guard)
+
+	var hilt := MeshInstance3D.new()
+	var hilt_cyl := CylinderMesh.new()
+	hilt_cyl.top_radius = 0.02
+	hilt_cyl.bottom_radius = 0.02
+	hilt_cyl.height = 0.24
+	hilt.mesh = hilt_cyl
+	hilt.material_override = dark_hilt_mat
+	hilt.position = Vector3(0, -0.12, 0)
+	weapon_mesh.add_child(hilt)
+
+	var light_main := OmniLight3D.new()
+	light_main.light_color = Color("#00e5ff")
+	light_main.light_energy = 1.8
+	light_main.omni_range = 2.4
+	weapon_mesh.add_child(light_main)
+
+	# Lâmina Estelar Secundária (Mão Esquerda / Offhand)
+	if offhand_pivot:
+		var off_blade := MeshInstance3D.new()
+		off_blade.mesh = blade_box
+		off_blade.material_override = silver_mat
+		off_blade.position = Vector3(0, 0.52, 0)
+		offhand_pivot.add_child(off_blade)
+
+		var off_edge := MeshInstance3D.new()
+		off_edge.mesh = edge_box
+		off_edge.material_override = cyan_edge_mat
+		off_edge.position = Vector3(0, 0.52, 0)
+		offhand_pivot.add_child(off_edge)
+
+		var off_guard := MeshInstance3D.new()
+		off_guard.mesh = guard_torus
+		off_guard.material_override = cyan_edge_mat
+		off_guard.rotation.x = deg_to_rad(90.0)
+		off_guard.position = Vector3(0, 0.02, 0)
+		offhand_pivot.add_child(off_guard)
+
+		var off_hilt := MeshInstance3D.new()
+		off_hilt.mesh = hilt_cyl
+		off_hilt.material_override = dark_hilt_mat
+		off_hilt.position = Vector3(0, -0.12, 0)
+		offhand_pivot.add_child(off_hilt)
+
+		var light_off := OmniLight3D.new()
+		light_off.light_color = Color("#00e5ff")
+		light_off.light_energy = 1.8
+		light_off.omni_range = 2.4
+		offhand_pivot.add_child(light_off)
+
+func _build_ash_flail_and_chains() -> void:
+	# Empunhadura de ferro negro das cinzas
+	var iron_mat := StandardMaterial3D.new()
+	iron_mat.albedo_color = Color(0.12, 0.12, 0.14)
+	iron_mat.metallic = 0.9
+	iron_mat.roughness = 0.3
+
+	var ember_mat := StandardMaterial3D.new()
+	ember_mat.albedo_color = Color("#d50000")
+	ember_mat.emission_enabled = true
+	ember_mat.emission = Color("#ff1744")
+	ember_mat.emission_energy_multiplier = 4.5
+
+	# Cabo do Mangual
+	var shaft := MeshInstance3D.new()
+	var shaft_cyl := CylinderMesh.new()
+	shaft_cyl.top_radius = 0.03
+	shaft_cyl.bottom_radius = 0.035
+	shaft_cyl.height = 0.48
+	shaft.mesh = shaft_cyl
+	shaft.material_override = iron_mat
+	shaft.position = Vector3(0, 0.1, 0)
+	weapon_mesh.add_child(shaft)
+
+	# Anéis e garras do topo
+	var cap := MeshInstance3D.new()
+	var cap_ring := TorusMesh.new()
+	cap_ring.inner_radius = 0.03
+	cap_ring.outer_radius = 0.06
+	cap.mesh = cap_ring
+	cap.material_override = ember_mat
+	cap.position = Vector3(0, 0.35, 0)
+	weapon_mesh.add_child(cap)
+
+	# Elos da corrente incandescente pendendo
+	for i in range(3):
+		var link := MeshInstance3D.new()
+		var link_torus := TorusMesh.new()
+		link_torus.inner_radius = 0.025
+		link_torus.outer_radius = 0.05
+		link.mesh = link_torus
+		link.material_override = ember_mat
+		if i % 2 == 1:
+			link.rotation.y = deg_to_rad(90.0)
+		link.position = Vector3(0, 0.35 - (i + 1) * 0.09, -i * 0.05)
+		weapon_mesh.add_child(link)
+
+	# Cabeça espinhosa do Mangual (Incandescente carmesim)
+	var flail_head := MeshInstance3D.new()
+	var head_sphere := SphereMesh.new()
+	head_sphere.radius = 0.13
+	head_sphere.height = 0.26
+	flail_head.mesh = head_sphere
+	flail_head.material_override = ember_mat
+	flail_head.position = Vector3(0, 0.04, -0.16)
+	weapon_mesh.add_child(flail_head)
+
+	# Espinhos pontiagudos ao redor da cabeça
+	for angle in [0, 60, 120, 180, 240, 300]:
+		var spike := MeshInstance3D.new()
+		var spike_cone := CylinderMesh.new()
+		spike_cone.top_radius = 0.0
+		spike_cone.bottom_radius = 0.03
+		spike_cone.height = 0.12
+		spike.mesh = spike_cone
+		spike.material_override = iron_mat
+		spike.rotation.z = deg_to_rad(angle)
+		spike.position = flail_head.position + Vector3(sin(deg_to_rad(angle)) * 0.13, cos(deg_to_rad(angle)) * 0.13, 0)
+		weapon_mesh.add_child(spike)
+
+	var flame_light := OmniLight3D.new()
+	flame_light.light_color = Color("#ff1744")
+	flame_light.light_energy = 2.6
+	flame_light.omni_range = 2.8
+	weapon_mesh.add_child(flame_light)
+
+	# Correntes incandescentes no braço esquerdo (Offhand)
+	if offhand_pivot:
+		var off_chain := MeshInstance3D.new()
+		var off_torus := TorusMesh.new()
+		off_torus.inner_radius = 0.07
+		off_torus.outer_radius = 0.11
+		off_chain.mesh = off_torus
+		off_chain.material_override = ember_mat
+		off_chain.rotation.x = deg_to_rad(90.0)
+		off_chain.position = Vector3(0, 0.05, 0)
+		offhand_pivot.add_child(off_chain)
+
+		var brand := MeshInstance3D.new()
+		var brand_box := BoxMesh.new()
+		brand_box.size = Vector3(0.12, 0.12, 0.03)
+		brand.mesh = brand_box
+		brand.material_override = ember_mat
+		brand.position = Vector3(0, 0.05, -0.1)
+		offhand_pivot.add_child(brand)
+
+func _build_bone_staff() -> void:
+	# Cajado de osso pálido
+	var bone_mat := StandardMaterial3D.new()
+	bone_mat.albedo_color = Color(0.91, 0.9, 0.84)
+	bone_mat.roughness = 0.65
+
+	var emerald_mat := StandardMaterial3D.new()
+	emerald_mat.albedo_color = Color("#00e676")
+	emerald_mat.emission_enabled = true
+	emerald_mat.emission = Color("#00e676")
+	emerald_mat.emission_energy_multiplier = 4.2
+	emerald_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	emerald_mat.albedo_color.a = 0.9
+
+	# Haste de osso
+	var shaft := MeshInstance3D.new()
+	var shaft_cyl := CylinderMesh.new()
+	shaft_cyl.top_radius = 0.032
+	shaft_cyl.bottom_radius = 0.042
+	shaft_cyl.height = 1.55
+	shaft.mesh = shaft_cyl
+	shaft.material_override = bone_mat
+	shaft.position = Vector3(0, 0.45, 0)
+	weapon_mesh.add_child(shaft)
+
+	# Anéis de vértebras ao longo do cajado
+	for y_off in [0.0, 0.4, 0.8]:
+		var vert := MeshInstance3D.new()
+		var vert_torus := TorusMesh.new()
+		vert_torus.inner_radius = 0.038
+		vert_torus.outer_radius = 0.065
+		vert.mesh = vert_torus
+		vert.material_override = bone_mat
+		vert.position = Vector3(0, y_off, 0)
+		weapon_mesh.add_child(vert)
+
+	# Crânio de cristal verde-esmeralda no topo
+	var cranium := MeshInstance3D.new()
+	var cranium_sphere := SphereMesh.new()
+	cranium_sphere.radius = 0.13
+	cranium_sphere.height = 0.22
+	cranium.mesh = cranium_sphere
+	cranium.material_override = emerald_mat
+	cranium.position = Vector3(0, 1.25, 0)
+	weapon_mesh.add_child(cranium)
+
+	var jaw := MeshInstance3D.new()
+	var jaw_box := BoxMesh.new()
+	jaw_box.size = Vector3(0.11, 0.08, 0.12)
+	jaw.mesh = jaw_box
+	jaw.material_override = emerald_mat
+	jaw.position = Vector3(0, 1.15, -0.04)
+	weapon_mesh.add_child(jaw)
+
+	# Olhos do crânio com luz concentrada
+	for eye_x in [-0.045, 0.045]:
+		var eye := MeshInstance3D.new()
+		var eye_sphere := SphereMesh.new()
+		eye_sphere.radius = 0.025
+		eye_sphere.height = 0.05
+		eye.mesh = eye_sphere
+		var eye_mat := StandardMaterial3D.new()
+		eye_mat.albedo_color = Color("#b9f6ca")
+		eye_mat.emission_enabled = true
+		eye_mat.emission = Color("#69f0ae")
+		eye_mat.emission_energy_multiplier = 5.0
+		eye.material_override = eye_mat
+		eye.position = Vector3(eye_x, 1.26, -0.1)
+		weapon_mesh.add_child(eye)
+
+	# Chifres/costelas de osso coroando o crânio
+	for side in [-1.0, 1.0]:
+		var horn := MeshInstance3D.new()
+		var horn_cone := CylinderMesh.new()
+		horn_cone.top_radius = 0.0
+		horn_cone.bottom_radius = 0.025
+		horn_cone.height = 0.28
+		horn.mesh = horn_cone
+		horn.material_override = bone_mat
+		horn.rotation.z = deg_to_rad(35.0 * side)
+		horn.position = Vector3(side * 0.12, 1.35, 0)
+		weapon_mesh.add_child(horn)
+
+	var staff_light := OmniLight3D.new()
+	staff_light.light_color = Color("#00e676")
+	staff_light.light_energy = 2.8
+	staff_light.omni_range = 3.2
+	cranium.add_child(staff_light)
+
+	# Relicário de osso na mão esquerda
+	if offhand_pivot:
+		var off_relic := MeshInstance3D.new()
+		var relic_box := BoxMesh.new()
+		relic_box.size = Vector3(0.12, 0.18, 0.08)
+		off_relic.mesh = relic_box
+		off_relic.material_override = bone_mat
+		off_relic.position = Vector3(0, 0.1, 0)
+		offhand_pivot.add_child(off_relic)
+
+		var rune_core := MeshInstance3D.new()
+		var rune_sph := SphereMesh.new()
+		rune_sph.radius = 0.04
+		rune_sph.height = 0.08
+		rune_core.mesh = rune_sph
+		rune_core.material_override = emerald_mat
+		rune_core.position = Vector3(0, 0.1, -0.05)
+		offhand_pivot.add_child(rune_core)
+
+func _build_primordial_spear_and_wolf() -> void:
+	# Lança de caça selvagem
+	var wood_mat := StandardMaterial3D.new()
+	wood_mat.albedo_color = Color("#3e2723")
+	wood_mat.roughness = 0.75
+
+	var wrap_mat := StandardMaterial3D.new()
+	wrap_mat.albedo_color = Color("#795548")
+	wrap_mat.roughness = 0.6
+
+	var spearhead_mat := StandardMaterial3D.new()
+	spearhead_mat.albedo_color = Color("#cfd8dc")
+	spearhead_mat.metallic = 0.8
+	spearhead_mat.roughness = 0.2
+	spearhead_mat.emission_enabled = true
+	spearhead_mat.emission = Color("#80d8ff")
+	spearhead_mat.emission_energy_multiplier = 2.0
+
+	var bone_accent_mat := StandardMaterial3D.new()
+	bone_accent_mat.albedo_color = Color("#e8e5d8")
+	bone_accent_mat.roughness = 0.5
+
+	# Haste longa de madeira ancestral
+	var shaft := MeshInstance3D.new()
+	var shaft_cyl := CylinderMesh.new()
+	shaft_cyl.top_radius = 0.03
+	shaft_cyl.bottom_radius = 0.034
+	shaft_cyl.height = 1.95
+	shaft.mesh = shaft_cyl
+	shaft.material_override = wood_mat
+	shaft.position = Vector3(0, 0.65, 0)
+	weapon_mesh.add_child(shaft)
+
+	# Faixas de couro de pegada
+	var grip := MeshInstance3D.new()
+	var grip_cyl := CylinderMesh.new()
+	grip_cyl.top_radius = 0.036
+	grip_cyl.bottom_radius = 0.036
+	grip_cyl.height = 0.36
+	grip.mesh = grip_cyl
+	grip.material_override = wrap_mat
+	grip.position = Vector3(0, 0.15, 0)
+	weapon_mesh.add_child(grip)
+
+	# Ponta serrada da lança
+	var spearhead := MeshInstance3D.new()
+	var spear_box := BoxMesh.new()
+	spear_box.size = Vector3(0.12, 0.52, 0.025)
+	spearhead.mesh = spear_box
+	spearhead.material_override = spearhead_mat
+	spearhead.position = Vector3(0, 1.7, 0)
+	weapon_mesh.add_child(spearhead)
+
+	# Presas de besta penduradas na base da ponta
+	for side in [-1.0, 1.0]:
+		var fang := MeshInstance3D.new()
+		var fang_cone := CylinderMesh.new()
+		fang_cone.top_radius = 0.0
+		fang_cone.bottom_radius = 0.02
+		fang_cone.height = 0.12
+		fang.mesh = fang_cone
+		fang.material_override = bone_accent_mat
+		fang.rotation.x = deg_to_rad(180.0)
+		fang.rotation.z = deg_to_rad(side * 20.0)
+		fang.position = Vector3(side * 0.06, 1.42, 0)
+		weapon_mesh.add_child(fang)
+
+	# Lobo Espiritual Prateado Translúcido Acompanhante
+	spirit_wolf_companion = Node3D.new()
+	spirit_wolf_companion.name = "SpiritWolfCompanion"
+
+	var wolf_mat := StandardMaterial3D.new()
+	wolf_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	wolf_mat.albedo_color = Color(0.72, 0.88, 1.0, 0.62)
+	wolf_mat.emission_enabled = true
+	wolf_mat.emission = Color("#80d8ff")
+	wolf_mat.emission_energy_multiplier = 2.4
+	wolf_mat.roughness = 0.2
+
+	# Corpo/Tronco do Lobo
+	var body_node := MeshInstance3D.new()
+	var body_capsule := CapsuleMesh.new()
+	body_capsule.radius = 0.18
+	body_capsule.height = 0.65
+	body_node.mesh = body_capsule
+	body_node.material_override = wolf_mat
+	body_node.rotation.x = deg_to_rad(90.0)
+	spirit_wolf_companion.add_child(body_node)
+
+	# Peitoral e cernelha
+	var chest := MeshInstance3D.new()
+	var chest_box := BoxMesh.new()
+	chest_box.size = Vector3(0.32, 0.36, 0.32)
+	chest.mesh = chest_box
+	chest.material_override = wolf_mat
+	chest.position = Vector3(0, 0.08, -0.22)
+	spirit_wolf_companion.add_child(chest)
+
+	# Cabeça do Lobo
+	var head := MeshInstance3D.new()
+	var head_box := BoxMesh.new()
+	head_box.size = Vector3(0.22, 0.18, 0.26)
+	head.mesh = head_box
+	head.material_override = wolf_mat
+	head.position = Vector3(0, 0.24, -0.42)
+	spirit_wolf_companion.add_child(head)
+
+	# Focinho alongado
+	var snout := MeshInstance3D.new()
+	var snout_box := BoxMesh.new()
+	snout_box.size = Vector3(0.12, 0.1, 0.2)
+	snout.mesh = snout_box
+	snout.material_override = wolf_mat
+	snout.position = Vector3(0, 0.19, -0.58)
+	spirit_wolf_companion.add_child(snout)
+
+	# Orelhas pontudas
+	for ear_x in [-0.08, 0.08]:
+		var ear := MeshInstance3D.new()
+		var ear_prism := PrismMesh.new()
+		ear_prism.size = Vector3(0.07, 0.12, 0.05)
+		ear.mesh = ear_prism
+		ear.material_override = wolf_mat
+		ear.position = Vector3(ear_x, 0.38, -0.4)
+		spirit_wolf_companion.add_child(ear)
+
+	# Olhos espectrais cintilantes
+	for eye_x in [-0.05, 0.05]:
+		var eye := MeshInstance3D.new()
+		var eye_sph := SphereMesh.new()
+		eye_sph.radius = 0.025
+		eye_sph.height = 0.05
+		eye.mesh = eye_sph
+		var eye_mat := StandardMaterial3D.new()
+		eye_mat.albedo_color = Color("#00e5ff")
+		eye_mat.emission_enabled = true
+		eye_mat.emission = Color("#00e5ff")
+		eye_mat.emission_energy_multiplier = 4.5
+		eye.material_override = eye_mat
+		eye.position = Vector3(eye_x, 0.26, -0.54)
+		spirit_wolf_companion.add_child(eye)
+
+	# Cauda espectral arqueada
+	var tail := MeshInstance3D.new()
+	var tail_cyl := CylinderMesh.new()
+	tail_cyl.top_radius = 0.02
+	tail_cyl.bottom_radius = 0.06
+	tail_cyl.height = 0.42
+	tail.mesh = tail_cyl
+	tail.material_override = wolf_mat
+	tail.rotation.x = deg_to_rad(-45.0)
+	tail.position = Vector3(0, 0.12, 0.42)
+	spirit_wolf_companion.add_child(tail)
+
+	# 4 Patas espectrais
+	for pos in [Vector3(-0.12, -0.2, -0.2), Vector3(0.12, -0.2, -0.2), Vector3(-0.12, -0.2, 0.2), Vector3(0.12, -0.2, 0.2)]:
+		var paw := MeshInstance3D.new()
+		var paw_cyl := CylinderMesh.new()
+		paw_cyl.top_radius = 0.045
+		paw_cyl.bottom_radius = 0.03
+		paw_cyl.height = 0.28
+		paw.mesh = paw_cyl
+		paw.material_override = wolf_mat
+		paw.position = pos
+		spirit_wolf_companion.add_child(paw)
+
+	var wolf_light := OmniLight3D.new()
+	wolf_light.light_color = Color("#80d8ff")
+	wolf_light.light_energy = 1.8
+	wolf_light.omni_range = 3.0
+	spirit_wolf_companion.add_child(wolf_light)
+
+	add_child(spirit_wolf_companion)
+
+func _build_void_greatsword_and_shield() -> void:
+	# Espada colossal negra com borda roxa gravitacional
+	var void_black_mat := StandardMaterial3D.new()
+	void_black_mat.albedo_color = Color(0.06, 0.06, 0.08)
+	void_black_mat.metallic = 0.95
+	void_black_mat.roughness = 0.2
+
+	var gravity_purple_mat := StandardMaterial3D.new()
+	gravity_purple_mat.albedo_color = Color("#7c4dff")
+	gravity_purple_mat.emission_enabled = true
+	gravity_purple_mat.emission = Color("#b388ff")
+	gravity_purple_mat.emission_energy_multiplier = 3.8
+
+	# Lâmina Colossal Negra
+	var blade := MeshInstance3D.new()
+	var blade_box := BoxMesh.new()
+	blade_box.size = Vector3(0.22, 1.68, 0.055)
+	blade.mesh = blade_box
+	blade.material_override = void_black_mat
+	blade.position = Vector3(0, 0.88, 0)
+	weapon_mesh.add_child(blade)
+
+	# Bordas gravitacionais roxas (Esquerda e Direita)
+	for side in [-1.0, 1.0]:
+		var edge := MeshInstance3D.new()
+		var edge_box := BoxMesh.new()
+		edge_box.size = Vector3(0.025, 1.7, 0.065)
+		edge.mesh = edge_box
+		edge.material_override = gravity_purple_mat
+		edge.position = Vector3(side * 0.11, 0.88, 0)
+		weapon_mesh.add_child(edge)
+
+	# Guarda do Vazio Angular
+	var guard := MeshInstance3D.new()
+	var guard_box := BoxMesh.new()
+	guard_box.size = Vector3(0.48, 0.08, 0.12)
+	guard.mesh = guard_box
+	guard.material_override = void_black_mat
+	guard.position = Vector3(0, 0.04, 0)
+	weapon_mesh.add_child(guard)
+
+	# Orbe de Singularidade Gravitacional no centro da guarda
+	var core_orb := MeshInstance3D.new()
+	var core_sph := SphereMesh.new()
+	core_sph.radius = 0.05
+	core_sph.height = 0.1
+	core_orb.mesh = core_sph
+	core_orb.material_override = gravity_purple_mat
+	core_orb.position = Vector3(0, 0.04, 0)
+	weapon_mesh.add_child(core_orb)
+
+	# Empunhadura de duas mãos
+	var hilt := MeshInstance3D.new()
+	var hilt_cyl := CylinderMesh.new()
+	hilt_cyl.top_radius = 0.028
+	hilt_cyl.bottom_radius = 0.028
+	hilt_cyl.height = 0.42
+	hilt.mesh = hilt_cyl
+	hilt.material_override = void_black_mat
+	hilt.position = Vector3(0, -0.21, 0)
+	weapon_mesh.add_child(hilt)
+
+	var pommel := MeshInstance3D.new()
+	var pommel_box := BoxMesh.new()
+	pommel_box.size = Vector3(0.08, 0.08, 0.08)
+	pommel.mesh = pommel_box
+	pommel.material_override = gravity_purple_mat
+	pommel.position = Vector3(0, -0.44, 0)
+	weapon_mesh.add_child(pommel)
+
+	# Escudo Pesado do Vazio (Offhand)
+	if offhand_pivot:
+		var shield := MeshInstance3D.new()
+		var shield_box := BoxMesh.new()
+		shield_box.size = Vector3(0.62, 0.96, 0.08)
+		shield.mesh = shield_box
+		shield.material_override = void_black_mat
+		shield.position = Vector3(0, 0.1, 0)
+		offhand_pivot.add_child(shield)
+
+		var rim := MeshInstance3D.new()
+		var rim_box := BoxMesh.new()
+		rim_box.size = Vector3(0.66, 1.0, 0.05)
+		rim.mesh = rim_box
+		var rim_mat := StandardMaterial3D.new()
+		rim_mat.albedo_color = Color("#263238")
+		rim_mat.metallic = 0.9
+		rim.material_override = rim_mat
+		rim.position = Vector3(0, 0.1, -0.02)
+		offhand_pivot.add_child(rim)
+
+		# Fenda do Vazio central
+		var rift_orb := MeshInstance3D.new()
+		var rift_sph := SphereMesh.new()
+		rift_sph.radius = 0.14
+		rift_sph.height = 0.08
+		rift_orb.mesh = rift_sph
+		rift_orb.material_override = gravity_purple_mat
+		rift_orb.position = Vector3(0, 0.1, -0.06)
+		offhand_pivot.add_child(rift_orb)
+
+		var rift_ring := MeshInstance3D.new()
+		var ring_torus := TorusMesh.new()
+		ring_torus.inner_radius = 0.15
+		ring_torus.outer_radius = 0.22
+		rift_ring.mesh = ring_torus
+		rift_ring.material_override = gravity_purple_mat
+		rift_ring.rotation.x = deg_to_rad(90.0)
+		rift_ring.position = Vector3(0, 0.1, -0.06)
+		offhand_pivot.add_child(rift_ring)
+
+		var shield_light := OmniLight3D.new()
+		shield_light.light_color = Color("#7c4dff")
+		shield_light.light_energy = 2.4
+		shield_light.omni_range = 2.8
+		offhand_pivot.add_child(shield_light)
+
+func _build_storm_halberd() -> void:
+	# Alabarda longa dourada crepitando com eletricidade azul
+	var gold_mat := StandardMaterial3D.new()
+	gold_mat.albedo_color = Color("#ffd700")
+	gold_mat.metallic = 0.95
+	gold_mat.roughness = 0.18
+
+	var lightning_mat := StandardMaterial3D.new()
+	lightning_mat.albedo_color = Color("#00e5ff")
+	lightning_mat.emission_enabled = true
+	lightning_mat.emission = Color("#00b0ff")
+	lightning_mat.emission_energy_multiplier = 4.8
+
+	# Haste Dourada Longa
+	var shaft := MeshInstance3D.new()
+	var shaft_cyl := CylinderMesh.new()
+	shaft_cyl.top_radius = 0.03
+	shaft_cyl.bottom_radius = 0.035
+	shaft_cyl.height = 2.05
+	shaft.mesh = shaft_cyl
+	shaft.material_override = gold_mat
+	shaft.position = Vector3(0, 0.72, 0)
+	weapon_mesh.add_child(shaft)
+
+	# Lâmina de Machado da Alabarda (Lateral direita)
+	var axe_blade := MeshInstance3D.new()
+	var axe_box := BoxMesh.new()
+	axe_box.size = Vector3(0.34, 0.45, 0.035)
+	axe_blade.mesh = axe_box
+	axe_blade.material_override = gold_mat
+	axe_blade.position = Vector3(0.18, 1.55, 0)
+	weapon_mesh.add_child(axe_blade)
+
+	var axe_edge := MeshInstance3D.new()
+	var edge_box := BoxMesh.new()
+	edge_box.size = Vector3(0.04, 0.48, 0.04)
+	axe_edge.mesh = edge_box
+	axe_edge.material_override = lightning_mat
+	axe_edge.position = Vector3(0.35, 1.55, 0)
+	weapon_mesh.add_child(axe_edge)
+
+	# Gancho/Pico perfurante traseiro (Lateral esquerda)
+	var rear_spike := MeshInstance3D.new()
+	var spike_box := BoxMesh.new()
+	spike_box.size = Vector3(0.2, 0.08, 0.03)
+	rear_spike.mesh = spike_box
+	rear_spike.material_override = gold_mat
+	rear_spike.position = Vector3(-0.12, 1.55, 0)
+	weapon_mesh.add_child(rear_spike)
+
+	# Ponta de Lança Superior
+	var spear_tip := MeshInstance3D.new()
+	var tip_cone := CylinderMesh.new()
+	tip_cone.top_radius = 0.0
+	tip_cone.bottom_radius = 0.045
+	tip_cone.height = 0.52
+	spear_tip.mesh = tip_cone
+	spear_tip.material_override = lightning_mat
+	spear_tip.position = Vector3(0, 1.95, 0)
+	weapon_mesh.add_child(spear_tip)
+
+	# Bobinas/Anéis condutores de eletricidade
+	for ring_y in [1.32, 1.42]:
+		var coil := MeshInstance3D.new()
+		var coil_torus := TorusMesh.new()
+		coil_torus.inner_radius = 0.04
+		coil_torus.outer_radius = 0.075
+		coil.mesh = coil_torus
+		coil.material_override = lightning_mat
+		coil.position = Vector3(0, ring_y, 0)
+		weapon_mesh.add_child(coil)
+
+	var storm_light := OmniLight3D.new()
+	storm_light.light_color = Color("#00e5ff")
+	storm_light.light_energy = 3.0
+	storm_light.omni_range = 3.6
+	spear_tip.add_child(storm_light)
+
+	# Manopla do Trovão na mão esquerda (Offhand)
+	if offhand_pivot:
+		var bracer := MeshInstance3D.new()
+		var bracer_cyl := CylinderMesh.new()
+		bracer_cyl.top_radius = 0.075
+		bracer_cyl.bottom_radius = 0.065
+		bracer_cyl.height = 0.28
+		bracer.mesh = bracer_cyl
+		bracer.material_override = gold_mat
+		bracer.position = Vector3(0, 0.08, 0)
+		offhand_pivot.add_child(bracer)
+
+		var bracer_coil := MeshInstance3D.new()
+		var b_torus := TorusMesh.new()
+		b_torus.inner_radius = 0.078
+		b_torus.outer_radius = 0.095
+		bracer_coil.mesh = b_torus
+		bracer_coil.material_override = lightning_mat
+		bracer_coil.position = Vector3(0, 0.08, 0)
+		offhand_pivot.add_child(bracer_coil)
+
 func _create_emissive_mat(col: Color, energy: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = col
@@ -1654,6 +2443,17 @@ func _physics_process(delta: float) -> void:
 			1.35 + sin(homunculus_anim_time * 4.5) * 0.18,
 			sin(homunculus_anim_time * orbit_spd) * orbit_r
 		)
+
+	# Atualiza companheiro Lobo Espiritual (Classe 13)
+	if current_class_id == 13 and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
+		spirit_wolf_anim_time += delta
+		var wolf_bob: float = sin(spirit_wolf_anim_time * 3.2) * 0.12
+		spirit_wolf_companion.position = Vector3(
+			-1.15 + cos(spirit_wolf_anim_time * 1.4) * 0.1,
+			0.5 + wolf_bob,
+			0.35 + sin(spirit_wolf_anim_time * 1.4) * 0.12
+		)
+		spirit_wolf_companion.rotation.y = sin(spirit_wolf_anim_time * 1.8) * 0.12
 
 	if attack_cooldown > 0.0:
 		attack_cooldown -= delta

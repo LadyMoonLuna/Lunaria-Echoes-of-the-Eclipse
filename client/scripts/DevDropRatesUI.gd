@@ -11,7 +11,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 1,
 		"name": "Lobo da Bruma",
-		"location": "Bosque Sussurrante (50.0, -45.0)",
+		"location": "Bosque Sussurrante (55.0, -45.0)",
 		"icon": "🐺",
 		"drops": [
 			{"item": "Carne Crua de Lobo", "rate": "100.0%", "rare": false},
@@ -25,7 +25,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 2,
 		"name": "Saqueador Deserdado",
-		"location": "Ruínas da Vigília (-48.0, 42.0)",
+		"location": "Ruínas da Vigília (-15.0, 70.0)",
 		"icon": "🗡️",
 		"drops": [
 			{"item": "Frasco de Vidro Vazio", "rate": "80.0%", "rare": false},
@@ -36,7 +36,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 3,
 		"name": "Besteiro da Vigília",
-		"location": "Ruínas da Vigília (-48.0, 42.0)",
+		"location": "Ruínas da Vigília (15.0, 72.0)",
 		"icon": "🏹",
 		"drops": [
 			{"item": "Frasco de Vidro Vazio", "rate": "80.0%", "rare": false},
@@ -47,7 +47,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 4,
 		"name": "Acólito do Eclipse",
-		"location": "Ruínas da Vigília (-48.0, 42.0)",
+		"location": "Ruínas da Vigília (-8.0, 80.0)",
 		"icon": "🕯️",
 		"drops": [
 			{"item": "Cálice da Alma Partida (Item 14 - Revenant)", "rate": "0.1%", "rare": true, "secret": true},
@@ -58,7 +58,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 5,
 		"name": "Executor de Ferro",
-		"location": "Ruínas da Vigília (-48.0, 42.0)",
+		"location": "Ruínas da Vigília (8.0, 82.0)",
 		"icon": "🛡️",
 		"drops": [
 			{"item": "Placa de Aço Pesada", "rate": "60.0%", "rare": false},
@@ -69,7 +69,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 6,
 		"name": "Lobo Alfa",
-		"location": "Bosque Sussurrante (Noite)",
+		"location": "Bosque Sussurrante (75.0, -60.0)",
 		"icon": "🌕",
 		"drops": [
 			{"item": "Pele Intacta de Lobo Alfa", "rate": "100.0%", "rare": false},
@@ -80,7 +80,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 7,
 		"name": "Licantropo Alfa (Raid Boss Secreto)",
-		"location": "Bosque Sussurrante (Lua de Sangue)",
+		"location": "Bosque Sussurrante (88.0, -72.0)",
 		"icon": "🩸",
 		"drops": [
 			{"item": "Coração do Licantropo Alfa", "rate": "100.0%", "rare": false},
@@ -91,7 +91,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 10,
 		"name": "Cultista Sombrio",
-		"location": "Santuário do Eclipse (-72.0, 70.0)",
+		"location": "Santuário do Eclipse (-75.0, 75.0)",
 		"icon": "🔮",
 		"drops": [
 			{"item": "Frasco de Vidro Vazio", "rate": "60.0%", "rare": false},
@@ -103,7 +103,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 11,
 		"name": "Gárgula de Pedra",
-		"location": "Santuário do Eclipse (-72.0, 70.0)",
+		"location": "Santuário do Eclipse (-78.0, 82.0)",
 		"icon": "🗿",
 		"drops": [
 			{"item": "Placa de Aço Pesada", "rate": "70.0%", "rare": false},
@@ -113,7 +113,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 12,
 		"name": "Inquisidor Vex (Mini-Boss)",
-		"location": "Santuário do Eclipse (-72.0, 70.0)",
+		"location": "Santuário do Eclipse (-85.0, 80.0)",
 		"icon": "⛓️",
 		"drops": [
 			{"item": "Foice Sombria do Inquisidor", "rate": "6.0%", "rare": true},
@@ -124,7 +124,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 13,
 		"name": "Comandante Vaelen, o Traidor (Boss)",
-		"location": "Santuário do Eclipse (-72.0, 70.0)",
+		"location": "Ruínas da Vigília (0.0, 90.0)",
 		"icon": "⚔️",
 		"drops": [
 			{"item": "Placa de Aço Pesada", "rate": "100.0%", "rare": false},
@@ -136,7 +136,7 @@ const MOB_DATA := [
 	{
 		"mob_id": 14,
 		"name": "Malakor, o Arauto do Eclipse (Raid Boss 5P)",
-		"location": "Santuário do Eclipse (Arena Central)",
+		"location": "Santuário do Eclipse (-88.0, 88.0)",
 		"icon": "🌑",
 		"drops": [
 			{"item": "Tocha Sagrada do Santuário", "rate": "100.0%", "rare": false},

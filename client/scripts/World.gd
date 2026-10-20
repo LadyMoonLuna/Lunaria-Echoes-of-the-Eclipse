@@ -11,7 +11,7 @@ const EntityOfferUIScript = preload("res://scripts/EntityOfferUI.gd")
 const SkillsUIScript = preload("res://scripts/SkillsUI.gd")
 const ClassMasterUIScript = preload("res://scripts/ClassMasterUI.gd")
 const DevDropRatesUIScript = preload("res://scripts/DevDropRatesUI.gd")
-const DevRaceMenuUIScript = preload("res://scripts/DevRaceMenuUI.gd")
+# const DevManagerUI = preload("res://scripts/DevManagerUI.gd")
 const AutopsyUIScript = preload("res://scripts/AutopsyUI.gd")
 const CorpseEntityScript = preload("res://scripts/CorpseEntity.gd")
 
@@ -46,7 +46,9 @@ var entity_offer_ui: CanvasLayer = null
 var skills_ui: CanvasLayer = null
 var class_master_ui: CanvasLayer = null
 var dev_drop_rates_ui: CanvasLayer = null
-var dev_race_menu_ui: CanvasLayer = null
+var dev_manager_ui: Control = null
+var dev_manager_node = null
+var dev_race_menu_ui = null
 var autopsy_ui: CanvasLayer = null
 var house_doors: Array = []
 var zone_marker_nodes: Array = []
@@ -86,7 +88,12 @@ const RACE_NAMES := [
 	"Licantropo Primordial (Varkai Alfa)",
 	"Amaldiçoado das Cinzas (Revenant)"
 ]
-const CLASS_NAMES := ["Viajante (Sem Classe)", "Espadachim", "Batedor", "Iniciado", "Acólito", "Ferreiro", "Alquimista", "Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos"]
+const CLASS_NAMES := [
+	"Viajante (Sem Classe)", "Espadachim", "Batedor", "Iniciado", "Acólito",
+	"Ferreiro", "Alquimista", "Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos",
+	"Dançarino Astral", "Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial",
+	"Cavaleiro da Ruptura", "Arauto da Tempestade"
+]
 const TIER_NAMES := ["Sem Classe", "Comum", "Incomum", "Rara", "Épica", "Única", "Lendária"]
 
 const EVOLVED_CLASS_NAMES := {
@@ -98,7 +105,13 @@ const EVOLVED_CLASS_NAMES := {
 	6: ["", "Alquimista", "Boticário Tóxico", "Grão-Mestre Químico", "Mestre da Transmutação", "Mestre da Transmutação", "Mestre da Transmutação"],
 	7: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
 	8: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
-	9: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"]
+	9: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
+	10: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
+	11: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
+	12: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
+	13: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
+	14: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
+	15: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
 }
 
 const TIER_COLORS := [
@@ -116,61 +129,161 @@ const CLASS_SKILLS := {
 		"basic": "Golpe Simples",
 		"q": "Investida",
 		"r": "Respirar Fundo",
-		"f": "Instinto"
+		"f": "Instinto",
+		"basic_desc": "Golpe simples desarmado ou com arma improvisada (1.0x dano).",
+		"q_desc": "Investida rápida à frente desferindo uma estocada simples (1.2x dano).",
+		"r_desc": "Postura defensiva temporária que recupera +15 de Stamina.",
+		"f_desc": "Salto para trás com foco aumentado reduzindo dano por 2s."
 	},
 	1: {
-		"basic": "Golpe Cortante",
-		"q": "Corte Perfurante",
-		"r": "Afiação de Aço",
-		"f": "Vórtice da Lâmina"
+		"basic": "Corte da Lâmina",
+		"q": "Corte Crescente",
+		"r": "Postura de Ferro",
+		"f": "Impacto Sísmico",
+		"basic_desc": "Golpe rápido de espada em arco frontal (1.0x dano base).",
+		"q_desc": "Talho ascendente poderoso cortando alvos em cone amplo (1.75x dano).",
+		"r_desc": "Parry que reduz 70% de dano por 2.5s e causa choque nos inimigos.",
+		"f_desc": "Salto esmagador cravando a lâmina no solo, liberando onda sísmica de 4.5m (2.4x dano)."
 	},
 	2: {
-		"basic": "Tiro Rápido",
-		"q": "Chuva de Flechas",
-		"r": "Foco do Caçador",
-		"f": "Disparo Devastador"
+		"basic": "Disparo Rápido",
+		"q": "Disparo Perfurante",
+		"r": "Chuva de Estrepes",
+		"f": "Saraivada Estelar",
+		"basic_desc": "Flecha balística veloz de longo alcance (1.0x dano).",
+		"q_desc": "Flecha pontiaguda de alta velocidade que atravessa múltiplos alvos (1.75x dano).",
+		"r_desc": "Dispara estrepes que reduzem movimentação dos monstros em 40% por 3s.",
+		"f_desc": "Dispara 3 flechas encantadas simultâneas em cone frontal aberto (2.4x dano total)."
 	},
 	3: {
-		"basic": "Dardo Arcano",
+		"basic": "Orbe Arcano",
 		"q": "Cometa Elemental",
-		"r": "Barreira Arcana",
-		"f": "Supernova Lunar"
+		"r": "Nova de Gelo",
+		"f": "Maelstrom Cósmico",
+		"basic_desc": "Projétil de energia cósmica concentrada com velocidade de 16m/s (1.0x dano).",
+		"q_desc": "Grande esfera de fogo estelar que explode em raio de 2.8m (1.75x dano).",
+		"r_desc": "Onda congelante de 5.0m radial que paralisa e desacelera monstros por 1.5s.",
+		"f_desc": "Tempestade arcana colossal de devastação massiva em raio de 6.5m (2.4x dano)."
 	},
 	4: {
-		"basic": "Pancada da Fé",
-		"q": "Lança Sagrada",
-		"r": "Bênção Divina",
-		"f": "Julgamento Celestial"
+		"basic": "Golpe da Fé",
+		"q": "Círculo de Luz",
+		"r": "Lança do Julgamento",
+		"f": "Égide Sagrada",
+		"basic_desc": "Pancada de maça abençoada causando dano sagrado puro (1.0x dano).",
+		"q_desc": "Impacto sagrado que causa dano e cura +40 HP em aliados em 6.0m.",
+		"r_desc": "Feixe divino perfurante lançado a até 15m que purifica os alvos.",
+		"f_desc": "Explosão celestial restaurando +65 HP no grupo e desferindo 2.4x dano sagrado."
 	},
 	5: {
-		"basic": "Golpe de Bigorna",
-		"q": "Martelada Sísmica",
-		"r": "Têmpera Ardente",
-		"f": "Cataclismo da Forja"
+		"basic": "Martelada Pesada",
+		"q": "Golpe de Bigorna",
+		"r": "Afiação de Combate",
+		"f": "Fúria do Vulcão",
+		"basic_desc": "Golpe esmagador contundente que atordoa armaduras leves (1.0x dano).",
+		"q_desc": "Impacto pesado concentrado no topo do crânio do alvo (1.75x dano).",
+		"r_desc": "Martela a bigorna conferindo buff de +25% de dano para o grupo por 10s.",
+		"f_desc": "Impacto sísmico frontal telegrafado de 4.5m abrindo fendas incandescentes (2.4x dano)."
 	},
 	6: {
-		"basic": "Arremesso Ácido",
-		"q": "Bomba Cáustica",
-		"r": "Elixir Revigorante",
-		"f": "Detonação Tóxica"
+		"basic": "Frasco Cáustico",
+		"q": "Frasco de Éter",
+		"r": "Bomba de Ácido",
+		"f": "Detonação Catalítica",
+		"basic_desc": "Arremesso de ampola corrosiva com alcance médio (1.0x dano).",
+		"q_desc": "Frasco que detona causando dano em área e curando +40 HP em aliados em 6.0m.",
+		"r_desc": "Arremessa poça corrosiva de 3.5m que reduz armaduras dos inimigos por 4s.",
+		"f_desc": "Reação química em cadeia explodindo violentamente em área de 5.5m (2.4x dano)."
 	},
 	7: {
-		"basic": "Corte das Trevas",
-		"q": "Dança da Foice",
-		"r": "Manto Sombrio",
-		"f": "Ceifa do Eclipse Total"
+		"basic": "Foice das Sombras",
+		"q": "Colheita Noturna",
+		"r": "Drenagem Abissal",
+		"f": "Dança do Eclipse Total",
+		"basic_desc": "Varredura ampla de longo alcance de 4.8m com lifesteal embutido (1.0x dano).",
+		"q_desc": "Corte espiral sugando essência vital de todos os alvos no caminho (1.75x dano).",
+		"r_desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.",
+		"f_desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida (2.4x dano)."
 	},
 	8: {
-		"basic": "Tiro de Metralha",
-		"q": "Canhão Rúnico",
-		"r": "Campo Eletrostático",
-		"f": "Bombardeio Supremo"
+		"basic": "Canhonada Rúnica",
+		"q": "Salva Rúnica",
+		"r": "Sobrecarga Eletrostática",
+		"f": "Bombardeio Titanomecânico",
+		"basic_desc": "Pancada física e detonação de pólvora simultâneas (1.0x dano).",
+		"q_desc": "Três cartuchos energizados disparados em rápida sucessão frontal (1.75x dano).",
+		"r_desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.",
+		"f_desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano)."
 	},
 	9: {
-		"basic": "Pulso Biótico",
-		"q": "Bile Transmutada",
-		"r": "Sintonia com Homúnculo",
-		"f": "Frenesi de Quimeras"
+		"basic": "Pulso Quimérico",
+		"q": "Infusão Mutagênica",
+		"r": "Névoa de Bioplasma",
+		"f": "Frenesi do Quimera Supremo",
+		"basic_desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre (1.0x dano).",
+		"q_desc": "Elixir abissal corrosivo que dissolve resistências inimigas (1.75x dano).",
+		"r_desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.",
+		"f_desc": "O homúnculo cresce e desfere explosão de garras e ácido colossais (2.4x dano)."
+	},
+	10: {
+		"basic": "Corte Astral",
+		"q": "Corte Cadente",
+		"r": "Valsa dos Espelhos",
+		"f": "Constelação de Mil Lâminas",
+		"basic_desc": "Corte rápido com +25% de chance crítica permanente e esquiva barata de 10 stamina.",
+		"q_desc": "Salto veloz que corta o espaço desferindo dano massivo (2.0x dano).",
+		"r_desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.",
+		"f_desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano)."
+	},
+	11: {
+		"basic": "Chama Penitente",
+		"q": "Chicote de Penitência",
+		"r": "Selo de Excomunhão",
+		"f": "Crucificação de Cinzas",
+		"basic_desc": "Golpe ardente que ganha até +60% de dano conforme o HP diminui.",
+		"q_desc": "Chicote de fogo sagrado de 8.0m que causa 2.2x dano e rouba vida.",
+		"r_desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.",
+		"f_desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano)."
+	},
+	12: {
+		"basic": "Toque do Sepulcro",
+		"q": "Lança de Fêmur",
+		"r": "Explosão Óssea & Escudo",
+		"f": "Legião do Ossuário",
+		"basic_desc": "Projétil de ossos fragmentados. Cada abate regenera +20 HP instantâneos.",
+		"q_desc": "Dispara lança de fêmur calcificado que perfura a 16m causando 2.0x dano.",
+		"r_desc": "Detona fragmentos ósseos em 5.0m e ergue barreira de ossos protetora.",
+		"f_desc": "Ergue vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal."
+	},
+	13: {
+		"basic": "Patada Selvagem",
+		"q": "Investida do Alfa",
+		"r": "Uivo da Alcateia",
+		"f": "Fúria do Behemoth",
+		"basic_desc": "Ataque corporal com ferocidade primal e dano aumentado em +25% permanentemente.",
+		"q_desc": "Avanço bestial rompendo as linhas inimigas com impacto violento (2.1x dano).",
+		"r_desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.",
+		"f_desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano)."
+	},
+	14: {
+		"basic": "Golpe de Fenda",
+		"q": "Esmagamento Gravitacional",
+		"r": "Singularidade Reversa",
+		"f": "Colapso Estelar",
+		"basic_desc": "Golpe pesado imbuído de gravidade e resistência passiva de -30% a danos.",
+		"q_desc": "Atrai monstros em 5.0m para junto de si e esmaga o solo (1.9x dano).",
+		"r_desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.",
+		"f_desc": "Cria um buraco negro em 6.5m que atordoa inimigos e desintegra matéria (2.8x dano)."
+	},
+	15: {
+		"basic": "Faísca Elétrica",
+		"q": "Lança do Trovão",
+		"r": "Passo de Relâmpago",
+		"f": "Ira dos Céus",
+		"basic_desc": "Dardos elétricos estáticos que causam +35% de dano durante climas chuvosos.",
+		"q_desc": "Arremessa um raio concentrado a 18m que detona ao impacto (2.1x dano).",
+		"r_desc": "Surto elétrico que concede velocidade e eletrocuta/atordoa monstros próximos.",
+		"f_desc": "Tempestade cataclísmica de raios cobrindo 6.0m com devastação celestial (3.1x dano)."
 	}
 }
 
@@ -240,9 +353,6 @@ func _ready() -> void:
 	dev_drop_rates_ui = DevDropRatesUIScript.new()
 	add_child(dev_drop_rates_ui)
 
-	dev_race_menu_ui = DevRaceMenuUIScript.new()
-	add_child(dev_race_menu_ui)
-
 	corpses_container = Node3D.new()
 	corpses_container.name = "Corpses"
 	add_child(corpses_container)
@@ -273,6 +383,7 @@ func _ready() -> void:
 	_create_zone_landmarks()
 	_create_rebirth_crystal()
 	_build_symmetric_village()
+	_build_new_landmarks()
 	_setup_burn_overlay()
 	_setup_action_bar()
 	_setup_xp_hud()
@@ -280,6 +391,10 @@ func _ready() -> void:
 	_spawn_local_player(Vector3(0, 1.5, 0))
 	_update_hud()
 	_update_clock_hud()
+
+	var footer_lbl = get_node_or_null("HUD/FooterPanel/FooterLabel")
+	if footer_lbl:
+		footer_lbl.text = "[WASD] Mover | [LMB] Ataque | [Shift] Esquiva | [Q/R/F] Skills | [Z] Racial | [E] Interagir | [C] Linhagem | [K] Atributos | [I] Inventário | [H] Grimório | [F10] Dev Manager"
 
 func _process(delta: float) -> void:
 	# 1. Lógica de atualização de tempo, clima e iluminação do mundo
@@ -360,6 +475,13 @@ func _check_proximity_interactions() -> void:
 					ntag.modulate = Color(1.0, 1.0, 1.0, 0.9)
 					ntag.outline_size = 6
 
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F9:
+			print("[World] F9: Alternando Dev Manager Unificado...")
+			_toggle_dev_manager()
+			get_viewport().set_input_as_handled()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_E:
@@ -381,16 +503,45 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_H:
 			if skills_ui:
 				skills_ui.toggle_menu()
-		elif event.keycode == KEY_F6 or event.is_action_pressed("skip_time"):
-			_on_skip_time_pressed()
-		elif event.keycode == KEY_F7:
-			_on_cycle_moon_pressed()
-		elif event.keycode == KEY_F8:
-			_on_cycle_weather_pressed()
 		elif event.keycode == KEY_F9:
-			_on_dev_get_drop_rates_pressed()
-		elif event.keycode == KEY_F10:
-			_on_dev_races_menu_pressed()
+			print("[World] F9: Alternando Dev Manager Unificado...")
+			_toggle_dev_manager()
+
+func _toggle_dev_manager() -> void:
+	if not dev_manager_node or not is_instance_valid(dev_manager_node):
+		var script_res = load("res://scripts/DevManagerUI.gd")
+		if script_res:
+			# Cria um Control e atribui o script do DevManagerUI dinamicamente
+			dev_manager_node = Control.new()
+			dev_manager_node.set_script(script_res)
+			dev_manager_node.set_anchors_preset(Control.PRESET_FULL_RECT)
+			if has_node("HUD"):
+				$HUD.add_child(dev_manager_node)
+			else:
+				add_child(dev_manager_node)
+			dev_manager_ui = dev_manager_node
+			dev_race_menu_ui = dev_manager_node
+
+	if dev_manager_node:
+		dev_manager_node.visible = not dev_manager_node.visible
+
+		if dev_manager_node.visible:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			if local_player and is_instance_valid(local_player):
+				local_player.set("is_menu_open", true)
+			if dev_manager_node.has_method("_update_trials_label"):
+				dev_manager_node._update_trials_label()
+		else:
+			var any_other_open := false
+			if char_select_ui and char_select_ui.get("is_open"): any_other_open = true
+			if attributes_ui and attributes_ui.get("is_open"): any_other_open = true
+			if inventory_ui and inventory_ui.get("is_open"): any_other_open = true
+			if skills_ui and skills_ui.get("is_open"): any_other_open = true
+			if dev_drop_rates_ui and dev_drop_rates_ui.get("is_open"): any_other_open = true
+			if not any_other_open:
+				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+				if local_player and is_instance_valid(local_player):
+					local_player.set("is_menu_open", false)
 
 func _on_skip_time_pressed() -> void:
 	print("[World] F6: Solicitando avanço de +6 horas ao servidor...")
@@ -410,9 +561,7 @@ func _on_dev_get_drop_rates_pressed() -> void:
 		dev_drop_rates_ui.toggle_menu()
 
 func _on_dev_races_menu_pressed() -> void:
-	print("[World] F10: Alternando menu dev de raças secretas...")
-	if dev_race_menu_ui:
-		dev_race_menu_ui.toggle_menu()
+	_toggle_dev_manager()
 
 func _on_dev_drop_rates_received(report_text: String) -> void:
 	print("[World DEV] Taxas de Drop recebidas do Servidor:\n%s" % report_text)
@@ -468,11 +617,11 @@ func _on_corpse_snapshot_received(corpses_dict: Dictionary) -> void:
 
 func _spawn_corpse(cid: int, mid: int, mtype: int, pos: Vector3, rot_y: float, is_looted: bool, remaining_sec: int) -> void:
 	var corpse = CorpseEntityScript.new()
-	corpse.setup(cid, mid, mtype, pos, rot_y, is_looted, remaining_sec)
 	if corpses_container:
 		corpses_container.add_child(corpse)
 	else:
 		add_child(corpse)
+	corpse.setup(cid, mid, mtype, pos, rot_y, is_looted, remaining_sec)
 	corpses[cid] = corpse
 	print("[World] Cadáver instanciado no chão: ID %d (MobType %d) em %s (restante: %ds)" % [cid, mtype, pos, remaining_sec])
 
@@ -528,7 +677,7 @@ func _try_interact_nearest_npc() -> void:
 	if nearest_id > 0:
 		print("[World] Interagindo com NPC #%d (distância: %.2fm)" % [nearest_id, min_dist])
 		NetworkManager.send_player_interact(nearest_id)
-		if nearest_id in [100, 103, 104, 105, 106]:
+		if nearest_id in [100, 103, 104, 105, 106, 107, 108, 109, 110]:
 			if class_master_ui:
 				class_master_ui.open_master_menu(nearest_id)
 
@@ -578,7 +727,7 @@ func _update_clock_hud() -> void:
 	var moon_str: String = MOON_NAMES[current_moon_phase] if current_moon_phase < MOON_NAMES.size() else "Lua"
 	var weather_str: String = WEATHER_NAMES[current_weather_type] if current_weather_type < WEATHER_NAMES.size() else "Limpo"
 
-	clock_label.text = "Horário: %02d:%02d (%s) | %s | %s | [F6] +6h [F7] Lua [F8] Clima [F9] Drops Dev" % [
+	clock_label.text = "Horário: %02d:%02d (%s) | %s | %s" % [
 		current_world_hour, current_world_minute, period_str, moon_str, weather_str
 	]
 
@@ -829,17 +978,28 @@ func _update_action_bar_skills() -> void:
 			6: return RACIAL_SKILL_NAMES.get(my_race_id, "Skill Racial")
 			_: return "Habilidade"
 
-	var bindings := {"LMB": 1, "Q": 3, "R": 4, "F": 5, "Z": 6}
-	if local_player and local_player.get("skill_slot_bindings"):
-		var p_binds: Dictionary = local_player.get("skill_slot_bindings")
-		for k in p_binds.keys():
-			bindings[k] = p_binds[k]
+	var get_action_desc := func(act_id: int) -> String:
+		match act_id:
+			1: return skills.get("basic_desc", "Ataque básico.")
+			2: return "Esquiva rápida com invulnerabilidade temporária."
+			3: return skills.get("q_desc", "Habilidade Ativa [Q].")
+			4: return skills.get("r_desc", "Habilidade Ativa [R].")
+			5: return skills.get("f_desc", "Habilidade Suprema [F].")
+			6: return "Habilidade especial inata de linhagem racial [Z]."
+			_: return "Habilidade de combate."
 
-	action_bar_name_labels[0].text = get_action_name.call(bindings["LMB"])
-	action_bar_name_labels[1].text = get_action_name.call(bindings["Q"])
-	action_bar_name_labels[2].text = get_action_name.call(bindings["R"])
-	action_bar_name_labels[3].text = get_action_name.call(bindings["F"])
-	action_bar_name_labels[4].text = get_action_name.call(bindings["Z"])
+	action_bar_name_labels[0].text = get_action_name.call(1)
+	action_bar_name_labels[1].text = get_action_name.call(3)
+	action_bar_name_labels[2].text = get_action_name.call(4)
+	action_bar_name_labels[3].text = get_action_name.call(5)
+	action_bar_name_labels[4].text = get_action_name.call(6)
+
+	if action_bar_slots.size() >= 5:
+		action_bar_slots[0].tooltip_text = "%s [LMB]\n%s" % [get_action_name.call(1), get_action_desc.call(1)]
+		action_bar_slots[1].tooltip_text = "%s [Q]\n%s" % [get_action_name.call(3), get_action_desc.call(3)]
+		action_bar_slots[2].tooltip_text = "%s [R]\n%s" % [get_action_name.call(4), get_action_desc.call(4)]
+		action_bar_slots[3].tooltip_text = "%s [F]\n%s" % [get_action_name.call(5), get_action_desc.call(5)]
+		action_bar_slots[4].tooltip_text = "%s [Z]\n%s" % [get_action_name.call(6), get_action_desc.call(6)]
 
 func flash_action_bar_slot(slot_idx: int) -> void:
 	if slot_idx < 0 or slot_idx >= action_bar_slots.size():
@@ -910,6 +1070,18 @@ func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int
 	elif nid == 106:
 		p_name = "Guarda Valen\n<Patrulheiro da Vila> [E]"
 		script_path = "scripts/npcs/guard.lua"
+	elif nid == 107:
+		p_name = "Irmã Seraphina\n<Mestra Acólita> [E]"
+		script_path = "scripts/npcs/seraphina.lua"
+	elif nid == 108:
+		p_name = "Mestre Aurelius\n<Arquimago> [E]"
+		script_path = "scripts/npcs/aurelius.lua"
+	elif nid == 109:
+		p_name = "Kaelen\n<Mestre Batedor> [E]"
+		script_path = "scripts/npcs/kaelen.lua"
+	elif nid == 110:
+		p_name = "Alquimista Esquecido\n<Espírito dos Esgotos> [E]"
+		script_path = "scripts/npcs/ghost_alchemist.lua"
 	else:
 		p_name = "NPC #%d" % nid
 
@@ -919,9 +1091,13 @@ func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int
 		npc_inst.npc_name = p_name
 		npc_inst.npc_id = nid
 
+	if npcs_container:
+		npcs_container.add_child(npc_inst)
+	else:
+		add_child(npc_inst)
+
 	npc_inst.global_position = initial_pos
 	npc_inst.rotation.y = initial_rot_y
-	npcs_container.add_child(npc_inst)
 
 	if npc_inst.has_method("update_network_transform"):
 		npc_inst.update_network_transform(initial_pos, initial_rot_y, state)
@@ -954,6 +1130,14 @@ func _on_npc_spoke(npc_id: int, message: String) -> void:
 			sender_name = "Capitão Randel"
 		elif npc_id == 106:
 			sender_name = "Guarda Valen"
+		elif npc_id == 107:
+			sender_name = "Irmã Seraphina"
+		elif npc_id == 108:
+			sender_name = "Mestre Aurelius"
+		elif npc_id == 109:
+			sender_name = "Kaelen"
+		elif npc_id == 110:
+			sender_name = "Alquimista Esquecido"
 		dialogue_label.text = "[%s]: %s" % [sender_name, message]
 		dialogue_label.visible = true
 		dialogue_clear_timer.start(8.0)
@@ -1169,11 +1353,11 @@ func _on_mob_state_received(mobs_dict: Dictionary) -> void:
 
 func _spawn_mob(mid: int, mtype: int, pos: Vector3, rot_y: float, state: int, hp: int, max_hp: int) -> void:
 	var mob = MobEntityScript.new()
-	mob.setup(mid, mtype, pos, rot_y, hp, max_hp)
 	if mobs_container:
 		mobs_container.add_child(mob)
 	else:
 		add_child(mob)
+	mob.setup(mid, mtype, pos, rot_y, hp, max_hp)
 
 	mob.update_network_data(pos, rot_y, state, hp, max_hp)
 	mob.set_moon_phase(current_moon_phase)
@@ -1268,9 +1452,9 @@ func _spawn_player_floating_damage(target_node: Node3D, damage: int) -> void:
 func _create_zone_landmarks() -> void:
 	zone_marker_nodes.clear()
 
-	# 1. Bosque Sussurrante (50, 1, -45)
+	# 1. Bosque Sussurrante (55, 2, -45)
 	var bosque_marker := Node3D.new()
-	bosque_marker.position = Vector3(50.0, 1.0, -45.0)
+	bosque_marker.position = Vector3(55.0, 0.0, -45.0)
 	add_child(bosque_marker)
 	zone_marker_nodes.append(bosque_marker)
 
@@ -1282,7 +1466,7 @@ func _create_zone_landmarks() -> void:
 	bp_mat.albedo_color = Color(0.2, 0.38, 0.22, 1.0)
 	bp_mat.roughness = 0.85
 	b_pilar.material_override = bp_mat
-	b_pilar.position = Vector3(0, 0.2, 0)
+	b_pilar.position = Vector3(0, 1.2, 0)
 	bosque_marker.add_child(b_pilar)
 
 	var b_lbl := Label3D.new()
@@ -1291,13 +1475,13 @@ func _create_zone_landmarks() -> void:
 	b_lbl.outline_modulate = Color(0, 0, 0, 1)
 	b_lbl.font_size = 24
 	b_lbl.modulate = Color(0.65, 0.95, 0.7, 1.0)
-	b_lbl.text = "🌲 Bosque Sussurrante\n[Área de Caça: Lobos da Bruma & Lobo Alfa]"
-	b_lbl.position = Vector3(0, 2.4, 0)
+	b_lbl.text = "🌲 Bosque Sussurrante\n[Área de Caça: Lobos da Bruma, Lobo Alfa & Licantropo Alfa]"
+	b_lbl.position = Vector3(0, 2.0, 0)
 	bosque_marker.add_child(b_lbl)
 
-	# 2. Ruínas da Vigília (-48, 1, 42)
+	# 2. Ruínas da Vigília (0, 2, 70)
 	var ruinas_marker := Node3D.new()
-	ruinas_marker.position = Vector3(-48.0, 1.0, 42.0)
+	ruinas_marker.position = Vector3(0.0, 0.0, 70.0)
 	add_child(ruinas_marker)
 	zone_marker_nodes.append(ruinas_marker)
 
@@ -1309,7 +1493,7 @@ func _create_zone_landmarks() -> void:
 	rp_mat.albedo_color = Color(0.35, 0.28, 0.24, 1.0)
 	rp_mat.roughness = 0.9
 	r_pilar.material_override = rp_mat
-	r_pilar.position = Vector3(0, 0.3, 0)
+	r_pilar.position = Vector3(0, 1.3, 0)
 	ruinas_marker.add_child(r_pilar)
 
 	var r_lbl := Label3D.new()
@@ -1318,73 +1502,24 @@ func _create_zone_landmarks() -> void:
 	r_lbl.outline_modulate = Color(0, 0, 0, 1)
 	r_lbl.font_size = 24
 	r_lbl.modulate = Color(1.0, 0.75, 0.45, 1.0)
-	r_lbl.text = "🏰 Ruínas da Vigília\n[Saqueadores, Besteiros & Executor de Ferro]"
-	r_lbl.position = Vector3(0, 2.5, 0)
+	r_lbl.text = "🏰 Ruínas da Vigília\n[Saqueadores, Besteiros, Acólitos, Executor & Comandante Vaelen]"
+	r_lbl.position = Vector3(0, 2.0, 0)
 	ruinas_marker.add_child(r_lbl)
 
-	# 3. Santuário do Eclipse (Dungeon / Raid) (-72, 1, 70) com portões trancados
+	# 3. Santuário do Eclipse (-85, 2, 85)
 	var sanctuary_root := Node3D.new()
-	sanctuary_root.position = Vector3(-72.0, 1.0, 70.0)
+	sanctuary_root.position = Vector3(-85.0, 0.0, 85.0)
 	add_child(sanctuary_root)
 	zone_marker_nodes.append(sanctuary_root)
 
-	var obs_mat := StandardMaterial3D.new()
-	obs_mat.albedo_color = Color(0.12, 0.08, 0.16, 1.0)
-	obs_mat.metallic = 0.85
-	obs_mat.roughness = 0.25
-
-	# Duas torres / obeliscos de obsidiana
-	for x_off in [-3.5, 3.5]:
-		var obelisk := MeshInstance3D.new()
-		var om := BoxMesh.new()
-		om.size = Vector3(1.2, 6.0, 1.2)
-		obelisk.mesh = om
-		obelisk.material_override = obs_mat
-		obelisk.position = Vector3(x_off, 2.0, 0.0)
-		sanctuary_root.add_child(obelisk)
-
-	# Arco Superior Gótico
-	var s_arch := MeshInstance3D.new()
-	var am := BoxMesh.new()
-	am.size = Vector3(8.2, 1.2, 1.2)
-	s_arch.mesh = am
-	s_arch.material_override = obs_mat
-	s_arch.position = Vector3(0.0, 5.2, 0.0)
-	sanctuary_root.add_child(s_arch)
-
-	# Portão Rúnico do Eclipse (Trancado)
-	var gate_mesh := MeshInstance3D.new()
-	gate_mesh.name = "SanctuaryGate"
-	var gm := BoxMesh.new()
-	gm.size = Vector3(5.8, 4.4, 0.2)
-	gate_mesh.mesh = gm
-	var g_mat := StandardMaterial3D.new()
-	g_mat.albedo_color = Color(0.18, 0.05, 0.25, 0.95)
-	g_mat.emission_enabled = true
-	g_mat.emission = Color(0.65, 0.15, 0.95)
-	g_mat.emission_energy_multiplier = 2.0
-	gate_mesh.material_override = g_mat
-	gate_mesh.position = Vector3(0.0, 2.2, 0.0)
-	sanctuary_root.add_child(gate_mesh)
-
-	# Tochas com luz violeta telegrafando a presença de Malakor
-	for x_off in [-4.5, 4.5]:
-		var torch_light := OmniLight3D.new()
-		torch_light.light_color = Color(0.85, 0.2, 1.0)
-		torch_light.light_energy = 3.5
-		torch_light.omni_range = 8.0
-		torch_light.position = Vector3(x_off, 3.0, 0.0)
-		sanctuary_root.add_child(torch_light)
-
-	# Label 3D do Santuário com aviso de Raid / Requisitos
 	var s_lbl := Label3D.new()
 	s_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	s_lbl.outline_size = 9
 	s_lbl.outline_modulate = Color(0, 0, 0, 1)
 	s_lbl.font_size = 26
 	s_lbl.modulate = Color(0.9, 0.45, 1.0, 1.0)
-	s_lbl.text = "🌑 Santuário do Eclipse (Dungeon / Raid)\n🔒 Portões do Eclipse Trancados\n(Exige Grupo de 5 Jogadores ou Puzzle de Ativação)"
-	s_lbl.position = Vector3(0.0, 6.4, 0.0)
+	s_lbl.text = "🌑 Santuário do Eclipse (Arena de Raid)\n[Cultistas, Gárgula, Inquisidor Vex & Raid Boss Malakor]"
+	s_lbl.position = Vector3(0.0, 2.0, 0.0)
 	sanctuary_root.add_child(s_lbl)
 
 func _on_projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_pos: Vector3, dir_xz: Vector2, speed: float, max_range: float) -> void:
@@ -1591,6 +1726,105 @@ func _on_projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_p
 			light.omni_range = 4.5
 			p_node.add_child(light)
 
+		7: # Lança de Fêmur (Necromante de Ossos - Skill Q): Projétil alongado branco-ósseo com rastro verde-fantasma
+			var bone_spear := MeshInstance3D.new()
+			var bone_mesh := CylinderMesh.new()
+			bone_mesh.top_radius = 0.035
+			bone_mesh.bottom_radius = 0.045
+			bone_mesh.height = 1.6
+			bone_spear.mesh = bone_mesh
+			var b_mat := StandardMaterial3D.new()
+			b_mat.albedo_color = Color("#f5f5dc")
+			b_mat.roughness = 0.6
+			bone_spear.material_override = b_mat
+			bone_spear.rotation.x = deg_to_rad(90.0)
+			p_node.add_child(bone_spear)
+
+			var b_tip := MeshInstance3D.new()
+			var b_cone := CylinderMesh.new()
+			b_cone.top_radius = 0.0
+			b_cone.bottom_radius = 0.075
+			b_cone.height = 0.38
+			b_tip.mesh = b_cone
+			b_tip.material_override = b_mat
+			b_tip.rotation.x = deg_to_rad(90.0)
+			b_tip.position = Vector3(0, 0, -0.95)
+			p_node.add_child(b_tip)
+
+			# Rastro verde fantasmagórico
+			var ghost_mat := StandardMaterial3D.new()
+			ghost_mat.albedo_color = Color("#00e676")
+			ghost_mat.emission_enabled = true
+			ghost_mat.emission = Color("#76ff03")
+			ghost_mat.emission_energy_multiplier = 4.5
+			ghost_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			ghost_mat.albedo_color.a = 0.65
+
+			for i in range(4):
+				var trail_ring := MeshInstance3D.new()
+				var trail_mesh := TorusMesh.new()
+				trail_mesh.inner_radius = 0.03 + i * 0.015
+				trail_mesh.outer_radius = 0.07 + i * 0.03
+				trail_ring.mesh = trail_mesh
+				trail_ring.material_override = ghost_mat
+				trail_ring.position = Vector3(0, 0, 0.4 + i * 0.28)
+				p_node.add_child(trail_ring)
+
+			var b_light := OmniLight3D.new()
+			b_light.light_color = Color("#76ff03")
+			b_light.light_energy = 3.8
+			b_light.omni_range = 4.8
+			p_node.add_child(b_light)
+
+		8: # Lança do Trovão (Arauto da Tempestade - Skill Q): Feixe elétrico ultrarrápido azul-claro
+			var bolt := MeshInstance3D.new()
+			var bolt_mesh := CylinderMesh.new()
+			bolt_mesh.top_radius = 0.025
+			bolt_mesh.bottom_radius = 0.025
+			bolt_mesh.height = 2.2
+			bolt.mesh = bolt_mesh
+			var core_mat := StandardMaterial3D.new()
+			core_mat.albedo_color = Color(1.0, 1.0, 1.0)
+			core_mat.emission_enabled = true
+			core_mat.emission = Color("#e1f5fe")
+			core_mat.emission_energy_multiplier = 6.0
+			bolt.material_override = core_mat
+			bolt.rotation.x = deg_to_rad(90.0)
+			p_node.add_child(bolt)
+
+			var aura := MeshInstance3D.new()
+			var aura_mesh := CylinderMesh.new()
+			aura_mesh.top_radius = 0.06
+			aura_mesh.bottom_radius = 0.06
+			aura_mesh.height = 2.4
+			aura.mesh = aura_mesh
+			var aura_mat := StandardMaterial3D.new()
+			aura_mat.albedo_color = Color("#00e5ff")
+			aura_mat.emission_enabled = true
+			aura_mat.emission = Color("#00b0ff")
+			aura_mat.emission_energy_multiplier = 5.0
+			aura_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			aura_mat.albedo_color.a = 0.75
+			aura.material_override = aura_mat
+			aura.rotation.x = deg_to_rad(90.0)
+			p_node.add_child(aura)
+
+			for rot_deg in [0.0, 60.0, 120.0]:
+				var spark := MeshInstance3D.new()
+				var spark_box := BoxMesh.new()
+				spark_box.size = Vector3(0.14, 1.6, 0.015)
+				spark.mesh = spark_box
+				spark.material_override = aura_mat
+				spark.rotation.z = deg_to_rad(rot_deg)
+				spark.rotation.x = deg_to_rad(90.0)
+				p_node.add_child(spark)
+
+			var bolt_light := OmniLight3D.new()
+			bolt_light.light_color = Color("#00e5ff")
+			bolt_light.light_energy = 5.5
+			bolt_light.omni_range = 6.0
+			p_node.add_child(bolt_light)
+
 	active_projectiles[proj_id] = {
 		"node": p_node,
 		"dir": dir,
@@ -1618,6 +1852,10 @@ func _update_active_projectiles(delta: float) -> void:
 				_spawn_comet_explosion(node.global_position)
 			elif p_data["proj_type"] == 6:
 				_spawn_acid_puddle(node.global_position)
+			elif p_data["proj_type"] == 7:
+				_spawn_bone_impact(node.global_position)
+			elif p_data["proj_type"] == 8:
+				_spawn_lightning_impact(node.global_position)
 			node.queue_free()
 			to_remove.append(pid)
 
@@ -1636,6 +1874,10 @@ func _check_projectile_impact(target_pos: Vector3) -> void:
 				_spawn_comet_explosion(node.global_position)
 			elif p_data["proj_type"] == 6:
 				_spawn_acid_puddle(node.global_position)
+			elif p_data["proj_type"] == 7:
+				_spawn_bone_impact(node.global_position)
+			elif p_data["proj_type"] == 8:
+				_spawn_lightning_impact(node.global_position)
 			node.queue_free()
 			to_remove.append(pid)
 			break
@@ -1705,6 +1947,105 @@ func _spawn_acid_puddle(pos: Vector3) -> void:
 	tw.chain().tween_property(mat, "albedo_color:a", 0.0, 0.7)
 	tw.parallel().tween_property(light, "light_energy", 0.0, 0.7)
 	tw.chain().tween_callback(puddle_root.queue_free)
+
+func _spawn_bone_impact(pos: Vector3) -> void:
+	var root := Node3D.new()
+	root.position = pos
+	add_child(root)
+
+	var flash := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.35
+	sphere.height = 0.7
+	flash.mesh = sphere
+	var f_mat := StandardMaterial3D.new()
+	f_mat.albedo_color = Color("#00e676")
+	f_mat.emission_enabled = true
+	f_mat.emission = Color("#76ff03")
+	f_mat.emission_energy_multiplier = 4.5
+	f_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	flash.material_override = f_mat
+	root.add_child(flash)
+
+	var bone_mat := StandardMaterial3D.new()
+	bone_mat.albedo_color = Color("#ecebe4")
+	bone_mat.roughness = 0.5
+	var shards: Array[MeshInstance3D] = []
+	for i in range(5):
+		var shard := MeshInstance3D.new()
+		var s_box := BoxMesh.new()
+		s_box.size = Vector3(0.06, 0.18, 0.05)
+		shard.mesh = s_box
+		shard.material_override = bone_mat
+		shard.rotation = Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1))
+		root.add_child(shard)
+		shards.append(shard)
+
+	var light := OmniLight3D.new()
+	light.light_color = Color("#76ff03")
+	light.light_energy = 5.0
+	light.omni_range = 5.5
+	root.add_child(light)
+
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(flash, "scale", Vector3(5.0, 5.0, 5.0), 0.32)
+	tw.tween_property(f_mat, "albedo_color:a", 0.0, 0.32)
+	tw.tween_property(light, "light_energy", 0.0, 0.32)
+	for i in range(shards.size()):
+		var angle: float = i * (PI * 2.0 / shards.size())
+		var target_offset := Vector3(cos(angle) * 1.8, randf_range(0.2, 1.2), sin(angle) * 1.8)
+		tw.tween_property(shards[i], "position", target_offset, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_callback(root.queue_free)
+
+func _spawn_lightning_impact(pos: Vector3) -> void:
+	var root := Node3D.new()
+	root.position = pos
+	add_child(root)
+
+	var bolt := MeshInstance3D.new()
+	var bolt_cyl := CylinderMesh.new()
+	bolt_cyl.top_radius = 0.14
+	bolt_cyl.bottom_radius = 0.18
+	bolt_cyl.height = 14.0
+	bolt.mesh = bolt_cyl
+	var b_mat := StandardMaterial3D.new()
+	b_mat.albedo_color = Color(1.0, 1.0, 1.0)
+	b_mat.emission_enabled = true
+	b_mat.emission = Color("#00e5ff")
+	b_mat.emission_energy_multiplier = 7.0
+	bolt.material_override = b_mat
+	bolt.position = Vector3(0, 7.0, 0)
+	root.add_child(bolt)
+
+	var shockwave := MeshInstance3D.new()
+	var ring := TorusMesh.new()
+	ring.inner_radius = 0.4
+	ring.outer_radius = 0.85
+	shockwave.mesh = ring
+	var s_mat := StandardMaterial3D.new()
+	s_mat.albedo_color = Color("#00b0ff")
+	s_mat.emission_enabled = true
+	s_mat.emission = Color("#00e5ff")
+	s_mat.emission_energy_multiplier = 5.5
+	s_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	shockwave.material_override = s_mat
+	shockwave.position = Vector3(0, 0.1, 0)
+	root.add_child(shockwave)
+
+	var light := OmniLight3D.new()
+	light.light_color = Color("#e1f5fe")
+	light.light_energy = 8.5
+	light.omni_range = 7.5
+	light.position = Vector3(0, 1.5, 0)
+	root.add_child(light)
+
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(bolt, "scale:x", 0.05, 0.22)
+	tw.tween_property(bolt, "scale:z", 0.05, 0.22)
+	tw.tween_property(shockwave, "scale", Vector3(6.5, 1.0, 6.5), 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(s_mat, "albedo_color:a", 0.0, 0.28)
+	tw.tween_property(light, "light_energy", 0.0, 0.28)
+	tw.chain().tween_callback(root.queue_free)
 
 func _create_rebirth_crystal() -> void:
 	var crystal_root := Node3D.new()
@@ -1791,9 +2132,9 @@ func _create_perimeter_walls() -> void:
 
 	var wall_height: float = 6.0
 	var wall_thick: float = 3.0
-	var map_limit: float = 76.0
+	var map_limit: float = 122.0
 
-	# 1. Muralha Norte (Z = -76)
+	# 1. Muralha Norte (Z = -122)
 	var north_wall := StaticBody3D.new()
 	north_wall.name = "NorthWall"
 	north_wall.position = Vector3(0.0, wall_height / 2.0, -map_limit)
@@ -1801,18 +2142,18 @@ func _create_perimeter_walls() -> void:
 
 	var n_col := CollisionShape3D.new()
 	var n_box := BoxShape3D.new()
-	n_box.size = Vector3(156.0, wall_height, wall_thick)
+	n_box.size = Vector3(250.0, wall_height, wall_thick)
 	n_col.shape = n_box
 	north_wall.add_child(n_col)
 
 	var n_mesh := MeshInstance3D.new()
 	var n_bmesh := BoxMesh.new()
-	n_bmesh.size = Vector3(156.0, wall_height, wall_thick)
+	n_bmesh.size = Vector3(250.0, wall_height, wall_thick)
 	n_mesh.mesh = n_bmesh
 	n_mesh.material_override = stone_mat
 	north_wall.add_child(n_mesh)
 
-	# 2. Muralha Sul (Z = +76)
+	# 2. Muralha Sul (Z = +122)
 	var south_wall := StaticBody3D.new()
 	south_wall.name = "SouthWall"
 	south_wall.position = Vector3(0.0, wall_height / 2.0, map_limit)
@@ -1820,18 +2161,18 @@ func _create_perimeter_walls() -> void:
 
 	var s_col := CollisionShape3D.new()
 	var s_box := BoxShape3D.new()
-	s_box.size = Vector3(156.0, wall_height, wall_thick)
+	s_box.size = Vector3(250.0, wall_height, wall_thick)
 	s_col.shape = s_box
 	south_wall.add_child(s_col)
 
 	var s_mesh := MeshInstance3D.new()
 	var s_bmesh := BoxMesh.new()
-	s_bmesh.size = Vector3(156.0, wall_height, wall_thick)
+	s_bmesh.size = Vector3(250.0, wall_height, wall_thick)
 	s_mesh.mesh = s_bmesh
 	s_mesh.material_override = stone_mat
 	south_wall.add_child(s_mesh)
 
-	# 3. Muralha Oeste (X = -76)
+	# 3. Muralha Oeste (X = -122)
 	var west_wall := StaticBody3D.new()
 	west_wall.name = "WestWall"
 	west_wall.position = Vector3(-map_limit, wall_height / 2.0, 0.0)
@@ -1839,62 +2180,62 @@ func _create_perimeter_walls() -> void:
 
 	var w_col := CollisionShape3D.new()
 	var w_box := BoxShape3D.new()
-	w_box.size = Vector3(wall_thick, wall_height, 156.0)
+	w_box.size = Vector3(wall_thick, wall_height, 250.0)
 	w_col.shape = w_box
 	west_wall.add_child(w_col)
 
 	var w_mesh := MeshInstance3D.new()
 	var w_bmesh := BoxMesh.new()
-	w_bmesh.size = Vector3(wall_thick, wall_height, 156.0)
+	w_bmesh.size = Vector3(wall_thick, wall_height, 250.0)
 	w_mesh.mesh = w_bmesh
 	w_mesh.material_override = stone_mat
 	west_wall.add_child(w_mesh)
 
-	# 4. Muralha Leste (X = +76) dividida em 2 seções com Fenda do Abismo no centro (Z = 0)
-	# Seção Norte do Leste: de Z = -76 a Z = -4 (comprimento 72m, centro Z = -40)
+	# 4. Muralha Leste (X = +122) dividida em 2 seções com Fenda do Abismo no centro (Z = 0)
+	# Seção Norte do Leste: de Z = -122 a Z = -5 (comprimento 117m, centro Z = -63.5)
 	var east_n := StaticBody3D.new()
 	east_n.name = "EastWall_North"
-	east_n.position = Vector3(map_limit, wall_height / 2.0, -40.0)
+	east_n.position = Vector3(map_limit, wall_height / 2.0, -63.5)
 	walls_node.add_child(east_n)
 
 	var en_col := CollisionShape3D.new()
 	var en_box := BoxShape3D.new()
-	en_box.size = Vector3(wall_thick, wall_height, 72.0)
+	en_box.size = Vector3(wall_thick, wall_height, 117.0)
 	en_col.shape = en_box
 	east_n.add_child(en_col)
 
 	var en_mesh := MeshInstance3D.new()
 	var en_bmesh := BoxMesh.new()
-	en_bmesh.size = Vector3(wall_thick, wall_height, 72.0)
+	en_bmesh.size = Vector3(wall_thick, wall_height, 117.0)
 	en_mesh.mesh = en_bmesh
 	en_mesh.material_override = stone_mat
 	east_n.add_child(en_mesh)
 
-	# Seção Sul do Leste: de Z = +4 a Z = +76 (comprimento 72m, centro Z = +40)
+	# Seção Sul do Leste: de Z = +5 a Z = +122 (comprimento 117m, centro Z = +63.5)
 	var east_s := StaticBody3D.new()
 	east_s.name = "EastWall_South"
-	east_s.position = Vector3(map_limit, wall_height / 2.0, 40.0)
+	east_s.position = Vector3(map_limit, wall_height / 2.0, 63.5)
 	walls_node.add_child(east_s)
 
 	var es_col := CollisionShape3D.new()
 	var es_box := BoxShape3D.new()
-	es_box.size = Vector3(wall_thick, wall_height, 72.0)
+	es_box.size = Vector3(wall_thick, wall_height, 117.0)
 	es_col.shape = es_box
 	east_s.add_child(es_col)
 
 	var es_mesh := MeshInstance3D.new()
 	var es_bmesh := BoxMesh.new()
-	es_bmesh.size = Vector3(wall_thick, wall_height, 72.0)
+	es_bmesh.size = Vector3(wall_thick, wall_height, 117.0)
 	es_mesh.mesh = es_bmesh
 	es_mesh.material_override = stone_mat
 	east_s.add_child(es_mesh)
 
-	# Marcadores e Placa da Fenda do Void (Z = 0 em X = 76)
+	# Marcadores e Placa da Fenda do Void (Z = 0 em X = 122)
 	var gap_marker := Node3D.new()
 	gap_marker.position = Vector3(map_limit, 0.0, 0.0)
 	walls_node.add_child(gap_marker)
 
-	for z_off in [-4.0, 4.0]:
+	for z_off in [-5.0, 5.0]:
 		var obelisk := MeshInstance3D.new()
 		var ob_box := BoxMesh.new()
 		ob_box.size = Vector3(1.2, 4.0, 1.2)
@@ -2852,4 +3193,710 @@ func _create_interactive_door(parent: Node3D, house_id: String, house_name: Stri
 		"door_inside": inside_pos,
 		"label_node": door_lbl
 	})
+
+func _build_new_landmarks() -> void:
+	var landmarks_root := Node3D.new()
+	landmarks_root.name = "NewLandmarks"
+	add_child(landmarks_root)
+
+	# =========================================================================
+	# 1. ⛪ IGREJA DA LUZ SAGRADA EM (-20, 0, -18)
+	# =========================================================================
+	var church_root := Node3D.new()
+	church_root.name = "HolyLightChurch"
+	church_root.position = Vector3(-20.0, 0.0, -18.0)
+	landmarks_root.add_child(church_root)
+
+	var church_stone_mat := StandardMaterial3D.new()
+	church_stone_mat.albedo_color = Color(0.92, 0.90, 0.85, 1.0) # Pedra marfim / branca
+	church_stone_mat.roughness = 0.85
+
+	var church_gold_mat := StandardMaterial3D.new()
+	church_gold_mat.albedo_color = Color(0.85, 0.70, 0.22, 1.0) # Telhado dourado
+	church_gold_mat.metallic = 0.6
+	church_gold_mat.roughness = 0.35
+
+	var church_solar_mat := StandardMaterial3D.new()
+	church_solar_mat.albedo_color = Color(1.0, 0.88, 0.25, 1.0)
+	church_solar_mat.emission_enabled = true
+	church_solar_mat.emission = Color(1.0, 0.88, 0.25)
+	church_solar_mat.emission_energy_multiplier = 4.5
+
+	# Nave Principal (Templo de Pedra Marfim 10m x 6m x 14m)
+	var church_body := StaticBody3D.new()
+	church_body.name = "ChurchStructure"
+	church_body.collision_layer = 1
+	church_body.collision_mask = 0
+	church_root.add_child(church_body)
+
+	var c_wall_t := 0.5
+	var c_size := Vector3(10.0, 6.0, 14.0)
+	var c_door_w := 2.4
+	var c_door_h := 3.0
+
+	# Piso de mármore interno
+	var c_floor := MeshInstance3D.new()
+	var c_fmesh := BoxMesh.new()
+	c_fmesh.size = Vector3(c_size.x - 0.2, 0.02, c_size.z - 0.2)
+	c_floor.mesh = c_fmesh
+	var c_fmat := StandardMaterial3D.new()
+	c_fmat.albedo_color = Color(0.82, 0.82, 0.85, 1.0)
+	c_fmat.roughness = 0.5
+	c_floor.material_override = c_fmat
+	c_floor.position = Vector3(0, 0.015, 0)
+	church_body.add_child(c_floor)
+
+	# Parede Norte (Fundos / Atrás do Altar - Sólida em Z = -7.0)
+	_add_wall_piece(church_body, Vector3(0, c_size.y / 2.0, -c_size.z / 2.0 + c_wall_t / 2.0), Vector3(c_size.x, c_size.y, c_wall_t), church_stone_mat)
+	# Parede Oeste (Lateral Esquerda em X = -5.0)
+	_add_wall_piece(church_body, Vector3(-c_size.x / 2.0 + c_wall_t / 2.0, c_size.y / 2.0, 0), Vector3(c_wall_t, c_size.y, c_size.z), church_stone_mat)
+	# Parede Leste (Lateral Direita em X = +5.0)
+	_add_wall_piece(church_body, Vector3(c_size.x / 2.0 - c_wall_t / 2.0, c_size.y / 2.0, 0), Vector3(c_wall_t, c_size.y, c_size.z), church_stone_mat)
+	# Parede Sul (Frente com abertura de porta voltada para Z = +7.0)
+	var c_side_w := (c_size.x - c_door_w) / 2.0
+	_add_wall_piece(church_body, Vector3(-(c_size.x + c_door_w) / 4.0, c_size.y / 2.0, c_size.z / 2.0 - c_wall_t / 2.0), Vector3(c_side_w, c_size.y, c_wall_t), church_stone_mat)
+	_add_wall_piece(church_body, Vector3((c_size.x + c_door_w) / 4.0, c_size.y / 2.0, c_size.z / 2.0 - c_wall_t / 2.0), Vector3(c_side_w, c_size.y, c_wall_t), church_stone_mat)
+	var c_lintel_h := c_size.y - c_door_h
+	if c_lintel_h > 0.1:
+		_add_wall_piece(church_body, Vector3(0, c_door_h + c_lintel_h / 2.0, c_size.z / 2.0 - c_wall_t / 2.0), Vector3(c_door_w, c_lintel_h, c_wall_t), church_stone_mat)
+
+	# Telhado Dourado
+	var church_roof := MeshInstance3D.new()
+	var cr_mesh := BoxMesh.new()
+	cr_mesh.size = Vector3(c_size.x + 0.8, 1.4, c_size.z + 0.8)
+	church_roof.mesh = cr_mesh
+	church_roof.position = Vector3(0, c_size.y + 0.6, 0)
+	church_roof.material_override = church_gold_mat
+	church_body.add_child(church_roof)
+
+	# Vitrais Laterais Coloridos nas paredes Leste e Oeste
+	for side_x in [-c_size.x / 2.0 - 0.05, c_size.x / 2.0 + 0.05]:
+		for z_offset in [-3.5, 0.0, 3.5]:
+			var glass := MeshInstance3D.new()
+			var gm := BoxMesh.new()
+			gm.size = Vector3(0.12, 2.6, 1.4)
+			glass.mesh = gm
+			var glass_mat := StandardMaterial3D.new()
+			if z_offset < -1.0:
+				glass_mat.albedo_color = Color(0.15, 0.55, 1.0, 0.9)
+				glass_mat.emission = Color(0.15, 0.55, 1.0)
+			elif z_offset > 1.0:
+				glass_mat.albedo_color = Color(0.95, 0.2, 0.3, 0.9)
+				glass_mat.emission = Color(0.95, 0.2, 0.3)
+			else:
+				glass_mat.albedo_color = Color(1.0, 0.85, 0.2, 0.9)
+				glass_mat.emission = Color(1.0, 0.85, 0.2)
+			glass_mat.emission_enabled = true
+			glass_mat.emission_energy_multiplier = 2.4
+			glass.material_override = glass_mat
+			glass.position = Vector3(side_x, 3.2, z_offset)
+			church_root.add_child(glass)
+
+	# Torre de Sino Alta (Frente da Igreja, altura 12m)
+	var tower_body := StaticBody3D.new()
+	tower_body.name = "ChurchBellTower"
+	tower_body.position = Vector3(0.0, 0.0, c_size.z / 2.0 + 1.2)
+	tower_body.collision_layer = 1
+	tower_body.collision_mask = 0
+	church_root.add_child(tower_body)
+
+	var t_col := CollisionShape3D.new()
+	var t_box := BoxShape3D.new()
+	t_box.size = Vector3(3.6, 12.0, 3.6)
+	t_col.shape = t_box
+	t_col.position = Vector3(0, 6.0, 0)
+	tower_body.add_child(t_col)
+
+	var t_mesh := MeshInstance3D.new()
+	var t_bmesh := BoxMesh.new()
+	t_bmesh.size = Vector3(3.6, 12.0, 3.6)
+	t_mesh.mesh = t_bmesh
+	t_mesh.position = Vector3(0, 6.0, 0)
+	t_mesh.material_override = church_stone_mat
+	tower_body.add_child(t_mesh)
+
+	# Topo da Torre com Sino de Bronze e Telhado Dourado
+	var bell_roof := MeshInstance3D.new()
+	var br_mesh := BoxMesh.new()
+	br_mesh.size = Vector3(4.2, 1.2, 4.2)
+	bell_roof.mesh = br_mesh
+	bell_roof.position = Vector3(0, 12.6, 0)
+	bell_roof.material_override = church_gold_mat
+	tower_body.add_child(bell_roof)
+
+	var bell := MeshInstance3D.new()
+	var b_mesh := CylinderMesh.new()
+	b_mesh.top_radius = 0.3
+	b_mesh.bottom_radius = 0.75
+	b_mesh.height = 1.1
+	bell.mesh = b_mesh
+	var bell_mat := StandardMaterial3D.new()
+	bell_mat.albedo_color = Color(0.8, 0.6, 0.2, 1.0)
+	bell_mat.metallic = 0.9
+	bell_mat.roughness = 0.3
+	bell.material_override = bell_mat
+	bell.position = Vector3(0, 11.2, 0)
+	tower_body.add_child(bell)
+
+	# Cruz Solar Brilhante no topo da Torre
+	var cross_v := MeshInstance3D.new()
+	var cv_mesh := BoxMesh.new()
+	cv_mesh.size = Vector3(0.35, 2.6, 0.35)
+	cross_v.mesh = cv_mesh
+	cross_v.material_override = church_solar_mat
+	cross_v.position = Vector3(0, 14.5, 0)
+	tower_body.add_child(cross_v)
+
+	var cross_h := MeshInstance3D.new()
+	var ch_mesh := BoxMesh.new()
+	ch_mesh.size = Vector3(1.7, 0.35, 0.35)
+	cross_h.mesh = ch_mesh
+	cross_h.material_override = church_solar_mat
+	cross_h.position = Vector3(0, 15.0, 0)
+	tower_body.add_child(cross_h)
+
+	var cross_light := OmniLight3D.new()
+	cross_light.light_color = Color(1.0, 0.9, 0.45)
+	cross_light.light_energy = 3.6
+	cross_light.omni_range = 14.0
+	cross_light.position = Vector3(0, 15.0, 0)
+	tower_body.add_child(cross_light)
+
+	# Altar Dourado no Interior da Igreja
+	var altar_body := StaticBody3D.new()
+	altar_body.name = "ChurchGoldenAltar"
+	altar_body.position = Vector3(0.0, 0.0, -c_size.z / 2.0 + 2.2)
+	altar_body.collision_layer = 1
+	altar_body.collision_mask = 0
+	church_root.add_child(altar_body)
+
+	var a_col := CollisionShape3D.new()
+	var a_box := BoxShape3D.new()
+	a_box.size = Vector3(3.4, 1.2, 1.6)
+	a_col.shape = a_box
+	a_col.position = Vector3(0, 0.6, 0)
+	altar_body.add_child(a_col)
+
+	var a_mesh := MeshInstance3D.new()
+	var a_bmesh := BoxMesh.new()
+	a_bmesh.size = Vector3(3.4, 1.2, 1.6)
+	a_mesh.mesh = a_bmesh
+	a_mesh.position = Vector3(0, 0.6, 0)
+	a_mesh.material_override = church_gold_mat
+	altar_body.add_child(a_mesh)
+
+	# Relíquia Solar Sagrada sobre o Altar
+	var sacred_relic := MeshInstance3D.new()
+	var sr_mesh := SphereMesh.new()
+	sr_mesh.radius = 0.32
+	sr_mesh.height = 0.64
+	sacred_relic.mesh = sr_mesh
+	sacred_relic.material_override = church_solar_mat
+	sacred_relic.position = Vector3(0, 1.5, 0)
+	altar_body.add_child(sacred_relic)
+
+	var altar_light := OmniLight3D.new()
+	altar_light.light_color = Color(1.0, 0.85, 0.35)
+	altar_light.light_energy = 3.2
+	altar_light.omni_range = 9.0
+	altar_light.position = Vector3(0, 2.2, 0)
+	altar_body.add_child(altar_light)
+
+	# Bancos de Oração de Madeira
+	for b_z in [-1.5, 1.2, 3.8]:
+		_create_furniture_piece(church_root, Vector3(-2.4, 0.45, b_z), Vector3(2.4, 0.8, 0.7), Color(0.3, 0.2, 0.12))
+		_create_furniture_piece(church_root, Vector3(2.4, 0.45, b_z), Vector3(2.4, 0.8, 0.7), Color(0.3, 0.2, 0.12))
+
+	# Porta Interativa da Igreja (Tecla E)
+	_create_interactive_door(landmarks_root, "holy_light_church", "Igreja da Luz Sagrada", Vector3(-20.0, 0.0, -11.0), Vector3(-20.0, 0.0, -8.8), Vector3(-20.0, 0.0, -13.5), true)
+
+	# =========================================================================
+	# 2. 🔮 TORRE ARCANA (TORRE DO MAGO) EM (20, 0, -18)
+	# =========================================================================
+	var tower_root := Node3D.new()
+	tower_root.name = "ArcaneMageTower"
+	tower_root.position = Vector3(20.0, 0.0, -18.0)
+	landmarks_root.add_child(tower_root)
+
+	var mage_stone_mat := StandardMaterial3D.new()
+	mage_stone_mat.albedo_color = Color(0.106, 0.149, 0.231, 1.0) # #1B263B Azul-escuro
+	mage_stone_mat.roughness = 0.65
+	mage_stone_mat.metallic = 0.25
+
+	var mage_gold_mat := StandardMaterial3D.new()
+	mage_gold_mat.albedo_color = Color(1.0, 0.84, 0.1, 1.0) # Anéis mágicos dourados
+	mage_gold_mat.emission_enabled = true
+	mage_gold_mat.emission = Color(1.0, 0.84, 0.1)
+	mage_gold_mat.emission_energy_multiplier = 3.5
+
+	var mage_cyan_mat := StandardMaterial3D.new()
+	mage_cyan_mat.albedo_color = Color(0.0, 0.94, 1.0, 1.0) # Cristais ciano luminosos
+	mage_cyan_mat.emission_enabled = true
+	mage_cyan_mat.emission = Color(0.0, 0.94, 1.0)
+	mage_cyan_mat.emission_energy_multiplier = 4.2
+
+	# Corpo Cilíndrico Alto (14 metros de altura)
+	var tower_mesh := MeshInstance3D.new()
+	var tm_cyl := CylinderMesh.new()
+	tm_cyl.top_radius = 3.6
+	tm_cyl.bottom_radius = 4.0
+	tm_cyl.height = 14.0
+	tower_mesh.mesh = tm_cyl
+	tower_mesh.material_override = mage_stone_mat
+	tower_mesh.position = Vector3(0, 7.0, 0)
+	tower_root.add_child(tower_mesh)
+
+	# Colisão Sólida Perimetral (StaticBody3D com BoxShape3D em formato octogonal)
+	var tower_col_body := StaticBody3D.new()
+	tower_col_body.name = "MageTowerCollision"
+	tower_col_body.collision_layer = 1
+	tower_col_body.collision_mask = 0
+	tower_root.add_child(tower_col_body)
+
+	for angle_deg in [45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0]:
+		var rad := deg_to_rad(angle_deg)
+		var c_col := CollisionShape3D.new()
+		var c_box := BoxShape3D.new()
+		c_box.size = Vector3(3.0, 14.0, 1.0)
+		c_col.shape = c_box
+		c_col.position = Vector3(sin(rad) * 3.7, 7.0, cos(rad) * 3.7)
+		c_col.rotation.y = rad
+		tower_col_body.add_child(c_col)
+
+	# Telhado Cônico / Pináculo Arcano no topo (Y = 14m a 18.5m)
+	var spire_mesh := MeshInstance3D.new()
+	var sm_cone := CylinderMesh.new()
+	sm_cone.top_radius = 0.1
+	sm_cone.bottom_radius = 4.1
+	sm_cone.height = 4.5
+	spire_mesh.mesh = sm_cone
+	spire_mesh.material_override = mage_stone_mat
+	spire_mesh.position = Vector3(0, 16.25, 0)
+	tower_root.add_child(spire_mesh)
+
+	# 2 Anéis Dourados Mágicos flutuando no topo
+	# Anel 1 em Y = 15.0m
+	var ring_1 := MeshInstance3D.new()
+	var r1_mesh := CylinderMesh.new()
+	r1_mesh.top_radius = 4.4
+	r1_mesh.bottom_radius = 4.4
+	r1_mesh.height = 0.22
+	ring_1.mesh = r1_mesh
+	ring_1.material_override = mage_gold_mat
+	ring_1.position = Vector3(0, 15.0, 0)
+	ring_1.rotation.x = deg_to_rad(12.0)
+	tower_root.add_child(ring_1)
+
+	# Anel 2 em Y = 16.5m
+	var ring_2 := MeshInstance3D.new()
+	var r2_mesh := CylinderMesh.new()
+	r2_mesh.top_radius = 3.6
+	r2_mesh.bottom_radius = 3.6
+	r2_mesh.height = 0.22
+	ring_2.mesh = r2_mesh
+	ring_2.material_override = mage_gold_mat
+	ring_2.position = Vector3(0, 16.5, 0)
+	ring_2.rotation.z = deg_to_rad(-14.0)
+	tower_root.add_child(ring_2)
+
+	# Cristais Ciano Luminosos (4 cristais orbitando a torre em Y = 7.0m)
+	for c_angle in [0.0, 90.0, 180.0, 270.0]:
+		var cr_rad := deg_to_rad(c_angle)
+		var c_pos := Vector3(sin(cr_rad) * 4.9, 7.0, cos(cr_rad) * 4.9)
+
+		var crystal := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.08
+		cm.bottom_radius = 0.42
+		cm.height = 1.9
+		crystal.mesh = cm
+		crystal.material_override = mage_cyan_mat
+		crystal.position = c_pos
+		tower_root.add_child(crystal)
+
+		var c_light := OmniLight3D.new()
+		c_light.light_color = Color(0.1, 0.95, 1.0)
+		c_light.light_energy = 2.6
+		c_light.omni_range = 8.0
+		c_light.position = c_pos
+		tower_root.add_child(c_light)
+
+	# Interior Arcano: Bancada de Poções, Estante de Livros e Orbe Místico
+	_create_furniture_piece(tower_root, Vector3(-1.8, 0.8, -1.5), Vector3(1.2, 1.6, 2.4), Color(0.2, 0.15, 0.25))
+	_create_furniture_piece(tower_root, Vector3(1.8, 0.8, -1.5), Vector3(1.2, 1.6, 2.4), Color(0.15, 0.2, 0.3))
+
+	var orb := MeshInstance3D.new()
+	var om := SphereMesh.new()
+	om.radius = 0.4
+	om.height = 0.8
+	orb.mesh = om
+	var orb_mat := StandardMaterial3D.new()
+	orb_mat.albedo_color = Color(0.8, 0.2, 1.0, 1.0)
+	orb_mat.emission_enabled = true
+	orb_mat.emission = Color(0.8, 0.2, 1.0)
+	orb_mat.emission_energy_multiplier = 4.0
+	orb.material_override = orb_mat
+	orb.position = Vector3(0, 1.6, 0)
+	tower_root.add_child(orb)
+
+	var orb_light := OmniLight3D.new()
+	orb_light.light_color = Color(0.7, 0.3, 1.0)
+	orb_light.light_energy = 3.2
+	orb_light.omni_range = 7.5
+	orb_light.position = Vector3(0, 2.0, 0)
+	tower_root.add_child(orb_light)
+
+	# Porta Interativa da Torre do Mago (Tecla E)
+	_create_interactive_door(landmarks_root, "mage_tower", "Torre Arcana do Mago", Vector3(20.0, 0.0, -14.2), Vector3(20.0, 0.0, -12.4), Vector3(20.0, 0.0, -16.2), true)
+
+	# =========================================================================
+	# 3. 🏹 POSTO DO CAÇADOR EM (34, 0, -30)
+	# =========================================================================
+	var hunter_root := Node3D.new()
+	hunter_root.name = "HunterPost"
+	hunter_root.position = Vector3(34.0, 0.0, -30.0)
+	landmarks_root.add_child(hunter_root)
+
+	var wood_cabin_mat := StandardMaterial3D.new()
+	wood_cabin_mat.albedo_color = Color(0.32, 0.20, 0.12, 1.0) # Madeira rústica
+	wood_cabin_mat.roughness = 0.85
+
+	var roof_bark_mat := StandardMaterial3D.new()
+	roof_bark_mat.albedo_color = Color(0.20, 0.14, 0.08, 1.0) # Telhado rústico
+	roof_bark_mat.roughness = 0.9
+
+	# Cabana Rústica de Madeira (7.4m x 3.8m x 6.4m)
+	_create_solid_building(hunter_root, "HunterCabin", Vector3.ZERO, Vector3(7.4, 3.8, 6.4), wood_cabin_mat.albedo_color, roof_bark_mat.albedo_color, "Posto do Caçador", Color(0.9, 0.8, 0.4), "north")
+
+	# Alvos de Treino de Tiro com Arco em (38, 0, -28) e (38, 0, -32)
+	for t_offset_z in [2.0, -2.0]:
+		var target_body := StaticBody3D.new()
+		target_body.position = Vector3(5.2, 0.0, t_offset_z)
+		target_body.collision_layer = 1
+		target_body.collision_mask = 0
+		hunter_root.add_child(target_body)
+
+		var tgt_col := CollisionShape3D.new()
+		var tgt_box := BoxShape3D.new()
+		tgt_box.size = Vector3(0.6, 2.2, 1.6)
+		tgt_col.shape = tgt_box
+		tgt_col.position = Vector3(0, 1.1, 0)
+		target_body.add_child(tgt_col)
+
+		# Cavalete de Madeira
+		var stand := MeshInstance3D.new()
+		var st_mesh := BoxMesh.new()
+		st_mesh.size = Vector3(0.4, 2.0, 0.15)
+		stand.mesh = st_mesh
+		stand.material_override = wood_cabin_mat
+		stand.position = Vector3(0, 1.0, 0)
+		target_body.add_child(stand)
+
+		# Alvo Circular com círculos concêntricos
+		var disc := MeshInstance3D.new()
+		var dc_mesh := CylinderMesh.new()
+		dc_mesh.top_radius = 0.75
+		dc_mesh.bottom_radius = 0.75
+		dc_mesh.height = 0.12
+		disc.mesh = dc_mesh
+		var disc_mat := StandardMaterial3D.new()
+		disc_mat.albedo_color = Color(0.9, 0.85, 0.7, 1.0) # Palha clara
+		disc.material_override = disc_mat
+		disc.position = Vector3(0, 1.4, 0)
+		disc.rotation.z = deg_to_rad(90.0)
+		target_body.add_child(disc)
+
+		# Bullseye Vermelho
+		var bullseye := MeshInstance3D.new()
+		var be_mesh := CylinderMesh.new()
+		be_mesh.top_radius = 0.3
+		be_mesh.bottom_radius = 0.3
+		be_mesh.height = 0.14
+		bullseye.mesh = be_mesh
+		var be_mat := StandardMaterial3D.new()
+		be_mat.albedo_color = Color(0.85, 0.15, 0.15, 1.0)
+		bullseye.material_override = be_mat
+		bullseye.position = Vector3(-0.02, 1.4, 0)
+		bullseye.rotation.z = deg_to_rad(90.0)
+		target_body.add_child(bullseye)
+
+	# Fogueira Acesa em frente ao Posto (Z = +4.2m relativo à cabana)
+	var campfire_body := StaticBody3D.new()
+	campfire_body.name = "HunterCampfire"
+	campfire_body.position = Vector3(-3.2, 0.0, 4.2)
+	campfire_body.collision_layer = 1
+	campfire_body.collision_mask = 0
+	hunter_root.add_child(campfire_body)
+
+	var cf_col := CollisionShape3D.new()
+	var cf_box := BoxShape3D.new()
+	cf_box.size = Vector3(1.6, 0.5, 1.6)
+	cf_col.shape = cf_box
+	cf_col.position = Vector3(0, 0.25, 0)
+	campfire_body.add_child(cf_col)
+
+	# Anel de Pedras da Fogueira
+	var stones_mesh := MeshInstance3D.new()
+	var st_cyl := CylinderMesh.new()
+	st_cyl.top_radius = 0.85
+	st_cyl.bottom_radius = 0.95
+	st_cyl.height = 0.3
+	stones_mesh.mesh = st_cyl
+	var st_mat := StandardMaterial3D.new()
+	st_mat.albedo_color = Color(0.3, 0.3, 0.32, 1.0)
+	stones_mesh.material_override = st_mat
+	stones_mesh.position = Vector3(0, 0.15, 0)
+	campfire_body.add_child(stones_mesh)
+
+	# Brasas e Madeira Ardente
+	var embers_mesh := MeshInstance3D.new()
+	var emb_box := BoxMesh.new()
+	emb_box.size = Vector3(0.9, 0.25, 0.9)
+	embers_mesh.mesh = emb_box
+	var emb_mat := StandardMaterial3D.new()
+	emb_mat.albedo_color = Color(1.0, 0.45, 0.05, 1.0)
+	emb_mat.emission_enabled = true
+	emb_mat.emission = Color(1.0, 0.45, 0.05)
+	emb_mat.emission_energy_multiplier = 4.0
+	embers_mesh.material_override = emb_mat
+	embers_mesh.position = Vector3(0, 0.2, 0)
+	campfire_body.add_child(embers_mesh)
+
+	# Partículas de Fogo
+	var fire_cpu := CPUParticles3D.new()
+	fire_cpu.position = Vector3(0, 0.35, 0)
+	fire_cpu.amount = 25
+	fire_cpu.lifetime = 0.8
+	fire_cpu.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	fire_cpu.emission_box_extents = Vector3(0.3, 0.1, 0.3)
+	fire_cpu.direction = Vector3(0, 1, 0)
+	fire_cpu.spread = 15.0
+	fire_cpu.initial_velocity_min = 1.4
+	fire_cpu.initial_velocity_max = 2.4
+	fire_cpu.scale_amount_min = 0.1
+	fire_cpu.scale_amount_max = 0.25
+	fire_cpu.color = Color(1.0, 0.6, 0.1, 0.9)
+	var cf_pmat := StandardMaterial3D.new()
+	cf_pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cf_pmat.albedo_color = Color(1.0, 0.5, 0.1, 1.0)
+	var cf_smesh := SphereMesh.new()
+	cf_smesh.radius = 0.1
+	cf_smesh.height = 0.2
+	cf_smesh.material = cf_pmat
+	fire_cpu.mesh = cf_smesh
+	campfire_body.add_child(fire_cpu)
+
+	var cf_light := OmniLight3D.new()
+	cf_light.light_color = Color(1.0, 0.58, 0.15)
+	cf_light.light_energy = 3.5
+	cf_light.omni_range = 8.5
+	cf_light.position = Vector3(0, 0.9, 0)
+	campfire_body.add_child(cf_light)
+
+	# Porta Interativa da Cabana do Caçador (Tecla E)
+	_create_interactive_door(landmarks_root, "hunter_post", "Posto do Caçador", Vector3(34.0, 0.0, -26.8), Vector3(34.0, 0.0, -25.2), Vector3(34.0, 0.0, -28.8), true)
+
+	# =========================================================================
+	# 4. 🌑 SANTUÁRIO DO ECLIPSE EM (-85, 0, 85)
+	# =========================================================================
+	var sanctuary_root := Node3D.new()
+	sanctuary_root.name = "EclipseSanctuaryLandmark"
+	sanctuary_root.position = Vector3(-85.0, 0.0, 85.0)
+	landmarks_root.add_child(sanctuary_root)
+
+	var obs_mat := StandardMaterial3D.new()
+	obs_mat.albedo_color = Color(0.08, 0.06, 0.10, 1.0) # Obsidiana negra
+	obs_mat.metallic = 0.88
+	obs_mat.roughness = 0.22
+
+	var crimson_rune_mat := StandardMaterial3D.new()
+	crimson_rune_mat.albedo_color = Color(1.0, 0.05, 0.12, 1.0) # Runas vermelhas brilhantes
+	crimson_rune_mat.emission_enabled = true
+	crimson_rune_mat.emission = Color(1.0, 0.05, 0.12)
+	crimson_rune_mat.emission_energy_multiplier = 4.8
+
+	var black_void_mat := StandardMaterial3D.new()
+	black_void_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	black_void_mat.albedo_color = Color(0.01, 0.01, 0.01, 1.0) # Sol Negro Absoluto
+
+	var halo_crimson_mat := StandardMaterial3D.new()
+	halo_crimson_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	halo_crimson_mat.albedo_color = Color(1.0, 0.08, 0.15, 1.0) # Halo Carmesim do Eclipse
+	halo_crimson_mat.emission_enabled = true
+	halo_crimson_mat.emission = Color(1.0, 0.08, 0.15)
+	halo_crimson_mat.emission_energy_multiplier = 5.5
+
+	# Arena Gótica de Obsidiana Negra (28x28m)
+	var arena_floor_body := StaticBody3D.new()
+	arena_floor_body.name = "SanctuaryArenaFloor"
+	arena_floor_body.collision_layer = 1
+	arena_floor_body.collision_mask = 0
+	sanctuary_root.add_child(arena_floor_body)
+
+	var af_col := CollisionShape3D.new()
+	var af_box := BoxShape3D.new()
+	af_box.size = Vector3(28.0, 0.4, 28.0)
+	af_col.shape = af_box
+	af_col.position = Vector3(0, 0.2, 0)
+	arena_floor_body.add_child(af_col)
+
+	var af_mesh := MeshInstance3D.new()
+	var af_bmesh := BoxMesh.new()
+	af_bmesh.size = Vector3(28.0, 0.4, 28.0)
+	af_mesh.mesh = af_bmesh
+	af_mesh.material_override = obs_mat
+	af_mesh.position = Vector3(0, 0.2, 0)
+	arena_floor_body.add_child(af_mesh)
+
+	# Muretas góticas de borda da Arena (28x28m) com entrada aberta de 6m em Z = -14.0
+	# Mureta Leste (X = +14.0)
+	_add_wall_piece(arena_floor_body, Vector3(14.0, 1.0, 0.0), Vector3(1.0, 1.6, 28.0), obs_mat)
+	# Mureta Oeste (X = -14.0)
+	_add_wall_piece(arena_floor_body, Vector3(-14.0, 1.0, 0.0), Vector3(1.0, 1.6, 28.0), obs_mat)
+	# Mureta Sul (Z = +14.0)
+	_add_wall_piece(arena_floor_body, Vector3(0.0, 1.0, 14.0), Vector3(28.0, 1.6, 1.0), obs_mat)
+	# Mureta Norte (Z = -14.0) com abertura de 6m
+	_add_wall_piece(arena_floor_body, Vector3(-8.5, 1.0, -14.0), Vector3(11.0, 1.6, 1.0), obs_mat)
+	_add_wall_piece(arena_floor_body, Vector3(8.5, 1.0, -14.0), Vector3(11.0, 1.6, 1.0), obs_mat)
+
+	# 8 Pilares Monolíticos com Runas Vermelhas Brilhantes (Raio de 11.5m em volta do centro)
+	for p_idx in range(8):
+		var p_angle := p_idx * (PI / 4.0)
+		var p_pos := Vector3(cos(p_angle) * 11.5, 0.0, sin(p_angle) * 11.5)
+
+		var pillar_body := StaticBody3D.new()
+		pillar_body.name = "EclipsePillar_%d" % p_idx
+		pillar_body.position = p_pos
+		pillar_body.collision_layer = 1
+		pillar_body.collision_mask = 0
+		sanctuary_root.add_child(pillar_body)
+
+		var p_col := CollisionShape3D.new()
+		var p_shape := BoxShape3D.new()
+		p_shape.size = Vector3(1.6, 7.5, 1.6)
+		p_col.shape = p_shape
+		p_col.position = Vector3(0, 3.75, 0)
+		pillar_body.add_child(p_col)
+
+		var p_mesh := MeshInstance3D.new()
+		var p_bmesh := BoxMesh.new()
+		p_bmesh.size = Vector3(1.6, 7.5, 1.6)
+		p_mesh.mesh = p_bmesh
+		p_mesh.material_override = obs_mat
+		p_mesh.position = Vector3(0, 3.75, 0)
+		pillar_body.add_child(p_mesh)
+
+		# Runas Vermelhas Brilhantes gravadas no pilar
+		var rune_1 := MeshInstance3D.new()
+		var r1_b := BoxMesh.new()
+		r1_b.size = Vector3(0.3, 5.2, 1.64)
+		rune_1.mesh = r1_b
+		rune_1.material_override = crimson_rune_mat
+		rune_1.position = Vector3(0, 3.75, 0)
+		pillar_body.add_child(rune_1)
+
+		var rune_2 := MeshInstance3D.new()
+		var r2_b := BoxMesh.new()
+		r2_b.size = Vector3(1.64, 5.2, 0.3)
+		rune_2.mesh = r2_b
+		rune_2.material_override = crimson_rune_mat
+		rune_2.position = Vector3(0, 3.75, 0)
+		pillar_body.add_child(rune_2)
+
+		var p_light := OmniLight3D.new()
+		p_light.light_color = Color(1.0, 0.1, 0.15)
+		p_light.light_energy = 2.4
+		p_light.omni_range = 6.5
+		p_light.position = Vector3(0, 7.6, 0)
+		pillar_body.add_child(p_light)
+
+	# Altar do Sacrifício em (-88, 0, 88) -> Relativo ao centro (-85, 0, 85) é (-3.0, 0, 3.0)
+	var sac_altar := StaticBody3D.new()
+	sac_altar.name = "SacrificialAltar"
+	sac_altar.position = Vector3(-3.0, 0.0, 3.0)
+	sac_altar.collision_layer = 1
+	sac_altar.collision_mask = 0
+	sanctuary_root.add_child(sac_altar)
+
+	var sa_col := CollisionShape3D.new()
+	var sa_box := BoxShape3D.new()
+	sa_box.size = Vector3(3.2, 1.2, 2.0)
+	sa_col.shape = sa_box
+	sa_col.position = Vector3(0, 0.6, 0)
+	sac_altar.add_child(sa_col)
+
+	var sa_mesh := MeshInstance3D.new()
+	var sa_bmesh := BoxMesh.new()
+	sa_bmesh.size = Vector3(3.2, 1.2, 2.0)
+	sa_mesh.mesh = sa_bmesh
+	sa_mesh.material_override = obs_mat
+	sa_mesh.position = Vector3(0, 0.6, 0)
+	sac_altar.add_child(sa_mesh)
+
+	# Inlay de sangue rúnico no topo do altar
+	var blood_rune := MeshInstance3D.new()
+	var br_box := BoxMesh.new()
+	br_box.size = Vector3(2.6, 0.05, 1.4)
+	blood_rune.mesh = br_box
+	blood_rune.material_override = crimson_rune_mat
+	blood_rune.position = Vector3(0, 1.23, 0)
+	sac_altar.add_child(blood_rune)
+
+	var sa_light := OmniLight3D.new()
+	sa_light.light_color = Color(1.0, 0.05, 0.1)
+	sa_light.light_energy = 3.6
+	sa_light.omni_range = 7.5
+	sa_light.position = Vector3(0, 1.8, 0)
+	sac_altar.add_child(sa_light)
+
+	# Sol Negro Eclipsado flutuando no céu em (-85, 18, 85) -> Relativo: (0, 18, 0)
+	# SphereMesh negra de raio 3.5m (altura 7.0m)
+	var black_sun := MeshInstance3D.new()
+	black_sun.name = "BlackSunEclipsed"
+	var bs_sphere := SphereMesh.new()
+	bs_sphere.radius = 3.5
+	bs_sphere.height = 7.0
+	black_sun.mesh = bs_sphere
+	black_sun.material_override = black_void_mat
+	black_sun.position = Vector3(0, 18.0, 0)
+	sanctuary_root.add_child(black_sun)
+
+	# Halo Vermelho-Carmesim Brilhante em volta do Sol Negro
+	var sun_halo := MeshInstance3D.new()
+	sun_halo.name = "SunCrimsonHalo"
+	var sh_cyl := CylinderMesh.new()
+	sh_cyl.top_radius = 4.4
+	sh_cyl.bottom_radius = 4.4
+	sh_cyl.height = 0.25
+	sun_halo.mesh = sh_cyl
+	sun_halo.material_override = halo_crimson_mat
+	sun_halo.position = Vector3(0, 18.0, 0)
+	sanctuary_root.add_child(sun_halo)
+
+	# Halo Externo Difuso Carmesim
+	var sun_halo_outer := MeshInstance3D.new()
+	var sho_cyl := CylinderMesh.new()
+	sho_cyl.top_radius = 5.2
+	sho_cyl.bottom_radius = 5.2
+	sho_cyl.height = 0.15
+	sun_halo_outer.mesh = sho_cyl
+	var sho_mat := StandardMaterial3D.new()
+	sho_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	sho_mat.albedo_color = Color(0.8, 0.05, 0.15, 0.6)
+	sho_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	sun_halo_outer.material_override = sho_mat
+	sun_halo_outer.position = Vector3(0, 18.0, 0)
+	sanctuary_root.add_child(sun_halo_outer)
+
+	# Luz imensa carmesim do eclipse sobre toda a arena
+	var sun_light := OmniLight3D.new()
+	sun_light.light_color = Color(1.0, 0.08, 0.12)
+	sun_light.light_energy = 5.0
+	sun_light.omni_range = 38.0
+	sun_light.position = Vector3(0, 18.0, 0)
+	sanctuary_root.add_child(sun_light)
+
+	# Portal e Entrada Interativa do Santuário (Tecla E)
+	_create_interactive_door(landmarks_root, "eclipse_sanctuary", "Santuário do Eclipse (Arena de Raid)", Vector3(-85.0, 0.0, 71.0), Vector3(-85.0, 0.0, 68.0), Vector3(-85.0, 0.0, 74.0), true)
+
 

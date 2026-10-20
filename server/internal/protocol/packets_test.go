@@ -208,26 +208,26 @@ func TestWorldTimePacket(t *testing.T) {
 }
 
 func TestDevWorldControlPacket(t *testing.T) {
-	cmdType := uint8(2) // Ciclar Lua
-	val := uint8(1)
+	for cmdType := uint8(1); cmdType <= 9; cmdType++ {
+		val := uint8(cmdType * 10)
+		data := SerializeDevWorldControl(cmdType, val)
+		if len(data) != DevWorldControlPacketSize {
+			t.Fatalf("esperava %d bytes, obteve %d", DevWorldControlPacketSize, len(data))
+		}
+		if data[0] != PacketTypeDevWorldControl {
+			t.Fatalf("esperava opcode 0x22, obteve 0x%02x", data[0])
+		}
+		if data[1] != cmdType || data[2] != val {
+			t.Fatalf("payload divergente: (%d, %d)", data[1], data[2])
+		}
 
-	data := SerializeDevWorldControl(cmdType, val)
-	if len(data) != DevWorldControlPacketSize {
-		t.Fatalf("esperava %d bytes, obteve %d", DevWorldControlPacketSize, len(data))
-	}
-	if data[0] != PacketTypeDevWorldControl {
-		t.Fatalf("esperava opcode 0x22, obteve 0x%02x", data[0])
-	}
-	if data[1] != cmdType || data[2] != val {
-		t.Fatalf("payload divergente: (%d, %d)", data[1], data[2])
-	}
-
-	var parsed DevWorldControlPacket
-	if err := DeserializeDevWorldControl(data[:], &parsed); err != nil {
-		t.Fatalf("erro ao decodificar DEV_WORLD_CONTROL: %v", err)
-	}
-	if parsed.CommandType != cmdType || parsed.Value != val {
-		t.Fatalf("dados decodificados incorretos: %+v", parsed)
+		var parsed DevWorldControlPacket
+		if err := DeserializeDevWorldControl(data[:], &parsed); err != nil {
+			t.Fatalf("erro ao decodificar DEV_WORLD_CONTROL: %v", err)
+		}
+		if parsed.CommandType != cmdType || parsed.Value != val {
+			t.Fatalf("dados decodificados incorretos: %+v", parsed)
+		}
 	}
 }
 

@@ -134,6 +134,20 @@ const CLASS_ACTIVE_SKILLS := {
 		"tier_name": "Tier 0 — Aventureiro Iniciante",
 		"desc": "Você ainda não escolheu um caminho marcial. Visite os Mestres Garrick, Lyra ou Capitão Randel na Vila do Refúgio para aprender uma Classe Básica!",
 		"color": Color("#cfd8dc"),
+		"evolved_titles": {
+			0: "Aventureiro Iniciante",
+			1: "Aventureiro Iniciante",
+			2: "Aventureiro Iniciante",
+			3: "Aventureiro Iniciante",
+			4: "Aventureiro Iniciante",
+			5: "Aventureiro Iniciante",
+			6: "Aventureiro Iniciante"
+		},
+		"passive": {
+			"name": "Instinto de Sobrevivência",
+			"desc": "Sem especialização ativa. +5% de velocidade de movimento ao fugir de perigos.",
+			"tier_scaling": "Sem bônus de Tier ativo."
+		},
 		"basic": {"name": "Golpe Simples [LMB]", "desc": "Pancada inicial desarmada ou com arma improvisada (1.0x dano).", "range": "2.5m", "cost": "0 Stamina", "cd": "0.35s"},
 		"q": {"name": "Investida Cautelosa [Q]", "desc": "Passo rápido à frente desferindo uma estocada simples (1.2x dano).", "range": "3.5m", "cost": "15 Stamina", "cd": "2.5s"},
 		"r": {"name": "Respirar Fundo [R]", "desc": "Postura defensiva temporária que recupera +15 de Stamina.", "range": "Pessoal", "cost": "0 Stamina", "cd": "6.0s"},
@@ -141,9 +155,22 @@ const CLASS_ACTIVE_SKILLS := {
 	},
 	1: { # Espadachim
 		"name": "Espadachim",
-		"tier_name": "Tier 1 a Tier 4 (Vanguarda Real)",
+		"tier_name": "Tier 1 a Tier 6 (Vanguarda Celestial)",
 		"desc": "Combatente corpo a corpo balanceado, mestre de espada e escudo com foco em cortes rápidos, defesas perfeitas e impactos sísmicos.",
 		"color": Color("#64b5f6"),
+		"evolved_titles": {
+			1: "Espadachim Comum",
+			2: "Guarda Valente (Incomum)",
+			3: "Cavaleiro Rúnico (Rara)",
+			4: "Mestre de Armas (Épica)",
+			5: "Senhor da Guerra (Única)",
+			6: "Vanguarda Celestial (Lendária)"
+		},
+		"passive": {
+			"name": "Determinação Inquebrável",
+			"desc": "Reduz passivamente todo dano físico recebido em +10% a +26% e amplifica a taxa de regeneração de Stamina em +15% a +39% enquanto estiver em postura de combate.",
+			"tier_scaling": "T1 Comum: 1.0x (10% Red / 15% Regen) | T2 Incomum: 1.20x (12% / 18%) | T3 Rara: 1.45x (14.5% / 21.8%) | T4 Épica: 1.75x (17.5% / 26.3%) | T5 Única: 2.15x (21.5% / 32.3%) | T6 Lendária: 2.60x (26% / 39%)"
+		},
 		"basic": {"name": "Corte da Lâmina [LMB]", "desc": "Golpe rápido de espada em arco frontal (1.0x dano base).", "range": "3.8m", "cost": "0 Stamina", "cd": "0.35s"},
 		"q": {"name": "Corte Crescente [Q]", "desc": "Talho ascendente poderoso que corta alvos em cone amplo (1.75x dano).", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
 		"r": {"name": "Postura de Ferro [R]", "desc": "Parry impenetrável que reduz 70% de dano por 2.5s e causa choque nos inimigos.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.0s"},
@@ -151,39 +178,91 @@ const CLASS_ACTIVE_SKILLS := {
 	},
 	2: { # Batedor
 		"name": "Batedor",
-		"tier_name": "Tier 1 a Tier 4 (Franco-Atirador Real)",
+		"tier_name": "Tier 1 a Tier 6 (Predador Lunar)",
 		"desc": "Atirador veloz de longo alcance armado com arco composto e flechas táticas de controle e perfuração.",
 		"color": Color("#69f0ae"),
+		"evolved_titles": {
+			1: "Batedor Comum",
+			2: "Rastreador Silvestre (Incomum)",
+			3: "Atirador Furtivo (Rara)",
+			4: "Patrulheiro Mestre (Épica)",
+			5: "Falcão da Noite (Única)",
+			6: "Predador Lunar (Lendária)"
+		},
+		"passive": {
+			"name": "Olho de Lince & Disparo Fatal",
+			"desc": "Concede bônus passivo de +12% a +31% de Chance Crítica e +15% a +39% de Velocidade de Movimento permanente.",
+			"tier_scaling": "T1 Comum: 1.0x (12% Crítico / 15% Vel) | T2 Incomum: 1.20x (14.4% / 18%) | T3 Rara: 1.45x (17.4% / 21.8%) | T4 Épica: 1.75x (21% / 26.3%) | T5 Única: 2.15x (25.8% / 32.3%) | T6 Lendária: 2.60x (31.2% / 39%)"
+		},
 		"basic": {"name": "Disparo Rápido [LMB]", "desc": "Flecha balística veloz de longo alcance (1.0x dano).", "range": "16.0m", "cost": "0 Stamina", "cd": "0.30s"},
 		"q": {"name": "Disparo Perfurante [Q]", "desc": "Flecha pontiaguda de alta velocidade que atravessa múltiplos alvos (1.75x dano).", "range": "22.0m", "cost": "15 Stamina", "cd": "3.0s"},
 		"r": {"name": "Chuva de Estrepes [R]", "desc": "Dispara armadilhas de espinhos que reduzem a movimentação dos monstros em 40% por 3s.", "range": "14.0m", "cost": "20 Stamina", "cd": "6.0s"},
 		"f": {"name": "Saraivada Estelar [F]", "desc": "Dispara 3 flechas encantadas simultâneas em cone frontal aberto (2.4x dano total).", "range": "18.0m", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	3: { # Iniciado
+	3: { # Iniciado Arcano
 		"name": "Iniciado Arcano",
-		"tier_name": "Tier 1 a Tier 4 (Arquimago Celestial)",
+		"tier_name": "Tier 1 a Tier 6 (Feiticeiro do Infinito)",
 		"desc": "Conjurador de magias elementais do cosmos, capaz de explodir esferas arcanas e congelar inimigos em área.",
 		"color": Color("#ea80fc"),
+		"evolved_titles": {
+			1: "Iniciado Arcano Comum",
+			2: "Aprendiz Elemental (Incomum)",
+			3: "Mago Rúnico (Rara)",
+			4: "Arquimago das Estrelas (Épica)",
+			5: "Sábio Celestial (Única)",
+			6: "Feiticeiro do Infinito (Lendária)"
+		},
+		"passive": {
+			"name": "Ressonância Arcana Cósmica",
+			"desc": "Amplifica o dano mágico arcano em +15% a +39% e concede regeneração contínua de +20% a +52% de mana/stamina após conjurações.",
+			"tier_scaling": "T1 Comum: 1.0x (15% Dano / 20% Regen) | T2 Incomum: 1.20x (18% / 24%) | T3 Rara: 1.45x (21.8% / 29%) | T4 Épica: 1.75x (26.3% / 35%) | T5 Única: 2.15x (32.3% / 43%) | T6 Lendária: 2.60x (39% / 52%)"
+		},
 		"basic": {"name": "Orbe Arcano [LMB]", "desc": "Projétil de energia cósmica concentrada com velocidade de 16m/s (1.0x dano).", "range": "14.0m", "cost": "0 Stamina", "cd": "0.38s"},
 		"q": {"name": "Cometa Elemental [Q]", "desc": "Grande esfera de fogo estelar que explode em um raio de 2.8m (1.75x dano).", "range": "18.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Nova de Gelo [R]", "desc": "Onda congelante de 5.0m radial que paralisa e desacelera monstros por 1.5s.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Maelstrom Cósmico [F]", "desc": "Tempestade arcana colossal de devastação massiva em raio de 6.5m (2.4x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	4: { # Acólito
+	4: { # Acólito da Aurora
 		"name": "Acólito da Aurora",
-		"tier_name": "Tier 1 a Tier 4 (Bispo Templário)",
+		"tier_name": "Tier 1 a Tier 6 (Santo da Aurora Cósmica)",
 		"desc": "Guerreiro sagrado empunhando maça e talismã, alternando entre ataques de contusão divina e orações curativas.",
 		"color": Color("#ffd54f"),
+		"evolved_titles": {
+			1: "Acólito da Aurora Comum",
+			2: "Clérigo Solene (Incomum)",
+			3: "Templário Sagrado (Rara)",
+			4: "Bispo Radiante (Épica)",
+			5: "Sumo Pontífice (Única)",
+			6: "Santo da Aurora Cósmica (Lendária)"
+		},
+		"passive": {
+			"name": "Graça Divina Radiante",
+			"desc": "Aumenta a eficácia de todas as curas sagradas em +20% a +52% e cria uma aura protetora que reduz 15% do dano de Trevas sofrido.",
+			"tier_scaling": "T1 Comum: 1.0x (20% Cura) | T2 Incomum: 1.20x (24% Cura) | T3 Rara: 1.45x (29% Cura) | T4 Épica: 1.75x (35% Cura) | T5 Única: 2.15x (43% Cura) | T6 Lendária: 2.60x (52% Cura)"
+		},
 		"basic": {"name": "Golpe da Fé [LMB]", "desc": "Pancada de maça abençoada causando dano sagrado puro (1.0x dano).", "range": "4.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Círculo de Luz [Q]", "desc": "Impacto sagrado que causa dano aos monstros e cura +40 HP em aliados em 6.0m.", "range": "6.0m", "cost": "15 Stamina", "cd": "3.5s"},
 		"r": {"name": "Lança do Julgamento [R]", "desc": "Feixe divino perfurante lançado a até 15m que purifica os alvos.", "range": "15.0m", "cost": "20 Stamina", "cd": "6.5s"},
 		"f": {"name": "Égide Sagrada [F]", "desc": "Explosão celestial restaurando +65 HP no grupo e desferindo 2.4x dano sagrado.", "range": "7.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	5: { # Ferreiro
+	5: { # Ferreiro Combatente
 		"name": "Ferreiro Combatente",
-		"tier_name": "Tier 1 a Tier 4 (Grão-Mestre Forjador)",
+		"tier_name": "Tier 1 a Tier 6 (Titã Vulcânico)",
 		"desc": "Força bruta com martelo colossal de forja, capaz de forjar armas de guerra e esmagar couraças.",
 		"color": Color("#ff9800"),
+		"evolved_titles": {
+			1: "Ferreiro Combatente Comum",
+			2: "Forjador de Guerra (Incomum)",
+			3: "Armeiro Blindado (Rara)",
+			4: "Grão-Forjador (Épica)",
+			5: "Mestre das Bigornas (Única)",
+			6: "Titã Vulcânico (Lendária)"
+		},
+		"passive": {
+			"name": "Pancada Incandescente & Couraça de Forja",
+			"desc": "Concede +15% a +39% de dano de contusão/atordoamento contra couraças pesadas e adiciona +20% a +52% de Armadura base aos equipamentos equipados.",
+			"tier_scaling": "T1 Comum: 1.0x (15% Dano / 20% Armadura) | T2 Incomum: 1.20x (18% / 24%) | T3 Rara: 1.45x (21.8% / 29%) | T4 Épica: 1.75x (26.3% / 35%) | T5 Única: 2.15x (32.3% / 43%) | T6 Lendária: 2.60x (39% / 52%)"
+		},
 		"basic": {"name": "Martelada Pesada [LMB]", "desc": "Golpe esmagador contundente que atordoa armaduras leves (1.0x dano).", "range": "4.0m", "cost": "0 Stamina", "cd": "0.40s"},
 		"q": {"name": "Golpe de Bigorna [Q]", "desc": "Impacto pesado concentrado no topo do crânio do alvo (1.75x dano).", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
 		"r": {"name": "Afiação de Combate [R]", "desc": "Martela a bigorna conferindo um buff de +25% de dano para o grupo por 10s.", "range": "Grupo 12m", "cost": "20 Stamina", "cd": "10.0s"},
@@ -191,43 +270,251 @@ const CLASS_ACTIVE_SKILLS := {
 	},
 	6: { # Alquimista
 		"name": "Alquimista",
-		"tier_name": "Tier 1 a Tier 4 (Quimicista Real)",
+		"tier_name": "Tier 1 a Tier 6 (Alquimista do Éter Cósmico)",
 		"desc": "Manipulador de frascos químicos, elixires curativos e bombas cáusticas de ácido.",
 		"color": Color("#00e676"),
+		"evolved_titles": {
+			1: "Alquimista Comum",
+			2: "Boticário Rebelde (Incomum)",
+			3: "Químico Cáustico (Rara)",
+			4: "Grão-Quimicista (Épica)",
+			5: "Transmutador Mestre (Única)",
+			6: "Alquimista do Éter Cósmico (Lendária)"
+		},
+		"passive": {
+			"name": "Catalisador Tóxico & Transmutação Vital",
+			"desc": "Ácidos, elixires e compostos químicos causam +25% a +65% de dano corrosivo contínuo ao longo do tempo. Abates transmutam +15 a +39 HP instantâneos.",
+			"tier_scaling": "T1 Comum: 1.0x (25% Ácido / +15 HP) | T2 Incomum: 1.20x (30% / +18 HP) | T3 Rara: 1.45x (36.3% / +21.8 HP) | T4 Épica: 1.75x (43.8% / +26.3 HP) | T5 Única: 2.15x (53.8% / +32.3 HP) | T6 Lendária: 2.60x (65% / +39 HP)"
+		},
 		"basic": {"name": "Frasco Cáustico [LMB]", "desc": "Arremesso de ampola corrosiva com alcance médio (1.0x dano).", "range": "13.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Frasco de Éter [Q]", "desc": "Frasco que detona causando dano em área e curando +40 HP em aliados em 6.0m.", "range": "14.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Bomba de Ácido [R]", "desc": "Arremessa poça corrosiva de 3.5m que reduz armaduras dos inimigos por 4s.", "range": "12.0m", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Detonação Catalítica [F]", "desc": "Reação química em cadeia que explode violentamente em área de 5.5m (2.4x dano).", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	7: { # Ceifador do Eclipse (Classe Secreta / Única Tier 5)
+	7: { # Ceifador do Eclipse (Classe Secreta 7)
 		"name": "Ceifador do Eclipse",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano da Meia-Noite)",
 		"desc": "Espírito das sombras portando uma foice colossal. Cada golpe ceifa as almas e o sangue dos inimigos.",
 		"color": Color("#d500f9"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Ceifador Comum",
+			2: "Ceifador Incomum",
+			3: "Ceifador Raro",
+			4: "Ceifador Épico",
+			5: "Ceifador das Sombras (Única)",
+			6: "Soberano da Meia-Noite (Lendária)"
+		},
+		"passive": {
+			"name": "Ceifa de Almas & Lifesteal Sombrio",
+			"desc": "Converte de 15% (Tier 5) a 25% (Tier 6) de todo o dano infligido em regeneração imediata de Vida, e ganha +20% de bônus de dano durante a Noite ou Eclipse.",
+			"tier_scaling": "Tier 5 Única (Base): 15% Lifesteal + 20% Dano Noturno | Tier 6 Lendária: 25% Lifesteal + 35% Dano Noturno"
+		},
+		"unlock_hint": "Falar com Varis (NPC 104) à noite possuindo Essência da Noite e Nível 15+, ou consumir o Frasco do Eclipse sob a Lua Cheia.",
 		"basic": {"name": "Foice das Sombras [LMB]", "desc": "Varredura ampla de longo melee de 4.8m com lifesteal embutido (1.0x dano).", "range": "4.8m", "cost": "0 Stamina", "cd": "0.38s"},
 		"q": {"name": "Colheita Noturna [Q]", "desc": "Corte espiral que suga essência vital de todos os alvos no caminho (1.75x dano).", "range": "5.0m", "cost": "15 Stamina", "cd": "3.0s"},
 		"r": {"name": "Drenagem Abissal [R]", "desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.", "range": "Pessoal 5m", "cost": "20 Stamina", "cd": "6.5s"},
 		"f": {"name": "Dança do Eclipse Total [F]", "desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida pleno (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	8: { # Artífice Rúnico (Tier 5)
+	8: { # Artífice Rúnico (Classe Secreta 8)
 		"name": "Artífice Rúnico",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Engenheiro Arcano Supremo)",
 		"desc": "Híbrido mecânico armado com martelo-canhão movido a núcleos de forja estelar.",
 		"color": Color("#ff6d00"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Artífice Comum",
+			2: "Artífice Incomum",
+			3: "Artífice Raro",
+			4: "Artífice Épico",
+			5: "Artífice Rúnico Mecânico (Única)",
+			6: "Engenheiro Arcano Supremo (Lendária)"
+		},
+		"passive": {
+			"name": "Sobrecarga de Pólvora & Canhão Arcano",
+			"desc": "O canhão de mão ganha +25% (Tier 5) a +40% (Tier 6) de dano em área e reduz o tempo de recarga de todas as habilidades de longo alcance em 20%.",
+			"tier_scaling": "Tier 5 Única (Base): +25% Dano em Área | Tier 6 Lendária: +40% Dano em Área + Pulso Eletrostático Crítico"
+		},
+		"unlock_hint": "Forjar a Liga Rúnica Estelar na Bigorna de Garrick (NPC 100) com Força >= 20 e Constituição >= 15 durante Neblina ou à Noite.",
 		"basic": {"name": "Canhonada Rúnica [LMB]", "desc": "Pancada física e detonação de pólvora simultâneas (1.0x dano).", "range": "15.0m", "cost": "0 Stamina", "cd": "0.38s"},
 		"q": {"name": "Salva Rúnica [Q]", "desc": "Três cartuchos energizados disparados em rápida sucessão frontal (1.75x dano).", "range": "16.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Sobrecarga Eletrostática [R]", "desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Bombardeio Titanomecânico [F]", "desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	9: { # Criador de Homúnculos (Tier 5)
+	9: { # Criador de Homúnculos (Classe Secreta 9)
 		"name": "Criador de Homúnculos",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Demiurgo da Vida Sintética)",
 		"desc": "Mestre da vida sintética acompanhado por uma quimera flutuante transmissora de elixires.",
 		"color": Color("#00b0ff"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Criador Comum",
+			2: "Criador Incomum",
+			3: "Criador Raro",
+			4: "Criador Épico",
+			5: "Transmutador de Homúnculos (Única)",
+			6: "Demiurgo da Vida Sintética (Lendária)"
+		},
+		"passive": {
+			"name": "Sintonia Biótica Quimérica",
+			"desc": "O homúnculo companheiro herda +30% (Tier 5) a +50% (Tier 6) de todos os atributos do criador, regenerando periodicamente a vida do mestre em combate.",
+			"tier_scaling": "Tier 5 Única (Base): +30% Atributos herdados + Cura contínua | Tier 6 Lendária: +50% Atributos herdados + Pulso Biótico Duplo"
+		},
+		"unlock_hint": "Combinar Órgão Perfeito de Aberração (extraído via autópsia bem-sucedida) com os Frascos de Lyra (NPC 103) durante a Chuva.",
 		"basic": {"name": "Pulso Quimérico [LMB]", "desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre (1.0x dano).", "range": "14.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Infusão Mutagênica [Q]", "desc": "Elixir abissal corrosivo que dissolve resistências inimigas (1.75x dano).", "range": "15.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Névoa de Bioplasma [R]", "desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.", "range": "4.5m Área", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Frenesi do Quimera Supremo [F]", "desc": "O homúnculo cresce e desfere uma explosão de garras e ácido colossais (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+	},
+	10: { # Dançarino Astral (Classe Secreta 10)
+		"name": "Dançarino Astral",
+		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano das Constelações)",
+		"desc": "Duelista cósmico mestre de esquivas fluidas e cortes críticos que brilham como cometas estelares.",
+		"color": Color("#80d8ff"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Dançarino Comum",
+			2: "Dançarino Incomum",
+			3: "Dançarino Raro",
+			4: "Dançarino Épico",
+			5: "Dançarino Astral (Única)",
+			6: "Soberano das Constelações (Lendária)"
+		},
+		"passive": {
+			"name": "Dança Intocável dos Cometas",
+			"desc": "Esquivas custam apenas 10 Stamina, concedem +25% (Tier 5) a +45% (Tier 6) de Dano Crítico após cada evasão e garantem +15% de chance de Esquiva Perfeita.",
+			"tier_scaling": "Tier 5 Única (Base): Esquiva 10 Stamina + 25% Dano Crítico | Tier 6 Lendária: Esquiva 8 Stamina + 45% Dano Crítico + I-Frames estendidos"
+		},
+		"unlock_hint": "Realizar 10 abates consecutivos de monstros sem sofrer nenhum dano (Untouched Kills >= 10) e falar com Mestre Aurelius (NPC 108) à Noite.",
+		"basic": {"name": "Corte Astral [LMB]", "desc": "Corte rápido com +25% de chance crítica permanente e esquiva barata de 10 stamina.", "range": "3.8m", "cost": "0 Stamina", "cd": "0.32s"},
+		"q": {"name": "Corte Cadente [Q]", "desc": "Salto veloz que corta o espaço desferindo dano massivo (2.0x dano).", "range": "4.5m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Valsa dos Espelhos [R]", "desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.", "range": "Pessoal", "cost": "20 Stamina", "cd": "6.0s"},
+		"f": {"name": "Constelação de Mil Lâminas [F]", "desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano).", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
+	},
+	11: { # Inquisidor das Cinzas (Classe Secreta 11)
+		"name": "Inquisidor das Cinzas",
+		"tier_name": "Tier 5 (Única) -> Tier 6 (Grão-Inquisidor das Chamas)",
+		"desc": "Executor fanático cuja força cresce exponencialmente quanto mais próximo estiver da morte.",
+		"color": Color("#ff5252"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Inquisidor Comum",
+			2: "Inquisidor Incomum",
+			3: "Inquisidor Raro",
+			4: "Inquisidor Épico",
+			5: "Inquisidor das Cinzas (Única)",
+			6: "Grão-Inquisidor das Chamas (Lendária)"
+		},
+		"passive": {
+			"name": "Fúria Penitente na Beira da Morte",
+			"desc": "Quando sua vida cai abaixo de 50%, seu dano é amplificado de +60% (Tier 5) até +100% (Tier 6), tornando-se completamente imune a atordoamento e medo.",
+			"tier_scaling": "Tier 5 Única (Base): Até +60% Dano com HP baixo + Imunidade a Stun | Tier 6 Lendária: Até +100% Dano com HP baixo + Fogo Sagrado puro"
+		},
+		"unlock_hint": "Realizar 3 abates de monstros à beira da morte (com HP <= 30%) e conversar com a Irmã Seraphina (NPC 107) estando com menos de 30% de Vida.",
+		"basic": {"name": "Chama Penitente [LMB]", "desc": "Golpe ardente que ganha até +60% de dano conforme o HP diminui.", "range": "4.0m", "cost": "0 Stamina", "cd": "0.36s"},
+		"q": {"name": "Chicote de Penitência [Q]", "desc": "Chicote de fogo sagrado de 8.0m que causa 2.2x dano e rouba vida.", "range": "8.0m", "cost": "15 Stamina", "cd": "3.5s"},
+		"r": {"name": "Selo de Excomunhão [R]", "desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Crucificação de Cinzas [F]", "desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+	},
+	12: { # Necromante de Ossos (Classe Secreta 12)
+		"name": "Necromante de Ossos",
+		"tier_name": "Tier 5 (Única) -> Tier 6 (Lorde do Ossuário Eterno)",
+		"desc": "Manipulador anatômico que canaliza a essência dos ossos e extrai vitalidade de cada abate (+20 HP).",
+		"color": Color("#ccff90"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Necromante Comum",
+			2: "Necromante Incomum",
+			3: "Necromante Raro",
+			4: "Necromante Épico",
+			5: "Necromante de Ossos (Única)",
+			6: "Lorde do Ossuário Eterno (Lendária)"
+		},
+		"passive": {
+			"name": "Ceifa do Ossuário & Toque Esmeralda",
+			"desc": "Cada criatura abatida restaura instantaneamente +20 HP (Tier 5) a +40 HP (Tier 6) e ergue uma farpa óssea ao redor que reduz o próximo dano sofrido em 50%.",
+			"tier_scaling": "Tier 5 Única (Base): +20 HP por abate + Farpa Óssea 50% | Tier 6 Lendária: +40 HP por abate + Barreira de Ossos Completa"
+		},
+		"unlock_hint": "Completar 5 autópsias perfeitas consecutivas na Zona Verde (Streak >= 5) e conversar com o Alquimista Fantasma (NPC 110) nos esgotos entre 00:00 e 04:00.",
+		"basic": {"name": "Toque do Sepulcro [LMB]", "desc": "Projétil de ossos fragmentados. Cada abate regenera +20 HP instantâneos.", "range": "14.0m", "cost": "0 Stamina", "cd": "0.36s"},
+		"q": {"name": "Lança de Fêmur [Q]", "desc": "Dispara uma lança de fêmur calcificado que perfura a 16m causando 2.0x dano.", "range": "16.0m", "cost": "15 Stamina", "cd": "3.2s"},
+		"r": {"name": "Explosão Óssea & Escudo [R]", "desc": "Detona fragmentos ósseos em 5.0m e ergue uma barreira de ossos protetora.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.5s"},
+		"f": {"name": "Legião do Ossuário [F]", "desc": "Ergue um vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+	},
+	13: { # Domador Primordial (Classe Secreta 13)
+		"name": "Domador Primordial",
+		"tier_name": "Tier 5 (Única) -> Tier 6 (Avatar da Fera Ancestral)",
+		"desc": "Guerreiro feral possuído pelo Espírito Alfa, infligindo +25% de dano constante com garras devastadoras.",
+		"color": Color("#ffd740"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Domador Comum",
+			2: "Domador Incomum",
+			3: "Domador Raro",
+			4: "Domador Épico",
+			5: "Domador Primordial (Única)",
+			6: "Avatar da Fera Ancestral (Lendária)"
+		},
+		"passive": {
+			"name": "Espírito Lupino Primal",
+			"desc": "Um Lobo Espiritual Prateado translúcido acompanha seus passos e desfere patadas sincronizadas causando +25% (Tier 5) a +45% (Tier 6) de dano físico e fareja monstros de elite.",
+			"tier_scaling": "Tier 5 Única (Base): Lobo Espiritual +25% Dano + Faro de Elites | Tier 6 Lendária: Lobo Ancestral +45% Dano + Uivo de Cura Duplo"
+		},
+		"unlock_hint": "Derrotar o Lobo Alfa sozinho sem usar armadura de peito sob a Lua Cheia, ou conversar com Kaelen (NPC 109) possuindo Força >= 15 e Espírito >= 15.",
+		"basic": {"name": "Patada Selvagem [LMB]", "desc": "Ataque corporal com ferocidade primal e dano aumentado em +25% permanentemente.", "range": "4.2m", "cost": "0 Stamina", "cd": "0.34s"},
+		"q": {"name": "Investida do Alfa [Q]", "desc": "Avanço bestial rompendo as linhas inimigas com impacto violento (2.1x dano).", "range": "5.5m", "cost": "15 Stamina", "cd": "3.2s"},
+		"r": {"name": "Uivo da Alcateia [R]", "desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
+		"f": {"name": "Fúria do Behemoth [F]", "desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano).", "range": "5.0m Frontal", "cost": "25 Stamina", "cd": "12.0s"}
+	},
+	14: { # Cavaleiro da Ruptura (Classe Secreta 14)
+		"name": "Cavaleiro da Ruptura",
+		"tier_name": "Tier 5 (Única) -> Tier 6 (Guardião da Singularidade)",
+		"desc": "Colosso dimensional envolto em malha espacial. Reduz 30% de todo o dano recebido e dobra a gravidade.",
+		"color": Color("#7c4dff"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Cavaleiro Comum",
+			2: "Cavaleiro Incomum",
+			3: "Cavaleiro Raro",
+			4: "Cavaleiro Épico",
+			5: "Cavaleiro da Ruptura (Única)",
+			6: "Guardião da Singularidade (Lendária)"
+		},
+		"passive": {
+			"name": "Colosso da Singularidade",
+			"desc": "Reduz passivamente 30% (Tier 5) a 50% (Tier 6) de todo o dano recebido e reflete 20% do impacto com um pulso de vácuo gravitacional que atrai inimigos para o corte.",
+			"tier_scaling": "Tier 5 Única (Base): 30% Redução de Dano + 20% Reflexão Vácuo | Tier 6 Lendária: 50% Redução de Dano + Singularidade Gravitacional Total"
+		},
+		"unlock_hint": "Bloquear/Parryar o golpe devastador de um Chefe de Elite (Executor ou Lobo Alfa) com Constituição >= 20 durante Eclipse ou Lua de Sangue e falar com Capitão Randel (NPC 105).",
+		"basic": {"name": "Golpe de Fenda [LMB]", "desc": "Golpe pesado imbuído de gravidade e resistência passiva de -30% a danos.", "range": "4.2m", "cost": "0 Stamina", "cd": "0.40s"},
+		"q": {"name": "Esmagamento Gravitacional [Q]", "desc": "Atrai todos os monstros em 5.0m para junto de si e esmaga o solo (1.9x dano).", "range": "5.0m Puxão", "cost": "15 Stamina", "cd": "3.5s"},
+		"r": {"name": "Singularidade Reversa [R]", "desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.", "range": "4.5m Radial", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Colapso Estelar [F]", "desc": "Cria um buraco negro em 6.5m que atordoa todos os inimigos e desintegra matéria (2.8x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
+	},
+	15: { # Arauto da Tempestade (Classe Secreta 15)
+		"name": "Arauto da Tempestade",
+		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano dos Relâmpagos)",
+		"desc": "Avatar dos trovões cuja fúria cresce em +35% durante chuvas, empunhando dardos de relâmpago puro.",
+		"color": Color("#40c4ff"),
+		"is_secret": true,
+		"evolved_titles": {
+			1: "Arauto Comum",
+			2: "Arauto Incomum",
+			3: "Arauto Raro",
+			4: "Arauto Épico",
+			5: "Arauto da Tempestade (Única)",
+			6: "Soberano dos Relâmpagos (Lendária)"
+		},
+		"passive": {
+			"name": "Condutividade Celestial",
+			"desc": "Ataques e feitiços elétricos causam +35% (Tier 5) a +60% (Tier 6) de dano durante Clima de Chuva e Tempestade. Golpes básicos têm chance de liberar arcos de choque em cadeia.",
+			"tier_scaling": "Tier 5 Única (Base): +35% Dano Elétrico na Chuva + Choque | Tier 6 Lendária: +60% Dano Elétrico + Relâmpagos Celestiais Contínuos"
+		},
+		"unlock_hint": "Conjurar a Habilidade Suprema [F] nas proximidades da Torre Arcana (coords 20, -18) durante uma Chuva/Tempestade intensa (Weather == 1).",
+		"basic": {"name": "Faísca Elétrica [LMB]", "desc": "Dardos elétricos estáticos que causam +35% de dano durante climas chuvosos.", "range": "15.0m", "cost": "0 Stamina", "cd": "0.34s"},
+		"q": {"name": "Lança do Trovão [Q]", "desc": "Arremessa um raio concentrado a 18m que detona ao impacto (2.1x dano).", "range": "18.0m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Passo de Relâmpago [R]", "desc": "Surto elétrico que concede velocidade e eletrocuta/atordoa monstros próximos.", "range": "4.0m Radial", "cost": "20 Stamina", "cd": "6.5s"},
+		"f": {"name": "Ira dos Céus [F]", "desc": "Tempestade cataclísmica de raios cobrindo 6.0m com devastação celestial (3.1x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	}
 }
 
@@ -349,7 +636,7 @@ func _build_ui() -> void:
 	var tab_names := [
 		"⚡ 1. Raciais [Tecla Z]",
 		"⚔️ 2. Ativas [LMB, Q, R, F]",
-		"🌌 3. Passivas & Provação",
+		"🌌 3. Classes Secretas & Passivas",
 		"🎯 4. Customizar Slots de Ação"
 	]
 	for i in range(4):
@@ -516,20 +803,7 @@ func _build_tab_1_racial(race_id: int) -> void:
 	pvbox.add_theme_constant_override("separation", 4)
 	card_pass.add_child(pvbox)
 
-	var pass_head := Label.new()
-	pass_head.text = "🛡️ PASSIVA DE LINHAGEM: %s" % r_info["passive_name"]
-	pass_head.add_theme_font_size_override("font_size", 13)
-	pass_head.add_theme_color_override("font_color", Color(0.4, 0.95, 0.45))
-	pvbox.add_child(pass_head)
-
-	var pass_desc := Label.new()
-	pass_desc.text = r_info["passive_desc"]
-	pass_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	pass_desc.add_theme_font_size_override("font_size", 11)
-	pass_desc.add_theme_color_override("font_color", Color(0.9, 0.94, 0.98))
-	pvbox.add_child(pass_desc)
-
-# ABA 2: Habilidades Ativas de Classe (LMB, Q, R, F)
+	# ABA 2: Habilidades Ativas de Classe (LMB, Q, R, F)
 func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> void:
 	var container: ScrollContainer = tab_containers[1]
 	for ch in container.get_children():
@@ -541,6 +815,11 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 	container.add_child(vbox)
 
 	var c_info: Dictionary = CLASS_ACTIVE_SKILLS.get(class_id, CLASS_ACTIVE_SKILLS[0])
+	var clamped_tier: int = clampi(class_tier, 1, 6)
+	var ev_titles: Dictionary = c_info.get("evolved_titles", {})
+	var evolved_title: String = ev_titles.get(clamped_tier, c_info.get("tier_name", "Tier %d" % clamped_tier))
+	var tier_names: Array = ["", "Tier 1 Comum", "Tier 2 Incomum", "Tier 3 Rara", "Tier 4 Épica", "Tier 5 Única", "Tier 6 Lendária"]
+	var tier_badge: String = tier_names[clamped_tier] if clamped_tier < tier_names.size() else ("Tier %d" % clamped_tier)
 
 	# Banner da Classe
 	var banner := PanelContainer.new()
@@ -561,7 +840,7 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 	banner.add_child(bvbox)
 
 	var c_title := Label.new()
-	c_title.text = "Classe Atual: %s — %s (Nível %d)" % [c_info["name"], c_info["tier_name"], level]
+	c_title.text = "Classe Atual: %s — %s [%s] (Nível %d)" % [c_info["name"], evolved_title, tier_badge, level]
 	c_title.add_theme_font_size_override("font_size", 15)
 	c_title.add_theme_color_override("font_color", c_info["color"])
 	bvbox.add_child(c_title)
@@ -572,6 +851,56 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 	c_desc.add_theme_font_size_override("font_size", 11)
 	c_desc.add_theme_color_override("font_color", Color(0.8, 0.85, 0.92))
 	bvbox.add_child(c_desc)
+
+	# Card da Passiva Exclusiva da Classe
+	var pass_info: Dictionary = c_info.get("passive", {
+		"name": "Passiva de Combate",
+		"desc": "Concede bônus contínuos ao combatente.",
+		"tier_scaling": "Escala conforme o Tier da Classe."
+	})
+	var card_pass := PanelContainer.new()
+	var pass_style := StyleBoxFlat.new()
+	pass_style.bg_color = Color(0.06, 0.11, 0.15, 0.95)
+	pass_style.border_color = Color(0.3, 0.95, 0.65, 0.85)
+	pass_style.set_border_width_all(1)
+	pass_style.set_corner_radius_all(6)
+	pass_style.content_margin_left = 14
+	pass_style.content_margin_right = 14
+	pass_style.content_margin_top = 10
+	pass_style.content_margin_bottom = 10
+	card_pass.add_theme_stylebox_override("panel", pass_style)
+	vbox.add_child(card_pass)
+
+	var pvbox := VBoxContainer.new()
+	pvbox.add_theme_constant_override("separation", 4)
+	card_pass.add_child(pvbox)
+
+	var pass_head := Label.new()
+	pass_head.text = "🛡️ PASSIVA EXCLUSIVA DA CLASSE: %s" % pass_info["name"]
+	pass_head.add_theme_font_size_override("font_size", 13)
+	pass_head.add_theme_color_override("font_color", Color(0.35, 1.0, 0.7))
+	pvbox.add_child(pass_head)
+
+	var pass_desc := Label.new()
+	pass_desc.text = pass_info["desc"]
+	pass_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pass_desc.add_theme_font_size_override("font_size", 11)
+	pass_desc.add_theme_color_override("font_color", Color(0.88, 0.95, 0.98))
+	pvbox.add_child(pass_desc)
+
+	var pass_scale := Label.new()
+	pass_scale.text = "📈 %s" % pass_info.get("tier_scaling", "")
+	pass_scale.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pass_scale.add_theme_font_size_override("font_size", 10)
+	pass_scale.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	pvbox.add_child(pass_scale)
+
+	var mult_label := Label.new()
+	var tier_mults: Dictionary = {1: "1.0x (Padrão)", 2: "1.20x (+20%)", 3: "1.45x (+45%)", 4: "1.75x (+75%)", 5: "2.15x (+115%)", 6: "2.60x (+160% Máximo)"}
+	mult_label.text = "✨ Potência Ativa da Passiva: [%s] — Multiplicador Atual: %s" % [tier_badge, tier_mults.get(clamped_tier, "1.0x")]
+	mult_label.add_theme_font_size_override("font_size", 10)
+	mult_label.add_theme_color_override("font_color", Color(0.5, 0.9, 1.0))
+	pvbox.add_child(mult_label)
 
 	# 4 Slots de Habilidades Ativas
 	var skills_list := [
@@ -619,7 +948,7 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 		s_body.add_theme_color_override("font_color", Color(0.88, 0.92, 0.96))
 		cvbox.add_child(s_body)
 
-# ABA 3: Passivas de Classe & Provação Lendária
+# ABA 3: Passivas de Classe, Provação & Catálogo de Classes Secretas
 func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int) -> void:
 	var container: ScrollContainer = tab_containers[2]
 	for ch in container.get_children():
@@ -649,25 +978,32 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 	pass_panel.add_child(pvbox)
 
 	var p_title := Label.new()
-	p_title.text = "🛡️ PASSIVAS DO CAMINHO DE ESPECIALIZAÇÃO:"
+	p_title.text = "🛡️ SEU CAMINHO MARCIAL ATIVO:"
 	p_title.add_theme_font_size_override("font_size", 14)
 	p_title.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	pvbox.add_child(p_title)
 
+	var my_c_info: Dictionary = CLASS_ACTIVE_SKILLS.get(class_id, CLASS_ACTIVE_SKILLS[0])
 	var p_desc := Label.new()
 	if class_id == 0:
 		p_desc.text = "Viajantes não possuem especialização marcial ativa. Visite os Mestres na Vila do Refúgio para aprender uma Classe Básica."
-	elif class_tier < 2:
-		p_desc.text = "Seu Caminho de Especialização despertará ao atingir o Nível 10 com o Mestre da sua Guilda."
 	else:
-		p_desc.text = "Especialização Ativa (Tier %d): +%d%% de amplificação de combate, bônus de dano de atributos e resistência a atordoamentos." % [class_tier, class_tier * 10]
+		var clamped_tier: int = clampi(class_tier, 1, 6)
+		var ev_titles: Dictionary = my_c_info.get("evolved_titles", {})
+		var ev_name: String = ev_titles.get(clamped_tier, my_c_info["name"])
+		var tier_mults: Dictionary = {1: "1.0x", 2: "1.20x", 3: "1.45x", 4: "1.75x", 5: "2.15x", 6: "2.60x"}
+		p_desc.text = "Classe Ativa: %s — Título Evolvido: %s (Tier %d)\nPassiva: %s\nPotência do Tier: %s de eficácia amplificada." % [
+			my_c_info["name"], ev_name, class_tier,
+			my_c_info.get("passive", {}).get("name", "Passiva"),
+			tier_mults.get(clamped_tier, "1.0x")
+		]
 	p_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	p_desc.add_theme_font_size_override("font_size", 11)
 	p_desc.add_theme_color_override("font_color", Color(0.85, 0.9, 0.95))
 	pvbox.add_child(p_desc)
 
 	# Se for Classe Única (Tier 5): Exibe a Provação Especial Lendária!
-	if class_tier >= 5 or class_id in [7, 8, 9]:
+	if class_tier >= 5 or class_id in [7, 8, 9, 10, 11, 12, 13, 14, 15]:
 		var trial_panel := PanelContainer.new()
 		var t_style := StyleBoxFlat.new()
 		t_style.bg_color = Color(0.12, 0.06, 0.16, 0.98)
@@ -739,10 +1075,145 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 		vbox.add_child(hint_panel)
 
 		var hint_lbl := Label.new()
-		hint_lbl.text = "ℹ️ DICA DE ASCENSÃO: Classes Básicas evoluem nos marcos de Nível 10 (Tier 2 Incomum), Nível 25 (Tier 3 Rara) e Nível 45 (Tier 4 Épica). Tomos e itens secretos desbloqueiam as Classes Únicas (Tier 5)."
+		hint_lbl.text = "ℹ️ DICA DE ASCENSÃO: Classes Básicas evoluem nos marcos de Nível 10 (Tier 2 Incomum), Nível 25 (Tier 3 Rara) e Nível 45 (Tier 4 Épica). Desafios e provações no mundo desbloqueiam as 9 Classes Secretas (Tier 5 Única)."
 		hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		hint_lbl.add_theme_font_size_override("font_size", 11)
 		hint_lbl.add_theme_color_override("font_color", Color(0.7, 0.78, 0.88))
+		hint_panel.add_child(hint_lbl)
+
+	# =========================================================================
+	# CATÁLOGO COMPLETO DAS 9 CLASSES SECRETAS & DESAFIOS DE OBTENÇÃO
+	# =========================================================================
+	var cat_header := PanelContainer.new()
+	var ch_style := StyleBoxFlat.new()
+	ch_style.bg_color = Color(0.1, 0.07, 0.16, 0.95)
+	ch_style.border_color = Color(0.85, 0.55, 1.0, 0.9)
+	ch_style.set_border_width_all(2)
+	ch_style.set_corner_radius_all(8)
+	ch_style.content_margin_left = 16
+	ch_style.content_margin_right = 16
+	ch_style.content_margin_top = 12
+	ch_style.content_margin_bottom = 12
+	cat_header.add_theme_stylebox_override("panel", ch_style)
+	vbox.add_child(cat_header)
+
+	var ch_vbox := VBoxContainer.new()
+	ch_vbox.add_theme_constant_override("separation", 4)
+	cat_header.add_child(ch_vbox)
+
+	var cat_title := Label.new()
+	cat_title.text = "🔮 CATÁLOGO DAS 9 CLASSES SECRETAS & DESAFIOS DE OBTENÇÃO (Tier 5 Única -> Tier 6 Lendária)"
+	cat_title.add_theme_font_size_override("font_size", 14)
+	cat_title.add_theme_color_override("font_color", Color(0.9, 0.7, 1.0))
+	ch_vbox.add_child(cat_title)
+
+	var cat_sub := Label.new()
+	cat_sub.text = "As 9 Classes Secretas (7 a 15) iniciam no Tier 5 Única, resetam o personagem para o Nível 1 concedendo +10 Pontos de Atributo por nível (ao invés de 5), e podem ascender ao Tier 6 Lendária (+12 pontos por nível) superando a Provação das Colheitas Cósmicas. Abaixo estão todas as pistas e requisitos para desbloquear cada uma no mundo de Lunaria:"
+	cat_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	cat_sub.add_theme_font_size_override("font_size", 11)
+	cat_sub.add_theme_color_override("font_color", Color(0.8, 0.85, 0.95))
+	ch_vbox.add_child(cat_sub)
+
+	# Itera pelas 9 Classes Secretas (7 a 15)
+	for sec_id in range(7, 16):
+		var s_info: Dictionary = CLASS_ACTIVE_SKILLS.get(sec_id)
+		if not s_info:
+			continue
+
+		var s_card := PanelContainer.new()
+		var sc_style := StyleBoxFlat.new()
+		sc_style.bg_color = Color(0.06, 0.08, 0.12, 0.95)
+		var sc_col: Color = s_info.get("color", Color(0.7, 0.7, 0.7))
+		sc_style.border_color = Color(sc_col.r, sc_col.g, sc_col.b, 0.75)
+		sc_style.set_border_width_all(1)
+		sc_style.set_corner_radius_all(6)
+		sc_style.content_margin_left = 14
+		sc_style.content_margin_right = 14
+		sc_style.content_margin_top = 10
+		sc_style.content_margin_bottom = 10
+		s_card.add_theme_stylebox_override("panel", sc_style)
+		vbox.add_child(s_card)
+
+		var sc_vbox := VBoxContainer.new()
+		sc_vbox.add_theme_constant_override("separation", 4)
+		s_card.add_child(sc_vbox)
+
+		# Linha de Título + Badge de Status
+		var top_row := HBoxContainer.new()
+		top_row.add_theme_constant_override("separation", 8)
+		sc_vbox.add_child(top_row)
+
+		var s_name := Label.new()
+		s_name.text = "Classe Secreta #%d: %s" % [sec_id, s_info["name"]]
+		s_name.add_theme_font_size_override("font_size", 13)
+		s_name.add_theme_color_override("font_color", sc_col)
+		top_row.add_child(s_name)
+
+		var s_badge := Label.new()
+		if class_id == sec_id:
+			s_badge.text = "[ ✅ SUA CLASSE ATUAL ]"
+			s_badge.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
+		else:
+			s_badge.text = "[ 🔒 DESAFIO NO MUNDO ]"
+			s_badge.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
+		s_badge.add_theme_font_size_override("font_size", 10)
+		top_row.add_child(s_badge)
+
+		# Títulos Evoluídos (T5 e T6)
+		var evs: Dictionary = s_info.get("evolved_titles", {})
+		var t_row := Label.new()
+		t_row.text = "Evoluções: Tier 5 Única [%s]  ➔  Tier 6 Lendária [%s]" % [evs.get(5, "Única"), evs.get(6, "Lendária")]
+		t_row.add_theme_font_size_override("font_size", 10)
+		t_row.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+		sc_vbox.add_child(t_row)
+
+		# Descrição
+		var s_desc := Label.new()
+		s_desc.text = s_info["desc"]
+		s_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		s_desc.add_theme_font_size_override("font_size", 11)
+		s_desc.add_theme_color_override("font_color", Color(0.85, 0.88, 0.94))
+		sc_vbox.add_child(s_desc)
+
+		# Passiva Exclusiva
+		var pass_data: Dictionary = s_info.get("passive", {})
+		var pass_l := Label.new()
+		pass_l.text = "🛡️ Passiva Exclusiva: %s — %s\n📈 %s" % [pass_data.get("name", ""), pass_data.get("desc", ""), pass_data.get("tier_scaling", "")]
+		pass_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		pass_l.add_theme_font_size_override("font_size", 10)
+		pass_l.add_theme_color_override("font_color", Color(0.45, 0.95, 0.65))
+		sc_vbox.add_child(pass_l)
+
+		# 3 Skills Ativas
+		var sk_l := Label.new()
+		var q_data: Dictionary = s_info.get("q", {})
+		var r_data: Dictionary = s_info.get("r", {})
+		var f_data: Dictionary = s_info.get("f", {})
+		sk_l.text = "⚡ Habilidades Ativas: [Q] %s | [R] %s | [F] %s" % [q_data.get("name", ""), r_data.get("name", ""), f_data.get("name", "")]
+		sk_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sk_l.add_theme_font_size_override("font_size", 10)
+		sk_l.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
+		sc_vbox.add_child(sk_l)
+
+		# Caixa de Dica / Desafio de Obtenção (com estilo especial em dourado)
+		var hint_panel := PanelContainer.new()
+		var hp_style := StyleBoxFlat.new()
+		hp_style.bg_color = Color(0.12, 0.1, 0.05, 0.85)
+		hp_style.border_color = Color(0.9, 0.75, 0.25, 0.8)
+		hp_style.set_border_width_all(1)
+		hp_style.set_corner_radius_all(4)
+		hp_style.content_margin_left = 10
+		hp_style.content_margin_right = 10
+		hp_style.content_margin_top = 6
+		hp_style.content_margin_bottom = 6
+		hint_panel.add_theme_stylebox_override("panel", hp_style)
+		sc_vbox.add_child(hint_panel)
+
+		var hint_lbl := Label.new()
+		hint_lbl.text = "📜 COMO DESBLOQUEAR NO JOGO: %s\n⭐ BÔNUS: Reseta para Nível 1 com +10 StatPoints/Nível (Tier 5) e +12 StatPoints/Nível (Tier 6 Lendária)." % s_info.get("unlock_hint", "Desafio secreto.")
+		hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint_lbl.add_theme_font_size_override("font_size", 10)
+		hint_lbl.add_theme_color_override("font_color", Color(1.0, 0.92, 0.55))
 		hint_panel.add_child(hint_lbl)
 
 # ABA 4: Customizar Slots de Ação

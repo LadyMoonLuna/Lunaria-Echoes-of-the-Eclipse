@@ -160,3 +160,27 @@ func (c *WorldClock) CheckHourChanged() (bool, int) {
 	}
 	return false, currentH
 }
+
+// SetHour define diretamente a hora do relógio (0 a 23), zerando os minutos.
+func (c *WorldClock) SetHour(hour uint8) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.currentHour = float64(hour % 24)
+}
+
+// SetMoonPhase define diretamente a fase da lua (0 a 9).
+func (c *WorldClock) SetMoonPhase(phase uint8) uint8 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.moonPhase = phase % 10
+	return c.moonPhase
+}
+
+// SetWeather define diretamente o tipo de clima (0 a 3).
+func (c *WorldClock) SetWeather(weather uint8) uint8 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.weatherType = weather % 4
+	return c.weatherType
+}
+

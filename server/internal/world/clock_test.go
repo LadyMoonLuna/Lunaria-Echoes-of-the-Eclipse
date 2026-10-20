@@ -65,3 +65,43 @@ func TestWorldClockAsymmetryAndPhases(t *testing.T) {
 		}
 	}
 }
+
+func TestWorldClockSetExact(t *testing.T) {
+	clock := NewWorldClock(12.0)
+
+	// Testa SetHour (03:00, 18:00, etc)
+	clock.SetHour(3)
+	h, m, _, _ := clock.GetTime()
+	if h != 3 || m != 0 {
+		t.Fatalf("esperava 03:00, obteve %02d:%02d", h, m)
+	}
+
+	clock.SetHour(18)
+	h, m, _, _ = clock.GetTime()
+	if h != 18 || m != 0 {
+		t.Fatalf("esperava 18:00, obteve %02d:%02d", h, m)
+	}
+
+	// Testa SetMoonPhase (0 a 9)
+	mPhase := clock.SetMoonPhase(4) // Lua Cheia
+	if mPhase != 4 || clock.GetMoonPhase() != 4 {
+		t.Fatalf("esperava MoonPhase 4 (Lua Cheia), obteve %d", mPhase)
+	}
+
+	mPhase = clock.SetMoonPhase(8) // Lua de Sangue
+	if mPhase != 8 || clock.GetMoonPhase() != 8 {
+		t.Fatalf("esperava MoonPhase 8 (Lua de Sangue), obteve %d", mPhase)
+	}
+
+	// Testa SetWeather (0 a 3)
+	w := clock.SetWeather(1) // Chuva
+	if w != 1 || clock.GetWeather() != 1 {
+		t.Fatalf("esperava Clima 1 (Chuva), obteve %d", w)
+	}
+
+	w = clock.SetWeather(2) // Neblina Densa
+	if w != 2 || clock.GetWeather() != 2 {
+		t.Fatalf("esperava Clima 2 (Neblina Densa), obteve %d", w)
+	}
+}
+

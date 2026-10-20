@@ -107,7 +107,7 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_C or event.keycode == KEY_TAB:
+		if event.keycode == KEY_C or event.keycode == KEY_TAB or (event.keycode == KEY_ESCAPE and is_open):
 			if is_open:
 				close_menu()
 			else:

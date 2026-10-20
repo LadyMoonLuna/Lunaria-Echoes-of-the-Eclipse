@@ -190,10 +190,10 @@ func TestMobStopDistanceAndBoundsClamping(t *testing.T) {
 		t.Fatalf("boss deveria ter parado em Z=7.8m (StopDistance 2.2m), mas parou em Z=%.2f", boss.PosZ)
 	}
 
-	// 3. Testa ClampToMapBounds: não deve permitir coordenadas fora de [-70.0, +70.0]
-	wolf.MoveTowards(100.0, 100.0, 200.0, 1.0)
-	if wolf.PosX > 70.0 || wolf.PosZ > 70.0 {
-		t.Fatalf("mob ultrapassou os limites seguros do mapa [-70, 70]: Pos=(%.2f, %.2f)", wolf.PosX, wolf.PosZ)
+	// 3. Testa ClampToMapBounds: não deve permitir coordenadas fora de [-120.0, +120.0]
+	wolf.MoveTowards(200.0, 200.0, 400.0, 1.0)
+	if wolf.PosX > 120.0 || wolf.PosZ > 120.0 {
+		t.Fatalf("mob ultrapassou os limites seguros do mapa [-120, 120]: Pos=(%.2f, %.2f)", wolf.PosX, wolf.PosZ)
 	}
 }
 

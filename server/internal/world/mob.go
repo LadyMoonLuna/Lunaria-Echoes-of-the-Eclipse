@@ -354,44 +354,33 @@ func NewMobManager() *MobManager {
 		Mobs: make(map[uint32]*Mob),
 	}
 
-	// 1. Bosque Sussurrante (Sudeste Distante: 45m a 65m do Centro)
-	mm.Mobs[201] = NewMob(201, "Lobo da Bruma", protocol.MobTypeMistWolf, 45.0, 0.0, -35.0, 220, 4.2)
-	mm.Mobs[202] = NewMob(202, "Lobo da Bruma", protocol.MobTypeMistWolf, 52.0, 0.0, -42.0, 220, 4.2)
+	// 1. Bosque Sussurrante (Sudeste)
+	mm.Mobs[201] = NewMob(201, "Lobo da Bruma", protocol.MobTypeMistWolf, 55.0, 0.0, -45.0, 220, 4.2)
+	mm.Mobs[202] = NewMob(202, "Lobo da Bruma", protocol.MobTypeMistWolf, 65.0, 0.0, -52.0, 220, 4.2)
 
 	// Lobo Alfa (ID 207) - Ativo na Lua Cheia
-	mob207 := NewMob(207, "Lobo Alfa", protocol.MobTypeAlphaWolf, 58.0, 0.0, -48.0, 750, 4.6)
+	mob207 := NewMob(207, "Lobo Alfa", protocol.MobTypeAlphaWolf, 75.0, 0.0, -60.0, 750, 4.6)
 	mob207.IsActive = false
 	mm.Mobs[207] = mob207
 
 	// Licantropo Alfa (ID 208) - Boss de Raid Secreto (Desperta na Lua de Sangue)
-	mob208 := NewMob(208, "Licantropo Alfa", protocol.MobTypeLycanthropeAlpha, 64.0, 0.0, -55.0, 2200, 4.4)
+	mob208 := NewMob(208, "Licantropo Alfa", protocol.MobTypeLycanthropeAlpha, 88.0, 0.0, -72.0, 2200, 4.4)
 	mob208.IsActive = false
 	mm.Mobs[208] = mob208
 
-	// 2. Estrada Real & Acampamento Desertor (Noroeste Distante)
-	mm.Mobs[203] = NewMob(203, "Saqueador Deserdado", protocol.MobTypeOutcastRaider, -45.0, 0.0, 38.0, 350, 3.2)
-	mm.Mobs[204] = NewMob(204, "Besteiro da Vigília", protocol.MobTypeVigilCrossbowman, -52.0, 0.0, 45.0, 200, 3.5)
+	// 2. Ruínas da Vigília (Norte: X: -25 a +25, Z: 65 a 95)
+	mm.Mobs[203] = NewMob(203, "Saqueador Deserdado", protocol.MobTypeOutcastRaider, -15.0, 0.0, 70.0, 350, 3.2)
+	mm.Mobs[204] = NewMob(204, "Besteiro da Vigília", protocol.MobTypeVigilCrossbowman, 15.0, 0.0, 72.0, 200, 3.5)
+	mm.Mobs[205] = NewMob(205, "Acólito do Eclipse", protocol.MobTypeEclipseAcolyte, -8.0, 0.0, 80.0, 240, 3.0)
+	mm.Mobs[206] = NewMob(206, "Executor de Ferro", protocol.MobTypeIronEnforcer, 8.0, 0.0, 82.0, 650, 2.4)
+	mm.Mobs[213] = NewMob(213, "Comandante Vaelen", protocol.MobTypeCommanderVaelen, 0.0, 0.0, 90.0, 3200, 3.5)
 
-	// 3. Ruínas da Vigília (Norte Distante)
-	mm.Mobs[205] = NewMob(205, "Acólito do Eclipse", protocol.MobTypeEclipseAcolyte, -12.0, 0.0, 52.0, 240, 3.0)
-	mm.Mobs[206] = NewMob(206, "Executor de Ferro", protocol.MobTypeIronEnforcer, 0.0, 0.0, 58.0, 650, 2.4)
-
-	// 4. Santuário do Eclipse (Dungeon & Raids: X: -65.0 a -85.0, Z: 55.0 a 85.0)
-	// Cultistas Sombrios (MobType 10 - HP 400)
-	mm.Mobs[209] = NewMob(209, "Cultista Sombrio", protocol.MobTypeDarkCultist, -66.0, 0.0, 62.0, 400, 3.2)
-	mm.Mobs[210] = NewMob(210, "Cultista Sombrio", protocol.MobTypeDarkCultist, -72.0, 0.0, 64.0, 400, 3.2)
-
-	// Gárgula de Pedra (MobType 11 - HP 580)
-	mm.Mobs[211] = NewMob(211, "Gárgula de Pedra", protocol.MobTypeStoneGargoyle, -78.0, 0.0, 68.0, 580, 3.8)
-
-	// Mini-Boss Inquisidor Vex (MobType 12 - HP 1400)
-	mm.Mobs[212] = NewMob(212, "Inquisidor Vex", protocol.MobTypeInquisitorVex, -68.0, 0.0, 72.0, 1400, 3.4)
-
-	// Boss Normal Comandante Vaelen, o Traidor (MobType 13 - HP 3200)
-	mm.Mobs[213] = NewMob(213, "Comandante Vaelen", protocol.MobTypeCommanderVaelen, -76.0, 0.0, 76.0, 3200, 3.5)
-
-	// Raid Boss Malakor, o Arauto do Eclipse (MobType 14 - HP 7500 - Desafio para 5 Jogadores)
-	mm.Mobs[214] = NewMob(214, "Malakor, o Arauto do Eclipse", protocol.MobTypeMalakorHeraldEclipse, -72.0, 0.0, 75.0, 7500, 3.0)
+	// 3. Santuário do Eclipse (Noroeste Distante — Centro em (-85.0, 85.0))
+	mm.Mobs[209] = NewMob(209, "Cultista Sombrio", protocol.MobTypeDarkCultist, -75.0, 0.0, 75.0, 400, 3.2)
+	mm.Mobs[210] = NewMob(210, "Cultista Sombrio", protocol.MobTypeDarkCultist, -80.0, 0.0, 72.0, 400, 3.2)
+	mm.Mobs[211] = NewMob(211, "Gárgula de Pedra", protocol.MobTypeStoneGargoyle, -78.0, 0.0, 82.0, 580, 3.8)
+	mm.Mobs[212] = NewMob(212, "Inquisidor Vex", protocol.MobTypeInquisitorVex, -85.0, 0.0, 80.0, 1400, 3.4)
+	mm.Mobs[214] = NewMob(214, "Malakor, o Arauto do Eclipse", protocol.MobTypeMalakorHeraldEclipse, -88.0, 0.0, 88.0, 7500, 3.0)
 
 	return mm
 }

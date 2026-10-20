@@ -70,6 +70,8 @@ const (
 	ProjTypeHolySpear      uint8 = 5 // Lança do Julgamento (Acólito - Skill R)
 	ProjTypeAcidFlask      uint8 = 6 // Frasco Químico / Bomba de Ácido (Alquimista)
 	ProjTypeShadowBolt     uint8 = 7 // Projétil Sombrio (Cultista Sombrio / Malakor)
+	ProjTypeBoneSpear      uint8 = 7 // Lança de Fêmur (Necromante de Ossos - Skill Q)
+	ProjTypeLightningSpear uint8 = 8 // Lança do Trovão (Arauto da Tempestade - Skill Q)
 )
 
 // Tipos de Mobs do Marco 4 e Expansão
@@ -231,9 +233,15 @@ const (
 	ClassAlchemist  uint8 = 6 // Alquimista (Ranged Químico Proj 6: HP 110, Stam 120)
 
 	// Classes Secretas (Tier 5 a 6, exigem Reset de Nível para 1)
-	ClassEclipseReaper     uint8 = 7 // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
-	ClassRunicArtificer    uint8 = 8 // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
-	ClassHomunculusCreator uint8 = 9 // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
+	ClassEclipseReaper     uint8 = 7  // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
+	ClassRunicArtificer    uint8 = 8  // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
+	ClassHomunculusCreator uint8 = 9  // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
+	ClassAstralDancer      uint8 = 10 // Dançarino Astral (Crítico e Esquiva: HP 135, Stam 140)
+	ClassAshInquisitor     uint8 = 11 // Inquisidor das Cinzas (Dano com Vida Baixa: HP 145, Stam 115)
+	ClassBoneNecromancer   uint8 = 12 // Necromante de Ossos (Lança Óssea & Cura no Abate: HP 130, Stam 120)
+	ClassPrimordialTamer   uint8 = 13 // Domador Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
+	ClassRiftKnight        uint8 = 14 // Cavaleiro da Ruptura (Resistência e Gravidade: HP 180, Stam 100)
+	ClassStormHerald       uint8 = 15 // Arauto da Tempestade (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
 )
 
 // Os 6 Tiers de Raridade de Classe
@@ -250,10 +258,11 @@ const (
 
 // Modos de Ação do Pacote 0x30 SELECT_IDENTITY
 const (
-	IdentityModeInitialChange uint8 = 0 // Troca Inicial (Tier 1 Comum)
-	IdentityModeEvolveClass   uint8 = 1 // Evoluir Classe (+1 Tier mantendo Nível)
-	IdentityModeSecretReset   uint8 = 2 // Trocar para Classe Secreta (Tier 5, Reset Level 1)
-	IdentityModeTrainLevel5   uint8 = 3 // Treinar / +5 Níveis para Teste
+	IdentityModeInitialChange uint8 = 0  // Troca Inicial (Tier 1 Comum)
+	IdentityModeEvolveClass   uint8 = 1  // Evoluir Classe (+1 Tier mantendo Nível)
+	IdentityModeSecretReset   uint8 = 2  // Trocar para Classe Secreta (Tier 5, Reset Level 1)
+	IdentityModeTrainLevel5   uint8 = 3  // Treinar / +5 Níveis para Teste
+	IdentityModeDevDirect     uint8 = 98 // Modo Dev Direto: define ClassID (1..15) e ClassTier (1..6)
 )
 
 // Identificadores de Ações de Combate (0x31 PLAYER_ACTION)
@@ -701,9 +710,21 @@ func DeserializeWorldTime(data []byte, out *WorldTimePacket) error {
 
 // --- 0x22: DEV_WORLD_CONTROL (TCP: Client -> Server, 3 bytes) ---
 
-// DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima).
+const (
+	DevCmdAdvanceHours uint8 = 1 // Avança +Value horas
+	DevCmdCycleMoon    uint8 = 2 // Cicla para próxima fase da lua
+	DevCmdCycleWeather uint8 = 3 // Cicla para próximo clima
+	DevCmdSetHour      uint8 = 4 // Define hora exata (Value % 24)
+	DevCmdSetMoon      uint8 = 5 // Define fase da lua exata (0 a 9)
+	DevCmdSetWeather   uint8 = 6 // Define clima exato (0 a 3)
+	DevCmdGiveItem     uint8 = 7 // Dá item (Value) ou kit 12 slots (255)
+	DevCmdLevelStats   uint8 = 8 // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
+	DevCmdTeleport     uint8 = 9 // Teleporte rápido (0..6)
+)
+
+// DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).
 type DevWorldControlPacket struct {
-	CommandType uint8 // 1 = +Horas, 2 = Ciclar Fase Lua, 3 = Ciclar Clima
+	CommandType uint8 // DevCmd* (1 a 9)
 	Value       uint8
 }
 

@@ -56,7 +56,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     local mas = tonumber(stat_mas) or 5
     local lck = tonumber(stat_lck) or 5
 
-    -- 1. Dano Base por Classe (1 a 9)
+    -- 1. Dano Base por Classe (1 a 15)
     local damage = 20
     if class_id == 0 then
         damage = 18 -- Viajante / Sem Classe (Tier 0)
@@ -78,17 +78,74 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         damage = 38 -- Artífice Rúnico (Classe Secreta)
     elseif class_id == 9 then
         damage = 36 -- Criador de Homúnculos (Classe Secreta)
+    elseif class_id == 10 then
+        damage = 40 -- Dançarino Astral (Classe Secreta)
+    elseif class_id == 11 then
+        damage = 38 -- Inquisidor das Cinzas (Classe Secreta)
+    elseif class_id == 12 then
+        damage = 34 -- Necromante de Ossos (Classe Secreta)
+    elseif class_id == 13 then
+        damage = 39 -- Domador Primordial (Classe Secreta)
+    elseif class_id == 14 then
+        damage = 44 -- Cavaleiro da Ruptura (Classe Secreta)
+    elseif class_id == 15 then
+        damage = 36 -- Arauto da Tempestade (Classe Secreta)
     end
 
     -- 2. Multiplicador de Ação (ActionType)
     if action_type == 2 then
         return 0, 0 -- Esquiva não causa dano
     elseif action_type == 3 then
-        damage = damage * 1.75 -- Habilidade 1 [Q]
+        -- Habilidade 1 [Tecla Q]
+        if class_id == 10 then
+            damage = damage * 2.00 -- Dançarino: Corte Cadente (2.0x)
+        elseif class_id == 11 then
+            damage = damage * 2.20 -- Inquisidor: Chicote de Penitência (2.2x)
+        elseif class_id == 12 then
+            damage = damage * 2.00 -- Necromante: Lança de Fêmur (2.0x)
+        elseif class_id == 13 then
+            damage = damage * 2.10 -- Domador: Investida do Alfa (2.1x)
+        elseif class_id == 14 then
+            damage = damage * 1.90 -- Cavaleiro: Esmagamento Gravitacional (1.9x)
+        elseif class_id == 15 then
+            damage = damage * 2.10 -- Arauto: Lança do Trovão (2.1x)
+        else
+            damage = damage * 1.75 -- Base Q
+        end
     elseif action_type == 4 then
-        damage = damage * 1.90 -- Habilidade 2 [R]
+        -- Habilidade 2 [Tecla R]
+        if class_id == 10 then
+            damage = damage * 1.80 -- Dançarino: Valsa dos Espelhos
+        elseif class_id == 11 then
+            damage = damage * 1.75 -- Inquisidor: Selo de Excomunhão
+        elseif class_id == 12 then
+            damage = damage * 1.80 -- Necromante: Explosão Óssea
+        elseif class_id == 13 then
+            damage = damage * 1.60 -- Domador: Uivo da Alcateia
+        elseif class_id == 14 then
+            damage = damage * 2.00 -- Cavaleiro: Singularidade Reversa
+        elseif class_id == 15 then
+            damage = damage * 1.75 -- Arauto: Passo de Relâmpago
+        else
+            damage = damage * 1.90 -- Base R
+        end
     elseif action_type == 5 then
-        damage = damage * 2.40 -- Habilidade 3 [F] - Ultimate
+        -- Habilidade 3 [Tecla F] - Ultimate
+        if class_id == 10 then
+            damage = damage * 3.00 -- Dançarino: Constelação de Mil Lâminas (3.0x)
+        elseif class_id == 11 then
+            damage = damage * 3.20 -- Inquisidor: Crucificação de Cinzas (3.2x)
+        elseif class_id == 12 then
+            damage = damage * 3.00 -- Necromante: Legião do Ossuário (3.0x)
+        elseif class_id == 13 then
+            damage = damage * 3.00 -- Domador: Fúria do Behemoth (3.0x)
+        elseif class_id == 14 then
+            damage = damage * 2.80 -- Cavaleiro: Colapso Estelar (2.8x)
+        elseif class_id == 15 then
+            damage = damage * 3.10 -- Arauto: Ira dos Céus (3.1x)
+        else
+            damage = damage * 2.40 -- Base Ultimate
+        end
     elseif action_type == 6 then
         damage = damage * 2.20 -- Habilidade Racial Ativa [Tecla Z]
     end
@@ -125,23 +182,23 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- 5. Escala pelos 8 Atributos Alocáveis (STR, DEX, INT, SPI, MAS, LCK)
-    -- STR aumenta dano melee (Espadachim, Ferreiro, Ceifador, Artífice)
-    if str > 5 and (class_id == 1 or class_id == 5 or class_id == 7 or class_id == 8) then
+    -- STR aumenta dano melee (Espadachim, Ferreiro, Ceifador, Artífice, Domador, Cavaleiro da Ruptura)
+    if str > 5 and (class_id == 1 or class_id == 5 or class_id == 7 or class_id == 8 or class_id == 13 or class_id == 14) then
         damage = damage * (1.0 + (str - 5) * 0.03)
     end
 
-    -- DEX aumenta dano ranged (Batedor, Alquimista, Criador)
-    if dex > 5 and (class_id == 2 or class_id == 6 or class_id == 9) then
+    -- DEX aumenta dano ranged / agilidade (Batedor, Alquimista, Criador, Dançarino Astral)
+    if dex > 5 and (class_id == 2 or class_id == 6 or class_id == 9 or class_id == 10) then
         damage = damage * (1.0 + (dex - 5) * 0.03)
     end
 
-    -- INT aumenta dano mágico/alquímico (Iniciado, Alquimista, Artífice, Criador)
-    if int_stat > 5 and (class_id == 3 or class_id == 6 or class_id == 8 or class_id == 9) then
+    -- INT aumenta dano mágico/alquímico (Iniciado, Alquimista, Artífice, Criador, Inquisidor, Necromante, Arauto)
+    if int_stat > 5 and (class_id == 3 or class_id == 6 or class_id == 8 or class_id == 9 or class_id == 11 or class_id == 12 or class_id == 15) then
         damage = damage * (1.0 + (int_stat - 5) * 0.03)
     end
 
-    -- SPI aumenta dano/eficácia de classes divinas/espirituais (Acólito)
-    if spi > 5 and class_id == 4 then
+    -- SPI aumenta dano/eficácia de classes divinas/espirituais (Acólito, Inquisidor, Domador)
+    if spi > 5 and (class_id == 4 or class_id == 11 or class_id == 13) then
         damage = damage * (1.0 + (spi - 5) * 0.03)
     end
 
@@ -149,6 +206,21 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     local damage_bonus = 1.0
     local crit_chance = 0.10
     local crit_multiplier = 1.50
+
+    -- Dançarino Astral (ClassID = 10): Passiva +25% de chance crítica permanente
+    if class_id == 10 then
+        crit_chance = crit_chance + 0.25
+    end
+
+    -- Domador Primordial (ClassID = 13): Passiva Espírito Alfa concede +25% de dano feroz constante
+    if class_id == 13 then
+        damage_bonus = damage_bonus + 0.25
+    end
+
+    -- Arauto da Tempestade (ClassID = 15): Passiva +35% de dano elétrico durante chuva (Weather == 1)
+    if class_id == 15 and weather_type == 1 then
+        damage_bonus = damage_bonus + 0.35
+    end
 
     -- DEX e LCK aumentam a chance de crítico
     if dex > 5 then
@@ -217,6 +289,15 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     -- Passiva Varkai: +20% de dano feroz quando HP <= 35%
     if (race_id == 4 or race_id == 6) and current_hp_pct <= 0.35 then
         damage_bonus = damage_bonus + 0.20
+    end
+
+    -- Passiva Inquisidor das Cinzas (ClassID = 11): até +60% de dano com vida baixa
+    if class_id == 11 then
+        local missing_hp = 1.0 - current_hp_pct
+        if missing_hp < 0 then
+            missing_hp = 0
+        end
+        damage_bonus = damage_bonus + (missing_hp * 0.60)
     end
 
     -- Condição de empoderamento lunar: Noite (18:00 às 05:59) ou Eclipse Total (fase 9)
