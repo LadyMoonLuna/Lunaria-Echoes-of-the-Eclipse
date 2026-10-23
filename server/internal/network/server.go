@@ -1114,7 +1114,7 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 			locName = "Igreja da Luz"
 		case 2:
 			targetX, targetY, targetZ = 20.0, 1.5, -15.0
-			locName = "Torre do Mago"
+			locName = "Torre do Arcanista"
 		case 3:
 			targetX, targetY, targetZ = -21.0, 1.5, -19.0
 			locName = "Entrada dos Esgotos"
@@ -1338,20 +1338,20 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 		}
 
 		// 1. Mestres de Classes Básicas para Viajantes Sem Classe (ClassID == 0):
-		// Capitão Randel (ID 105 ou 104): Ensina Guerreiro (1) e Desperta Cavaleiro da Ruptura (26)
+		// Capitão Randel (ID 105 ou 104): Ensina Espadachim da Aurora (1) e Desperta Cavaleiro do Vazio (26)
 		if pkt.TargetNPCID == 105 || pkt.TargetNPCID == 104 {
-			// Desafio Secreto: Cavaleiro da Ruptura (Classe 14)
+			// Desafio Secreto: Cavaleiro do Vazio (Classe 14)
 			if player.BlockedBossRupture && player.ClassID != protocol.ClassRiftKnight {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassRiftKnight, protocol.IdentityModeSecretReset)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da guerra! Seu escudo resistiu ao impacto titânico do monstro durante o cataclismo lunar! Uma fenda dimensional responde ao seu comando... Eu o proclamo um Cavaleiro da Ruptura #%d!", pkt.PlayerID))
-				log.Printf("[CLASSE SECRETA] Capitão Randel iniciou o jogador #%d como Cavaleiro da Ruptura (Classe 14)!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da guerra! Seu escudo resistiu ao impacto titânico do monstro durante o cataclismo lunar! Uma fenda dimensional responde ao seu comando... Eu o proclamo um Cavaleiro do Vazio #%d!", pkt.PlayerID))
+				log.Printf("[CLASSE SECRETA] Capitão Randel iniciou o jogador #%d como Cavaleiro do Vazio (Classe 14)!\n", pkt.PlayerID)
 				return
 			}
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassSwordsman, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Bem-vindo à vanguarda, recruta #%d! Confirme para se tornar um Guerreiro (Tier 1). Empunhe sua lâmina com honra!", pkt.PlayerID))
-				log.Printf("[MESTRE] Capitão Randel ofereceu a Classe Guerreiro (1) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Bem-vindo à vanguarda, recruta #%d! Confirme para se tornar um Espadachim da Aurora (Tier 1). Empunhe sua lâmina com honra!", pkt.PlayerID))
+				log.Printf("[MESTRE] Capitão Randel ofereceu a Classe Espadachim da Aurora (1) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if player.ClassID == protocol.ClassSwordsman && player.Level >= 10 {
@@ -1361,12 +1361,12 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// Guarda Valen / Mestre Caçador (ID 106 ou 105): Ensina Arqueiro (3)
+		// Guarda Valen / Mestre Caçador (ID 106 ou 105): Ensina Sentinela dos Ventos (3)
 		if pkt.TargetNPCID == 106 {
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassScout, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Passos firmes e olhos na mata, aventureiro #%d! Confirme para aprender as artes do Arqueiro (Tier 1)!", pkt.PlayerID))
-				log.Printf("[MESTRE] Mestre Caçador ofereceu a Classe Arqueiro (3) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Passos firmes e olhos na mata, aventureiro #%d! Confirme para aprender as artes do Sentinela dos Ventos (Tier 1)!", pkt.PlayerID))
+				log.Printf("[MESTRE] Mestre Caçador ofereceu a Classe Sentinela dos Ventos (3) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if (player.ClassID == protocol.ClassScout || player.ClassID == protocol.ClassInitiate || player.ClassID == protocol.ClassAcolyte) && player.Level >= 10 {
@@ -1374,7 +1374,7 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// Garrick, o Ferreiro (ID 100 ou 1): Ensina Ferreiro (5)
+		// Garrick, o Ferreiro (ID 100 ou 1): Ensina Forjador de Estrelas (5)
 		if pkt.TargetNPCID == 100 || pkt.TargetNPCID == 1 {
 			// Regra de Exclusividade Rígida: Alquimistas são rejeitados
 			if player.ClassID == protocol.ClassAlchemist {
@@ -1386,8 +1386,8 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassBlacksmith, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(100, fmt.Sprintf("Pela bigorna sagrada! Você quer aprender a forjar e a esmagar aço? Você agora é um Ferreiro (Tier 1), #%d!", pkt.PlayerID))
-				log.Printf("[MESTRE] Garrick ensinou a Classe Ferreiro (5) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(100, fmt.Sprintf("Pela bigorna sagrada! Você quer aprender a forjar e a esmagar aço? Você agora é um Forjador de Estrelas (Tier 1), #%d!", pkt.PlayerID))
+				log.Printf("[MESTRE] Garrick ensinou a Classe Forjador de Estrelas (5) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if player.ClassID == protocol.ClassBlacksmith {
@@ -1420,8 +1420,8 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassAlchemist, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("O equilíbrio dos elementos é a maior das magias! Você agora é um Alquimista (Tier 1), #%d!", pkt.PlayerID))
-				log.Printf("[MESTRE] Lyra ensinou a Classe Alquimista (6) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("O equilíbrio dos elementos é a maior das magias! Você agora é um Transmutador (Tier 1), #%d!", pkt.PlayerID))
+				log.Printf("[MESTRE] Lyra ensinou a Classe Transmutador (6) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if player.ClassID == protocol.ClassAlchemist && player.Level >= 10 {
@@ -1429,13 +1429,13 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// Gatilho Secreto Artífice Rúnico com Garrick (NPCID = 100 ou 1)
+		// Gatilho Secreto Engenheiro Rúnico com Garrick (NPCID = 100 ou 1)
 		if (pkt.TargetNPCID == 100 || pkt.TargetNPCID == 1) && player.Level >= 5 && player.HasItem(protocol.ItemHeavySteelPlate) {
 			if !player.HasItem(protocol.ItemStarforgeCore) {
 				player.RemoveItem(protocol.ItemHeavySteelPlate, 1)
 				player.AddItem(protocol.ItemStarforgeCore, 1)
 				s.sendInventorySync(player)
-				s.BroadcastNPCSay(100, fmt.Sprintf("Pelos deuses da bigorna! Essa Placa de Aço do Executor é pura liga estelar... Tome este Núcleo de Forja Estelar, aventureiro #%d! Use-o em seu inventário para despertar como Artífice Rúnico!", pkt.PlayerID))
+				s.BroadcastNPCSay(100, fmt.Sprintf("Pelos deuses da bigorna! Essa Placa de Aço do Executor é pura liga estelar... Tome este Núcleo de Forja Estelar, aventureiro #%d! Use-o em seu inventário para despertar como Engenheiro Rúnico!", pkt.PlayerID))
 				log.Printf("[SEGREDO] Garrick forjou o Núcleo de Forja Estelar (Item 18) para o jogador #%d!\n", pkt.PlayerID)
 				return
 			}
@@ -1469,19 +1469,19 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			if currentH >= 6 && currentH < 18 {
 				return // De dia fica inativo/silencioso
 			}
-			// Mercado Negro: Goblins compram o Diagrama do Mecha (requisito do Barão da Sucata, Classe Única 26)
+			// Mercado Negro: Goblins compram o Diagrama do Mecha (requisito do Barão Engrenagem, Classe Única 26)
 			if player.RaceID == protocol.RaceGoblin && !player.HasItem(protocol.ItemMechaBlueprint) && player.ClassID != protocol.ClassScrapBaron {
 				player.AddItem(protocol.ItemMechaBlueprint, 1)
 				s.sendInventorySync(player)
 				s.BroadcastNPCSay(104, fmt.Sprintf("Pssiu... Um goblin de olho no Mercado Negro! Leve este Diagrama do Mecha, #%d. Com ele, a sucata vira um exoesqueleto de guerra...", pkt.PlayerID))
 				return
 			}
-			// Iniciação do Ceifador do Eclipse com Tomo (o Tomo só é consumido quando o jogador confirma)
+			// Iniciação do Ceifador da Lua Negra com Tomo (o Tomo só é consumido quando o jogador confirma)
 			if player.HasItem(protocol.ItemEclipseScytheTome) && player.ClassID != protocol.ClassEclipseReaper {
 				player.OfferIdentity(player.RaceID, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset, protocol.ItemEclipseScytheTome)
 				s.sendEvolutionOffer(player, protocol.OfferTypeIdentityChange, protocol.ClassEclipseReaper, player.RaceID)
-				s.BroadcastNPCSay(104, fmt.Sprintf("Pssiu... As sombras o acolhem, novo Ceifador do Eclipse #%d! Sua alma agora ceifará a escuridão!", pkt.PlayerID))
-				log.Printf("[MESTRE] Varis iniciou o jogador #%d como Ceifador do Eclipse (Classe 7)!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(104, fmt.Sprintf("Pssiu... As sombras o acolhem, novo Ceifador da Lua Negra #%d! Sua alma agora ceifará a escuridão!", pkt.PlayerID))
+				log.Printf("[MESTRE] Varis iniciou o jogador #%d como Ceifador da Lua Negra (Classe 7)!\n", pkt.PlayerID)
 				return
 			}
 			// Troca sombria: Glândula de Veneno por Cálice da Alma Partida
@@ -1495,21 +1495,21 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// Irmã Seraphina (ID 107): Ensina Escudeiro (6) e Desperta Inquisidor das Cinzas (23)
+		// Irmã Seraphina (ID 107): Ensina Guardião do Bastião (6) e Desperta Inquisidor da Chama Branca (23)
 		if pkt.TargetNPCID == 107 {
-			// Desafio Secreto: Inquisidor das Cinzas (Classe 11)
+			// Desafio Secreto: Inquisidor da Chama Branca (Classe 11)
 			// Com 3+ abates à beira da morte (LowHPKills >= 3), falar com Seraphina com < 30% HP
 			if player.LowHPKills >= 3 && float32(player.HP) < float32(player.MaxHP)*0.30 && player.ClassID != protocol.ClassAshInquisitor {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassAshInquisitor, protocol.IdentityModeSecretReset)
-				s.BroadcastNPCSay(107, fmt.Sprintf("Você sangrou no limiar da morte, mas sua penitência forjou uma fé inabalável... Erga-se das cinzas sagradas, Inquisidor das Cinzas #%d!", pkt.PlayerID))
-				log.Printf("[CLASSE SECRETA] Irmã Seraphina iniciou o jogador #%d como Inquisidor das Cinzas (Classe 11)!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(107, fmt.Sprintf("Você sangrou no limiar da morte, mas sua penitência forjou uma fé inabalável... Erga-se das cinzas sagradas, Inquisidor da Chama Branca #%d!", pkt.PlayerID))
+				log.Printf("[CLASSE SECRETA] Irmã Seraphina iniciou o jogador #%d como Inquisidor da Chama Branca (Classe 11)!\n", pkt.PlayerID)
 				return
 			}
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassShieldBearer, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(107, fmt.Sprintf("A Luz Sagrada ilumina seus passos, recruta #%d! Confirme para se tornar um Escudeiro (Tier 1)!", pkt.PlayerID))
-				log.Printf("[MESTRE] Irmã Seraphina ofereceu a Classe Escudeiro (6) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(107, fmt.Sprintf("A Luz Sagrada ilumina seus passos, recruta #%d! Confirme para se tornar um Guardião do Bastião (Tier 1)!", pkt.PlayerID))
+				log.Printf("[MESTRE] Irmã Seraphina ofereceu a Classe Guardião do Bastião (6) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if player.ClassID == protocol.ClassAcolyte && player.Level >= 10 {
@@ -1519,23 +1519,23 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// Mestre Aurelius (ID 108): Ensina Mago (2) e Desperta Dançarino Astral (22)
+		// Mestre Aurelius (ID 108): Ensina Arcanista (2) e Desperta Bailarino das Estrelas (22)
 		if pkt.TargetNPCID == 108 {
 			currentH := s.clock.GetCurrentHour()
 			isNight := (currentH >= 18 || currentH < 6)
-			// Desafio Secreto: Dançarino Astral (Classe 10)
+			// Desafio Secreto: Bailarino das Estrelas (Classe 10)
 			// UntouchedKills >= 10 e falar com Mestre Aurelius à noite
 			if isNight && player.UntouchedKills >= 10 && player.ClassID != protocol.ClassAstralDancer {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassAstralDancer, protocol.IdentityModeSecretReset)
-				s.BroadcastNPCSay(108, fmt.Sprintf("Incrível! Você dançou através de dez combates sem sofrer um único golpe sequer sob o manto celestial! O cosmos escolheu você, Dançarino Astral #%d!", pkt.PlayerID))
-				log.Printf("[CLASSE SECRETA] Mestre Aurelius iniciou o jogador #%d como Dançarino Astral (Classe 10)!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(108, fmt.Sprintf("Incrível! Você dançou através de dez combates sem sofrer um único golpe sequer sob o manto celestial! O cosmos escolheu você, Bailarino das Estrelas #%d!", pkt.PlayerID))
+				log.Printf("[CLASSE SECRETA] Mestre Aurelius iniciou o jogador #%d como Bailarino das Estrelas (Classe 10)!\n", pkt.PlayerID)
 				return
 			}
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassInitiate, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(108, fmt.Sprintf("O cosmos revela seus segredos a você, sábio #%d! Confirme para se tornar um Mago (Tier 1)!", pkt.PlayerID))
-				log.Printf("[MESTRE] Mestre Aurelius ofereceu a Classe Mago (2) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(108, fmt.Sprintf("O cosmos revela seus segredos a você, sábio #%d! Confirme para se tornar um Arcanista (Tier 1)!", pkt.PlayerID))
+				log.Printf("[MESTRE] Mestre Aurelius ofereceu a Classe Arcanista (2) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if player.ClassID == protocol.ClassInitiate && player.Level >= 10 {
@@ -1545,22 +1545,22 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// Kaelen, o Mestre Caçador (ID 109): Ensina Arqueiro (3) e Desperta Domador Primordial (25)
+		// Kaelen, o Mestre Caçador (ID 109): Ensina Sentinela dos Ventos (3) e Desperta Senhor da Selva Primordial (25)
 		if pkt.TargetNPCID == 109 {
 			pSTR, _, _, _, _, pSPI, _, _ := player.GetAttributes()
-			// Desafio Secreto: Domador Primordial (Classe 13)
+			// Desafio Secreto: Senhor da Selva Primordial (Classe 13)
 			// Derrotar o Lobo Alfa Solo e falar com Kaelen tendo FOR >= 15 e ESP >= 15
 			if player.SoloAlphaWolfKilled && pSTR >= 15 && pSPI >= 15 && player.ClassID != protocol.ClassPrimordialTamer {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassPrimordialTamer, protocol.IdentityModeSecretReset)
-				s.BroadcastNPCSay(109, fmt.Sprintf("Pelos rastros das feras ancestrais! Você derrotou o Lobo Alfa em duelo solitário e possui a têmpera de um verdadeiro alfa (FOR %d, ESP %d)! Desperte o Espírito Alfa, Domador Primordial #%d!", pSTR, pSPI, pkt.PlayerID))
-				log.Printf("[CLASSE SECRETA] Kaelen iniciou o jogador #%d como Domador Primordial (Classe 13)!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(109, fmt.Sprintf("Pelos rastros das feras ancestrais! Você derrotou o Lobo Alfa em duelo solitário e possui a têmpera de um verdadeiro alfa (FOR %d, ESP %d)! Desperte o Espírito Alfa, Senhor da Selva Primordial #%d!", pSTR, pSPI, pkt.PlayerID))
+				log.Printf("[CLASSE SECRETA] Kaelen iniciou o jogador #%d como Senhor da Selva Primordial (Classe 13)!\n", pkt.PlayerID)
 				return
 			}
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassScout, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(109, fmt.Sprintf("Olhos afiados e passos nas folhas, parceiro #%d! Confirme para se tornar um Arqueiro (Tier 1)!", pkt.PlayerID))
-				log.Printf("[MESTRE] Kaelen ofereceu a Classe Arqueiro (3) ao jogador #%d!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(109, fmt.Sprintf("Olhos afiados e passos nas folhas, parceiro #%d! Confirme para se tornar um Sentinela dos Ventos (Tier 1)!", pkt.PlayerID))
+				log.Printf("[MESTRE] Kaelen ofereceu a Classe Sentinela dos Ventos (3) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
 			if player.ClassID == protocol.ClassScout && player.Level >= 10 {
@@ -1570,19 +1570,19 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			}
 		}
 
-		// O Alquimista Esquecido (ID 110): Ativo na madrugada (00h às 04h) e Desperta Necromante de Ossos (12)
+		// O Alquimista Esquecido (ID 110): Ativo na madrugada (00h às 04h) e Desperta Arauto do Ossuário (12)
 		if pkt.TargetNPCID == 110 {
 			currentH := s.clock.GetCurrentHour()
 			if currentH > 4 {
 				return
 			}
 
-			// Desafio Secreto: Necromante de Ossos (Classe 12)
+			// Desafio Secreto: Arauto do Ossuário (Classe 12)
 			// Com 5+ acertos perfeitos seguidos (PerfectAutopsiesStreak >= 5) na madrugada
 			if player.PerfectAutopsiesStreak >= 5 && player.ClassID != protocol.ClassBoneNecromancer {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassBoneNecromancer, protocol.IdentityModeSecretReset)
-				s.BroadcastNPCSay(110, fmt.Sprintf("Sssss... Cinco autópsias cirúrgicas perfeitas sem lacerar um único órgão vital... Você compreende a arquitetura dos ossos e da morte. Eu o consagro como Necromante de Ossos #%d!", pkt.PlayerID))
-				log.Printf("[CLASSE SECRETA] Alquimista Esquecido iniciou o jogador #%d como Necromante de Ossos (Classe 12)!\n", pkt.PlayerID)
+				s.BroadcastNPCSay(110, fmt.Sprintf("Sssss... Cinco autópsias cirúrgicas perfeitas sem lacerar um único órgão vital... Você compreende a arquitetura dos ossos e da morte. Eu o consagro como Arauto do Ossuário #%d!", pkt.PlayerID))
+				log.Printf("[CLASSE SECRETA] Alquimista Esquecido iniciou o jogador #%d como Arauto do Ossuário (Classe 12)!\n", pkt.PlayerID)
 				return
 			}
 		}
@@ -1615,7 +1615,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 	switch pkt.ActionType {
 	case protocol.ActionBasicAttack: // 1: Ataque Básico (sem custo de stamina)
 		staminaCost = 0.0
-	case protocol.ActionDodgeRoll: // 2: Esquiva (20 stamina, 10 para Thalassiano e Dançarino Astral)
+	case protocol.ActionDodgeRoll: // 2: Esquiva (20 stamina, 10 para Thalassiano e Bailarino das Estrelas)
 		staminaCost = 20.0
 		if player.RaceID == protocol.RaceThalassian || player.ClassID == protocol.ClassAstralDancer || player.ClassID == protocol.ClassAegisValkyrie {
 			staminaCost = 10.0
@@ -1685,7 +1685,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		return
 	}
 
-	// 3.1. Guerreiro (1): R = Investida Imparável (Dash 6m + empurrão/atordoamento); F = Julgamento da Espada (AoE 4.5m)
+	// 3.1. Espadachim da Aurora (1): R = Investida Imparável (Dash 6m + empurrão/atordoamento); F = Julgamento da Espada (AoE 4.5m)
 	if classID == protocol.ClassWarrior {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.Mu.Lock()
@@ -1709,13 +1709,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[INVESTIDA IMPARÁVEL] Guerreiro #%d avançou 6m desferindo investida!\n", player.ID)
+			log.Printf("[INVESTIDA IMPARÁVEL] Espadachim da Aurora #%d avançou 6m desferindo investida!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 4.5, 400)
 		}
 	}
 
-	// 3.2. Mago (2): R = Prisão Glacial (Congela e empurra inimigos em 5m por 2s); F = Chuva de Meteoros (6m AoE)
+	// 3.2. Arcanista (2): R = Prisão Glacial (Congela e empurra inimigos em 5m por 2s); F = Chuva de Meteoros (6m AoE)
 	if classID == protocol.ClassMage {
 		if pkt.ActionType == protocol.ActionSkillR {
 			if s.mobManager != nil {
@@ -1733,13 +1733,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[PRISÃO GLACIAL] Mago #%d congelou inimigos em 5m por 2s!\n", player.ID)
+			log.Printf("[PRISÃO GLACIAL] Arcanista #%d congelou inimigos em 5m por 2s!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*3.0, pz+aimZ*3.0, 6.0, 500)
 		}
 	}
 
-	// 3.3. Arqueiro (3): R = Salto Acrobático (recuo 4m + flecha imobiliza 2s); F = Tempestade de Mil Flechas (6m AoE)
+	// 3.3. Sentinela dos Ventos (3): R = Salto Acrobático (recuo 4m + flecha imobiliza 2s); F = Tempestade de Mil Flechas (6m AoE)
 	if classID == protocol.ClassArcher {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.Mu.Lock()
@@ -1762,13 +1762,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[SALTO ACROBÁTICO] Arqueiro #%d recuou prendendo inimigo!\n", player.ID)
+			log.Printf("[SALTO ACROBÁTICO] Sentinela dos Ventos #%d recuou prendendo inimigo!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*4.0, pz+aimZ*4.0, 6.0, 450)
 		}
 	}
 
-	// 3.4. Assassino (4): Q = Passo das Sombras (teleporta 5m cortando); R = Cortina de Fumaça (2.5s I-Frame + 30% vel); F = Lótus de Sangue (4m)
+	// 3.4. Lâmina Silente (4): Q = Passo das Sombras (teleporta 5m cortando); R = Cortina de Fumaça (2.5s I-Frame + 30% vel); F = Lótus de Sangue (4m)
 	if classID == protocol.ClassAssassin {
 		if pkt.ActionType == protocol.ActionSkillQ {
 			// Teleporta para as costas do alvo mais próximo à frente (até 8m); sem alvo, avança 5m
@@ -1782,17 +1782,17 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 			}
 			player.Mu.Unlock()
 			s.BroadcastPlayerRespawn(player.ID, player.PosX, player.PosY, player.PosZ)
-			log.Printf("[PASSO DAS SOMBRAS] Assassino #%d teleportou cortando pelas costas!\n", player.ID)
+			log.Printf("[PASSO DAS SOMBRAS] Lâmina Silente #%d teleportou cortando pelas costas!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			player.SetDodgeIFrame(2500 * time.Millisecond)
 			player.SetBuff(2500 * time.Millisecond)
-			log.Printf("[CORTINA DE FUMAÇA] Assassino #%d ativou invisibilidade e intangibilidade por 2.5s!\n", player.ID)
+			log.Printf("[CORTINA DE FUMAÇA] Lâmina Silente #%d ativou invisibilidade e intangibilidade por 2.5s!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 4.0, 300)
 		}
 	}
 
-	// 3.5. Lutador (5): Q = Gancho Demolidor (atordoamento); R = Postura do Lótus Marcial (cura +40 HP, -50% dano 3s); F = Meteoro de Um Punho (5.5m)
+	// 3.5. Punho Celeste (5): Q = Gancho Demolidor (atordoamento); R = Postura do Lótus Marcial (cura +40 HP, -50% dano 3s); F = Meteoro de Um Punho (5.5m)
 	if classID == protocol.ClassFighter {
 		if pkt.ActionType == protocol.ActionSkillQ {
 			if s.mobManager != nil {
@@ -1813,13 +1813,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			player.Heal(40)
 			player.SetParry(3000 * time.Millisecond)
-			log.Printf("[LÓTUS MARCIAL] Lutador #%d curou +40 HP e ativou 50%% redução de dano!\n", player.ID)
+			log.Printf("[LÓTUS MARCIAL] Punho Celeste #%d curou +40 HP e ativou 50%% redução de dano!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*2.0, pz+aimZ*2.0, 5.5, 450)
 		}
 	}
 
-	// 3.6. Escudeiro (6): Q = Esmagamento de Bastião (Taunt 8m); R = Formação Impenetrável (80% bloqueio 4s + escudo aliados); F = Cidadela Inabalável (+70 HP grupo)
+	// 3.6. Guardião do Bastião (6): Q = Esmagamento de Bastião (Taunt 8m); R = Formação Impenetrável (80% bloqueio 4s + escudo aliados); F = Cidadela Inabalável (+70 HP grupo)
 	if classID == protocol.ClassShieldBearer {
 		if pkt.ActionType == protocol.ActionSkillQ {
 			if s.mobManager != nil {
@@ -1839,7 +1839,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[BASTIÃO] Escudeiro #%d provocou monstros em 8m!\n", player.ID)
+			log.Printf("[BASTIÃO] Guardião do Bastião #%d provocou monstros em 8m!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			player.SetParry(4000 * time.Millisecond)
 			s.mu.RLock()
@@ -1857,7 +1857,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				}
 			}
 			s.mu.RUnlock()
-			log.Printf("[FORMAÇÃO IMPENETRÁVEL] Escudeiro #%d concedeu escudo de 80%% ao grupo por 4s!\n", player.ID)
+			log.Printf("[FORMAÇÃO IMPENETRÁVEL] Guardião do Bastião #%d concedeu escudo de 80%% ao grupo por 4s!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 7.0, 400)
 			s.mu.RLock()
@@ -1877,11 +1877,11 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				}
 			}
 			s.mu.RUnlock()
-			log.Printf("[CIDADELA INABALÁVEL] Escudeiro #%d ativou cúpula curando +70 HP no grupo!\n", player.ID)
+			log.Printf("[CIDADELA INABALÁVEL] Guardião do Bastião #%d ativou cúpula curando +70 HP no grupo!\n", player.ID)
 		}
 	}
 
-	// 3.7. Ferreiro (7): R = Afiação & Têmpera (+25% Atq/Def grupo 10s); F = Dança do Arsenal Forjado (5.5m AoE)
+	// 3.7. Forjador de Estrelas (7): R = Afiação & Têmpera (+25% Atq/Def grupo 10s); F = Dança do Arsenal Forjado (5.5m AoE)
 	if classID == protocol.ClassBlacksmith {
 		if pkt.ActionType == protocol.ActionSkillR {
 			s.mu.RLock()
@@ -1900,13 +1900,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				}
 			}
 			s.mu.RUnlock()
-			log.Printf("[BUFF] Ferreiro #%d ativou Afiação & Têmpera (+25%% Atq/Def grupo por 10s)!\n", player.ID)
+			log.Printf("[BUFF] Forjador de Estrelas #%d ativou Afiação & Têmpera (+25%% Atq/Def grupo por 10s)!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 400)
 		}
 	}
 
-	// 3.8. Alquimista (8): Q = Frasco de Fogo Grego & Cura (+45 HP aliados); R = Bomba de Ácido Corrosivo; F = Transmutação do Behemoth (+30% status 8s)
+	// 3.8. Transmutador (8): Q = Frasco de Fogo Grego & Cura (+45 HP aliados); R = Bomba de Ácido Corrosivo; F = Transmutação do Behemoth (+30% status 8s)
 	if classID == protocol.ClassAlchemist {
 		if pkt.ActionType == protocol.ActionSkillQ {
 			s.mu.RLock()
@@ -1925,39 +1925,39 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				}
 			}
 			s.mu.RUnlock()
-			log.Printf("[FOGO GREGO & CURA] Alquimista #%d curou aliados em +45 HP!\n", player.ID)
+			log.Printf("[FOGO GREGO & CURA] Transmutador #%d curou aliados em +45 HP!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*3.0, pz+aimZ*3.0, 3.5, 300)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 400)
 			player.SetBuff(8 * time.Second)
-			log.Printf("[BEHEMOTH QUÍMICO] Alquimista #%d ativou Transmutação do Behemoth (+30%% status por 8s)!\n", player.ID)
+			log.Printf("[BEHEMOTH QUÍMICO] Transmutador #%d ativou Transmutação do Behemoth (+30%% status por 8s)!\n", player.ID)
 		}
 	}
 
-	// 3.9. Escultor (9): R = Estátua Explosiva / Pele de Mármore (50% redução 3s + AoE 4.5m); F = Técnica Secreta: Escultura do Luar (6m)
+	// 3.9. Escultor de Almas (9): R = Estátua Explosiva / Pele de Mármore (50% redução 3s + AoE 4.5m); F = Técnica Secreta: Escultura do Luar (6m)
 	if classID == protocol.ClassSculptor {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.SetParry(3000 * time.Millisecond)
 			s.BroadcastAOETelegraph(player.ID, px, pz, 4.5, 300)
-			log.Printf("[PELE DE MÁRMORE] Escultor #%d ativou Pele de Mármore e Estátua Explosiva!\n", player.ID)
+			log.Printf("[PELE DE MÁRMORE] Escultor de Almas #%d ativou Pele de Mármore e Estátua Explosiva!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 450)
 		}
 	}
 
-	// 3.10. Domador (10): R = Fusão & Uivo Bestial (+50 HP + 30% vel 10s); F = Debandada das Feras Primordiais (7m)
+	// 3.10. Senhor das Feras (10): R = Fusão & Uivo Bestial (+50 HP + 30% vel 10s); F = Debandada das Feras Primordiais (7m)
 	if classID == protocol.ClassTamer {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.Heal(50)
 			player.SetBuff(10 * time.Second)
-			log.Printf("[UIVO BESTIAL] Domador #%d curou +50 HP e ativou velocidade bestial por 10s!\n", player.ID)
+			log.Printf("[UIVO BESTIAL] Senhor das Feras #%d curou +50 HP e ativou velocidade bestial por 10s!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*3.5, pz+aimZ*3.5, 7.0, 500)
 		}
 	}
 
-	// 3.11. Alfaiate de Guerra (11): R = Costurar Sombras (prende inimigos 2.5s); F = Gaiola de Fios Carmesins (6m)
+	// 3.11. Tecelão Carmesim (11): R = Costurar Sombras (prende inimigos 2.5s); F = Gaiola de Fios Carmesins (6m)
 	if classID == protocol.ClassWarTailor {
 		if pkt.ActionType == protocol.ActionSkillR {
 			if s.mobManager != nil {
@@ -1975,17 +1975,17 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[COSTURAR SOMBRAS] Alfaiate de Guerra #%d prendeu inimigos por 2.5s com fios de aço!\n", player.ID)
+			log.Printf("[COSTURAR SOMBRAS] Tecelão Carmesim #%d prendeu inimigos por 2.5s com fios de aço!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 400)
 		}
 	}
 
-	// 3.12. Chef de Caça (12): Q = Desossar a Vivo! (+35 HP); R = Banquete na Wok Flamejante (+55 HP e +25% dano); F = Trinchar o Behemoth (5.5m)
+	// 3.12. Mestre do Banquete (12): Q = Desossar a Vivo! (+35 HP); R = Banquete na Wok Flamejante (+55 HP e +25% dano); F = Trinchar o Behemoth (5.5m)
 	if classID == protocol.ClassHuntingChef {
 		if pkt.ActionType == protocol.ActionSkillQ {
 			player.Heal(35)
-			log.Printf("[DESOSSAR A VIVO] Chef de Caça #%d extraiu corte nobre curando +35 HP!\n", player.ID)
+			log.Printf("[DESOSSAR A VIVO] Mestre do Banquete #%d extraiu corte nobre curando +35 HP!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			player.SetParry(3000 * time.Millisecond)
 			s.mu.RLock()
@@ -2005,46 +2005,46 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				}
 			}
 			s.mu.RUnlock()
-			log.Printf("[BANQUETE NA WOK] Chef de Caça #%d serviu banquete curando +55 HP e +25%% dano no grupo!\n", player.ID)
+			log.Printf("[BANQUETE NA WOK] Mestre do Banquete #%d serviu banquete curando +55 HP e +25%% dano no grupo!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*2.5, pz+aimZ*2.5, 5.5, 450)
 		}
 	}
 
 	// 3.7. Efeitos Distintos das Classes Secretas (10 a 15)
-	// Classe 10 (Dançarino Astral): R = Valsa dos Espelhos (1.5s I-Frame); F = Constelação de Mil Lâminas (5.5m AoE)
+	// Classe 10 (Bailarino das Estrelas): R = Valsa dos Espelhos (1.5s I-Frame); F = Constelação de Mil Lâminas (5.5m AoE)
 	if classID == protocol.ClassAstralDancer {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.SetDodgeIFrame(1500 * time.Millisecond)
-			log.Printf("[VALSA DOS ESPELHOS] Dançarino Astral #%d ativou Valsa dos Espelhos (1.5s I-Frame)!\n", player.ID)
+			log.Printf("[VALSA DOS ESPELHOS] Bailarino das Estrelas #%d ativou Valsa dos Espelhos (1.5s I-Frame)!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 350)
 		}
 	}
 
-	// Classe 11 (Inquisidor das Cinzas): R = Selo de Excomunhão (cura +35 HP e queima 5m); F = Crucificação de Cinzas (6.0m AoE)
+	// Classe 11 (Inquisidor da Chama Branca): R = Selo de Excomunhão (cura +35 HP e queima 5m); F = Crucificação de Cinzas (6.0m AoE)
 	if classID == protocol.ClassAshInquisitor {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.Heal(35)
 			s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 300)
-			log.Printf("[SELO DE EXCOMUNHÃO] Inquisidor das Cinzas #%d curou +35 HP e liberou chamas sagradas!\n", player.ID)
+			log.Printf("[SELO DE EXCOMUNHÃO] Inquisidor da Chama Branca #%d curou +35 HP e liberou chamas sagradas!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 450)
 		}
 	}
 
-	// Classe 12 (Necromante de Ossos): R = Explosão Óssea & Escudo (5.0m AoE + defesa); F = Legião do Ossuário (6.0m AoE)
+	// Classe 12 (Arauto do Ossuário): R = Explosão Óssea & Escudo (5.0m AoE + defesa); F = Legião do Ossuário (6.0m AoE)
 	if classID == protocol.ClassBoneNecromancer {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.SetParry(2500 * time.Millisecond)
 			s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 350)
-			log.Printf("[EXPLOSÃO ÓSSEA] Necromante de Ossos #%d ativou Escudo Ósseo e explosão radial!\n", player.ID)
+			log.Printf("[EXPLOSÃO ÓSSEA] Arauto do Ossuário #%d ativou Escudo Ósseo e explosão radial!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 450)
 		}
 	}
 
-	// Classe 13 (Domador Primordial): R = Uivo da Alcateia (cura +50 HP e buffa grupo); F = Fúria do Behemoth (impacto frontal 4.5m)
+	// Classe 13 (Senhor da Selva Primordial): R = Uivo da Alcateia (cura +50 HP e buffa grupo); F = Fúria do Behemoth (impacto frontal 4.5m)
 	if classID == protocol.ClassPrimordialTamer {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.Heal(50)
@@ -2066,13 +2066,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				}
 			}
 			s.mu.RUnlock()
-			log.Printf("[UIVO DA ALCATEIA] Domador Primordial #%d curou o grupo em +50 HP e concedeu buff crítico por 10s!\n", player.ID)
+			log.Printf("[UIVO DA ALCATEIA] Senhor da Selva Primordial #%d curou o grupo em +50 HP e concedeu buff crítico por 10s!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px+aimX*2.5, pz+aimZ*2.5, 4.5, 400)
 		}
 	}
 
-	// Classe 14 (Cavaleiro da Ruptura): Q = Esmagamento Gravitacional (puxa 5m); R = Singularidade Reversa (reduz 80% dano); F = Colapso Estelar (6.5m AoE + atordoa)
+	// Classe 14 (Cavaleiro do Vazio): Q = Esmagamento Gravitacional (puxa 5m); R = Singularidade Reversa (reduz 80% dano); F = Colapso Estelar (6.5m AoE + atordoa)
 	if classID == protocol.ClassRiftKnight {
 		if pkt.ActionType == protocol.ActionSkillQ {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 250)
@@ -2092,11 +2092,11 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					mob.Mu.Unlock()
 				}
 			}
-			log.Printf("[ESMAGAMENTO GRAVITACIONAL] Cavaleiro da Ruptura #%d puxou inimigos em 5m!\n", player.ID)
+			log.Printf("[ESMAGAMENTO GRAVITACIONAL] Cavaleiro do Vazio #%d puxou inimigos em 5m!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			player.SetParry(3000 * time.Millisecond)
 			s.BroadcastAOETelegraph(player.ID, px, pz, 4.5, 300)
-			log.Printf("[SINGULARIDADE REVERSA] Cavaleiro da Ruptura #%d ativou escudo gravitacional e fenda espacial!\n", player.ID)
+			log.Printf("[SINGULARIDADE REVERSA] Cavaleiro do Vazio #%d ativou escudo gravitacional e fenda espacial!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 6.5, 400)
 			if s.mobManager != nil {
@@ -2114,11 +2114,11 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[COLAPSO ESTELAR] Cavaleiro da Ruptura #%d detonou colapso estelar atordoando inimigos!\n", player.ID)
+			log.Printf("[COLAPSO ESTELAR] Cavaleiro do Vazio #%d detonou colapso estelar atordoando inimigos!\n", player.ID)
 		}
 	}
 
-	// Classe 15 (Arauto da Tempestade): R = Passo de Relâmpago (choque + vel); F = Ira dos Céus (6.0m AoE)
+	// Classe 15 (Arauto do Trovão): R = Passo de Relâmpago (choque + vel); F = Ira dos Céus (6.0m AoE)
 	if classID == protocol.ClassStormHerald {
 		if pkt.ActionType == protocol.ActionSkillR {
 			player.SetBuff(8 * time.Second)
@@ -2137,13 +2137,13 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					}
 				}
 			}
-			log.Printf("[PASSO DE RELÂMPAGO] Arauto da Tempestade #%d eletrificou a área e ganhou velocidade!\n", player.ID)
+			log.Printf("[PASSO DE RELÂMPAGO] Arauto do Trovão #%d eletrificou a área e ganhou velocidade!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 400)
 		}
 	}
 
-	// Desafio Secreto: Cavaleiro da Ruptura (Classe 14)
+	// Desafio Secreto: Cavaleiro do Vazio (Classe 14)
 	// Usar bloqueio/skill R contra Boss/Executor tendo CON >= 20 durante Eclipse ou Lua de Sangue
 	if pkt.ActionType == protocol.ActionSkillR {
 		_, _, moon, _ := s.clock.GetTime()
@@ -2175,7 +2175,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		}
 	}
 
-	// Desafio Secreto: Arauto da Tempestade (Classe 15)
+	// Desafio Secreto: Arauto do Trovão (Classe 15)
 	// Usar a Ultimate (Tecla F) perto da Torre Arcana (20, -18) durante Chuva (Weather == 1)
 	if pkt.ActionType == protocol.ActionSkillF {
 		_, _, _, weather := s.clock.GetTime()
@@ -2187,7 +2187,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassStormHerald, protocol.IdentityModeSecretReset)
 				s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 300)
 				s.BroadcastNPCSay(108, fmt.Sprintf("[RAIO CELESTIAL] Os céus rugem sobre a Torre Arcana! Um relâmpago divino atingiu o aventureiro #%d, despertando o lendário ARAUTO DA TEMPESTADE!", player.ID))
-				log.Printf("[CLASSE SECRETA] Jogador #%d despertou como Arauto da Tempestade (15) perto da Torre Arcana sob Chuva!\n", player.ID)
+				log.Printf("[CLASSE SECRETA] Jogador #%d despertou como Arauto do Trovão (15) perto da Torre Arcana sob Chuva!\n", player.ID)
 			}
 		}
 	}
@@ -2543,7 +2543,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 			}
 			player.Heal(ls)
 		}
-		// Passiva Boreal: ataques aplicam lentidão de gelo
+		// Passiva Borealin: ataques aplicam lentidão de gelo
 		if raceID == protocol.RaceBoreal {
 			targetMob.ApplySlow(2*time.Second, 0.7)
 		}
@@ -2576,7 +2576,7 @@ func (s *Server) handleMobAttack(mobID, playerID uint32, damage uint16) {
 	s.BroadcastCombatEvent(mobID, playerID, protocol.ActionBasicAttack, damage, 0, newHP, player.MaxHP)
 	s.sendPlayerStats(player)
 
-	// Passivas de reflexo: Escudeiro (Fortaleza Viva, 20%) e Carrasco Vorpal (Sangue Corrosivo, 15%)
+	// Passivas de reflexo: Guardião do Bastião (Fortaleza Viva, 20%) e Carrasco Vorpal (Sangue Corrosivo, 15%)
 	if (player.ClassID == protocol.ClassShieldBearer || player.ClassID == protocol.ClassVorpalExecutioner) && damage > 0 && s.mobManager != nil {
 		if mob := s.mobManager.GetMob(mobID); mob != nil && mob.IsAlive {
 			reflected := damage / 5
@@ -2722,14 +2722,14 @@ func (s *Server) RespawnPlayer(player *world.Player) {
 	worldHour := s.clock.GetCurrentHour()
 	isNight := (worldHour >= 18 || worldHour < 6)
 
-	// Gatilho Secreto da Raça Revenant (RaceID = 7 - Amaldiçoado das Cinzas):
+	// Gatilho Secreto da Raça Cinerion (RaceID = 7 - Cinerion):
 	// Morte à noite com Cálice da Alma Partida (Item 14) no inventário
 	if isNight && player.HasItem(protocol.ItemBrokenSoulChalice) && player.RaceID != protocol.RaceRevenant {
 		player.RemoveItem(protocol.ItemBrokenSoulChalice, 1)
 		player.EvolveToRevenant()
 		s.sendInventorySync(player)
-		s.BroadcastNPCSay(0, fmt.Sprintf("[RITUAL SOMBRIO] As trevas da noite consomem a alma do Jogador #%d... Ao segurar o Cálice da Alma Partida, ele renasce como AMALDIÇOADO DAS CINZAS (Revenant)! (+50 MaxHP, +25%% Dano Noturno)", player.ID))
-		log.Printf("[SEGREDO] Jogador #%d despertou como Raça Secreta 7 (Revenant) ao morrer à noite com o Cálice da Alma Partida!\n", player.ID)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[RITUAL SOMBRIO] As trevas da noite consomem a alma do Jogador #%d... Ao segurar o Cálice da Alma Partida, ele renasce como AMALDIÇOADO DAS CINZAS (Cinerion)! (+50 MaxHP, +25%% Dano Noturno)", player.ID))
+		log.Printf("[SEGREDO] Jogador #%d despertou como Raça Secreta 7 (Cinerion) ao morrer à noite com o Cálice da Alma Partida!\n", player.ID)
 	}
 
 	player.Respawn(0.0, 1.5, 0.0)
@@ -2839,7 +2839,7 @@ func getMobKillXP(mobType uint8) uint16 {
 		return 140
 	case protocol.MobTypeWildFrostDrake: // 21: Draco de Geada Selvagem (220 XP)
 		return 220
-	case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Gigante de Gelo (1200 XP)
+	case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Jotunar (1200 XP)
 		return 1200
 	case protocol.MobTypeVesperianBloodGuard: // 23: Guarda Sanguinário de Vesperian (130 XP)
 		return 130
@@ -2911,7 +2911,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 					soloPlayer.EvolveToPrimordialLycanthrope()
 					s.sendPlayerStats(soloPlayer)
 					s.BroadcastNPCSay(208, fmt.Sprintf("[LUA DE SANGUE] O guerreiro Varkai #%d bebeu o sangue do Licantropo Alfa em duelo solitário! Ele despertou como o lendário LICANTROPO PRIMORDIAL!", soloPID))
-					log.Printf("[EVOLUÇÃO] Jogador #%d completou a Evolução Solo Varkai para Licantropo Primordial (RaceID = 6)!\n", soloPID)
+					log.Printf("[EVOLUÇÃO] Jogador #%d completou a Evolução Solo Varkai para Lupharion (RaceID = 6)!\n", soloPID)
 				}
 			}
 		}
@@ -2944,7 +2944,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			log.Printf("[NECROMANTE DE OSSOS] Jogador #%d curou +20 HP pelo abate do Mob #%d!\n", killer.ID, mobID)
 		}
 
-		// Desafio Secreto: Domador Primordial (Classe 13)
+		// Desafio Secreto: Senhor da Selva Primordial (Classe 13)
 		// Derrotar o Lobo Alfa (MobType 6) 100% Solo na Lua Cheia sem peitoral equipado
 		if mobType == protocol.MobTypeAlphaWolf && len(dealers) == 1 {
 			_, _, moon, _ := s.clock.GetTime()
@@ -2957,7 +2957,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				if !hasChest && killer.ClassID != protocol.ClassPrimordialTamer {
 					s.offerIdentityChange(killer, killer.RaceID, protocol.ClassPrimordialTamer, protocol.IdentityModeSecretReset)
 					s.BroadcastNPCSay(109, fmt.Sprintf("[DOMADOR PRIMORDIAL] O guerreiro #%d subjugou o Lobo Alfa com o peito nu sob a Lua Cheia! O Espírito Alfa despertou!", killer.ID))
-					log.Printf("[CLASSE SECRETA] Jogador #%d despertou Domador Primordial (13) derrotando Lobo Alfa Solo sem peitoral sob Lua Cheia!\n", killer.ID)
+					log.Printf("[CLASSE SECRETA] Jogador #%d despertou Senhor da Selva Primordial (13) derrotando Lobo Alfa Solo sem peitoral sob Lua Cheia!\n", killer.ID)
 				}
 			}
 		}
@@ -3225,11 +3225,11 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			drops = append(drops, "Veneno Vorpal x1")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemAbyssalScorpionStinger, 1)
-				drops = append(drops, "Ferrão de Escorpião Abissal [SECRETO 0.1% - Desbloqueia Raça Demi-Humano Escorpião!] x1")
+				drops = append(drops, "Ferrão de Escorpião Abissal [SECRETO 0.1% - Desbloqueia Raça Escarion!] x1")
 			}
-			if rand.Float64() < 0.02 { // 2%: requisito do Carrasco do Veneno Vorpal (Classe Única 19)
+			if rand.Float64() < 0.02 { // 2%: requisito do Algoz Vorpal (Classe Única 19)
 				killer.AddItem(protocol.ItemRoyalVenomGland, 1)
-				drops = append(drops, "Glândula Real do Escorpião [RARO 2% - Classe Única Carrasco do Veneno Vorpal] x1")
+				drops = append(drops, "Glândula Real do Escorpião [RARO 2% - Classe Única Algoz Vorpal] x1")
 			}
 
 		case protocol.MobTypeStitchedChimeraZero: // 19: Experimento Nº 0: A Quimera Costurada (Mini-Boss)
@@ -3248,13 +3248,13 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			killer.AddItem(protocol.ItemCookedNobleMeat, 1)
 			drops = append(drops, "Escama Dracônica Primordial x1", "Carne Nobre Assada x1")
 
-		case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Gigante de Gelo (Boss)
+		case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Jotunar (Boss)
 			killer.AddItem(protocol.ItemAncientIceCore, 2)
 			killer.AddItem(protocol.ItemHeavySteelPlate, 2)
 			drops = append(drops, "Núcleo de Gelo Ancestral x2", "Placa Glacial Reforçada x2")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemEternalFrostHeart, 1)
-				drops = append(drops, "Coração de Geada Eterna [SECRETO 0.1% - Desbloqueia Gigante de Gelo / Boreal!] x1")
+				drops = append(drops, "Coração de Geada Eterna [SECRETO 0.1% - Desbloqueia Jotunar!] x1")
 			}
 
 		case protocol.MobTypeVesperianBloodGuard: // 23: Guarda Sanguinário de Vesperian
@@ -3272,11 +3272,11 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			drops = append(drops, "Anel Carmesim de Vesperian x1", "Tomo da Foice do Eclipse x1")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemProgenitorPureBlood, 1)
-				drops = append(drops, "Sangue Puro do Progenitor [SECRETO 0.1% - Desbloqueia Raça Dhampir/Vampiro!] x1")
+				drops = append(drops, "Sangue Puro do Progenitor [SECRETO 0.1% - Desbloqueia Raça Sangrael!] x1")
 			}
-			if rand.Float64() < 0.25 { // 25%: requisito do Aristocrata Carmesim (Classe Única 25)
+			if rand.Float64() < 0.25 { // 25%: requisito do Conde Escarlate (Classe Única 25)
 				killer.AddItem(protocol.ItemVesperianPureBlood, 1)
-				drops = append(drops, "Sangue Puro de Vesperian [RARO 25% - Classe Única Aristocrata Carmesim] x1")
+				drops = append(drops, "Sangue Puro de Vesperian [RARO 25% - Classe Única Conde Escarlate] x1")
 			}
 		}
 
@@ -3385,7 +3385,7 @@ func (s *Server) generateDropRatesReport() string {
 	sb.WriteString("  - Item #28 (Lixo Orgânico): 100.0%\n")
 	sb.WriteString("[Mob 18] Escorpião Abissal Gigante:\n")
 	sb.WriteString("  - Item #48 (Veneno Vorpal): 100.0%\n")
-	sb.WriteString("  - Item #47 (Ferrão de Escorpião Abissal): 0.1% [SECRETO 1/1000 - Desbloqueia Raça Demi-Humano Escorpião!]\n")
+	sb.WriteString("  - Item #47 (Ferrão de Escorpião Abissal): 0.1% [SECRETO 1/1000 - Desbloqueia Raça Escarion!]\n")
 	sb.WriteString("[Mob 19] Experimento Nº 0: A Quimera Costurada (Mini-Boss):\n")
 	sb.WriteString("  - Item #49 (Retalho Quimérico Costurado): 100.0%\n")
 	sb.WriteString("  - Item #11 (Glândula de Veneno Mutante): 100.0%\n")
@@ -3396,17 +3396,17 @@ func (s *Server) generateDropRatesReport() string {
 	sb.WriteString("[Mob 21] Draco de Geada Selvagem:\n")
 	sb.WriteString("  - Item #51 (Escama Dracônica Primordial): 100.0%\n")
 	sb.WriteString("  - Item #3 (Carne Nobre Assada): 100.0%\n")
-	sb.WriteString("[Mob 22] Ymir, o Patriarca Gigante de Gelo (Boss):\n")
+	sb.WriteString("[Mob 22] Ymir, o Patriarca Jotunar (Boss):\n")
 	sb.WriteString("  - Item #50 (Núcleo de Gelo Ancestral): 100.0%\n")
 	sb.WriteString("  - Item #12 (Placa Glacial Reforçada): 100.0%\n")
-	sb.WriteString("  - Item #52 (Coração de Geada Eterna): 0.1% [SECRETO 1/1000 - Desbloqueia Gigante de Gelo / Boreal!]\n")
+	sb.WriteString("  - Item #52 (Coração de Geada Eterna): 0.1% [SECRETO 1/1000 - Desbloqueia Jotunar!]\n")
 	sb.WriteString("[Mob 23] Guarda Sanguinário de Vesperian:\n")
 	sb.WriteString("  - Item #53 (Insígnia do Guarda Carmesim): 100.0%\n")
 	sb.WriteString("  - Item #10 (Sangue Lunar Puro com Frasco Vazio): 100.0%\n")
 	sb.WriteString("[Mob 24] Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto):\n")
 	sb.WriteString("  - Item #55 (Anel Carmesim de Vesperian): 100.0%\n")
 	sb.WriteString("  - Item #17 (Tomo da Foice do Eclipse): 100.0%\n")
-	sb.WriteString("  - Item #54 (Sangue Puro do Progenitor): 0.1% [SECRETO 1/1000 - Desbloqueia Raça Dhampir/Vampiro!]\n")
+	sb.WriteString("  - Item #54 (Sangue Puro do Progenitor): 0.1% [SECRETO 1/1000 - Desbloqueia Raça Sangrael!]\n")
 	sb.WriteString("==================================================")
 	return sb.String()
 }
@@ -4003,7 +4003,7 @@ func (s *Server) updateProjectiles(dt float32) {
 						s.sendPlayerStats(owner)
 					}
 
-					// Disparo de Estrepes (Arqueiro Skill R): reduz MoveSpeed em 40% por 3s
+					// Disparo de Estrepes (Sentinela dos Ventos Skill R): reduz MoveSpeed em 40% por 3s
 					if p.ProjType == protocol.ProjTypePiercingArrow && actionType == protocol.ActionSkillR {
 						mob.ApplySlow(3*time.Second, 0.40)
 						log.Printf("[LENTIDAO] Mob #%d atingido por Estrepes! Velocidade reduzida em 40%% por 3s.\n", mob.ID)
@@ -4674,7 +4674,7 @@ func (s *Server) checkForgeFireHazard() {
 			p.Mu.RUnlock()
 
 			if raceID == protocol.RaceAshDragonborn || raceID == protocol.RacePyromancer {
-				// Coração de Fornalha / Pyromante: na fornalha do Garrick, cura +20 HP e +20 Stamina/s!
+				// Coração de Fornalha / Pyrael: na fornalha do Garrick, cura +20 HP e +20 Stamina/s!
 				p.Heal(20)
 				p.RestoreStamina(20.0)
 				s.sendPlayerStats(p)
@@ -4718,7 +4718,7 @@ func (s *Server) checkForgeFireHazard() {
 func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ float32, raceID, pSTR, pDEX, pINT, pSPI, pMAS, pLCK uint8) {
 	switch raceID {
 	case protocol.RaceValerian, protocol.RaceHighValerian, protocol.RaceAetherWalker:
-		// Valeriano / Alto Valeriano / Andarilho do Éter:
+		// Valeriano / Solvaren / Aetheris:
 		// Restaura +40 Stamina, +25 HP e concede buff de ataque por 10s (+25% dano)
 		player.RestoreStamina(40.0)
 		player.Heal(25)
@@ -4727,7 +4727,7 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Valeriano #%d ativou Ímpeto Valeriano (+40 Stamina, +25 HP, +25%% Dano)!\n", player.ID)
 
 	case protocol.RaceNoctari, protocol.RaceLunarArchon, protocol.RaceUmbralSpecter:
-		// Noctari / Arconte Lunar / Espectro Umbral:
+		// Noctari / Selenarca / Nyxara:
 		// Dispara explosão de luz estelar/sombra ao redor (5.5m), alto dano mágico e cura +30 HP
 		player.Heal(30)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 300)
@@ -4737,7 +4737,7 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Noctari #%d ativou Explosão Lunar/Umbral (+30 HP, %d dano em 5.5m)!\n", player.ID, dmg)
 
 	case protocol.RaceKharad, protocol.RaceRunicGuardian, protocol.RaceObsidianTitan:
-		// Kharad / Guardião Rúnico / Titã de Obsidiana:
+		// Kharad / Runakhar / Pyrokhar:
 		// Ativa pele rúnica/erupção de magma causando dano em área de 4.5m e concedendo escudo redutor de dano por 5s
 		player.SetParry(5 * time.Second)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 4.5, 400)
@@ -4747,7 +4747,7 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Kharad #%d ativou Baluarte Rúnico / Erupção de Magma (Escudo 5s, %d dano em 4.5m)!\n", player.ID, dmg)
 
 	case protocol.RaceVarkai, protocol.RaceDraconicSovereign, protocol.RaceFrenzyBeast:
-		// Varkai / Soberano Dracônico / Fera do Frenesi:
+		// Varkai / Dravarkai / Ferovar:
 		// Desfere Sopro Dracônico / Rugido Predatório em área frontal causando dano elevado e ativando roubo de vida
 		dmg := uint16(60 + int(pSTR)*3 + int(pDEX)*2)
 		hits := s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 5.5, 0.25, dmg)
@@ -4760,16 +4760,16 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Varkai #%d desferiu Sopro Dracônico/Rugido Predatório em cone (%d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceDhampir:
-		// Dhampir: Roubo de vida e dreno em área (5m)
+		// Sangrael: Roubo de vida e dreno em área (5m)
 		player.Heal(60)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 300)
 		dmg := uint16(55 + int(pINT)*2 + int(pDEX)*2)
 		s.applyRacialAoEDamage(player, px, pz, 5.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 60, 0, 0, 0)
-		log.Printf("[RACIAL] Dhampir #%d ativou Dreno Vampírico (+60 HP, %d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Sangrael #%d ativou Dreno Vampírico (+60 HP, %d dano)!\n", player.ID, dmg)
 
 	case protocol.RacePrimordialLycanthrope:
-		// Licantropo Primordial: Rugido/Garras Alfas no Z (cone frontal, alto dano + lifesteal)
+		// Lupharion: Rugido/Garras Alfas no Z (cone frontal, alto dano + lifesteal)
 		dmg := uint16(75 + int(pSTR)*3 + int(player.CON)*2)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 6.5, 300)
 		hits := s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 6.5, 0.20, dmg)
@@ -4778,43 +4778,43 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		}
 		player.SetBuff(10 * time.Second)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Licantropo Primordial #%d ativou Garras Alfas (%d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Lupharion #%d ativou Garras Alfas (%d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceRevenant:
-		// Revenant: Chama Fátua espiritual (5.5m), dano espiritual e cura +50 HP
+		// Cinerion: Chama Fátua espiritual (5.5m), dano espiritual e cura +50 HP
 		player.Heal(50)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 300)
 		dmg := uint16(50 + int(pINT)*2 + int(pSPI)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 50, 0, 0, 0)
-		log.Printf("[RACIAL] Revenant #%d ativou Chama Fátua (+50 HP, %d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Cinerion #%d ativou Chama Fátua (+50 HP, %d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceCelestial:
-		// Celestino: Julgamento da Aurora: cura aliados + dano solar no Z (raio 6m)
+		// Seraphel: Julgamento da Aurora: cura aliados + dano solar no Z (raio 6m)
 		player.Heal(50)
 		s.healNearbyAllies(player.ID, px, pz, 6.0, 50)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 300)
 		dmg := uint16(55 + int(pSPI)*3 + int(pINT)*2)
 		s.applyRacialAoEDamage(player, px, pz, 6.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 50, 0, 0, 0)
-		log.Printf("[RACIAL] Celestino #%d ativou Julgamento da Aurora (Cura aliados +50, %d dano solar)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Seraphel #%d ativou Julgamento da Aurora (Cura aliados +50, %d dano solar)!\n", player.ID, dmg)
 
 	case protocol.RaceAbyssal:
-		// Abissal: Singularidade: puxa inimigos em 6m e causa dano de vazio no Z
+		// Umbryss: Singularidade: puxa inimigos em 6m e causa dano de vazio no Z
 		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 400)
 		s.pullMobsToward(player.GetZone(), px, pz, 6.0, 0.35)
 		dmg := uint16(60 + int(pINT)*4)
 		s.applyRacialAoEDamage(player, px, pz, 6.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Abissal #%d ativou Singularidade (Puxão 6m, %d dano de vazio)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Umbryss #%d ativou Singularidade (Puxão 6m, %d dano de vazio)!\n", player.ID, dmg)
 
 	case protocol.RaceRunicAutomaton:
-		// Autômato Rúnico: Sobrecarga de Laser Rúnico no Z (feixe/cone 10m)
+		// Runaric: Sobrecarga de Laser Rúnico no Z (feixe/cone 10m)
 		dmg := uint16(70 + int(pSTR)*3 + int(pMAS)*3)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 10.0, 350)
 		s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 10.0, 0.65, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Autômato Rúnico #%d ativou Laser Rúnico (%d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Runaric #%d ativou Laser Rúnico (%d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceSylvari:
 		// 19 Sylvari: Prisão da Floresta: enraíza Mobs em 5m por 3s e cura +40 HP
@@ -4827,7 +4827,7 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Sylvari #%d ativou Prisão da Floresta (Enraíza 3s em 5m, +40 HP)!\n", player.ID)
 
 	case protocol.RaceMyconid:
-		// 20 Esporiano / Myconid: Nuvem de Esporos: veneno em área de 6m e reduz velocidade dos Mobs em 50%
+		// 20 Myconid: Nuvem de Esporos: veneno em área de 6m e reduz velocidade dos Mobs em 50%
 		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 300)
 		s.applyRacialCrowdControl(player.GetZone(), px, pz, 6.0, 0, 5*time.Second, 0.5)
 		dmg := uint16(45 + int(pINT)*3)
@@ -4843,31 +4843,31 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Aracne #%d ativou Disparo de Seda (Snipe 14m, Paralisia 3s, %d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceAshDragonborn:
-		// 22 Draconato de Cinzas: Cataclismo Dracônico: cone de magma de 8m com dano massivo
+		// 22 Ignivarn: Cataclismo Dracônico: cone de magma de 8m com dano massivo
 		dmg := uint16(90 + int(pSTR)*4 + int(player.CON)*2)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 8.0, 400)
 		s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 8.0, 0.25, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Draconato #%d ativou Cataclismo Dracônico (Cone 8m, %d dano de magma)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Ignivarn #%d ativou Cataclismo Dracônico (Cone 8m, %d dano de magma)!\n", player.ID, dmg)
 
 	case protocol.RaceChimera:
-		// 23 Quimera: Sobrecarga Anatômica: cura +50 HP, ativa buff completo por 15s e causa explosão ácida em 5m
+		// 23 Chimeryth: Sobrecarga Anatômica: cura +50 HP, ativa buff completo por 15s e causa explosão ácida em 5m
 		player.Heal(50)
 		player.SetBuff(15 * time.Second)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 300)
 		dmg := uint16(55 + int(pSTR)*2 + int(pDEX)*2 + int(player.CON)*2)
 		s.applyRacialAoEDamage(player, px, pz, 5.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 50, 0, 0, 0)
-		log.Printf("[RACIAL] Quimera #%d ativou Sobrecarga Anatômica (+50 HP, Buff 15s, %d dano ácido)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Chimeryth #%d ativou Sobrecarga Anatômica (+50 HP, Buff 15s, %d dano ácido)!\n", player.ID, dmg)
 
 	case protocol.RaceBoreal:
-		// 24 Boreal: Zero Absoluto: congela todos os Mobs em 5m por 2.5s e causa dano criogênico
+		// 24 Borealin: Zero Absoluto: congela todos os Mobs em 5m por 2.5s e causa dano criogênico
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 300)
 		s.applyRacialCrowdControl(player.GetZone(), px, pz, 5.0, 2500*time.Millisecond, 0, 1.0)
 		dmg := uint16(50 + int(pINT)*3 + int(pSPI)*2)
 		s.applyRacialAoEDamage(player, px, pz, 5.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Boreal #%d ativou Zero Absoluto (Congela 2.5s em 5m, %d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Borealin #%d ativou Zero Absoluto (Congela 2.5s em 5m, %d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceThalassian:
 		// 25 Thalassiano: Gêiser Abissal: explosão de água pressurizada em área (5.5m)
@@ -4897,17 +4897,17 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		log.Printf("[RACIAL] Nephilim #%d ativou Julgamento do Eclipse Solar (+60 cura grupo 7m, %d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceTimeWanderer:
-		// 28 Errante Temporal: Rebobinar o Destino: restaura HP/Stamina de 3s atrás (ou +80) e dispara onda temporal
+		// 28 Cronari: Rebobinar o Destino: restaura HP/Stamina de 3s atrás (ou +80) e dispara onda temporal
 		snap, restored := player.RewindTimeDestiny()
 		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 200)
 		dmg := uint16(60 + int(pINT)*3 + int(pDEX)*2)
 		s.applyRacialAoEDamage(player, px, pz, 6.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 80, 0, 0, 0)
-		log.Printf("[RACIAL] Errante Temporal #%d ativou Rebobinar o Destino (Restaurado: %v, Pos: %.1f,%.1f, HP: %d, %d dano)!\n",
+		log.Printf("[RACIAL] Cronari #%d ativou Rebobinar o Destino (Restaurado: %v, Pos: %.1f,%.1f, HP: %d, %d dano)!\n",
 			player.ID, restored, snap.PosX, snap.PosZ, snap.HP, dmg)
 
 	// Quadrante 5: 18 Novas Raças do RPG (29 a 46)
-	case protocol.RaceHalfCelestial: // 29 Meio-Celestial
+	case protocol.RaceHalfCelestial: // 29 Aurelith
 		// Asas de Luz: Voa a 1.5m do solo por 10s, curando +40 HP, restaurando stamina e +30% velocidade
 		player.Heal(40)
 		player.RestoreStamina(50.0)
@@ -4917,9 +4917,9 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(55 + int(pSPI)*4 + int(pINT)*2)
 		s.applyRacialAoEDamage(player, px, pz, 5.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 40, 0, 0, 0)
-		log.Printf("[RACIAL] Meio-Celestial #%d ativou Asas de Luz (+40 HP, +50 Stamina, Buff 10s, %d dano solar)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Aurelith #%d ativou Asas de Luz (+40 HP, +50 Stamina, Buff 10s, %d dano solar)!\n", player.ID, dmg)
 
-	case protocol.RacePyromancer: // 30 Pyromante
+	case protocol.RacePyromancer: // 30 Pyrael
 		// Combustão: Consome 25% do HP atual para dobrar o Dano Físico e Mágico por 10s!
 		player.Mu.Lock()
 		cost := player.HP / 4
@@ -4937,9 +4937,9 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(70 + int(pINT)*4)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Pyromante #%d ativou Combustão (Consumiu %d HP, Buff Dano Dobrado 10s, %d dano de fogo)!\n", player.ID, cost, dmg)
+		log.Printf("[RACIAL] Pyrael #%d ativou Combustão (Consumiu %d HP, Buff Dano Dobrado 10s, %d dano de fogo)!\n", player.ID, cost, dmg)
 
-	case protocol.RaceFrostGiant: // 31 Gigante de Gelo
+	case protocol.RaceFrostGiant: // 31 Jotunar
 		// Memória Molecular: Materializa arma de gelo gigante e golpeia em área congelando inimigos em 5.5m
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 350)
 		s.applyRacialCrowdControl(player.GetZone(), px, pz, 5.5, 3*time.Second, 5*time.Second, 0.4)
@@ -4947,9 +4947,9 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(75 + int(pSTR)*3 + int(pCON)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Gigante de Gelo #%d ativou Memória Molecular (Congela 3s em 5.5m, %d dano glacial)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Jotunar #%d ativou Memória Molecular (Congela 3s em 5.5m, %d dano glacial)!\n", player.ID, dmg)
 
-	case protocol.RaceDragonEarth: // 32 Drago (Terra)
+	case protocol.RaceDragonEarth: // 32 Terravyrn
 		// Insulto Sísmico: Provoca (Taunt) todos os Mobs em 18m e ganha escudo de +80 HP
 		player.Heal(80)
 		player.SetParry(6 * time.Second)
@@ -4959,9 +4959,9 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(50 + int(pSTR)*2 + int(pCON)*3)
 		s.applyRacialAoEDamage(player, px, pz, 6.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 80, 0, 0, 0)
-		log.Printf("[RACIAL] Drago Terra #%d ativou Insulto Sísmico (Taunt 18m, Escudo +80 HP, %d dano sísmico)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Terravyrn #%d ativou Insulto Sísmico (Taunt 18m, Escudo +80 HP, %d dano sísmico)!\n", player.ID, dmg)
 
-	case protocol.RaceDragonWater: // 33 Drago (Água)
+	case protocol.RaceDragonWater: // 33 Hydravyrn
 		// Bênção de Netuno: Cura +55 HP e dispara onda de pressão aquática
 		player.Heal(55)
 		player.RestoreStamina(40.0)
@@ -4969,16 +4969,16 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(60 + int(pINT)*3 + int(pDEX)*2)
 		s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 7.5, 0.25, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 55, 0, 0, 0)
-		log.Printf("[RACIAL] Drago Água #%d ativou Bênção de Netuno (+55 HP, Onda frontal 7.5m, %d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Hydravyrn #%d ativou Bênção de Netuno (+55 HP, Onda frontal 7.5m, %d dano)!\n", player.ID, dmg)
 
-	case protocol.RaceDragonLightning: // 34 Drago (Raio)
+	case protocol.RaceDragonLightning: // 34 Fulgravyrn
 		// Descarga Elétrica: Dispara raio a 14m causando alto dano (bônus contra alvos de ferro)
 		dmg := uint16(85 + int(pINT)*4 + int(pDEX)*3)
 		s.applyRacialSingleTargetSnipe(player, px, pz, aimX, aimZ, 14.0, dmg, 2*time.Second)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Drago Raio #%d ativou Descarga Elétrica (Raio 14m, %d dano de choque)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Fulgravyrn #%d ativou Descarga Elétrica (Raio 14m, %d dano de choque)!\n", player.ID, dmg)
 
-	case protocol.RaceDragonMystic: // 35 Drago (Místico)
+	case protocol.RaceDragonMystic: // 35 Arcavyrn
 		// Infusão Arcana: Pulso místico que restaura HP/Stamina e explode runas ao redor
 		player.Heal(50)
 		player.RestoreStamina(50.0)
@@ -4986,9 +4986,9 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(65 + int(pINT)*4 + int(pSPI)*2)
 		s.applyRacialAoEDamage(player, px, pz, 6.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 50, 0, 0, 0)
-		log.Printf("[RACIAL] Drago Místico #%d ativou Infusão Arcana (+50 HP/Stam, %d dano rúnico 6m)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Arcavyrn #%d ativou Infusão Arcana (+50 HP/Stam, %d dano rúnico 6m)!\n", player.ID, dmg)
 
-	case protocol.RaceOrc: // 36 Orc
+	case protocol.RaceOrc: // 36 Orkhan
 		// Ataque Devastador: Golpe brutal que causa 2.4x dano corpo a corpo e regenera vida se ferido
 		pCON := player.CON
 		dmg := uint16(90 + int(pSTR)*4 + int(pCON)*2)
@@ -4997,43 +4997,43 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 			player.Heal(40 * uint16(hits))
 		}
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Orc #%d ativou Ataque Devastador (Cone 5m, %d dano brutal)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Orkhan #%d ativou Ataque Devastador (Cone 5m, %d dano brutal)!\n", player.ID, dmg)
 
-	case protocol.RaceDwarf: // 37 Anão
+	case protocol.RaceDwarf: // 37 Dvergar
 		// Martelo Ancestral: Bate no chão fortalecendo a defesa e reparando equipamento
 		player.SetParry(5 * time.Second)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 350)
 		dmg := uint16(60 + int(pSTR)*3 + int(pMAS)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Anão #%d ativou Martelo Ancestral (Escudo 5s, %d dano de terra 5m)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Dvergar #%d ativou Martelo Ancestral (Escudo 5s, %d dano de terra 5m)!\n", player.ID, dmg)
 
-	case protocol.RaceElf: // 38 Elfo
+	case protocol.RaceElf: // 38 Elarin
 		// Disparo/Feitiço Élfico: Dispara flecha de mana luminosa de longo alcance
 		dmg := uint16(80 + int(pDEX)*4 + int(pINT)*3)
 		s.applyRacialSingleTargetSnipe(player, px, pz, aimX, aimZ, 16.0, dmg, 1500*time.Millisecond)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Elfo #%d ativou Disparo Élfico (Flecha 16m, %d dano luminoso)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Elarin #%d ativou Disparo Élfico (Flecha 16m, %d dano luminoso)!\n", player.ID, dmg)
 
-	case protocol.RaceSolarElf: // 39 Elfo Solar (Azgher)
+	case protocol.RaceSolarElf: // 39 Solarin (Azgher)
 		// Espada Solar de Azgher: Encanta a arma com fogo solar sagrado causando explosão ígnea e buff de ataque
 		player.SetBuff(12 * time.Second)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 300)
 		dmg := uint16(65 + int(pINT)*3 + int(pSPI)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Elfo Solar #%d ativou Espada Solar de Azgher (Buff 12s, %d dano solar 5.5m)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Solarin #%d ativou Espada Solar de Azgher (Buff 12s, %d dano solar 5.5m)!\n", player.ID, dmg)
 
-	case protocol.RaceLunarElf: // 40 Elfo Lunar (Tenebra)
+	case protocol.RaceLunarElf: // 40 Lunarin (Tenebra)
 		// Manto de Tenebra: Envolve a área em escuridão lunar causando dano sombrio e ficando furtivo
 		player.SetDodgeIFrame(2 * time.Second)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 300)
 		dmg := uint16(60 + int(pINT)*3 + int(pDEX)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Elfo Lunar #%d ativou Manto de Tenebra (Furtivo 2s, %d dano lunar 5.5m)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Lunarin #%d ativou Manto de Tenebra (Furtivo 2s, %d dano lunar 5.5m)!\n", player.ID, dmg)
 
-	case protocol.RaceFairy: // 41 Fadinha
+	case protocol.RaceFairy: // 41 Faelith
 		// Pó de Fada Estelar: Cura +60 HP dos aliados próximos e encanta inimigos
 		player.Heal(60)
 		player.RestoreStamina(40.0)
@@ -5041,45 +5041,45 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		s.BroadcastAOETelegraph(player.ID, px, pz, 7.5, 300)
 		s.applyRacialCrowdControl(player.GetZone(), px, pz, 7.5, 2*time.Second, 4*time.Second, 0.5)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 60, 0, 0, 0)
-		log.Printf("[RACIAL] Fadinha #%d ativou Pó de Fada Estelar (+60 HP grupo 7.5m, Encanto 2s)!\n", player.ID)
+		log.Printf("[RACIAL] Faelith #%d ativou Pó de Fada Estelar (+60 HP grupo 7.5m, Encanto 2s)!\n", player.ID)
 
-	case protocol.RaceGoblin: // 42 Goblin
-		// Truque Sujo Goblin: Joga bomba de fumaça/explosivo recuando rapidamente
+	case protocol.RaceGoblin: // 42 Gnarlin
+		// Truque Sujo Gnarlin: Joga bomba de fumaça/explosivo recuando rapidamente
 		player.SetDodgeIFrame(1500 * time.Millisecond)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 250)
 		s.applyRacialCrowdControl(player.GetZone(), px, pz, 5.0, 1*time.Second, 4*time.Second, 0.3)
 		dmg := uint16(55 + int(pDEX)*3 + int(pLCK)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.0, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Goblin #%d ativou Truque Sujo (Bomba 5m, %d dano, Lentidão 70%%)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Gnarlin #%d ativou Truque Sujo (Bomba 5m, %d dano, Lentidão 70%%)!\n", player.ID, dmg)
 
-	case protocol.RaceScorpionDemi: // 43 Demi-Humano Escorpião
+	case protocol.RaceScorpionDemi: // 43 Escarion
 		// Aguilhão de Toxina Vorpal: Golpeia com a cauda aplicando veneno letal cumulativo e nuvem ácida
 		dmg := uint16(80 + int(pDEX)*3 + int(pMAS)*4)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 4.5, 250)
 		hits := s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 4.5, 0.35, dmg)
 		s.applyRacialCrowdControl(player.GetZone(), px, pz, 4.5, 0, 5*time.Second, 0.6)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
-		log.Printf("[RACIAL] Demi Escorpião #%d ativou Aguilhão de Toxina Vorpal (%d acertos, %d dano tóxico)!\n", player.ID, hits, dmg)
+		log.Printf("[RACIAL] Escarion #%d ativou Aguilhão de Toxina Vorpal (%d acertos, %d dano tóxico)!\n", player.ID, hits, dmg)
 
-	case protocol.RaceTurtleDemi: // 44 Demi-Humano Tartaruga
+	case protocol.RaceTurtleDemi: // 44 Testudar
 		// Lar Doce Casca: Recolhe-se no casco por 4s, reduzindo o dano em 70% e curando +25 HP por segundo (total +100 HP)
 		player.SetParry(4 * time.Second)
 		player.Heal(100)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 4.0, 400)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 100, 0, 0, 0)
-		log.Printf("[RACIAL] Demi Tartaruga #%d ativou Lar Doce Casca (Escudo 70%% por 4s, +100 HP)!\n", player.ID)
+		log.Printf("[RACIAL] Testudar #%d ativou Lar Doce Casca (Escudo 70%% por 4s, +100 HP)!\n", player.ID)
 
-	case protocol.RaceHalfDemon: // 45 Meio-Demônio (Succubus)
+	case protocol.RaceHalfDemon: // 45 Lilitara
 		// Drenar Força Vital: Seduz o alvo a até 10m e rouba grande quantidade de HP e Stamina dele para você!
 		dmg := uint16(75 + int(pINT)*4 + int(pDEX)*2)
 		s.applyRacialSingleTargetSnipe(player, px, pz, aimX, aimZ, 10.0, dmg, 2*time.Second)
 		player.Heal(60)
 		player.RestoreStamina(50.0)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 60, 0, 0, 0)
-		log.Printf("[RACIAL] Meio-Demônio #%d ativou Drenar Força Vital (Roubou +60 HP e +50 Stamina, %d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Lilitara #%d ativou Drenar Força Vital (Roubou +60 HP e +50 Stamina, %d dano)!\n", player.ID, dmg)
 
-	case protocol.RaceWolfDemi: // 46 Demi-Humano Lobo
+	case protocol.RaceWolfDemi: // 46 Ulvar
 		// Despertar Forma Bestial (Alfa/Beta/Ômega): Transforma-se na Forma Bestial Lupina ganhando +35% de Velocidade, Força e ataques duplos de mordida
 		player.SetBuff(15 * time.Second)
 		player.Heal(45)
@@ -5088,7 +5088,7 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		dmg := uint16(75 + int(pSTR)*3 + int(pAGI)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 45, 0, 0, 0)
-		log.Printf("[RACIAL] Demi Lobo #%d ativou Despertar Forma Bestial (+45 HP, Buff 15s, %d dano)!\n", player.ID, dmg)
+		log.Printf("[RACIAL] Ulvar #%d ativou Despertar Forma Bestial (+45 HP, Buff 15s, %d dano)!\n", player.ID, dmg)
 
 	case protocol.RaceManamancer: // 47 Manamante
 		// Coração de Mana: queima 15% da Vida máxima numa explosão arcana de 7m (falha se a Vida não cobrir o custo)

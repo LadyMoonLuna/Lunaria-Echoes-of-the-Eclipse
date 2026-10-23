@@ -50,7 +50,7 @@ const MOB_DATA := [
 		"location": "Ruínas da Vigília (-8.0, 80.0)",
 		"icon": "🕯️",
 		"drops": [
-			{"item": "Cálice da Alma Partida (Item 14 - Revenant)", "rate": "0.1%", "rare": true, "secret": true},
+			{"item": "Cálice da Alma Partida (Item 14 - Cinerion)", "rate": "0.1%", "rare": true, "secret": true},
 			{"item": "Tomo da Foice do Eclipse (Item 17 - Ceifador)", "rate": "0.1%", "rare": true, "secret": true},
 			{"item": "Casulo de Seda Prateada (Item 30 - Aracne)", "rate": "0.1%", "rare": true, "secret": true}
 		]
@@ -84,7 +84,7 @@ const MOB_DATA := [
 		"icon": "🩸",
 		"drops": [
 			{"item": "Coração do Licantropo Alfa", "rate": "100.0%", "rare": false},
-			{"item": "Sangue do Progenitor Bestial (Item 16 - Dhampir)", "rate": "0.1% (Frasco)", "rare": true, "secret": true},
+			{"item": "Sangue do Progenitor Bestial (Item 16 - Sangrael)", "rate": "0.1% (Frasco)", "rare": true, "secret": true},
 			{"item": "Tomo do Martelo Titânico", "rate": "7.0%", "rare": true}
 		]
 	},
@@ -97,7 +97,7 @@ const MOB_DATA := [
 			{"item": "Frasco de Vidro Vazio", "rate": "60.0%", "rare": false},
 			{"item": "Túnica do Cultista Sombrio", "rate": "5.0%", "rare": true},
 			{"item": "Tomo da Foice do Eclipse (Item 17)", "rate": "0.1%", "rare": true, "secret": true},
-			{"item": "Ampulheta Rúnica (Item 29 - Cronomante)", "rate": "0.1%", "rare": true, "secret": true}
+			{"item": "Ampulheta Rúnica (Item 29 - Cronari)", "rate": "0.1%", "rare": true, "secret": true}
 		]
 	},
 	{
@@ -219,13 +219,13 @@ const MOB_DATA := [
 	},
 	{
 		"mob_id": 22,
-		"name": "★ Ymir, o Patriarca Gigante de Gelo [BOSS] ★",
+		"name": "★ Ymir, o Patriarca Jotunar [BOSS] ★",
 		"location": "Ruínas da Vigília & Norte Gelado (0.0, 150.0)",
 		"icon": "❄️",
 		"drops": [
 			{"item": "Núcleo de Gelo Ancestral (Item 50)", "rate": "100.0%", "rare": false},
 			{"item": "Placa Glacial Reforçada (Item 12)", "rate": "100.0%", "rare": false},
-			{"item": "Coração de Geada Eterna (Item 52 - Raça Boreal / Gigante)", "rate": "0.1%", "rare": true, "secret": true}
+			{"item": "Coração de Geada Eterna (Item 52 - Raça Borealin / Gigante)", "rate": "0.1%", "rare": true, "secret": true}
 		]
 	},
 	{
@@ -246,7 +246,7 @@ const MOB_DATA := [
 		"drops": [
 			{"item": "Anel Carmesim de Vesperian (Item 55)", "rate": "100.0%", "rare": false},
 			{"item": "Tomo da Foice do Eclipse (Item 17)", "rate": "100.0%", "rare": false},
-			{"item": "Sangue Puro do Progenitor (Item 54 - Raça Dhampir/Vampiro)", "rate": "0.1%", "rare": true, "secret": true}
+			{"item": "Sangue Puro do Progenitor (Item 54 - Raça Sangrael)", "rate": "0.1%", "rare": true, "secret": true}
 		]
 	}
 ]

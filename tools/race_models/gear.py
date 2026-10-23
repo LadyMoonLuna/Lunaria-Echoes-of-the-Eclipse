@@ -270,7 +270,7 @@ def hunting_knife():
 
 def homunculus():
     m = Model(0, "homunculus", "Mini-Homúnculo", "Companheiro",
-              "Criatura flutuante de 50 cm feita de cristal vermelho e sombras, que orbita o Criador de Homúnculos.",
+              "Criatura flutuante de 50 cm feita de cristal vermelho e sombras, que orbita o Demiurgo Alquímico.",
               "#ff1744", kind="companion")
     crystal = m.mat("red_crystal", "#ff8a80", rough=0.05, metal=0.3, emit="#d50000", energy=2.2, alpha=0.9,
                     anim={"type": "glow", "speed": 2.0, "min": 0.6, "max": 1.3})
@@ -541,7 +541,7 @@ def outfit_acolyte():
 
 
 def outfit_blacksmith():
-    m = O("blacksmith", "Ferreiro", "Peitoral de couro reforçado com placas de ferro rebitadas, braçadeira mecânica e cinto de ferramentas.", "#ff6d00")
+    m = O("blacksmith", "Forjador de Estrelas", "Peitoral de couro reforçado com placas de ferro rebitadas, braçadeira mecânica e cinto de ferramentas.", "#ff6d00")
     leather = m.mat("reinforced_leather", "#4a2e1b", rough=0.8)
     iron = m.mat("riveted_iron", "#45484d", rough=0.4, metal=0.85)
     rivet = m.mat("rivet", "#b0b6bc", rough=0.3, metal=0.9)
@@ -563,7 +563,7 @@ def outfit_blacksmith():
 
 
 def outfit_alchemist():
-    m = O("alchemist", "Alquimista", "Casaco longo de couro resistente a ácido, bandoleira de poções e mochila com tanque de vidro borbulhante.", "#00e676")
+    m = O("alchemist", "Transmutador", "Casaco longo de couro resistente a ácido, bandoleira de poções e mochila com tanque de vidro borbulhante.", "#00e676")
     coat = m.mat("acid_coat", "#3b2717", rough=0.75, double=True)
     strap = m.mat("bandolier", "#2a1d14", rough=0.8)
     glass = m.mat("tank_glass", "#e0f2f1", rough=0.02, alpha=0.35)
@@ -590,7 +590,7 @@ def outfit_alchemist():
 
 
 def outfit_reaper():
-    m = O("reaper", "Ceifador do Eclipse", "Manto negro rasgado de caçador sombrio com ombreiras de crânio de corvo e detalhes carmesins.", "#d50000")
+    m = O("reaper", "Ceifador da Lua Negra", "Manto negro rasgado de caçador sombrio com ombreiras de crânio de corvo e detalhes carmesins.", "#d50000")
     cloak = m.mat("torn_cloak", "#0d0b0e", rough=0.85, double=True)
     crimson = m.mat("crimson", "#8b0000", rough=0.6, emit="#d50000", energy=0.4)
     bone = m.mat("raven_skull", "#e0d8c8", rough=0.5)
@@ -612,7 +612,7 @@ def outfit_reaper():
 
 
 def outfit_artificer():
-    m = O("artificer", "Artífice Rúnico", "Armadura Steampunk-Rúnica de bronze, tubos de pressão luminosos nas costas e monóculo rúnico.", "#2979ff")
+    m = O("artificer", "Engenheiro Rúnico", "Armadura Steampunk-Rúnica de bronze, tubos de pressão luminosos nas costas e monóculo rúnico.", "#2979ff")
     bronze = m.mat("bronze_armor", "#9a7034", rough=0.3, metal=0.95)
     iron = m.mat("iron", "#2a2c30", rough=0.4, metal=0.9)
     tube = m.mat("pressure_tube", "#b3e5fc", emit="#2979ff", energy=3.0, alpha=0.85,
@@ -632,7 +632,7 @@ def outfit_artificer():
 
 
 def outfit_homunculus():
-    m = O("homunculus_creator", "Criador de Homúnculos", "Traje real de alquimista supremo em preto, ouro e carmesim.", "#ff1744")
+    m = O("homunculus_creator", "Demiurgo Alquímico", "Traje real de alquimista supremo em preto, ouro e carmesim.", "#ff1744")
     black = m.mat("royal_black", "#121014", rough=0.55, metal=0.1)
     gold = m.mat("royal_gold", "#d4ac0d", rough=0.25, metal=0.95)
     crimson = m.mat("royal_crimson", "#8b0f1f", rough=0.6, double=True)
@@ -669,153 +669,153 @@ LOADOUTS = {
           "hand_r": _hand("iron_dagger", (-70, 0, 0)),
           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_spin"}},
     # --- 6 Classes Básicas de Combate ---
-    "1": {"name": "Guerreiro", "outfit": "outfit_swordsman",
+    "1": {"name": "Espadachim da Aurora", "outfit": "outfit_swordsman",
           "hand_r": _hand("knight_longsword", (-62, 0, 0)),
           "actions": {"1": "attack_1h", "3": "attack_2h_sweep", "4": "skill_q", "5": "skill_f_slam"}},
-    "2": {"name": "Mago", "outfit": "outfit_initiate",
+    "2": {"name": "Arcanista", "outfit": "outfit_initiate",
           "hand_r": _hand("crystal_staff", (-8, 0, 0), (0, 0.05, 0)),
           "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "3": {"name": "Arqueiro", "outfit": "outfit_scout",
+    "3": {"name": "Sentinela dos Ventos", "outfit": "outfit_scout",
           "hand_l": _hand("recurve_bow", (0, 0, 0)),
           "hand_r": _hand("steel_arrow", (-80, 0, 0)),
           "actions": {"1": "attack_bow", "3": "attack_bow", "4": "skill_r_backflip", "5": "attack_bow"}},
-    "4": {"name": "Assassino", "outfit": "outfit_assassin",
+    "4": {"name": "Lâmina Silente", "outfit": "outfit_assassin",
           "hand_r": _hand("assassin_dagger", (-70, 0, 0)),
           "hand_l": _hand("assassin_dagger", (-70, 0, 0)),
           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
-    "5": {"name": "Lutador", "outfit": "outfit_fighter",
+    "5": {"name": "Punho Celeste", "outfit": "outfit_fighter",
           "hand_r": _hand("heavy_gauntlet", (0, 0, 0)),
           "hand_l": _hand("heavy_gauntlet", (0, 0, 0)),
           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_slam"}},
-    "6": {"name": "Escudeiro", "outfit": "outfit_shieldbearer",
+    "6": {"name": "Guardião do Bastião", "outfit": "outfit_shieldbearer",
           "hand_r": _hand("short_mace", (-55, 0, 0)),
           "hand_l": _hand("colossal_shield", (0, 40, 0), (-0.12, 0.1, 0.02)),
           "actions": {"1": "attack_1h", "3": "skill_r_shield", "4": "skill_r_shield", "5": "skill_f_slam"}},
     # --- 6 Classes Básicas de Produção Combatentes ---
-    "7": {"name": "Ferreiro", "outfit": "outfit_blacksmith",
+    "7": {"name": "Forjador de Estrelas", "outfit": "outfit_blacksmith",
           "hand_r": _hand("forge_warhammer", (160, 0, -8)),
           "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_spin"}},
-    "8": {"name": "Alquimista", "outfit": "outfit_alchemist",
+    "8": {"name": "Transmutador", "outfit": "outfit_alchemist",
           "hand_r": _hand("alchemy_flask", (0, 0, 0)),
           "hand_l": _hand("injector_gauntlet", (0, 0, 0)),
           "actions": {"1": "attack_throw", "3": "attack_throw", "4": "attack_throw", "5": "skill_f_slam"}},
-    "9": {"name": "Escultor", "outfit": "outfit_sculptor",
+    "9": {"name": "Escultor de Almas", "outfit": "outfit_sculptor",
           "hand_r": _hand("sculptor_chisel", (-70, 0, 0)),
           "companion": "companion_guardian_statue",
           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_q_support", "5": "skill_f_spin"}},
-    "10": {"name": "Domador", "outfit": "outfit_tamer",
+    "10": {"name": "Senhor das Feras", "outfit": "outfit_tamer",
            "hand_r": _hand("coiled_whip", (0, 0, 0)),
            "companion": "companion_tamed_beast",
            "actions": {"1": "attack_1h", "3": "attack_throw", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "11": {"name": "Alfaiate de Guerra", "outfit": "outfit_tailor",
+    "11": {"name": "Tecelão Carmesim", "outfit": "outfit_tailor",
            "hand_r": _hand("golden_needle", (-80, 0, 0)),
            "hand_l": _hand("golden_needle", (-80, 0, 0)),
            "actions": {"1": "attack_cast", "3": "attack_2h_sweep", "4": "attack_cast", "5": "skill_f_spin"}},
-    "12": {"name": "Chef de Caça", "outfit": "outfit_chef",
+    "12": {"name": "Mestre do Banquete", "outfit": "outfit_chef",
            "hand_r": _hand("giant_cleaver", (-50, 0, 0)),
            "hand_l": _hand("iron_wok", (0, 40, 0), (-0.1, 0.1, 0.02)),
            "actions": {"1": "attack_2h_heavy", "3": "attack_2h_heavy", "4": "skill_r_shield", "5": "skill_f_slam"}},
     # --- Variantes Secretas (13 a 18) ---
-    "13": {"name": "Espadachim Rúnico", "outfit": "outfit_swordsman",
+    "13": {"name": "Lâmina Rúnica", "outfit": "outfit_swordsman",
            "hand_r": _hand("runic_sword", (-62, 0, 0)),
            "hand_l": _hand("arcane_orb", (0, 0, 0)),
            "actions": {"1": "attack_1h", "3": "attack_2h_sweep", "4": "skill_r_shield", "5": "attack_cast"}},
-    "14": {"name": "Caçador de Vampiros", "outfit": "outfit_scout",
+    "14": {"name": "Inquisidor de Prata", "outfit": "outfit_scout",
            "hand_r": _hand("silver_crossbow", (0, 0, 0)),
            "hand_l": _hand("holy_stake", (-70, 0, 0)),
            "actions": {"1": "attack_bow", "3": "attack_bow", "4": "attack_throw", "5": "skill_f_slam"}},
-    "15": {"name": "Valquíria da Égide", "outfit": "outfit_valkyrie",
+    "15": {"name": "Valquíria Celeste", "outfit": "outfit_valkyrie",
            "hand_r": _hand("golden_spear", (-62, 0, 0)),
            "hand_l": _hand("winged_shield", (0, 40, 0), (-0.1, 0.12, 0.02)),
            "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_slam"}},
-    "16": {"name": "Monge das Sombras", "outfit": "outfit_assassin",
+    "16": {"name": "Punho Fantasma", "outfit": "outfit_assassin",
            "hand_r": _hand("shadow_gauntlet", (0, 0, 0)),
            "hand_l": _hand("shadow_gauntlet", (0, 0, 0)),
            "actions": {"1": "attack_1h", "3": "skill_q", "4": "dodge_roll", "5": "skill_f_spin"}},
-    "17": {"name": "Forjador de Armas Amaldiçoadas", "outfit": "outfit_blacksmith",
+    "17": {"name": "Forjador Carmesim", "outfit": "outfit_blacksmith",
            "hand_r": _hand("crimson_hammer", (160, 0, -8)),
            "hand_l": _hand("living_sword", (-62, 0, 0)),
            "actions": {"1": "attack_2h_heavy", "3": "attack_2h_heavy", "4": "skill_r_sharpen", "5": "skill_f_spin"}},
-    "18": {"name": "Médico da Peste", "outfit": "outfit_plague_doctor",
+    "18": {"name": "Doutor Corvo", "outfit": "outfit_plague_doctor",
            "hand_r": _hand("scalpel", (-70, 0, 0)),
            "hand_l": _hand("censer", (0, 0, 0)),
            "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_q_support", "5": "attack_throw"}},
     # --- Classes Únicas Exclusivas de Raça (19 a 26) ---
-    "19": {"name": "Carrasco do Veneno Vorpal", "outfit": "outfit_assassin",
+    "19": {"name": "Algoz Vorpal", "outfit": "outfit_assassin",
            "hand_r": _hand("vorpal_stinger", (-70, 0, 0)),
            "hand_l": _hand("vorpal_stinger", (-70, 0, 0)),
            "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
-    "20": {"name": "Soberano da Teia Carmesim", "outfit": "outfit_tailor",
+    "20": {"name": "Senhor da Teia Escarlate", "outfit": "outfit_tailor",
            "hand_r": _hand("golden_needle", (-80, 0, 0)),
            "hand_l": _hand("golden_needle", (-80, 0, 0)),
            "actions": {"1": "attack_cast", "3": "attack_2h_sweep", "4": "skill_q_support", "5": "skill_f_spin"}},
-    "21": {"name": "Rei-Fera da Alcateia de Sangue", "outfit": "outfit_tamer",
+    "21": {"name": "Rei-Lobo do Eclipse", "outfit": "outfit_tamer",
            "hand_r": _hand("heavy_gauntlet", (0, 0, 0)),
            "hand_l": _hand("heavy_gauntlet", (0, 0, 0)),
            "companion": "companion_tamed_beast",
            "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "22": {"name": "Runomante da Montanha Eterna", "outfit": "outfit_blacksmith",
+    "22": {"name": "Runomante Ancestral", "outfit": "outfit_blacksmith",
            "hand_r": _hand("forge_warhammer", (160, 0, -8)),
            "actions": {"1": "attack_2h_heavy", "3": "attack_2h_heavy", "4": "skill_r_sharpen", "5": "skill_f_slam"}},
-    "23": {"name": "Bastião do Mundo", "outfit": "outfit_shieldbearer",
+    "23": {"name": "Colosso Abissal", "outfit": "outfit_shieldbearer",
            "hand_r": _hand("short_mace", (-55, 0, 0)),
            "hand_l": _hand("colossal_shield", (0, 40, 0), (-0.12, 0.1, 0.02)),
            "actions": {"1": "attack_1h", "3": "skill_f_spin", "4": "skill_r_shield", "5": "skill_f_slam"}},
-    "24": {"name": "Arquifada da Árvore do Mundo", "outfit": "outfit_initiate",
+    "24": {"name": "Arquifada de Yggdra", "outfit": "outfit_initiate",
            "hand_r": _hand("crystal_staff", (-8, 0, 0), (0, 0.05, 0)),
            "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "25": {"name": "Aristocrata Carmesim", "outfit": "outfit_tailor",
+    "25": {"name": "Conde Escarlate", "outfit": "outfit_tailor",
            "hand_r": _hand("living_sword", (-62, 0, 0)),
            "actions": {"1": "attack_1h", "3": "attack_throw", "4": "skill_r_backflip", "5": "skill_f_slam"}},
-    "26": {"name": "Barão da Sucata", "outfit": "outfit_artificer",
+    "26": {"name": "Barão Engrenagem", "outfit": "outfit_artificer",
            "hand_r": _hand("hammer_cannon", (160, 0, -8)),
            "actions": {"1": "attack_2h_heavy", "3": "attack_throw", "4": "dodge_roll", "5": "skill_f_slam"}},
     # --- Classes Únicas Gerais (27 a 30 e 35 a 39) ---
-    "27": {"name": "Ceifador do Eclipse", "outfit": "outfit_reaper",
+    "27": {"name": "Ceifador da Lua Negra", "outfit": "outfit_reaper",
            "hand_r": _hand("eclipse_scythe", (-20, 0, 20)),
            "actions": {"1": "attack_2h_sweep", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
-    "35": {"name": "Artífice Rúnico", "outfit": "outfit_artificer",
+    "35": {"name": "Engenheiro Rúnico", "outfit": "outfit_artificer",
            "hand_r": _hand("hammer_cannon", (160, 0, -8)),
            "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_slam"}},
-    "36": {"name": "Criador de Homúnculos", "outfit": "outfit_homunculus_creator",
+    "36": {"name": "Demiurgo Alquímico", "outfit": "outfit_homunculus_creator",
            "hand_r": _hand("philosopher_chalice", (0, 0, 0)),
            "companion": "companion_homunculus",
            "actions": {"1": "attack_cast", "3": "skill_q_support", "4": "attack_cast", "5": "skill_f_slam"}},
-    "28": {"name": "Dançarino Astral", "outfit": "outfit_assassin",
+    "28": {"name": "Bailarino das Estrelas", "outfit": "outfit_assassin",
            "hand_r": _hand("assassin_dagger", (-70, 0, 0)),
            "hand_l": _hand("assassin_dagger", (-70, 0, 0)),
            "actions": {"1": "attack_1h", "3": "skill_f_spin", "4": "skill_r_backflip", "5": "skill_f_spin"}},
-    "29": {"name": "Inquisidor das Cinzas", "outfit": "outfit_acolyte",
+    "29": {"name": "Inquisidor da Chama Branca", "outfit": "outfit_acolyte",
            "hand_r": _hand("executioner_mace", (-55, 0, 0)),
            "actions": {"1": "attack_2h_heavy", "3": "attack_2h_sweep", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "30": {"name": "Necromante de Ossos", "outfit": "outfit_initiate",
+    "30": {"name": "Arauto do Ossuário", "outfit": "outfit_initiate",
            "hand_r": _hand("shadow_orb_staff", (-8, 0, 0), (0, 0.05, 0)),
            "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "37": {"name": "Domador Primordial", "outfit": "outfit_tamer",
+    "37": {"name": "Senhor da Selva Primordial", "outfit": "outfit_tamer",
            "hand_r": _hand("primordial_scythe", (-20, 0, 20)),
            "companion": "companion_tamed_beast",
            "actions": {"1": "attack_2h_sweep", "3": "skill_q", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "38": {"name": "Cavaleiro da Ruptura", "outfit": "outfit_shieldbearer",
+    "38": {"name": "Cavaleiro do Vazio", "outfit": "outfit_shieldbearer",
            "hand_r": _hand("traitor_greatsword", (-62, 0, 0)),
            "hand_l": _hand("colossal_shield", (0, 40, 0), (-0.12, 0.1, 0.02)),
            "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_slam"}},
-    "39": {"name": "Arauto da Tempestade", "outfit": "outfit_initiate",
+    "39": {"name": "Arauto do Trovão", "outfit": "outfit_initiate",
            "hand_r": _hand("crystal_staff", (-8, 0, 0), (0, 0.05, 0)),
            "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_r_backflip", "5": "skill_f_slam"}},
     # --- Classes Lendárias (31 a 34) ---
-    "31": {"name": "Descendente de Pagma", "outfit": "outfit_blacksmith",
+    "31": {"name": "Herdeiro da Forja Divina", "outfit": "outfit_blacksmith",
            "hand_r": _hand("knight_longsword", (-62, 0, 0)),
            "companion": "companion_six_swords",
            "actions": {"1": "attack_1h", "3": "attack_2h_sweep", "4": "skill_f_spin", "5": "skill_f_slam"}},
-    "32": {"name": "Escultor do Luar Lendário", "outfit": "outfit_sculptor",
+    "32": {"name": "Mestre Escultor do Luar", "outfit": "outfit_sculptor",
            "hand_r": _hand("sculptor_chisel", (-70, 0, 0)),
            "companion": "companion_guardian_statue",
            "actions": {"1": "attack_1h", "3": "attack_2h_sweep", "4": "skill_q_support", "5": "skill_f_spin"}},
-    "33": {"name": "Monarca dos Dragões", "outfit": "outfit_tamer",
+    "33": {"name": "Imperador Dracônico", "outfit": "outfit_tamer",
            "hand_r": _hand("coiled_whip", (0, 0, 0)),
            "companion": "companion_elder_dragon",
            "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "34": {"name": "Imperador do Sol Negro", "outfit": "outfit_reaper",
+    "34": {"name": "Soberano do Sol Negro", "outfit": "outfit_reaper",
            "hand_r": _hand("black_sun_blade", (-62, 0, 0)),
            "actions": {"1": "attack_2h_heavy", "3": "attack_2h_sweep", "4": "skill_r_shield", "5": "skill_f_slam"}},
 }

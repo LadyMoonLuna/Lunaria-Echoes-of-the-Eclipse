@@ -108,7 +108,7 @@ def valeriano():
 
 
 def alto_valeriano():
-    m = Model(11, "alto_valeriano", "Alto Valeriano", "Caminho da Ordem",
+    m = Model(11, "alto_valeriano", "Solvaren", "Caminho da Ordem",
               "O sangue valeriano desperta sob o Sol: mechas douradas luminosas nascem nos cabelos, os olhos se "
               "tornam ouro puro e uma coroa solar sutil passa a flutuar sobre a testa.",
               "#ffd700", scale=1.02, seed=11)
@@ -130,7 +130,7 @@ def alto_valeriano():
 
 
 def andarilho_eter():
-    m = Model(12, "andarilho_eter", "Andarilho do Éter", "Caminho do Caos",
+    m = Model(12, "andarilho_eter", "Aetheris", "Caminho do Caos",
               "Os que tocaram o vazio entre as estrelas voltam marcados: pontas dos cabelos e antebraços "
               "escurecem com textura de galáxia roxa e os olhos passam a brilhar em violeta.",
               "#8e44ad", scale=1.0, seed=12)
@@ -188,7 +188,7 @@ def noctari():
 
 
 def arconte_lunar():
-    m = Model(13, "arconte_lunar", "Arconte Lunar", "Caminho da Ordem",
+    m = Model(13, "arconte_lunar", "Selenarca", "Caminho da Ordem",
               "Tatuagens astrais prateadas acendem no rosto e nos braços, e uma meia-lua de cristal prateado "
               "passa a flutuar atrás das costas do Arconte.",
               "#00e5ff", scale=1.07, seed=13)
@@ -213,7 +213,7 @@ def arconte_lunar():
 
 
 def espectro_umbral():
-    m = Model(14, "espectro_umbral", "Espectro Umbral", "Caminho do Caos",
+    m = Model(14, "espectro_umbral", "Nyxara", "Caminho do Caos",
               "A pele escurece até o cinza-noite, a esclera dos olhos fica totalmente negra com uma pupila branca "
               "brilhante, e sombras vivas escorrem dos pés a cada passo.",
               "#7c4dff", scale=1.06, seed=14)
@@ -271,7 +271,7 @@ def kharad():
 
 
 def guardiao_runico():
-    m = Model(15, "guardiao_runico", "Guardião Rúnico", "Caminho da Ordem",
+    m = Model(15, "guardiao_runico", "Runakhar", "Caminho da Ordem",
               "Placas geométricas de aço e ouro se encravam nos ombros e no peito, e runas azuis brilhantes são "
               "esculpidas na própria pele de pedra do Guardião.",
               "#ff9800", scale=0.85, seed=15)
@@ -293,7 +293,7 @@ def guardiao_runico():
 
 
 def tita_obsidiana():
-    m = Model(16, "tita_obsidiana", "Titã de Obsidiana", "Caminho do Caos",
+    m = Model(16, "tita_obsidiana", "Pyrokhar", "Caminho do Caos",
               "Chifres curtos de pedra vulcânica negra e polida rompem a testa e os ombros, e veias de lava "
               "incandescente escorrem vivas pelo peito do Titã.",
               "#ff3d00", scale=0.87, seed=16)
@@ -355,7 +355,7 @@ def varkai():
 
 
 def soberano_draconico():
-    m = Model(17, "soberano_draconico", "Soberano Dracônico", "Caminho da Ordem",
+    m = Model(17, "soberano_draconico", "Dravarkai", "Caminho da Ordem",
               "O sangue de dragão prevalece: um par de chifres nobres curvados para trás, placas de escamas "
               "vermelhas e douradas nos ombros e braços, e uma cauda reptiliana.",
               "#ff1744", scale=1.04, seed=17)
@@ -378,7 +378,7 @@ def soberano_draconico():
 
 
 def fera_frenesi():
-    m = Model(18, "fera_frenesi", "Fera do Frenesi", "Caminho do Caos",
+    m = Model(18, "fera_frenesi", "Ferovar", "Caminho do Caos",
               "A fera vence o homem: pelagem densa e eriçada cobre ombros e costas, o focinho semi-lupino fica "
               "mais pronunciado e as garras longas vivem manchadas de carmesim.",
               "#ad1457", scale=1.06, seed=18)
@@ -405,7 +405,7 @@ def fera_frenesi():
 # ---------------------------------------------------------------------------
 
 def dhampir():
-    m = Model(5, "dhampir", "Dhampir", "Vampiro Progenitor",
+    m = Model(5, "dhampir", "Sangrael", "Vampiro Progenitor",
               "Pele branca marmórea e fria, rosto aristocrático e cadavérico, olhos vermelho-rubi luminosos, "
               "presas longas, unhas negras afiadas e gola alta gótica vermelha e preta.",
               "#d500f9", scale=1.04, seed=5)
@@ -433,7 +433,7 @@ def dhampir():
 
 
 def licantropo():
-    m = Model(6, "licantropo", "Licantropo Primordial", "Raid Boss / Raça",
+    m = Model(6, "licantropo", "Lupharion", "Raid Boss / Raça",
               "Lobisomem bípede colossal de 2,30 m, com pernas digitígradas, tórax gigante coberto de pelagem "
               "negra e carmesim, cabeça lupina feroz marcada de cicatrizes e olhos ardendo em sangue.",
               "#ff6f00", scale=1.22, seed=6)
@@ -490,8 +490,8 @@ def licantropo():
 
 
 def revenant():
-    m = Model(7, "revenant", "Amaldiçoado das Cinzas", "Revenant",
-              "Guerreiro morto-vivo de pele cinza ressecada colada aos ossos. No centro do peito, costelas "
+    m = Model(7, "revenant", "Cinerion", "Cinerion",
+              "Espadachim da Aurora morto-vivo de pele cinza ressecada colada aos ossos. No centro do peito, costelas "
               "expostas protegem uma chama azul-ciano que pulsa como um coração espiritual.",
               "#69f0ae", scale=1.02, seed=7)
     skin = m.mat("dry_skin", "#7a7c72", rough=0.9)
@@ -521,7 +521,7 @@ def revenant():
 
 
 def celestino():
-    m = Model(8, "celestino", "Celestino", "Serafim Astral",
+    m = Model(8, "celestino", "Seraphel", "Serafim Astral",
               "Corpo humanoide esculpido em mármore branco com veias de ouro, rosto sereno de olhos sem pupila "
               "emitindo luz dourada e quatro asas de lâminas de luz translúcida flutuando desconectadas das costas.",
               "#fff59d", scale=1.08, seed=8)
@@ -547,7 +547,7 @@ def celestino():
 
 
 def abissal():
-    m = Model(9, "abissal", "Abissal", "Filho do Eclipse",
+    m = Model(9, "abissal", "Umbryss", "Filho do Eclipse",
               "Silhueta inteiramente negra e fosca com textura de céu estrelado profundo, rosto sem traços com "
               "dois olhos roxos e um mini buraco negro com anel de fogo girando no centro do tórax.",
               "#18ffff", scale=1.04, seed=9)
@@ -576,7 +576,7 @@ def abissal():
 
 
 def automato():
-    m = Model(10, "automato", "Autômato Rúnico", "Alma Forjada",
+    m = Model(10, "automato", "Runaric", "Alma Forjada",
               "Corpo de placas de bronze envelhecido e ferro negro, com engrenagens aparentes nos cotovelos e "
               "joelhos, elmo sem boca com visor horizontal ciano e um núcleo de cristal giratório no peito.",
               "#00e5ff", scale=1.04, seed=10)

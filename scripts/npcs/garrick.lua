@@ -156,13 +156,13 @@ function OnPlayerInteract(player_id, world_hour, player_race, player_class, play
         return
     end
 
-    -- Viajante Sem Classe (Classe 0): Ensina a profissão básica de Ferreiro
+    -- Viajante Sem Classe (Classe 0): Ensina a profissão básica de Forjador de Estrelas
     if player_class == 0 then
-        npc_say("Um viajante sem rumo? Se você tiver mãos fortes para bater o martelo, posso lhe ensinar os segredos da Forja e do combate com martelos pesados! Você agora é um Ferreiro (Tier 1)!")
+        npc_say("Um viajante sem rumo? Se você tiver mãos fortes para bater o martelo, posso lhe ensinar os segredos da Forja e do combate com martelos pesados! Você agora é um Forjador de Estrelas (Tier 1)!")
         return
     end
 
-    -- Colega de Profissão: Ferreiro (Classe 5)
+    -- Colega de Profissão: Forjador de Estrelas (Classe 5)
     if player_class == 5 then
         if f_level >= 3 then
             npc_say("Vejo que você tem talento com o martelo. Tome, vou te ensinar a forjar o Malho de Batalha Rúnico, uma arma que você não acha em nenhuma prateleira!")

@@ -26,7 +26,7 @@ def O(key, name, desc, color):
 # ---------------------------------------------------------------------------
 
 def assassin_dagger():
-    m = W("assassin_dagger", "Adaga Curva do Assassino", "Lâmina negra curva com fio violeta envenenado (usada em par).", "#7c4dff")
+    m = W("assassin_dagger", "Adaga Curva do Lâmina Silente", "Lâmina negra curva com fio violeta envenenado (usada em par).", "#7c4dff")
     steel = m.mat("blade_black_steel", "#2b2d33", rough=0.2, metal=0.9)
     edge = m.mat("venom_edge", "#d1c4e9", emit="#7c4dff", energy=2.2)
     wrap = m.mat("grip_wrap", "#1a1420", rough=0.9)
@@ -140,7 +140,7 @@ def iron_wok():
 # ---------------------------------------------------------------------------
 
 def guardian_statue():
-    m = C("guardian_statue", "Estátua Guardiã", "Pequena estátua de mármore esculpida pelo Escultor, que orbita e o ajuda.", "#eceff1")
+    m = C("guardian_statue", "Estátua Guardiã", "Pequena estátua de mármore esculpida pelo Escultor de Almas, que orbita e o ajuda.", "#eceff1")
     marble = m.mat("marble", "#f1efe9", rough=0.2)
     moon = m.mat("moon_glow", "#e1f5fe", emit="#81d4fa", energy=3.0)
     m.group("orbit", (0, 0, 0), anim={"type": "spin", "axis": [0, 1, 0], "speed": 90})
@@ -156,7 +156,7 @@ def guardian_statue():
 
 
 def tamed_beast():
-    m = C("tamed_beast", "Fera Domada", "Lobo de pelagem castanha que acompanha o Domador e ataca ao comando do chicote.", "#8d6e63")
+    m = C("tamed_beast", "Fera Domada", "Lobo de pelagem castanha que acompanha o Senhor das Feras e ataca ao comando do chicote.", "#8d6e63")
     fur = m.mat("fur", "#7b5a43", rough=1.0)
     belly = m.mat("fur_light", "#c8a98a", rough=1.0)
     eye = m.mat("eye_amber", "#ffe082", emit="#ffab00", energy=4.0)
@@ -196,7 +196,7 @@ def _shell(m, mat, sleeves=None, pants=None, boots=None):
 
 
 def outfit_assassin():
-    m = O("assassin", "Assassino", "Couro negro justo, capuz e lenço cobrindo o rosto, faixas violeta.", "#7c4dff")
+    m = O("assassin", "Lâmina Silente", "Couro negro justo, capuz e lenço cobrindo o rosto, faixas violeta.", "#7c4dff")
     leather = m.mat("black_leather", "#1d1a22", rough=0.7)
     sash = m.mat("violet_sash", "#4a148c", rough=0.8)
     boots = m.mat("soft_boots", "#151218", rough=0.85)
@@ -209,7 +209,7 @@ def outfit_assassin():
 
 
 def outfit_fighter():
-    m = O("fighter", "Lutador", "Faixas de pano nas mãos, calça larga marcial, faixa de cintura e braços à mostra.", "#ffab40")
+    m = O("fighter", "Punho Celeste", "Faixas de pano nas mãos, calça larga marcial, faixa de cintura e braços à mostra.", "#ffab40")
     gi = m.mat("gi_cloth", "#f3ead7", rough=0.9)
     belt = m.mat("black_belt", "#1b1b1b", rough=0.8)
     wrap = m.mat("hand_wrap", "#e8dcc4", rough=0.95)
@@ -222,7 +222,7 @@ def outfit_fighter():
 
 
 def outfit_shieldbearer():
-    m = O("shieldbearer", "Escudeiro", "Armadura pesada de placas douradas e aço, gorjal alto e saiote de malha.", "#ffd54f")
+    m = O("shieldbearer", "Guardião do Bastião", "Armadura pesada de placas douradas e aço, gorjal alto e saiote de malha.", "#ffd54f")
     plate = m.mat("plate_armor", "#aeb6bd", rough=0.25, metal=0.9)
     gold = m.mat("gold_trim", "#d4a017", rough=0.25, metal=0.95)
     mail = m.mat("chainmail", "#8c949b", rough=0.55, metal=0.8)
@@ -236,7 +236,7 @@ def outfit_shieldbearer():
 
 
 def outfit_sculptor():
-    m = O("sculptor", "Escultor", "Túnica cinza de artesão com avental de couro sujo de pó de mármore e capa de luar.", "#e1f5fe")
+    m = O("sculptor", "Escultor de Almas", "Túnica cinza de artesão com avental de couro sujo de pó de mármore e capa de luar.", "#e1f5fe")
     tunic = m.mat("grey_tunic", "#78858f", rough=0.9)
     apron = m.mat("apron", "#6d5844", rough=0.85)
     cape = m.mat("moon_cape", "#1a2a4a", rough=0.8, double=True)
@@ -247,7 +247,7 @@ def outfit_sculptor():
 
 
 def outfit_tamer():
-    m = O("tamer", "Domador", "Peles de fera sobre os ombros, colete de couro e braceletes com dentes.", "#8d6e63")
+    m = O("tamer", "Senhor das Feras", "Peles de fera sobre os ombros, colete de couro e braceletes com dentes.", "#8d6e63")
     leather = m.mat("leather", "#5d4330", rough=0.8)
     fur = m.mat("fur_mantle", "#8a6a4f", rough=1.0)
     fang = m.mat("fang", "#efe6d6", rough=0.4)
@@ -259,7 +259,7 @@ def outfit_tamer():
 
 
 def outfit_tailor():
-    m = O("tailor", "Alfaiate de Guerra", "Casaca vermelha sob medida com bordados de fio de aço e luvas finas.", "#d50000")
+    m = O("tailor", "Tecelão Carmesim", "Casaca vermelha sob medida com bordados de fio de aço e luvas finas.", "#d50000")
     coat = m.mat("crimson_coat", "#8e1b1b", rough=0.6)
     embroidery = m.mat("embroidery_gold", "#ffd54f", rough=0.3, metal=0.8)
     pants = m.mat("navy_pants", "#1b2340", rough=0.8)
@@ -272,7 +272,7 @@ def outfit_tailor():
 
 
 def outfit_chef():
-    m = O("chef", "Chef de Caça", "Dólmã branca manchada, avental de açougueiro, lenço vermelho e chapéu de chef.", "#ff7043")
+    m = O("chef", "Mestre do Banquete", "Dólmã branca manchada, avental de açougueiro, lenço vermelho e chapéu de chef.", "#ff7043")
     jacket = m.mat("chef_cloth", "#f2efe8", rough=0.85)
     apron = m.mat("butcher_apron", "#7b5e4a", rough=0.85)
     scarf = m.mat("red_scarf", "#c62828", rough=0.8)
@@ -424,7 +424,7 @@ def censer():
 
 
 def outfit_plague_doctor():
-    m = O("plague_doctor", "Médico da Peste", "Sobretudo de couro encerado, chapéu de aba larga e máscara de corvo com lentes.", "#7cb342")
+    m = O("plague_doctor", "Doutor Corvo", "Sobretudo de couro encerado, chapéu de aba larga e máscara de corvo com lentes.", "#7cb342")
     coat = m.mat("waxed_leather", "#2b2622", rough=0.55)
     hat = m.mat("black_hat", "#1a1714", rough=0.7)
     mask = m.mat("crow_mask", "#d7ccc8", rough=0.6)
@@ -439,7 +439,7 @@ def outfit_plague_doctor():
 
 
 def outfit_valkyrie():
-    m = O("valkyrie", "Valquíria da Égide", "Armadura dourada e branca com elmo alado e saia de placas.", "#fff59d")
+    m = O("valkyrie", "Valquíria Celeste", "Armadura dourada e branca com elmo alado e saia de placas.", "#fff59d")
     gold = m.mat("gold_plate", "#e0b84a", rough=0.25, metal=0.95)
     white = m.mat("white_cloth", "#f5f5f5", rough=0.8)
     feather = m.mat("feather_white", "#ffffff", rough=0.8)
@@ -501,7 +501,7 @@ def six_swords():
 
 
 def elder_dragon():
-    m = C("elder_dragon", "Dragão Ancião", "Dragão ancião vermelho-ouro que plana ao lado do Monarca dos Dragões.", "#ff6d00")
+    m = C("elder_dragon", "Dragão Ancião", "Dragão ancião vermelho-ouro que plana ao lado do Imperador Dracônico.", "#ff6d00")
     scale = m.mat("dragon_scale", "#8e1b10", rough=0.35, metal=0.4)
     gold = m.mat("gold_horn", "#ffca28", rough=0.2, metal=0.9)
     mem = m.mat("membrane", "#5d1010", rough=0.6, double=True)

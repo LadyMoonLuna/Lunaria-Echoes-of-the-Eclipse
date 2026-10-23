@@ -377,7 +377,7 @@ func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 			ItemReward: protocol.ItemCookedNobleMeat, Quantity: 2, Difficulty: 5,
 		})
 
-	case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Gigante de Gelo (Boss)
+	case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Jotunar (Boss)
 		organs = append(organs, CorpseOrgan{
 			Index: 0, Name: "Núcleo de Gelo Ancestral de Ymir", OrganType: OrganHeartRelic,
 			ItemReward: protocol.ItemAncientIceCore, Quantity: 2, Difficulty: 9,

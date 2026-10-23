@@ -27,7 +27,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Base — Pronta para Despertar no Nível 10"
 	},
 	3: {
-		"name": "Kharad (Anão de Pedra & Magma)",
+		"name": "Kharad (Dvergar de Pedra & Magma)",
 		"skill_z_name": "Baluarte Rúnico / Erupção [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Bate com força telúrica no chão, desferindo erupção de magma em 4.5m e ativando escudo que reduz 70% de todo dano por 5s.",
@@ -47,7 +47,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Base — Pronta para Despertar no Nível 10"
 	},
 	5: {
-		"name": "Dhampir (Vampírico)",
+		"name": "Sangrael (Vampírico)",
 		"skill_z_name": "Sede de Sangue [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Drena 45 HP do alvo num estalo sombrio, restaurando sua própria vida e concedendo bônus de velocidade.",
@@ -57,7 +57,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Secreta Nobre"
 	},
 	6: {
-		"name": "Licantropo Primordial",
+		"name": "Lupharion",
 		"skill_z_name": "Uivo da Fera Ancestral [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Uivo estarrecedor que aterroriza monstros em 8m e aumenta a velocidade de ataque em 40%.",
@@ -67,7 +67,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Feral Ancestral"
 	},
 	7: {
-		"name": "Revenant (Amaldiçoado das Cinzas)",
+		"name": "Cinerion (Cinerion)",
 		"skill_z_name": "Pacto das Cinzas [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Explosão espectral de cinzas em 5m, prendendo inimigos e drenando essência etérea.",
@@ -77,7 +77,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Espectral da Cripta"
 	},
 	8: {
-		"name": "Celestino (Natus Solaris)",
+		"name": "Seraphel (Natus Solaris)",
 		"skill_z_name": "Chama Sagrada [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Feixe purificador solar que queima inimigos e cura aliados no trajeto.",
@@ -87,7 +87,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Celestial Divina"
 	},
 	9: {
-		"name": "Abissal (Umbralis)",
+		"name": "Umbryss (Filho do Eclipse)",
 		"skill_z_name": "Mergulho Abissal [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Desaparece no éter abissal e surge adiante detonando ondas de vácuo gravitacional.",
@@ -97,7 +97,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Abissal Cósmica"
 	},
 	10: {
-		"name": "Autômato Rúnico",
+		"name": "Runaric",
 		"skill_z_name": "Sobrecarga Arcana [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Detona descarga elétrica em anel de 6m atordoando monstros mecânicos e orgânicos.",
@@ -107,7 +107,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Rúnica Ancestral"
 	},
 	11: {
-		"name": "Alto Valeriano (Ordem Solar)",
+		"name": "Solvaren (Ordem Solar)",
 		"skill_z_name": "Estandarte Real [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Ergue o estandarte sagrado imperial, curando +50 HP em aliados, restaurando +60 Stamina e energizando armas com dano solar divino (+35% de dano por 12s).",
@@ -117,7 +117,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
 	12: {
-		"name": "Andarilho do Éter (Caos Espacial)",
+		"name": "Aetheris (Caos Espacial)",
 		"skill_z_name": "Fenda Dimensional [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Rasga a tapeçaria da realidade, teleportando 6 metros para a direção de movimento e gerando uma explosão de vácuo etéreo que ignora armaduras físicas.",
@@ -127,7 +127,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
 	},
 	13: {
-		"name": "Arconte Lunar (Ordem de Selene)",
+		"name": "Selenarca (Ordem de Selene)",
 		"skill_z_name": "Luz de Selene [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Invoca um pilar de luz lunar concentrada (6.0m) que purifica aliados curando +70 HP e cega monstros desferindo dano sagrado estelar.",
@@ -137,17 +137,17 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
 	14: {
-		"name": "Espectro Umbral (Caos de Nyx)",
+		"name": "Nyxara (Caos de Nyx)",
 		"skill_z_name": "Manto de Nyx [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Dissolve seu corpo nas sombras tornando-se invisível por 4 segundos. O próximo ataque causa +120% de Dano Crítico garantido.",
-		"passive_name": "Assassino das Trevas (Passiva Ascendida)",
+		"passive_name": "Lâmina Silente das Trevas (Passiva Ascendida)",
 		"passive_desc": "+35% de velocidade de movimento e +30% de dano crítico permanente.",
 		"color": Color("#7c4dff"),
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
 	},
 	15: {
-		"name": "Guardião Rúnico (Ordem da Bigorna)",
+		"name": "Runakhar (Ordem da Bigorna)",
 		"skill_z_name": "Muralha Rúnica [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Grava runas sagradas de proteção na pele, absorvendo 85% de dano por 6s e refletindo 50% de volta aos atacantes.",
@@ -157,7 +157,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
 	16: {
-		"name": "Titã de Obsidiana (Caos de Magma)",
+		"name": "Pyrokhar (Caos de Magma)",
 		"skill_z_name": "Erupção Magma [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Racha o solo liberando uma geiser vulcânica de 5.5m que incendeia inimigos causando dano contínuo e repulsão.",
@@ -167,7 +167,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
 	},
 	17: {
-		"name": "Soberano Dracônico (Ordem Dracônica)",
+		"name": "Dravarkai (Ordem Dracônica)",
 		"skill_z_name": "Chamas Reais [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Dispara um sopro colunar de chamas ancestrais de 7.0m que incinera tudo e rouba vida em massa.",
@@ -177,7 +177,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
 	18: {
-		"name": "Fera do Frenesi (Caos Sangrento)",
+		"name": "Ferovar (Caos Sangrento)",
 		"skill_z_name": "Frenesi Destruidor [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Salto devastador com 4 garras cortantes rápidas; cada golpe restaura +20 HP e aumenta sua velocidade em 50%.",
@@ -197,7 +197,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Silvestre"
 	},
 	20: {
-		"name": "Esporiano (Myconid)",
+		"name": "Myconid (Myconid)",
 		"skill_z_name": "Nuvem de Esporos [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Libera uma densa nuvem fúngica de veneno e confusão cegando atacantes em 5m.",
@@ -217,7 +217,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Aracnídea"
 	},
 	22: {
-		"name": "Draconato de Cinzas",
+		"name": "Ignivarn",
 		"skill_z_name": "Sopro de Cinzas [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Cone frontal de brasas incandescentes e fumaça vulcânica causando queima cumulativa.",
@@ -227,7 +227,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Dracônica de Cinzas"
 	},
 	23: {
-		"name": "Quimera",
+		"name": "Chimeryth",
 		"skill_z_name": "Mutação Bioquímica [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Onda de choque bio-ácida frontal adaptativa com dano massivo.",
@@ -237,7 +237,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Quimérica"
 	},
 	24: {
-		"name": "Boreal",
+		"name": "Borealin",
 		"skill_z_name": "Crio-Armadura [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Envolve o corpo em cristal de gelo puro absorvendo dano e congelando atacantes próximos.",
@@ -277,7 +277,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Crepuscular"
 	},
 	28: {
-		"name": "Errante Temporal (Cronomante)",
+		"name": "Cronari",
 		"skill_z_name": "Reversão Temporal [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Rebobina o tempo do seu corpo para a posição e integridade física de 3 segundos atrás.",
@@ -287,7 +287,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Temporal"
 	},
 	29: {
-		"name": "Meio-Celestial",
+		"name": "Aurelith",
 		"skill_z_name": "Asas de Luz [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Abre asas divinas curando +65 HP, restaurando +40 Stamina e banindo debuffs.",
@@ -297,7 +297,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Celestial Divina"
 	},
 	30: {
-		"name": "Pyromante",
+		"name": "Pyrael",
 		"skill_z_name": "Combustão [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Detona uma explosão de fogo em raio de 6m desferindo 2.8x de dano elemental.",
@@ -307,7 +307,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Elemental Ígnea"
 	},
 	31: {
-		"name": "Gigante de Gelo (1.45x)",
+		"name": "Jotunar (1.45x)",
 		"skill_z_name": "Memória Molecular [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Esmaga o solo liberando estalagmites de gelo e recebendo +350 HP Máximo por 15s.",
@@ -317,7 +317,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Glacial Gigantesca"
 	},
 	32: {
-		"name": "Drago Terra",
+		"name": "Terravyrn",
 		"skill_z_name": "Insulto Sísmico [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Provoca todos os monstros num raio de 10m forçando seu foco e quebrando posturas.",
@@ -327,7 +327,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Dracônica Telúrica"
 	},
 	33: {
-		"name": "Drago Água",
+		"name": "Hydravyrn",
 		"skill_z_name": "Bênção de Netuno [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Dispara uma violenta onda marinha em cone empurrando e atordoando inimigos.",
@@ -337,7 +337,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Dracônica Marinha"
 	},
 	34: {
-		"name": "Drago Raio",
+		"name": "Fulgravyrn",
 		"skill_z_name": "Descarga Elétrica [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Raio elétrico fulminante de longo alcance que perfura e eletrifica oponentes.",
@@ -347,7 +347,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Dracônica Eletrostática"
 	},
 	35: {
-		"name": "Drago Místico",
+		"name": "Arcavyrn",
 		"skill_z_name": "Infusão Arcana [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Círculo rúnico protetor de 6m concedendo +40% de dano mágico em habilidades por 10s.",
@@ -357,7 +357,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Dracônica Arcana"
 	},
 	36: {
-		"name": "Orc",
+		"name": "Orkhan",
 		"skill_z_name": "Ataque Devastador [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Golpe esmagador brutal com força tripla (3.2x dano) rompendo defesas blindadas.",
@@ -367,7 +367,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Brutal Marcial"
 	},
 	37: {
-		"name": "Anão (0.82x)",
+		"name": "Dvergar (0.82x)",
 		"skill_z_name": "Martelo Ancestral [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Pancada ancestral de bigorna que atordoa todos os oponentes em raio de 5.5m.",
@@ -377,7 +377,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem da Bigorna Ancestral"
 	},
 	38: {
-		"name": "Elfo",
+		"name": "Elarin",
 		"skill_z_name": "Disparo Élfico [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Disparo veloz de éter que atravessa múltiplos alvos causando dano crítico.",
@@ -387,7 +387,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Silvestre Esguia"
 	},
 	39: {
-		"name": "Elfo Solar (Azgher)",
+		"name": "Solarin (Azgher)",
 		"skill_z_name": "Espada Solar de Azgher [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Incendeia lâmina com fogo solar sagrado, causando corte colunar de chamas radiantes.",
@@ -397,7 +397,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Solar de Azgher"
 	},
 	40: {
-		"name": "Elfo Lunar (Tenebra)",
+		"name": "Lunarin (Tenebra)",
 		"skill_z_name": "Manto de Tenebra [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Mergulha no véu escuro de Tenebra obtendo invisibilidade e bônus letal de emboscada.",
@@ -407,7 +407,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Noturna de Tenebra"
 	},
 	41: {
-		"name": "Fadinha (0.55x)",
+		"name": "Faelith (0.55x)",
 		"skill_z_name": "Pó de Fada Estelar [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Espalha pó de fada cintilante curando +50 HP em aliados e cegando monstros.",
@@ -417,8 +417,8 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Fada Alada"
 	},
 	42: {
-		"name": "Goblin (0.75x)",
-		"skill_z_name": "Truque Sujo Goblin [Z]",
+		"name": "Gnarlin (0.75x)",
+		"skill_z_name": "Truque Sujo Gnarlin [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Arremessa bomba de pólvora e fumaça que cega, atordoa e rouba moedas de monstros.",
 		"passive_name": "Trapaceiro Nato (Passiva Inata)",
@@ -427,7 +427,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Goblinóide Astuta"
 	},
 	43: {
-		"name": "Demi-Humano Escorpião",
+		"name": "Escarion",
 		"skill_z_name": "Aguilhão de Toxina Vorpal [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Estocada rápida com ferrão traseiro injetando peçonha corrosiva que dissolve resistências.",
@@ -437,7 +437,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Demi-Humana Aracnídea"
 	},
 	44: {
-		"name": "Demi-Humano Tartaruga (1.35x)",
+		"name": "Testudar (1.35x)",
 		"skill_z_name": "Lar Doce Casca [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Encolhe na carapaça impenetrável por 4s, absorvendo 85% de dano e repelindo atacantes.",
@@ -447,7 +447,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Demi-Humana Quelônia"
 	},
 	45: {
-		"name": "Meio-Demônio (Succubus)",
+		"name": "Lilitara",
 		"skill_z_name": "Drenar Força Vital [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Sifão demoníaco que drena 55 HP do oponente e transfere diretamente para o jogador.",
@@ -457,7 +457,7 @@ const RACIAL_DETAILS := {
 		"status": "Linhagem Demoníaca"
 	},
 	46: {
-		"name": "Demi-Humano Lobo",
+		"name": "Ulvar",
 		"skill_z_name": "Despertar Forma Bestial [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Uivo primal liberando velocidade furiosa (+35%), garras estendidas e roubo de vida por 8s.",
@@ -494,13 +494,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Respirar Fundo [R]", "desc": "Postura defensiva temporária que recupera +15 de Stamina.", "range": "Pessoal", "cost": "0 Stamina", "cd": "6.0s"},
 		"f": {"name": "Instinto de Sobrevivência [F]", "desc": "Salto para trás e foco aumentado reduzindo dano recebido por 2s.", "range": "Pessoal", "cost": "20 Stamina", "cd": "12.0s"}
 	},
-	1: { # Guerreiro
-		"name": "Guerreiro",
+	1: { # Espadachim da Aurora
+		"name": "Espadachim da Aurora",
 		"tier_name": "Tier 1 a Tier 4 (Mestre das Lâminas)",
 		"desc": "Combatente resoluto armado com espada longa afiada. [Passiva: Sangue de Batalha] +15% Defesa Física e +10% Dano com Espadas.",
 		"color": Color("#4fc3f7"),
 		"evolved_titles": {
-			1: "Guerreiro Comum",
+			1: "Espadachim da Aurora Comum",
 			2: "Guarda Valente (Incomum)",
 			3: "Cavaleiro Rúnico (Rara)",
 			4: "Mestre de Armas (Épica)"
@@ -515,14 +515,14 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Investida Imparável [R]", "desc": "Dash frontal de 6m que empurra inimigos e quebra postura.", "range": "6.0m Dash", "cost": "20 Stamina", "cd": "6.5s"},
 		"f": {"name": "Julgamento da Espada [F]", "desc": "2.6x dano sísmico em área de 4.5m (+40% dano em alvos com <35% HP).", "range": "4.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	2: { # Mago
-		"name": "Mago",
+	2: { # Arcanista
+		"name": "Arcanista",
 		"tier_name": "Tier 1 a Tier 4 (Arquimago do Éter)",
 		"desc": "Mestre arcano armado com cajado de foco e orbes radiantes. [Passiva: Ressonância Arcana] +20% Dano Mágico e regeneração de Mana.",
 		"color": Color("#ba68c8"),
 		"evolved_titles": {
-			1: "Mago Comum",
-			2: "Mago Arcano (Incomum)",
+			1: "Arcanista Comum",
+			2: "Arcanista Arcano (Incomum)",
 			3: "Arquimago (Rara)",
 			4: "Sábio Elemental (Épica)"
 		},
@@ -536,13 +536,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Prisão Glacial [R]", "desc": "Congela e empurra inimigos em 5m por 2s.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Chuva de Meteoros [F]", "desc": "2.8x dano arcano/fogo devastador em raio de 6m.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	3: { # Arqueiro
-		"name": "Arqueiro",
+	3: { # Sentinela dos Ventos
+		"name": "Sentinela dos Ventos",
 		"tier_name": "Tier 1 a Tier 4 (Sentinela Noturno)",
 		"desc": "Atirador ágil e letal com arco longo e disparos penetrantes. [Passiva: Olho de Falcão] +20% Taxa Crítica e +12% Velocidade.",
 		"color": Color("#81c784"),
 		"evolved_titles": {
-			1: "Arqueiro Comum",
+			1: "Sentinela dos Ventos Comum",
 			2: "Caçador Silvestre (Incomum)",
 			3: "Franco-Atirador (Rara)",
 			4: "Sentinela Noturno (Épica)"
@@ -557,13 +557,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Salto Acrobático [R]", "desc": "Mortal para trás disparando flecha que prende o inimigo por 2s.", "range": "12.0m", "cost": "20 Stamina", "cd": "6.0s"},
 		"f": {"name": "Tempestade de Mil Flechas [F]", "desc": "2.6x dano em chuva de flechas numa área de 6m.", "range": "18.0m", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	4: { # Assassino
-		"name": "Assassino",
+	4: { # Lâmina Silente
+		"name": "Lâmina Silente",
 		"tier_name": "Tier 1 a Tier 4 (Lâmina Sombria)",
 		"desc": "Executor veloz empunhando duas adagas venenosas. [Passiva: Lâmina Silenciosa] +35% Crítico costas e +15% Esquiva.",
 		"color": Color("#e57373"),
 		"evolved_titles": {
-			1: "Assassino Comum",
+			1: "Lâmina Silente Comum",
 			2: "Espreitador (Incomum)",
 			3: "Lâmina Sombria (Rara)",
 			4: "Mestre da Morte (Épica)"
@@ -578,13 +578,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Cortina de Fumaça [R]", "desc": "Fica furtivo/intangível por 2.5s e ganha +30% velocidade.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Lótus de Sangue [F]", "desc": "Desfere 8 cortes letais em 4m causando 2.7x dano e hemorragia.", "range": "4.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	5: { # Lutador
-		"name": "Lutador",
+	5: { # Punho Celeste
+		"name": "Punho Celeste",
 		"tier_name": "Tier 1 a Tier 4 (Punho de Dragão)",
 		"desc": "Mestre marcial que luta com manoplas pesadas de ferro e Chi canalizado. [Passiva: Punhos de Ferro & Chi].",
 		"color": Color("#ffb74d"),
 		"evolved_titles": {
-			1: "Lutador Comum",
+			1: "Punho Celeste Comum",
 			2: "Pugilista de Ferro (Incomum)",
 			3: "Mestre de Chi (Rara)",
 			4: "Punho de Dragão (Épica)"
@@ -599,13 +599,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Postura do Lótus Marcial [R]", "desc": "Purifica debuffs, cura +40 HP e reduz dano em 50% por 3s.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Meteoro de Um Punho [F]", "desc": "Salta e soca o chão abrindo cratera de 5.5m com 2.75x dano.", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	6: { # Escudeiro
-		"name": "Escudeiro",
+	6: { # Guardião do Bastião
+		"name": "Guardião do Bastião",
 		"tier_name": "Tier 1 a Tier 4 (Paladino da Fortaleza)",
 		"desc": "Bastião inabalável com escudo colossal e maça. [Passiva: Fortaleza Viva] +35% Defesa, reflete 20% do dano.",
 		"color": Color("#fff176"),
 		"evolved_titles": {
-			1: "Escudeiro Comum",
+			1: "Guardião do Bastião Comum",
 			2: "Guardião da Torre (Incomum)",
 			3: "Baluarte Implacável (Rara)",
 			4: "Paladino da Fortaleza (Épica)"
@@ -620,13 +620,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Formação Impenetrável [R]", "desc": "Bloqueia 80% do dano por 4s e concede escudo aos aliados próximos.", "range": "Grupo 8m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Cidadela Inabalável [F]", "desc": "Crava o escudo no solo criando cúpula dourada que cura +70 HP e impede mortes por 4s.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	7: { # Ferreiro
-		"name": "Ferreiro",
+	7: { # Forjador de Estrelas
+		"name": "Forjador de Estrelas",
 		"tier_name": "Tier 1 a Tier 4 (Artesão Supremo — Estilo Overgeared)",
 		"desc": "Forjador lendário com martelo colossal de forja. [Passiva: Orgulho do Criador] Equipamentos nunca quebram e +25% Dano com armas forjadas.",
 		"color": Color("#ff9800"),
 		"evolved_titles": {
-			1: "Ferreiro Comum",
+			1: "Forjador de Estrelas Comum",
 			2: "Forjador de Batalha (Incomum)",
 			3: "Mestre da Forja (Rara)",
 			4: "Artesão Supremo (Épica)"
@@ -641,16 +641,16 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Afiação & Têmpera em Campo [R]", "desc": "Repara armas e concede +25% Ataque e Defesa ao grupo por 10s.", "range": "Grupo 12m", "cost": "20 Stamina", "cd": "10.0s"},
 		"f": {"name": "Dança do Arsenal Forjado [F]", "desc": "Invoca 4 armas espectrais forjadas que giram cortando tudo em 5.5m com 2.7x dano!", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	8: { # Alquimista
-		"name": "Alquimista",
-		"tier_name": "Tier 1 a Tier 4 (Grão-Alquimista do Éter)",
+	8: { # Transmutador
+		"name": "Transmutador",
+		"tier_name": "Tier 1 a Tier 4 (Grão-Transmutador do Éter)",
 		"desc": "Cientista bélico armado com catalisadores e frascos químicos. [Passiva: Reação Sintética] +35% potência de poções.",
 		"color": Color("#69f0ae"),
 		"evolved_titles": {
-			1: "Alquimista Comum",
+			1: "Transmutador Comum",
 			2: "Boticário Bélico (Incomum)",
 			3: "Bioquímico Transmutador (Rara)",
-			4: "Grão-Alquimista do Éter (Épica)"
+			4: "Grão-Transmutador do Éter (Épica)"
 		},
 		"passive": {
 			"name": "Reação Sintética",
@@ -662,15 +662,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Bomba de Ácido Corrosivo [R]", "desc": "Poça química que derrete 35% da defesa inimiga e desacelera por 4s.", "range": "12.0m", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Transmutação do Behemoth Químico [F]", "desc": "Detona megabomba de 2.6x dano e transforma o corpo com +30% status por 8s.", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	9: { # Escultor
-		"name": "Escultor",
+	9: { # Escultor de Almas
+		"name": "Escultor de Almas",
 		"tier_name": "Tier 1 a Tier 4 (Mestre do Luar — Estilo Moonlight Sculptor)",
 		"desc": "Artista do entalhe com cinzel afiado e adaga prateada. [Passiva: Olho da Escultura & Estátua Viva] +25% Crítico e Estátua Guardiã leal.",
 		"color": Color("#80deea"),
 		"evolved_titles": {
-			1: "Escultor Comum",
+			1: "Escultor de Almas Comum",
 			2: "Lapidador de Mármore (Incomum)",
-			3: "Escultor da Alvorada (Rara)",
+			3: "Escultor de Almas da Alvorada (Rara)",
 			4: "Mestre da Luz e Sombra (Épica)"
 		},
 		"passive": {
@@ -683,13 +683,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Estátua Explosiva / Pele de Mármore [R]", "desc": "Deixa uma escultura que explode nos inimigos e concede 50% de redução de dano.", "range": "4.5m Área", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Técnica Secreta: Escultura do Luar [F]", "desc": "Feixe de cortes prateados em 6m causando 2.8x Dano Verdadeiro e despertando o Colosso!", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	10: { # Domador
-		"name": "Domador",
+	10: { # Senhor das Feras
+		"name": "Senhor das Feras",
 		"tier_name": "Tier 1 a Tier 4 (Senhor dos Predadores — Estilo Taming Master)",
 		"desc": "Mestre das feras com chicote bestial de couro trançado. [Passiva: Senhor da Matilha] Luta com Fera Domada que divide dano.",
 		"color": Color("#ffd740"),
 		"evolved_titles": {
-			1: "Domador Comum",
+			1: "Senhor das Feras Comum",
 			2: "Adestrador de Feras (Incomum)",
 			3: "Comandante da Matilha (Rara)",
 			4: "Senhor dos Predadores (Épica)"
@@ -704,13 +704,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Fusão & Uivo Bestial [R]", "desc": "Cura +50 HP seu e da fera, concedendo +30% de velocidade e garras vorazes.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.5s"},
 		"f": {"name": "Debandada das Feras Primordiais [F]", "desc": "Invoca feras domadas que atropelam toda a área em 7m com 2.8x dano!", "range": "7.0m Área", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	11: { # Alfaiate de Guerra
-		"name": "Alfaiate de Guerra",
+	11: { # Tecelão Carmesim
+		"name": "Tecelão Carmesim",
 		"tier_name": "Tier 1 a Tier 4 (Mestre do Tear Fatal)",
 		"desc": "Manipulador tático de fios de aço monofilamento e agulhas rúnicas blindadas. [Passiva: Fios & Seda Blindada].",
 		"color": Color("#ce93d8"),
 		"evolved_titles": {
-			1: "Alfaiate de Guerra Comum",
+			1: "Tecelão Carmesim Comum",
 			2: "Costureiro de Malha (Incomum)",
 			3: "Tecelão da Vigília (Rara)",
 			4: "Mestre do Tear Fatal (Épica)"
@@ -725,13 +725,13 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Costurar Sombras / Marionete [R]", "desc": "Prende os inimigos no chão por 2.5s com fios de aço e concede esquiva ao grupo.", "range": "6.0m", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Gaiola de Fios Carmesins [F]", "desc": "Fecha uma redoma de fios de aço que tritura todos os alvos em 6m causando 2.7x dano.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	12: { # Chef de Caça
-		"name": "Chef de Caça",
+	12: { # Mestre do Banquete
+		"name": "Mestre do Banquete",
 		"tier_name": "Tier 1 a Tier 4 (Grão-Chef dos Ermos)",
 		"desc": "Açougueiro de monstros com cutelo colossal e wok de ferro. [Passiva: Células Gourmet & Mestre Açougueiro].",
 		"color": Color("#ff7043"),
 		"evolved_titles": {
-			1: "Chef de Caça Comum",
+			1: "Mestre do Banquete Comum",
 			2: "Cozinheiro de Bordo (Incomum)",
 			3: "Mestre Gourmet (Rara)",
 			4: "Grão-Chef dos Ermos (Épica)"
@@ -746,8 +746,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Banquete na Wok Flamejante [R]", "desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Trinchar o Behemoth [F]", "desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade!", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	27: { # Ceifador do Eclipse (Classe Secreta 27)
-		"name": "Ceifador do Eclipse",
+	27: { # Ceifador da Lua Negra (Classe Secreta 27)
+		"name": "Ceifador da Lua Negra",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano da Meia-Noite)",
 		"desc": "Espírito das sombras portando uma foice colossal. Cada golpe ceifa as almas e o sangue dos inimigos.",
 		"color": Color("#d500f9"),
@@ -771,8 +771,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Drenagem Abissal [R]", "desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.", "range": "Pessoal 5m", "cost": "20 Stamina", "cd": "6.5s"},
 		"f": {"name": "Dança do Eclipse Total [F]", "desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida pleno (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	35: { # Artífice Rúnico (Classe Secreta 35)
-		"name": "Artífice Rúnico",
+	35: { # Engenheiro Rúnico (Classe Secreta 35)
+		"name": "Engenheiro Rúnico",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Engenheiro Arcano Supremo)",
 		"desc": "Híbrido mecânico armado com martelo-canhão movido a núcleos de forja estelar.",
 		"color": Color("#ff6d00"),
@@ -782,7 +782,7 @@ const CLASS_ACTIVE_SKILLS := {
 			2: "Artífice Incomum",
 			3: "Artífice Raro",
 			4: "Artífice Épico",
-			5: "Artífice Rúnico Mecânico (Única)",
+			5: "Engenheiro Rúnico Mecânico (Única)",
 			6: "Engenheiro Arcano Supremo (Lendária)"
 		},
 		"passive": {
@@ -796,8 +796,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Sobrecarga Eletrostática [R]", "desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Bombardeio Titanomecânico [F]", "desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	36: { # Criador de Homúnculos (Classe Secreta 36)
-		"name": "Criador de Homúnculos",
+	36: { # Demiurgo Alquímico (Classe Secreta 36)
+		"name": "Demiurgo Alquímico",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Demiurgo da Vida Sintética)",
 		"desc": "Mestre da vida sintética acompanhado por uma quimera flutuante transmissora de elixires.",
 		"color": Color("#00b0ff"),
@@ -819,10 +819,10 @@ const CLASS_ACTIVE_SKILLS := {
 		"basic": {"name": "Pulso Quimérico [LMB]", "desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre (1.0x dano).", "range": "14.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Infusão Mutagênica [Q]", "desc": "Elixir abissal corrosivo que dissolve resistências inimigas (1.75x dano).", "range": "15.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Névoa de Bioplasma [R]", "desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.", "range": "4.5m Área", "cost": "20 Stamina", "cd": "7.0s"},
-		"f": {"name": "Frenesi do Quimera Supremo [F]", "desc": "O homúnculo cresce e desfere uma explosão de garras e ácido colossais (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+		"f": {"name": "Frenesi do Chimeryth Supremo [F]", "desc": "O homúnculo cresce e desfere uma explosão de garras e ácido colossais (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	28: { # Dançarino Astral (Classe Secreta 28)
-		"name": "Dançarino Astral",
+	28: { # Bailarino das Estrelas (Classe Secreta 28)
+		"name": "Bailarino das Estrelas",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano das Constelações)",
 		"desc": "Duelista cósmico mestre de esquivas fluidas e cortes críticos que brilham como cometas estelares.",
 		"color": Color("#80d8ff"),
@@ -832,7 +832,7 @@ const CLASS_ACTIVE_SKILLS := {
 			2: "Dançarino Incomum",
 			3: "Dançarino Raro",
 			4: "Dançarino Épico",
-			5: "Dançarino Astral (Única)",
+			5: "Bailarino das Estrelas (Única)",
 			6: "Soberano das Constelações (Lendária)"
 		},
 		"passive": {
@@ -846,8 +846,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Valsa dos Espelhos [R]", "desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.", "range": "Pessoal", "cost": "20 Stamina", "cd": "6.0s"},
 		"f": {"name": "Constelação de Mil Lâminas [F]", "desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano).", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	29: { # Inquisidor das Cinzas (Classe Secreta 29)
-		"name": "Inquisidor das Cinzas",
+	29: { # Inquisidor da Chama Branca (Classe Secreta 29)
+		"name": "Inquisidor da Chama Branca",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Grão-Inquisidor das Chamas)",
 		"desc": "Executor fanático cuja força cresce exponencialmente quanto mais próximo estiver da morte.",
 		"color": Color("#ff5252"),
@@ -857,7 +857,7 @@ const CLASS_ACTIVE_SKILLS := {
 			2: "Inquisidor Incomum",
 			3: "Inquisidor Raro",
 			4: "Inquisidor Épico",
-			5: "Inquisidor das Cinzas (Única)",
+			5: "Inquisidor da Chama Branca (Única)",
 			6: "Grão-Inquisidor das Chamas (Lendária)"
 		},
 		"passive": {
@@ -871,8 +871,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Selo de Excomunhão [R]", "desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Crucificação de Cinzas [F]", "desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	30: { # Necromante de Ossos (Classe Secreta 30)
-		"name": "Necromante de Ossos",
+	30: { # Arauto do Ossuário (Classe Secreta 30)
+		"name": "Arauto do Ossuário",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Lorde do Ossuário Eterno)",
 		"desc": "Manipulador anatômico que canaliza a essência dos ossos e extrai vitalidade de cada abate (+20 HP).",
 		"color": Color("#ccff90"),
@@ -882,7 +882,7 @@ const CLASS_ACTIVE_SKILLS := {
 			2: "Necromante Incomum",
 			3: "Necromante Raro",
 			4: "Necromante Épico",
-			5: "Necromante de Ossos (Única)",
+			5: "Arauto do Ossuário (Única)",
 			6: "Lorde do Ossuário Eterno (Lendária)"
 		},
 		"passive": {
@@ -896,18 +896,18 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Explosão Óssea & Escudo [R]", "desc": "Detona fragmentos ósseos em 5.0m e ergue uma barreira de ossos protetora.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.5s"},
 		"f": {"name": "Legião do Ossuário [F]", "desc": "Ergue um vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	37: { # Domador Primordial (Classe Secreta 37)
-		"name": "Domador Primordial",
+	37: { # Senhor da Selva Primordial (Classe Secreta 37)
+		"name": "Senhor da Selva Primordial",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Avatar da Fera Ancestral)",
-		"desc": "Guerreiro feral possuído pelo Espírito Alfa, infligindo +25% de dano constante com garras devastadoras.",
+		"desc": "Espadachim da Aurora feral possuído pelo Espírito Alfa, infligindo +25% de dano constante com garras devastadoras.",
 		"color": Color("#ffd740"),
 		"is_secret": true,
 		"evolved_titles": {
-			1: "Domador Comum",
-			2: "Domador Incomum",
-			3: "Domador Raro",
-			4: "Domador Épico",
-			5: "Domador Primordial (Única)",
+			1: "Senhor das Feras Comum",
+			2: "Senhor das Feras Incomum",
+			3: "Senhor das Feras Raro",
+			4: "Senhor das Feras Épico",
+			5: "Senhor da Selva Primordial (Única)",
 			6: "Avatar da Fera Ancestral (Lendária)"
 		},
 		"passive": {
@@ -921,8 +921,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Uivo da Alcateia [R]", "desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Fúria do Behemoth [F]", "desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano).", "range": "5.0m Frontal", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	38: { # Cavaleiro da Ruptura (Classe Secreta 38)
-		"name": "Cavaleiro da Ruptura",
+	38: { # Cavaleiro do Vazio (Classe Secreta 38)
+		"name": "Cavaleiro do Vazio",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Guardião da Singularidade)",
 		"desc": "Colosso dimensional envolto em malha espacial. Reduz 30% de todo o dano recebido e dobra a gravidade.",
 		"color": Color("#7c4dff"),
@@ -932,7 +932,7 @@ const CLASS_ACTIVE_SKILLS := {
 			2: "Cavaleiro Incomum",
 			3: "Cavaleiro Raro",
 			4: "Cavaleiro Épico",
-			5: "Cavaleiro da Ruptura (Única)",
+			5: "Cavaleiro do Vazio (Única)",
 			6: "Guardião da Singularidade (Lendária)"
 		},
 		"passive": {
@@ -946,8 +946,8 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Singularidade Reversa [R]", "desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.", "range": "4.5m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Colapso Estelar [F]", "desc": "Cria um buraco negro em 6.5m que atordoa todos os inimigos e desintegra matéria (2.8x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	39: { # Arauto da Tempestade (Classe Secreta 39)
-		"name": "Arauto da Tempestade",
+	39: { # Arauto do Trovão (Classe Secreta 39)
+		"name": "Arauto do Trovão",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano dos Relâmpagos)",
 		"desc": "Avatar dos trovões cuja fúria cresce em +35% durante chuvas, empunhando dardos de relâmpago puro.",
 		"color": Color("#40c4ff"),
@@ -957,7 +957,7 @@ const CLASS_ACTIVE_SKILLS := {
 			2: "Arauto Incomum",
 			3: "Arauto Raro",
 			4: "Arauto Épico",
-			5: "Arauto da Tempestade (Única)",
+			5: "Arauto do Trovão (Única)",
 			6: "Soberano dos Relâmpagos (Lendária)"
 		},
 		"passive": {
@@ -1510,10 +1510,10 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 
 		var quest_name: String = "As Três Colheitas sob o Sol Negro"
 		var quest_lore: String = "Abata 3 Criaturas de Elite ou Chefes (Lobo Alfa, Licantropo Alfa, Executor) sem tombar em batalha para provar seu valor perante o cosmos e ascender ao TIER 6 LENDÁRIO."
-		if class_id == 35: # Artífice Rúnico
+		if class_id == 35: # Engenheiro Rúnico
 			quest_name = "O Metal que Caiu do Céu"
 			quest_lore = "Colete a liga divina do cosmos abatendo 3 Monstros de Elite sem morrer para ascender a Engenheiro Arcano Supremo (Tier 6)."
-		elif class_id == 36: # Criador de Homúnculos
+		elif class_id == 36: # Demiurgo Alquímico
 			quest_name = "Magnum Opus Transmutacional"
 			quest_lore = "Transmute a centelha da vida sintética definitiva com a essência de 3 Criaturas de Elite para despertar como Demiurgo (Tier 6)."
 

@@ -41,7 +41,7 @@ const MOB_NAMES := {
 	19: "Quimera Costurada Nº 0",
 	20: "Golem de Gelo Antigo",
 	21: "Draco de Geada Selvagem",
-	22: "Ymir, o Patriarca Gigante de Gelo",
+	22: "Ymir, o Patriarca Jotunar",
 	23: "Guarda Sanguinário de Vesperian",
 	24: "Lorde Vesperian, o Progenitor Vampiro"
 }

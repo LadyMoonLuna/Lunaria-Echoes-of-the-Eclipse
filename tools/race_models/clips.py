@@ -67,7 +67,7 @@ CLIPS = {
         k(0.36, torso=(-32, 8, 0), arm_r=(45, 0, 0), arm_l=(45, 0, 0), leg_r=(-15, 0, 0), leg_l=(28, 0, 0), root_y=-0.12),
         k(0.46, torso=(-30, 6, 0), arm_r=(40, 0, 0), arm_l=(40, 0, 0), leg_r=(-15, 0, 0), leg_l=(28, 0, 0), root_y=-0.12),
         k(0.6),
-    ], "Golpe esmagador de cima para baixo com o peso do corpo (Ferreiro)."),
+    ], "Golpe esmagador de cima para baixo com o peso do corpo (Forjador de Estrelas)."),
 
     "attack_2h_sweep": clip(0.6, False, [
         k(0.0),
@@ -98,7 +98,7 @@ CLIPS = {
         k(0.16, torso=(10, -28, 0), arm_r=(165, 0, 25), arm_l=(60, 0, -20), leg_r=(-14, 0, 0), leg_l=(12, 0, 0)),
         k(0.3, torso=(-16, 22, 0), arm_r=(40, 0, -10), arm_l=(20, 0, -20), leg_r=(-14, 0, 0), leg_l=(18, 0, 0)),
         k(0.5),
-    ], "Arremesso por cima do ombro como uma granada (Alquimista)."),
+    ], "Arremesso por cima do ombro como uma granada (Transmutador)."),
 
     "skill_q": clip(0.6, False, [
         k(0.0),

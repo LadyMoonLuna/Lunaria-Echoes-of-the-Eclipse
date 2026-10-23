@@ -280,7 +280,7 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 		add_child(d_arms)
 
 	elif is_lyra:
-		# Lyra (Alquimista - ID 102): Cápsula com tom roxo-claro e um frasco alquímico luminoso flutuante
+		# Lyra (Transmutador - ID 102): Cápsula com tom roxo-claro e um frasco alquímico luminoso flutuante
 		is_dummy = false
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = Color(0.72, 0.52, 0.88, 1.0) # Tom roxo-claro místico

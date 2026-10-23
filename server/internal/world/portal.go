@@ -116,10 +116,10 @@ var OfficialPortals = map[uint8]PortalDef{
 		TargetZ:      -35.0,
 	},
 
-	// 11 & 12: Vila do Refúgio <-> Interior da Torre do Mago (60x60m)
+	// 11 & 12: Vila do Refúgio <-> Interior da Torre do Arcanista (60x60m)
 	11: {
 		ID:           11,
-		Name:         "Porta da Torre do Mago -> Interior da Torre",
+		Name:         "Porta da Torre do Arcanista -> Interior da Torre",
 		FromZoneID:   ZoneVillage,
 		TargetZoneID: ZoneMageTower,
 		TargetX:      0.0,
@@ -128,7 +128,7 @@ var OfficialPortals = map[uint8]PortalDef{
 	},
 	12: {
 		ID:           12,
-		Name:         "Saída da Torre do Mago -> Vila",
+		Name:         "Saída da Torre do Arcanista -> Vila",
 		FromZoneID:   ZoneMageTower,
 		TargetZoneID: ZoneVillage,
 		TargetX:      45.0,

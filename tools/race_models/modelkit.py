@@ -385,7 +385,7 @@ BODY_GROUPS = (None, "leg_l", "leg_r", "arm_l", "arm_r")
 
 
 def ghost_copy(m, ghost_mat, offset):
-    """Duplica as partes do corpo como eco translúcido (Errante Temporal)."""
+    """Duplica as partes do corpo como eco translúcido (Cronari)."""
     body = [p for p in m.parts if p.get("group") in BODY_GROUPS
             and m.mats[p["mat"]].get("alpha", 1.0) >= 1.0]
     for p in body:

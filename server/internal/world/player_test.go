@@ -26,10 +26,10 @@ func TestCalculateStatsByClassAndRace(t *testing.T) {
 		t.Fatalf("Esperava (125, 110) para Iniciado Kharad, obteve (%d, %d)", hp, stam)
 	}
 
-	// Assassino (110, 140) + Dhampir (+10, +15) = (120, 155)
+	// Lâmina Silente (110, 140) + Sangrael (+10, +15) = (120, 155)
 	hp, stam = CalculateStatsByClassAndRace(protocol.ClassAssassin, protocol.RaceDhampir)
 	if hp != 120 || stam != 155 {
-		t.Fatalf("Esperava (120, 155) para Assassino Dhampir, obteve (%d, %d)", hp, stam)
+		t.Fatalf("Esperava (120, 155) para Lâmina Silente Sangrael, obteve (%d, %d)", hp, stam)
 	}
 
 	// Espadachim (140, 100) + Varkai (+15, +10) = (155, 110)
@@ -38,13 +38,13 @@ func TestCalculateStatsByClassAndRace(t *testing.T) {
 		t.Fatalf("Esperava (155, 110) para Espadachim Varkai, obteve (%d, %d)", hp, stam)
 	}
 
-	// Ferreiro (155, 100) + Valeriano (+10, +10) = (165, 110)
+	// Forjador de Estrelas (155, 100) + Valeriano (+10, +10) = (165, 110)
 	hp, stam = CalculateStats(protocol.ClassBlacksmith, protocol.RaceValerian, protocol.TierCommon, 1)
 	if hp != 165 || stam != 110 {
-		t.Fatalf("Esperava (165, 110) para Ferreiro Valeriano, obteve (%d, %d)", hp, stam)
+		t.Fatalf("Esperava (165, 110) para Forjador de Estrelas Valeriano, obteve (%d, %d)", hp, stam)
 	}
 
-	// Alquimista (110, 120) + Noctari (+0, +20) = (110, 140)
+	// Transmutador (110, 120) + Noctari (+0, +20) = (110, 140)
 	hp, stam = CalculateStats(protocol.ClassAlchemist, protocol.RaceNoctari, protocol.TierCommon, 1)
 	if hp != 110 || stam != 140 {
 		t.Fatalf("Esperava (110, 140) para Alquimista Noctari, obteve (%d, %d)", hp, stam)
@@ -109,7 +109,7 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 		t.Fatalf("Classe Base não pode ultrapassar Tier 4! Obteve %d", p.ClassTier)
 	}
 
-	// Trocar para Classe Secreta (ActionMode 2): Ceifador do Eclipse (27)
+	// Trocar para Classe Secreta (ActionMode 2): Ceifador da Lua Negra (27)
 	// Deve iniciar no Tier 5 (Única) e RESETAR NÍVEL PARA 1!
 	p.SetIdentityMode(protocol.RaceDhampir, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset)
 	if p.ClassID != protocol.ClassEclipseReaper {
@@ -386,14 +386,14 @@ func TestPlayerConsumablesAndSecretTriggers(t *testing.T) {
 		t.Fatalf("Falha ao ativar Poção Lupina: ok=%v, active=%v", ok, p.IsWolfPotionActive())
 	}
 
-	// Sangue do Progenitor Bestial (16): Desperta Dhampir (Raça 5)
+	// Sangue do Progenitor Bestial (16): Desperta Sangrael (Raça 5)
 	p.AddItem(protocol.ItemBeastProgenitorBlood, 1)
 	ok, _ = p.UseConsumable(protocol.ItemBeastProgenitorBlood)
 	if !ok || p.RaceID != protocol.RaceDhampir {
-		t.Fatalf("Falha ao despertar Dhampir via item 16: ok=%v, race=%d", ok, p.RaceID)
+		t.Fatalf("Falha ao despertar Sangrael via item 16: ok=%v, race=%d", ok, p.RaceID)
 	}
 
-	// Tomo da Foice do Eclipse (17): Desperta Ceifador do Eclipse (Classe 7), Tier 5 Única, Nível 1 Reset
+	// Tomo da Foice do Eclipse (17): Desperta Ceifador da Lua Negra (Classe 7), Tier 5 Única, Nível 1 Reset
 	p.AddLevel(10) // Nível 11
 	p.AddItem(protocol.ItemEclipseScytheTome, 1)
 	ok, _ = p.UseConsumable(protocol.ItemEclipseScytheTome)
@@ -402,7 +402,7 @@ func TestPlayerConsumablesAndSecretTriggers(t *testing.T) {
 			ok, p.ClassID, p.ClassTier, p.Level)
 	}
 
-	// Núcleo de Forja Estelar (18): Desperta Artífice Rúnico (Classe 8), Tier 5 Única, Nível 1 Reset
+	// Núcleo de Forja Estelar (18): Desperta Engenheiro Rúnico (Classe 8), Tier 5 Única, Nível 1 Reset
 	p.AddLevel(5) // Nível 6
 	p.AddItem(protocol.ItemStarforgeCore, 1)
 	ok, _ = p.UseConsumable(protocol.ItemStarforgeCore)
@@ -411,14 +411,14 @@ func TestPlayerConsumablesAndSecretTriggers(t *testing.T) {
 			ok, p.ClassID, p.ClassTier, p.Level)
 	}
 
-	// Despertar da Raça Secreta Revenant (7): +50 MaxHP
+	// Despertar da Raça Secreta Cinerion (7): +50 MaxHP
 	prevHP := p.MaxHP
 	p.EvolveToRevenant()
 	if p.RaceID != protocol.RaceRevenant {
-		t.Fatalf("Esperava Raça Revenant (7), obteve %d", p.RaceID)
+		t.Fatalf("Esperava Raça Cinerion (7), obteve %d", p.RaceID)
 	}
 	if p.MaxHP < prevHP+50 {
-		t.Fatalf("Revenant deveria ter concedido +50 MaxHP: antes %d, depois %d", prevHP, p.MaxHP)
+		t.Fatalf("Cinerion deveria ter concedido +50 MaxHP: antes %d, depois %d", prevHP, p.MaxHP)
 	}
 }
 
@@ -813,7 +813,7 @@ func TestTimeWandererRewindDestiny(t *testing.T) {
 func TestConsumablesNewRaces(t *testing.T) {
 	p := NewPlayer(5, nil, 0, 0, 0)
 
-	// 1. Esporiano com Lixo Orgânico
+	// 1. Myconid com Lixo Orgânico
 	p.RaceID = protocol.RaceValerian
 	p.AddItem(protocol.ItemOrganicTrash, 1)
 	ok, _ := p.UseConsumable(protocol.ItemOrganicTrash)
@@ -828,13 +828,13 @@ func TestConsumablesNewRaces(t *testing.T) {
 		t.Fatalf("Myconid falhou ao comer lixo orgânico: ok=%v, msg=%s, hp=%d", ok, msg, p.HP)
 	}
 
-	// 2. Quimera com Carnes
+	// 2. Chimeryth com Carnes
 	p.RaceID = protocol.RaceChimera
 	p.HP = 10
 	p.AddItem(protocol.ItemRawWolfMeat, 1)
 	ok, _ = p.UseConsumable(protocol.ItemRawWolfMeat)
 	if !ok || p.HP != 100 { // 10 + 90 (dobro de 45) = 100
-		t.Fatalf("Quimera deveria receber 90 HP da carne crua! Obteve: %d", p.HP)
+		t.Fatalf("Chimeryth deveria receber 90 HP da carne crua! Obteve: %d", p.HP)
 	}
 
 	// 3. Despertar Aracne com Casulo de Seda Prateada
@@ -844,11 +844,11 @@ func TestConsumablesNewRaces(t *testing.T) {
 		t.Fatalf("Falha ao despertar Aracne via casulo de seda!")
 	}
 
-	// 4. Despertar Errante Temporal com Ampulheta Rúnica
+	// 4. Despertar Cronari com Ampulheta Rúnica
 	p.AddItem(protocol.ItemRunicHourglass, 1)
 	ok, _ = p.UseConsumable(protocol.ItemRunicHourglass)
 	if !ok || p.RaceID != protocol.RaceTimeWanderer {
-		t.Fatalf("Falha ao despertar Errante Temporal via ampulheta!")
+		t.Fatalf("Falha ao despertar Cronari via ampulheta!")
 	}
 }
 
@@ -965,13 +965,13 @@ func TestSecretClasses10to15AndDevDirect(t *testing.T) {
 		t.Fatalf("UntouchedKills deveria ter zerado após sofrer dano, valor atual: %d", p.UntouchedKills)
 	}
 
-	// 4. Testa Passiva de -30% Dano Recebido do Cavaleiro da Ruptura (Classe 14)
+	// 4. Testa Passiva de -30% Dano Recebido do Cavaleiro do Vazio (Classe 14)
 	p.SetIdentityMode(protocol.TierCommon, protocol.ClassRiftKnight, protocol.IdentityModeDevDirect)
 	p.HP = 200
 	p.TakeDamage(100) // 100 * 0.70 = 70 de dano efetivo
 	expectedHP := uint16(200 - 70)
 	if p.HP != expectedHP {
-		t.Fatalf("Passiva Cavaleiro da Ruptura deveria reduzir 30%% do dano (esperava HP %d, obteve %d)", expectedHP, p.HP)
+		t.Fatalf("Passiva Cavaleiro do Vazio deveria reduzir 30%% do dano (esperava HP %d, obteve %d)", expectedHP, p.HP)
 	}
 }
 
@@ -1024,20 +1024,20 @@ func TestDevControlLevelAndStats(t *testing.T) {
 }
 
 func TestBasicClassDefensivePassives(t *testing.T) {
-	// Guerreiro (Sangue de Batalha): +15% de Defesa Física -> 100 vira 85
+	// Espadachim da Aurora (Sangue de Batalha): +15% de Defesa Física -> 100 vira 85
 	w := NewPlayer(1, nil, 0, 0, 0)
 	w.SetIdentity(protocol.RaceValerian, protocol.ClassWarrior)
 	hp := w.HP
 	if newHP, _ := w.TakeDamage(100); newHP != hp-85 {
-		t.Fatalf("Guerreiro: esperava HP %d, obteve %d", hp-85, newHP)
+		t.Fatalf("Espadachim da Aurora: esperava HP %d, obteve %d", hp-85, newHP)
 	}
 
-	// Escudeiro (Fortaleza Viva): +35% de Defesa Total -> 100 vira 65
+	// Guardião do Bastião (Fortaleza Viva): +35% de Defesa Total -> 100 vira 65
 	sb := NewPlayer(2, nil, 0, 0, 0)
 	sb.SetIdentity(protocol.RaceValerian, protocol.ClassShieldBearer)
 	hp = sb.HP
 	if newHP, _ := sb.TakeDamage(100); newHP != hp-65 {
-		t.Fatalf("Escudeiro: esperava HP %d, obteve %d", hp-65, newHP)
+		t.Fatalf("Guardião do Bastião: esperava HP %d, obteve %d", hp-65, newHP)
 	}
 }
 
@@ -1082,7 +1082,7 @@ func TestEvolutionPathsMultipliersAndChoice(t *testing.T) {
 	}
 	baseHP := p.MaxHP
 
-	// Escudeiro Caminho 1 (Guardião ➔ Égide Imortal): +30% HP, +25% Defesa, -15% Dano
+	// Guardião do Bastião Caminho 1 (Guardião ➔ Égide Imortal): +30% HP, +25% Defesa, -15% Dano
 	p.SetIdentityMode(protocol.TierUncommon, protocol.ClassShieldBearer, protocol.IdentityModeDevDirect, 1)
 	if p.SubPath != 1 || p.NeedsPathChoice() {
 		t.Fatalf("Caminho 1 deveria estar ativo, obteve %d", p.SubPath)
@@ -1094,7 +1094,7 @@ func TestEvolutionPathsMultipliersAndChoice(t *testing.T) {
 		t.Fatalf("Guardião: esperava dano x0.85, obteve %.2f", m)
 	}
 	hp := p.HP
-	// 100 de dano: defesa do caminho (/1.25 = 80) e depois a passiva do Escudeiro (x0.65 = 52)
+	// 100 de dano: defesa do caminho (/1.25 = 80) e depois a passiva do Guardião do Bastião (x0.65 = 52)
 	if newHP, _ := p.TakeDamage(100); newHP != hp-52 {
 		t.Fatalf("Guardião: esperava HP %d após 100 de dano, obteve %d", hp-52, newHP)
 	}
@@ -1125,10 +1125,10 @@ func TestSecretVariantRequirementsKeepLevel(t *testing.T) {
 	p.AddLevel(29) // Nível 30
 
 	if ok, _ := p.CanAwakenVariant(protocol.ClassRunicSpellblade); ok {
-		t.Fatal("Ferreiro não pode despertar o Espadachim Rúnico (exige Guerreiro ou Mago)")
+		t.Fatal("Forjador de Estrelas não pode despertar o Lâmina Rúnica (exige Espadachim da Aurora ou Arcanista)")
 	}
 	if ok, why := p.CanAwakenVariant(protocol.ClassCursedSmith); !ok {
-		t.Fatalf("Ferreiro nível 30 deveria poder despertar o Forjador Amaldiçoado: %s", why)
+		t.Fatalf("Forjador de Estrelas nível 30 deveria poder despertar o Forjador Carmesim: %s", why)
 	}
 
 	p.SetIdentityMode(0, protocol.ClassCursedSmith, protocol.IdentityModeInitialChange)
@@ -1146,20 +1146,20 @@ func TestSecretVariantRequirementsKeepLevel(t *testing.T) {
 	low := NewPlayer(2, nil, 0, 0, 0)
 	low.SetIdentity(protocol.RaceValerian, protocol.ClassWarrior)
 	if ok, _ := low.CanAwakenVariant(protocol.ClassRunicSpellblade); ok {
-		t.Fatal("Guerreiro nível 1 não deveria despertar Variante (exige nível 25)")
+		t.Fatal("Espadachim da Aurora nível 1 não deveria despertar Variante (exige nível 25)")
 	}
 }
 
 func TestTranscendentClassesResetAndPower(t *testing.T) {
-	// Única Exclusiva de Raça: Bastião do Mundo exige Demi-Humano Tartaruga + Escudeiro
+	// Única Exclusiva de Raça: Colosso Abissal exige Testudar + Guardião do Bastião
 	p := NewPlayer(1, nil, 0, 0, 0)
 	p.SetIdentity(protocol.RaceValerian, protocol.ClassShieldBearer)
 	if ok, why, _ := p.CanAwakenUnique(protocol.ClassWorldBastion); ok || !strings.Contains(why, "Sangue Incompatível") {
-		t.Fatalf("Valeriano não pode ser Bastião do Mundo; motivo: %q", why)
+		t.Fatalf("Valeriano não pode ser Colosso Abissal; motivo: %q", why)
 	}
 	p.SetIdentity(protocol.RaceTurtleDemi, protocol.ClassShieldBearer)
 	if ok, why, _ := p.CanAwakenUnique(protocol.ClassWorldBastion); !ok {
-		t.Fatalf("Tartaruga Escudeiro deveria poder despertar o Bastião: %s", why)
+		t.Fatalf("Testudar Guardião do Bastião deveria poder despertar o Colosso Abissal: %s", why)
 	}
 	p.AddLevel(29)
 	p.Mu.Lock()
@@ -1195,14 +1195,14 @@ func TestTranscendentClassesResetAndPower(t *testing.T) {
 		t.Fatalf("Lendária: CON deveria ser raça+classe+50, obteve %d", p.CON)
 	}
 
-	// Itens como requisito: Barão da Sucata exige Goblin + Diagrama do Mecha
+	// Itens como requisito: Barão Engrenagem exige Gnarlin + Diagrama do Mecha
 	g := NewPlayer(2, nil, 0, 0, 0)
 	g.SetIdentity(protocol.RaceGoblin, protocol.ClassFighter)
 	if ok, _, _ := g.CanAwakenUnique(protocol.ClassScrapBaron); ok {
-		t.Fatal("Goblin sem o Diagrama do Mecha não pode despertar o Barão da Sucata")
+		t.Fatal("Gnarlin sem o Diagrama do Mecha não pode despertar o Barão Engrenagem")
 	}
 	g.AddItem(protocol.ItemMechaBlueprint, 1)
 	if ok, why, used := g.CanAwakenUnique(protocol.ClassScrapBaron); !ok || used != protocol.ItemMechaBlueprint {
-		t.Fatalf("Goblin com o Diagrama deveria poder despertar o Barão (consumindo o Diagrama): %s, item %d", why, used)
+		t.Fatalf("Gnarlin com o Diagrama deveria poder despertar o Barão (consumindo o Diagrama): %s, item %d", why, used)
 	}
 }

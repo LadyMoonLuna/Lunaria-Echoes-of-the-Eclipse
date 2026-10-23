@@ -125,7 +125,7 @@ func TestLivingNPCScripts(t *testing.T) {
 		t.Errorf("esperava primeiro waypoint do laboratorio (-15, 10), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
 	}
 
-	// Interação com Alquimista (classe 6) ou alta perícia MAS (12)
+	// Interação com Transmutador (classe 6) ou alta perícia MAS (12)
 	_ = CallOnPlayerInteract(lyra, 1, 10, 1, 6, 5)
 	if lyraSaid == "" || !strings.Contains(lyraSaid, "Poção de Sangue Lupino") {
 		t.Errorf("fala de alquimia inesperada: %s", lyraSaid)
@@ -166,14 +166,14 @@ func TestLivingNPCScripts(t *testing.T) {
 	if varis.PosX != 0.0 || varis.PosZ != 10.0 {
 		t.Errorf("esperava Varis no Mercado Negro em (0, 10) de noite, obteve (%f, %f)", varis.PosX, varis.PosZ)
 	}
-	// Reatividade com Dhampir (raça 5) e Revenant (raça 7)
+	// Reatividade com Sangrael (raça 5) e Cinerion (raça 7)
 	_ = CallOnPlayerInteract(varis, 1, 22, 5, 1, 5)
-	if !strings.Contains(varisSaid, "Dhampir") {
-		t.Errorf("esperava reatividade com Dhampir, obteve: %s", varisSaid)
+	if !strings.Contains(varisSaid, "Sangrael") {
+		t.Errorf("esperava reatividade com Sangrael, obteve: %s", varisSaid)
 	}
 	_ = CallOnPlayerInteract(varis, 1, 22, 7, 1, 5)
-	if !strings.Contains(varisSaid, "Revenant") {
-		t.Errorf("esperava reatividade com Revenant, obteve: %s", varisSaid)
+	if !strings.Contains(varisSaid, "Cinerion") {
+		t.Errorf("esperava reatividade com Cinerion, obteve: %s", varisSaid)
 	}
 
 	// 3. Guarda da Patrulha Real (105)
@@ -199,10 +199,10 @@ func TestLivingNPCScripts(t *testing.T) {
 		t.Errorf("aviso de guarda inesperado para Varkai: %s", guardSaid)
 	}
 
-	// Aproximação de raça Dhampir (raça 5)
+	// Aproximação de raça Sangrael (raça 5)
 	_ = CallOnPlayerApproach(guard, 1, 2.0, 5, false)
 	if !strings.Contains(guardSaid, "Mantenha a linha, viajante. Sem problemas na nossa vila.") {
-		t.Errorf("aviso de guarda inesperado para Dhampir: %s", guardSaid)
+		t.Errorf("aviso de guarda inesperado para Sangrael: %s", guardSaid)
 	}
 }
 
@@ -224,19 +224,19 @@ func TestNPCFriendshipAndClassRestrictionsLua(t *testing.T) {
 		t.Fatalf("falha ao vincular garrick: %v", err)
 	}
 
-	// Alquimista (Classe 6) tentando interagir com Garrick: bloqueado com desprezo
+	// Transmutador (Classe 6) tentando interagir com Garrick: bloqueado com desprezo
 	_ = CallOnPlayerInteract(garrick, 1, 12, 1, 6, 5, 0)
 	if !strings.Contains(garrickSaid, "misturando fumacinhas em frascos") {
-		t.Errorf("esperava recusa ao Alquimista por Garrick, obteve: %s", garrickSaid)
+		t.Errorf("esperava recusa ao Transmutador por Garrick, obteve: %s", garrickSaid)
 	}
 
-	// Ferreiro (Classe 5) com Afiança Nível 1 (< 3): reconhecido como colega
+	// Forjador de Estrelas (Classe 5) com Afiança Nível 1 (< 3): reconhecido como colega
 	_ = CallOnPlayerInteract(garrick, 1, 12, 1, 5, 5, 1)
 	if !strings.Contains(garrickSaid, "irmão da bigorna") {
 		t.Errorf("esperava saudação de colega ferreiro, obteve: %s", garrickSaid)
 	}
 
-	// Ferreiro (Classe 5) com Afiança Nível 3+: ensina o Malho de Batalha Rúnico
+	// Forjador de Estrelas (Classe 5) com Afiança Nível 3+: ensina o Malho de Batalha Rúnico
 	_ = CallOnPlayerInteract(garrick, 1, 12, 1, 5, 5, 3)
 	if !strings.Contains(garrickSaid, "Malho de Batalha Rúnico") {
 		t.Errorf("esperava ensinamento do Malho de Batalha Rúnico, obteve: %s", garrickSaid)
@@ -253,7 +253,7 @@ func TestNPCFriendshipAndClassRestrictionsLua(t *testing.T) {
 		t.Fatalf("falha ao vincular lyra: %v", err)
 	}
 
-	// Ferreiro (Classe 5) com Afiança Nível 1 (<= 2): comércio fechado
+	// Forjador de Estrelas (Classe 5) com Afiança Nível 1 (<= 2): comércio fechado
 	_ = CallOnPlayerInteract(lyra, 1, 12, 1, 5, 5, 1)
 	if !strings.Contains(lyraSaid, "luvas sujas") {
 		t.Errorf("esperava recusa ao ferreiro bruto por Lyra, obteve: %s", lyraSaid)

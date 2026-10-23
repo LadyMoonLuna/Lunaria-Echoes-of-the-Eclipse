@@ -71,7 +71,7 @@ Arquivo: `race_4_f.glb`
 Full body character concept art of an athletic female beast-blooded warrior, feline and lupine posture, furry wolf ears on top of the head, visible fangs, black claws, long furry tail, slit amber eyes, wild tousled hair, light leather harness and wraps, detailed individual fur strands, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, tawny brown fur, dark leather, glowing amber eyes, warm sunset light with strong rim. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Dhampir / Vampiro Progenitor (masculino)
+### Sangrael Progenitor (masculino)
 
 Arquivo: `race_5_m.glb`
 
@@ -79,7 +79,7 @@ Arquivo: `race_5_m.glb`
 Full body character concept art of an aristocratic male vampire noble, cold white marble skin, cadaverous elegant face, glowing ruby red eyes, long upper fangs, sharp black nails, slicked-back black hair, high gothic red-and-black collar, long fitted black coat with crimson velvet lining and silver brooch, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, black, deep crimson #E74C3C and silver, cold moonlight with crimson rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Dhampir / Vampiro Progenitor (feminino)
+### Sangrael Progenitor (feminino)
 
 Arquivo: `race_5_f.glb`
 
@@ -87,7 +87,7 @@ Arquivo: `race_5_f.glb`
 Full body character concept art of an aristocratic female vampire noble, cold white marble skin, cadaverous elegant face, glowing ruby red eyes, long upper fangs, sharp black nails, slicked-back black hair, high gothic red-and-black collar, long fitted black coat with crimson velvet lining and silver brooch, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, black, deep crimson #E74C3C and silver, cold moonlight with crimson rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Licantropo Primordial (masculino)
+### Lupharion (masculino)
 
 Arquivo: `race_6_m.glb`
 
@@ -95,7 +95,7 @@ Arquivo: `race_6_m.glb`
 Full body character concept art of a colossal 2.3-meter male primordial werewolf, bipedal wolf with digitigrade legs, gigantic chest covered in thick black and crimson fur, ferocious scarred wolf head, long claws, bristling mane, torn trouser remnants, each fur clump individually sculpted, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, black and blood-crimson fur, burning red eyes, blood moon backlight with red rim. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Licantropo Primordial (feminino)
+### Lupharion (feminino)
 
 Arquivo: `race_6_f.glb`
 
@@ -103,7 +103,7 @@ Arquivo: `race_6_f.glb`
 Full body character concept art of a colossal 2.3-meter female primordial werewolf, bipedal wolf with digitigrade legs, gigantic chest covered in thick black and crimson fur, ferocious scarred wolf head, long claws, bristling mane, torn trouser remnants, each fur clump individually sculpted, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, black and blood-crimson fur, burning red eyes, blood moon backlight with red rim. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Amaldiçoado das Cinzas (Revenant) (masculino)
+### Cinerion (masculino)
 
 Arquivo: `race_7_m.glb`
 
@@ -111,7 +111,7 @@ Arquivo: `race_7_m.glb`
 Full body character concept art of an undead male revenant warrior, dried grey skin stretched tightly over bones, exposed ribs in the center of the chest caging a bright pulsing cyan spirit flame like a heart, hollow eye sockets with cyan pinpoints, tattered dark cloth and rusted iron pauldron, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ashen grey, rusted iron, glowing cyan #00FFFF soul fire as main light source. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Amaldiçoado das Cinzas (Revenant) (feminino)
+### Cinerion (feminino)
 
 Arquivo: `race_7_f.glb`
 
@@ -119,7 +119,7 @@ Arquivo: `race_7_f.glb`
 Full body character concept art of an undead female revenant warrior, dried grey skin stretched tightly over bones, exposed ribs in the center of the chest caging a bright pulsing cyan spirit flame like a heart, hollow eye sockets with cyan pinpoints, tattered dark cloth and rusted iron pauldron, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ashen grey, rusted iron, glowing cyan #00FFFF soul fire as main light source. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Celestino (Serafim Astral) (masculino)
+### Seraphel (Serafim Astral) (masculino)
 
 Arquivo: `race_8_m.glb`
 
@@ -127,7 +127,7 @@ Arquivo: `race_8_m.glb`
 Full body character concept art of a serene male astral seraph, body sculpted from polished white marble with flowing gold veins, serene face with pupil-less eyes emitting golden light, golden circlet, four wings made of translucent golden light blades floating detached from the back, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white marble, gold and radiant light, divine top light with bloom. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Celestino (Serafim Astral) (feminino)
+### Seraphel (Serafim Astral) (feminino)
 
 Arquivo: `race_8_f.glb`
 
@@ -135,7 +135,7 @@ Arquivo: `race_8_f.glb`
 Full body character concept art of a serene female astral seraph, body sculpted from polished white marble with flowing gold veins, serene face with pupil-less eyes emitting golden light, golden circlet, four wings made of translucent golden light blades floating detached from the back, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white marble, gold and radiant light, divine top light with bloom. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Abissal (Filho do Eclipse) (masculino)
+### Umbryss (Filho do Eclipse) (masculino)
 
 Arquivo: `race_9_m.glb`
 
@@ -143,7 +143,7 @@ Arquivo: `race_9_m.glb`
 Full body character concept art of a faceless male child of the eclipse, entirely matte black silhouette with a deep starry night sky texture across the body, featureless face with only two glowing purple eyes, a small black hole with a spinning purple and orange fire ring set in an opening in the chest, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, void black with tiny white stars, purple and orange accretion glow, dramatic low-key lighting. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Abissal (Filho do Eclipse) (feminino)
+### Umbryss (Filho do Eclipse) (feminino)
 
 Arquivo: `race_9_f.glb`
 
@@ -151,7 +151,7 @@ Arquivo: `race_9_f.glb`
 Full body character concept art of a faceless female child of the eclipse, entirely matte black silhouette with a deep starry night sky texture across the body, featureless face with only two glowing purple eyes, a small black hole with a spinning purple and orange fire ring set in an opening in the chest, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, void black with tiny white stars, purple and orange accretion glow, dramatic low-key lighting. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Autômato Rúnico (Alma Forjada) (masculino)
+### Runaric (Alma Forjada) (masculino)
 
 Arquivo: `race_10_m.glb`
 
@@ -159,7 +159,7 @@ Arquivo: `race_10_m.glb`
 Full body character concept art of a medieval runic automaton knight (masculine build), body of aged bronze plates and black iron, exposed gears at elbows and knees, mouthless helm with a horizontal glowing cyan visor slit, rotating crystal core in the chest, engraved runes and rivets, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, aged bronze, black iron, glowing cyan #00E5FF, workshop key light with cool rim. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Autômato Rúnico (Alma Forjada) (feminino)
+### Runaric (Alma Forjada) (feminino)
 
 Arquivo: `race_10_f.glb`
 
@@ -167,7 +167,7 @@ Arquivo: `race_10_f.glb`
 Full body character concept art of a medieval runic automaton knight (feminine build), body of aged bronze plates and black iron, exposed gears at elbows and knees, mouthless helm with a horizontal glowing cyan visor slit, rotating crystal core in the chest, engraved runes and rivets, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, aged bronze, black iron, glowing cyan #00E5FF, workshop key light with cool rim. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Alto Valeriano (masculino)
+### Solvaren (masculino)
 
 Arquivo: `race_11_m.glb`
 
@@ -175,7 +175,7 @@ Arquivo: `race_11_m.glb`
 Full body character concept art of a noble 28-year-old male high human, athletic proportions, brown hair with luminous golden streaks, eyes of pure gold, a subtle floating solar crown of golden rays above the forehead, refined linen and leather garments with gold trims, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, gold, warm brown and ivory, radiant golden backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Alto Valeriano (feminino)
+### Solvaren (feminino)
 
 Arquivo: `race_11_f.glb`
 
@@ -183,7 +183,7 @@ Arquivo: `race_11_f.glb`
 Full body character concept art of a noble 26-year-old female high human, athletic proportions, brown hair with luminous golden streaks, eyes of pure gold, a subtle floating solar crown of golden rays above the forehead, refined linen and leather garments with gold trims, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, gold, warm brown and ivory, radiant golden backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Andarilho do Éter (masculino)
+### Aetheris (masculino)
 
 Arquivo: `race_12_m.glb`
 
@@ -191,7 +191,7 @@ Arquivo: `race_12_m.glb`
 Full body character concept art of a 28-year-old male ether wanderer, hair tips and forearms darkened into a swirling galaxy void texture of purple #8E44AD with tiny stars, glowing violet eyes, travel clothes of linen and leather torn by space rifts, small floating star motes, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, deep purple galaxy, black void, violet glow, cosmic rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Andarilho do Éter (feminino)
+### Aetheris (feminino)
 
 Arquivo: `race_12_f.glb`
 
@@ -199,7 +199,7 @@ Arquivo: `race_12_f.glb`
 Full body character concept art of a 26-year-old female ether wanderer, hair tips and forearms darkened into a swirling galaxy void texture of purple #8E44AD with tiny stars, glowing violet eyes, travel clothes of linen and leather torn by space rifts, small floating star motes, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, deep purple galaxy, black void, violet glow, cosmic rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Arconte Lunar (masculino)
+### Selenarca (masculino)
 
 Arquivo: `race_13_m.glb`
 
@@ -207,7 +207,7 @@ Arquivo: `race_13_m.glb`
 Full body character concept art of a tall male lunar archon elf, long swept-back pointed ears, pale bluish skin with glowing silver astral tattoos on face and arms, long silver hair, ornate midnight robes with silver filigree, a crystal silver crescent moon floating behind the back, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, silver, midnight blue and soft cyan glow, moonlit rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Arconte Lunar (feminino)
+### Selenarca (feminino)
 
 Arquivo: `race_13_f.glb`
 
@@ -215,7 +215,7 @@ Arquivo: `race_13_f.glb`
 Full body character concept art of a tall female lunar archon elf, long swept-back pointed ears, pale bluish skin with glowing silver astral tattoos on face and arms, long silver hair, ornate midnight robes with silver filigree, a crystal silver crescent moon floating behind the back, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, silver, midnight blue and soft cyan glow, moonlit rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Espectro Umbral (masculino)
+### Nyxara (masculino)
 
 Arquivo: `race_14_m.glb`
 
@@ -223,7 +223,7 @@ Arquivo: `race_14_m.glb`
 Full body character concept art of a male umbral specter elf, night-grey skin #2C3E50, fully black sclera with glowing white pupils, long silver hair, dark elegant robes, living shadows dripping and smoking from the feet, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, night grey, black and white glow, cold low-key lighting with purple smoke. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Espectro Umbral (feminino)
+### Nyxara (feminino)
 
 Arquivo: `race_14_f.glb`
 
@@ -231,7 +231,7 @@ Arquivo: `race_14_f.glb`
 Full body character concept art of a female umbral specter elf, night-grey skin #2C3E50, fully black sclera with glowing white pupils, long silver hair, dark elegant robes, living shadows dripping and smoking from the feet, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, night grey, black and white glow, cold low-key lighting with purple smoke. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Guardião Rúnico (masculino)
+### Runakhar (masculino)
 
 Arquivo: `race_15_m.glb`
 
@@ -239,7 +239,7 @@ Arquivo: `race_15_m.glb`
 Full body character concept art of a male runic guardian ash-forged warrior, 1.5 meters tall, broad basalt stone body with ember fissures, geometric steel and gold plates embedded into shoulders and chest, glowing blue runes carved into the stone skin, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, basalt grey, steel, gold and glowing rune blue, forge light with blue rune glow. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Guardião Rúnico (feminino)
+### Runakhar (feminino)
 
 Arquivo: `race_15_f.glb`
 
@@ -247,7 +247,7 @@ Arquivo: `race_15_f.glb`
 Full body character concept art of a female runic guardian ash-forged warrior, 1.5 meters tall, broad basalt stone body with ember fissures, geometric steel and gold plates embedded into shoulders and chest, glowing blue runes carved into the stone skin, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, basalt grey, steel, gold and glowing rune blue, forge light with blue rune glow. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Titã de Obsidiana (masculino)
+### Pyrokhar (masculino)
 
 Arquivo: `race_16_m.glb`
 
@@ -255,7 +255,7 @@ Arquivo: `race_16_m.glb`
 Full body character concept art of a male obsidian titan, 1.55 meters tall, broad basalt body, short polished black volcanic glass horns on the forehead and shoulders, living incandescent lava veins running down the chest, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, glossy obsidian black, molten lava orange-red, volcanic underlighting. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Titã de Obsidiana (feminino)
+### Pyrokhar (feminino)
 
 Arquivo: `race_16_f.glb`
 
@@ -263,7 +263,7 @@ Arquivo: `race_16_f.glb`
 Full body character concept art of a female obsidian titan, 1.55 meters tall, broad basalt body, short polished black volcanic glass horns on the forehead and shoulders, living incandescent lava veins running down the chest, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, glossy obsidian black, molten lava orange-red, volcanic underlighting. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Soberano Dracônico (masculino)
+### Dravarkai (masculino)
 
 Arquivo: `race_17_m.glb`
 
@@ -271,7 +271,7 @@ Arquivo: `race_17_m.glb`
 Full body character concept art of a regal male draconic sovereign, athletic body, a pair of noble horns curving backwards, red and gold dragon scale plates on shoulders and arms, thick reptilian tail, slit amber eyes, small fangs, leather and gold regalia, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, crimson red, gold and dark leather, royal warm light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Soberano Dracônico (feminino)
+### Dravarkai (feminino)
 
 Arquivo: `race_17_f.glb`
 
@@ -279,7 +279,7 @@ Arquivo: `race_17_f.glb`
 Full body character concept art of a regal female draconic sovereign, athletic body, a pair of noble horns curving backwards, red and gold dragon scale plates on shoulders and arms, thick reptilian tail, slit amber eyes, small fangs, leather and gold regalia, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, crimson red, gold and dark leather, royal warm light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Fera do Frenesi (masculino)
+### Ferovar (masculino)
 
 Arquivo: `race_18_m.glb`
 
@@ -287,7 +287,7 @@ Arquivo: `race_18_m.glb`
 Full body character concept art of a feral male frenzy beast warrior, dense bristling fur covering shoulders and back, pronounced semi-lupine snout, long claws stained crimson, wild mane, wolf ears, furry tail, ragged leather wraps, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, dark brown fur, blood crimson stains, red rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Fera do Frenesi (feminino)
+### Ferovar (feminino)
 
 Arquivo: `race_18_f.glb`
 
@@ -311,7 +311,7 @@ Arquivo: `race_19_f.glb`
 Full body character concept art of a female sylvari elf of living oak, elf-like body carved from polished living oak and roots, glowing golden amber sap veins, hair made of vines, leaves and small night-blooming flowers glowing yellow and blue, branch antlers, pointed wooden ears, moss sash, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, warm oak brown, moss green, amber gold sap and soft blue flower glow, enchanted forest moonlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Myconid / Esporiano (masculino)
+### Myconid (masculino)
 
 Arquivo: `race_20_m.glb`
 
@@ -319,7 +319,7 @@ Arquivo: `race_20_m.glb`
 Full body character concept art of a slender male myconid fungal humanoid, slim body with bluish-white fungal flesh texture, a large bioluminescent purple and cyan mushroom cap on the head like a wizard hat, glowing gills, small glowing mushrooms growing on the right shoulder, mantle of mushrooms, floating spores, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, pale blue-white, violet and cyan bioluminescence, dark sewer ambient light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Myconid / Esporiano (feminino)
+### Myconid (feminino)
 
 Arquivo: `race_20_f.glb`
 
@@ -343,7 +343,7 @@ Arquivo: `race_21_f.glb`
 Full body character concept art of a female arachne mist weaver, pale greyish porcelain skin, straight black silk-like hair, six glowing red eyes (two normal and four smaller on the forehead), four sharp articulated black spider legs emerging from the shoulder blades, black and silver silk garments, silver tiara, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, porcelain white, black, silver and glowing ruby red, misty cold light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Draconato de Cinzas (Escama-Negra) (masculino)
+### Ignivarn (Escama-Negra) (masculino)
 
 Arquivo: `race_22_m.glb`
 
@@ -351,7 +351,7 @@ Arquivo: `race_22_m.glb`
 Full body character concept art of a muscular male ashen dragonborn, hairless reptilian humanoid with a dragon head, black obsidian horns, thick heavy tail, overlapping matte black scales with orange fire glowing between the scales of neck and chest, molten gold eyes, black scale shoulder plates, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, matte black scales, molten orange fire glow, gold eyes, volcanic rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Draconato de Cinzas (Escama-Negra) (feminino)
+### Ignivarn (Escama-Negra) (feminino)
 
 Arquivo: `race_22_f.glb`
 
@@ -359,7 +359,7 @@ Arquivo: `race_22_f.glb`
 Full body character concept art of a muscular female ashen dragonborn, hairless reptilian humanoid with a dragon head, black obsidian horns, thick heavy tail, overlapping matte black scales with orange fire glowing between the scales of neck and chest, molten gold eyes, black scale shoulder plates, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, matte black scales, molten orange fire glow, gold eyes, volcanic rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Quimera (O Experimento Costurado) (masculino)
+### Chimeryth (O Experimento Costurado) (masculino)
 
 Arquivo: `race_23_m.glb`
 
@@ -367,7 +367,7 @@ Arquivo: `race_23_m.glb`
 Full body character concept art of a male stitched chimera experiment, Frankenstein mutant look with thick surgical stitch lines on the skin, giant hairy right arm with wolf claws, left arm covered in green scales with glowing venom tubes, one yellow beast eye and one blue human eye, single bone horn, pulsing acid sacs on the back, lizard tail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, patchwork skin tones, brown fur, green scales, acid green glow, harsh lab light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Quimera (O Experimento Costurado) (feminino)
+### Chimeryth (O Experimento Costurado) (feminino)
 
 Arquivo: `race_23_f.glb`
 
@@ -375,7 +375,7 @@ Arquivo: `race_23_f.glb`
 Full body character concept art of a female stitched chimera experiment, Frankenstein mutant look with thick surgical stitch lines on the skin, giant hairy right arm with wolf claws, left arm covered in green scales with glowing venom tubes, one yellow beast eye and one blue human eye, single bone horn, pulsing acid sacs on the back, lizard tail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, patchwork skin tones, brown fur, green scales, acid green glow, harsh lab light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Boreal (Coração de Geada) (masculino)
+### Borealin (Coração de Geada) (masculino)
 
 Arquivo: `race_24_m.glb`
 
@@ -383,7 +383,7 @@ Arquivo: `race_24_m.glb`
 Full body character concept art of a male boreal frost guardian, pale ice-blue skin, spiky frost-white hair like hoarfrost, sharp translucent ice crystals #5DADE2 growing from the shoulders, forearms and as a cold crown on the forehead, white fur mantle, navy cape, breath condensing into ice crystals, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ice blue, frost white and navy, cold aurora light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Boreal (Coração de Geada) (feminino)
+### Borealin (Coração de Geada) (feminino)
 
 Arquivo: `race_24_f.glb`
 
@@ -439,7 +439,7 @@ Arquivo: `race_27_f.glb`
 Full body character concept art of a female nephilim twilight hybrid, divine asymmetry: right side with white hair, golden eye and one white-gold angel wing; left side with black hair, abyssal purple eye and one black demon raven wing, split white-and-black robes with gold, broken half halo, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white and gold versus black and violet, split lighting warm on the right and cold on the left. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Errante Temporal (Cronomante) (masculino)
+### Cronari (masculino)
 
 Arquivo: `race_28_m.glb`
 
@@ -447,7 +447,7 @@ Arquivo: `race_28_m.glb`
 Full body character concept art of a male chronomancer time wanderer, wrapped in an astral blue and gold mantle and hood, a ring of golden roman numerals floating and slowly rotating behind the back, golden star-sand particles flowing from hands and feet, translucent afterimage slightly ahead of the body, hourglass on the belt, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, astral indigo, gold and star-sand glow, magical golden rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Errante Temporal (Cronomante) (feminino)
+### Cronari (feminino)
 
 Arquivo: `race_28_f.glb`
 
@@ -455,7 +455,7 @@ Arquivo: `race_28_f.glb`
 Full body character concept art of a female chronomancer time wanderer, wrapped in an astral blue and gold mantle and hood, a ring of golden roman numerals floating and slowly rotating behind the back, golden star-sand particles flowing from hands and feet, translucent afterimage slightly ahead of the body, hourglass on the belt, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, astral indigo, gold and star-sand glow, magical golden rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Orc (masculino)
+### Orkhan (masculino)
 
 Arquivo: `race_36_m.glb`
 
@@ -463,7 +463,7 @@ Arquivo: `race_36_m.glb`
 Full body character concept art of a broad muscular male orc warrior, moss-green skin, prominent lower tusks, honor scars across the face, black warrior braid, bone pauldron with spikes, leather harness and fur kilt, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, moss green, bone white and dark leather, harsh steppe daylight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Orc (feminino)
+### Orkhan (feminino)
 
 Arquivo: `race_36_f.glb`
 
@@ -471,7 +471,7 @@ Arquivo: `race_36_f.glb`
 Full body character concept art of a broad muscular female orc warrior, moss-green skin, prominent lower tusks, honor scars across the face, black warrior braid, bone pauldron with spikes, leather harness and fur kilt, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, moss green, bone white and dark leather, harsh steppe daylight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Goblin (masculino)
+### Gnarlin (masculino)
 
 Arquivo: `race_42_m.glb`
 
@@ -479,7 +479,7 @@ Arquivo: `race_42_m.glb`
 Full body character concept art of a short wiry male goblin trickster, 1.1 meters tall, lime-green skin, huge pointed ears, hooked nose, mischievous toothy grin, brown hood, belt full of pouches and shiny coins, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, lime green, brown leather and gold coin glints, warm cave torchlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Goblin (feminino)
+### Gnarlin (feminino)
 
 Arquivo: `race_42_f.glb`
 
@@ -487,7 +487,7 @@ Arquivo: `race_42_f.glb`
 Full body character concept art of a short wiry female goblin trickster, 1.1 meters tall, lime-green skin, huge pointed ears, hooked nose, mischievous toothy grin, brown hood, belt full of pouches and shiny coins, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, lime green, brown leather and gold coin glints, warm cave torchlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Elfo (masculino)
+### Elarin (masculino)
 
 Arquivo: `race_38_m.glb`
 
@@ -495,7 +495,7 @@ Arquivo: `race_38_m.glb`
 Full body character concept art of a slender male forest elf, long pointed ears, long pale-blond hair with leaf clips, forest-green tunic with leaf embroidery, carved leather bracers, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, forest green, pale gold and soft brown, dappled forest light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Elfo (feminino)
+### Elarin (feminino)
 
 Arquivo: `race_38_f.glb`
 
@@ -503,7 +503,7 @@ Arquivo: `race_38_f.glb`
 Full body character concept art of a slender female forest elf, long pointed ears, long pale-blond hair with leaf clips, forest-green tunic with leaf embroidery, carved leather bracers, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, forest green, pale gold and soft brown, dappled forest light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Elfo Solar (masculino)
+### Solarin (masculino)
 
 Arquivo: `race_39_m.glb`
 
@@ -511,7 +511,7 @@ Arquivo: `race_39_m.glb`
 Full body character concept art of a radiant male solar elf, golden flowing hair, white and gold plate armor with a glowing sun disc on the chest, halo of golden rays behind the head, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white, gold and amber, bright solar backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Elfo Solar (feminino)
+### Solarin (feminino)
 
 Arquivo: `race_39_f.glb`
 
@@ -519,7 +519,7 @@ Arquivo: `race_39_f.glb`
 Full body character concept art of a radiant female solar elf, golden flowing hair, white and gold plate armor with a glowing sun disc on the chest, halo of golden rays behind the head, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white, gold and amber, bright solar backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Elfo Lunar (masculino)
+### Lunarin (masculino)
 
 Arquivo: `race_40_m.glb`
 
@@ -527,7 +527,7 @@ Arquivo: `race_40_m.glb`
 Full body character concept art of a pale male lunar elf, silver hair down to the waist, pale skin, night-blue cloak with embroidered crescents, glowing crescent diadem, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, night blue, silver and pale cyan, cold moonlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Elfo Lunar (feminino)
+### Lunarin (feminino)
 
 Arquivo: `race_40_f.glb`
 
@@ -535,7 +535,7 @@ Arquivo: `race_40_f.glb`
 Full body character concept art of a pale female lunar elf, silver hair down to the waist, pale skin, night-blue cloak with embroidered crescents, glowing crescent diadem, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, night blue, silver and pale cyan, cold moonlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago da Terra (masculino)
+### Terravyrn (masculino)
 
 Arquivo: `race_32_m.glb`
 
@@ -543,7 +543,7 @@ Arquivo: `race_32_m.glb`
 Full body character concept art of a stocky male earth drago draconic humanoid, earth-brown scales turning into stone plates on the shoulders, thick backward horns, amber crystals growing from the spine, heavy reptilian tail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, earth brown, stone grey and glowing amber, dusty warm light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago da Terra (feminino)
+### Terravyrn (feminino)
 
 Arquivo: `race_32_f.glb`
 
@@ -551,7 +551,7 @@ Arquivo: `race_32_f.glb`
 Full body character concept art of a stocky female earth drago draconic humanoid, earth-brown scales turning into stone plates on the shoulders, thick backward horns, amber crystals growing from the spine, heavy reptilian tail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, earth brown, stone grey and glowing amber, dusty warm light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago da Água (masculino)
+### Hydravyrn (masculino)
 
 Arquivo: `race_33_m.glb`
 
@@ -559,7 +559,7 @@ Arquivo: `race_33_m.glb`
 Full body character concept art of a sleek male water drago draconic humanoid, turquoise scales, translucent fins on forearms and head, floating water droplets orbiting the body, long tail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, turquoise, sea foam white and deep blue, caustic underwater light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago da Água (feminino)
+### Hydravyrn (feminino)
 
 Arquivo: `race_33_f.glb`
 
@@ -567,7 +567,7 @@ Arquivo: `race_33_f.glb`
 Full body character concept art of a sleek female water drago draconic humanoid, turquoise scales, translucent fins on forearms and head, floating water droplets orbiting the body, long tail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, turquoise, sea foam white and deep blue, caustic underwater light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago do Raio (masculino)
+### Fulgravyrn (masculino)
 
 Arquivo: `race_34_m.glb`
 
@@ -575,7 +575,7 @@ Arquivo: `race_34_m.glb`
 Full body character concept art of an agile male lightning drago draconic humanoid, electric yellow and black scales, zigzag horns, arcs of lightning jumping between spine spikes, glowing eyes, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, electric yellow and black, crackling white sparks, stormy backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago do Raio (feminino)
+### Fulgravyrn (feminino)
 
 Arquivo: `race_34_f.glb`
 
@@ -583,7 +583,7 @@ Arquivo: `race_34_f.glb`
 Full body character concept art of an agile female lightning drago draconic humanoid, electric yellow and black scales, zigzag horns, arcs of lightning jumping between spine spikes, glowing eyes, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, electric yellow and black, crackling white sparks, stormy backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago Místico (masculino)
+### Arcavyrn (masculino)
 
 Arquivo: `race_35_m.glb`
 
@@ -591,7 +591,7 @@ Arquivo: `race_35_m.glb`
 Full body character concept art of a mystic male drago draconic humanoid, violet scales engraved with glowing runes, crystal horns, three arcane orbs orbiting the body, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, violet, lilac and magenta glow, arcane rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Drago Místico (feminino)
+### Arcavyrn (feminino)
 
 Arquivo: `race_35_f.glb`
 
@@ -599,7 +599,7 @@ Arquivo: `race_35_f.glb`
 Full body character concept art of a mystic female drago draconic humanoid, violet scales engraved with glowing runes, crystal horns, three arcane orbs orbiting the body, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, violet, lilac and magenta glow, arcane rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Pyromante (masculino)
+### Pyrael (masculino)
 
 Arquivo: `race_30_m.glb`
 
@@ -607,7 +607,7 @@ Arquivo: `race_30_m.glb`
 Full body character concept art of a male pyromancer human, tanned skin cracked by glowing ember veins, hair like living flames, scorched crimson robe, fire dancing in both hands, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, crimson, ember orange and charcoal, fiery underlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Pyromante (feminino)
+### Pyrael (feminino)
 
 Arquivo: `race_30_f.glb`
 
@@ -615,7 +615,7 @@ Arquivo: `race_30_f.glb`
 Full body character concept art of a female pyromancer human, tanned skin cracked by glowing ember veins, hair like living flames, scorched crimson robe, fire dancing in both hands, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, crimson, ember orange and charcoal, fiery underlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### DemiHumano Escorpião (masculino)
+### Escarion (masculino)
 
 Arquivo: `race_43_m.glb`
 
@@ -623,7 +623,7 @@ Arquivo: `race_43_m.glb`
 Full body character concept art of a male scorpionkin demi-human, segmented amber chitin plates on chest and arms, articulated scorpion tail curving over the head with a glowing green venom stinger, desert wraps, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, amber, sand and toxic green, harsh desert sun. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### DemiHumano Escorpião (feminino)
+### Escarion (feminino)
 
 Arquivo: `race_43_f.glb`
 
@@ -631,7 +631,7 @@ Arquivo: `race_43_f.glb`
 Full body character concept art of a female scorpionkin demi-human, segmented amber chitin plates on chest and arms, articulated scorpion tail curving over the head with a glowing green venom stinger, desert wraps, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, amber, sand and toxic green, harsh desert sun. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### DemiHumano Tartaruga (masculino)
+### Testudar (masculino)
 
 Arquivo: `race_44_m.glb`
 
@@ -639,7 +639,7 @@ Arquivo: `race_44_m.glb`
 Full body character concept art of a sturdy male tortoisekin demi-human, olive-green skin, huge hexagonal shell on the back, plated plastron on the chest, calm ancient eyes, simple monk wraps, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, olive green, shell brown and cream, calm soft daylight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### DemiHumano Tartaruga (feminino)
+### Testudar (feminino)
 
 Arquivo: `race_44_f.glb`
 
@@ -647,7 +647,7 @@ Arquivo: `race_44_f.glb`
 Full body character concept art of a sturdy female tortoisekin demi-human, olive-green skin, huge hexagonal shell on the back, plated plastron on the chest, calm ancient eyes, simple monk wraps, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, olive green, shell brown and cream, calm soft daylight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Fadinha (masculino)
+### Faelith (masculino)
 
 Arquivo: `race_41_m.glb`
 
@@ -655,7 +655,7 @@ Arquivo: `race_41_m.glb`
 Full body character concept art of a tiny male fairy, pink hair in a bun, petal dress, pointed ears, four translucent crystal wings shedding sparkling dust, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, pastel pink, crystal white and sparkling gold, dreamy glow. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Fadinha (feminino)
+### Faelith (feminino)
 
 Arquivo: `race_41_f.glb`
 
@@ -663,7 +663,7 @@ Arquivo: `race_41_f.glb`
 Full body character concept art of a tiny female fairy, pink hair in a bun, petal dress, pointed ears, four translucent crystal wings shedding sparkling dust, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, pastel pink, crystal white and sparkling gold, dreamy glow. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Meio-Celestial (masculino)
+### Aurelith (masculino)
 
 Arquivo: `race_29_m.glb`
 
@@ -671,7 +671,7 @@ Arquivo: `race_29_m.glb`
 Full body character concept art of a male half-celestial, fair glowing skin, white hair, white tunic with gold trims, faint golden halo, large white feathered wings, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white, gold and soft yellow, heavenly backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Meio-Celestial (feminino)
+### Aurelith (feminino)
 
 Arquivo: `race_29_f.glb`
 
@@ -679,7 +679,7 @@ Arquivo: `race_29_f.glb`
 Full body character concept art of a female half-celestial, fair glowing skin, white hair, white tunic with gold trims, faint golden halo, large white feathered wings, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white, gold and soft yellow, heavenly backlight. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Gigante de Gelo (masculino)
+### Jotunar (masculino)
 
 Arquivo: `race_31_m.glb`
 
@@ -687,7 +687,7 @@ Arquivo: `race_31_m.glb`
 Full body character concept art of a colossal male frost giant, 2.4 meters tall, pale blue skin, beard and hair made of ice, white bear-fur pauldrons, ice crystals growing on shoulders and forearms, glowing frost eyes, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ice blue, white fur and steel grey, cold blizzard light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Gigante de Gelo (feminino)
+### Jotunar (feminino)
 
 Arquivo: `race_31_f.glb`
 
@@ -695,7 +695,7 @@ Arquivo: `race_31_f.glb`
 Full body character concept art of a colossal female frost giant, 2.4 meters tall, pale blue skin, beard and hair made of ice, white bear-fur pauldrons, ice crystals growing on shoulders and forearms, glowing frost eyes, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ice blue, white fur and steel grey, cold blizzard light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Meio-Demônio Súcubo (masculino)
+### Lilitara (masculino)
 
 Arquivo: `race_45_m.glb`
 
@@ -703,7 +703,7 @@ Arquivo: `race_45_m.glb`
 Full body character concept art of a male incubus half-demon, lavender skin, curved black horns, long wine-red hair, bat wings with violet membranes, thin tail ending in a glowing heart tip, velvet corset armor, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, lavender, wine red and deep violet, seductive magenta rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Meio-Demônio Súcubo (feminino)
+### Lilitara (feminino)
 
 Arquivo: `race_45_f.glb`
 
@@ -711,7 +711,7 @@ Arquivo: `race_45_f.glb`
 Full body character concept art of a female succubus half-demon, lavender skin, curved black horns, long wine-red hair, bat wings with violet membranes, thin tail ending in a glowing heart tip, velvet corset armor, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, lavender, wine red and deep violet, seductive magenta rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Anão (masculino)
+### Dvergar (masculino)
 
 Arquivo: `race_37_m.glb`
 
@@ -719,7 +719,7 @@ Arquivo: `race_37_m.glb`
 Full body character concept art of a short broad male dwarf blacksmith, 1.4 meters tall, long braided ginger beard with bronze rings, iron helm with side flaps, soot-marked thick arms, leather forge apron over chainmail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ginger, bronze and soot grey, warm forge glow. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### Anão (feminino)
+### Dvergar (feminino)
 
 Arquivo: `race_37_f.glb`
 
@@ -727,7 +727,7 @@ Arquivo: `race_37_f.glb`
 Full body character concept art of a short broad female dwarf blacksmith, 1.4 meters tall, long braided ginger beard with bronze rings, iron helm with side flaps, soot-marked thick arms, leather forge apron over chainmail, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, ginger, bronze and soot grey, warm forge glow. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### DemiHumano Lobo (masculino)
+### Ulvar (masculino)
 
 Arquivo: `race_46_m.glb`
 
@@ -735,7 +735,7 @@ Arquivo: `race_46_m.glb`
 Full body character concept art of an athletic male wolfkin demi-human, grey wolf fur, tall wolf ears, short muzzle, silver glowing eyes, thick bushy tail, light leather armor with hanging wolf fangs, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, storm grey, dark leather and silver, cold moonlit rim light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, no extra clutter in hands unless specified, 8k resolution.
 ```
 
-### DemiHumano Lobo (feminino)
+### Ulvar (feminino)
 
 Arquivo: `race_46_f.glb`
 
@@ -1087,7 +1087,7 @@ Arquivo: `outfit_acolyte.glb`
 Full body character concept art of a neutral athletic human mannequin wearing the Acolyte priest class outfit, immaculate white clerical robes with gold plates on chest and shoulders, long stole with sun and moon symbols, bald featureless head so only the clothing matters, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, white and gold, neutral studio light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, empty hands, 8k resolution.
 ```
 
-### Ferreiro
+### Forjador de Estrelas
 
 Arquivo: `outfit_blacksmith.glb`
 
@@ -1095,7 +1095,7 @@ Arquivo: `outfit_blacksmith.glb`
 Full body character concept art of a neutral athletic human mannequin wearing the Battle Blacksmith class outfit, heavy reinforced leather chestpiece with riveted iron plates, heavy mechanical bracer on the right arm, tool belt, bald featureless head so only the clothing matters, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, brown leather and iron, neutral studio light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, empty hands, 8k resolution.
 ```
 
-### Alquimista
+### Transmutador
 
 Arquivo: `outfit_alchemist.glb`
 
@@ -1103,7 +1103,7 @@ Arquivo: `outfit_alchemist.glb`
 Full body character concept art of a neutral athletic human mannequin wearing the Combat Alchemist class outfit, long acid-resistant dark brown leather coat, bandolier full of glowing potions, backpack with a bubbling green glass tank, bald featureless head so only the clothing matters, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, dark brown, glowing green, neutral studio light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, empty hands, 8k resolution.
 ```
 
-### Ceifador do Eclipse
+### Ceifador da Lua Negra
 
 Arquivo: `outfit_reaper.glb`
 
@@ -1111,7 +1111,7 @@ Arquivo: `outfit_reaper.glb`
 Full body character concept art of a neutral athletic human mannequin wearing the Eclipse Reaper class outfit, torn black dark-hunter cloak, raven skull pauldrons, crimson details, bald featureless head so only the clothing matters, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, black and crimson, neutral studio light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, empty hands, 8k resolution.
 ```
 
-### Artífice Rúnico
+### Engenheiro Rúnico
 
 Arquivo: `outfit_artificer.glb`
 
@@ -1119,7 +1119,7 @@ Arquivo: `outfit_artificer.glb`
 Full body character concept art of a neutral athletic human mannequin wearing the Runic Artificer class outfit, heavy steampunk-runic bronze armor, glowing pressure tubes on the back, runic monocle, bald featureless head so only the clothing matters, heroic anime art style inspired by Sword Art Online and Fate series. Expressive sharp features, detailed textures, bronze and glowing blue, neutral studio light. Dark fantasy anime video game aesthetic, cel-shaded details with high-end Unreal Engine 5 render lighting, symmetrical A-pose, full body, plain neutral gray background, empty hands, 8k resolution.
 ```
 
-### Criador de Homúnculos
+### Demiurgo Alquímico
 
 Arquivo: `outfit_homunculus_creator.glb`
 

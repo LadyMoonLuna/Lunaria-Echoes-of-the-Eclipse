@@ -47,7 +47,7 @@ function OnPlayerInteract(player_id, world_hour, player_race, player_class, play
         return
     end
 
-    -- Se for Alquimista ou tiver alta Maestria Anatômica/Alquímica
+    -- Se for Transmutador ou tiver alta Maestria Anatômica/Alquímica
     if player_class == 6 or (player_mas and player_mas >= 10) then
         npc_say("... Vejo que você conhece a arte dos frascos e da dissecação. O conselho me jogou aqui por tentar fundir a essência das feras do Eclipse ao sangue humano. Tome esta fórmula proibida... Use os órgãos extraídos de monstros raros para destilar poções que nenhum alquimista vivo ousaria sonhar...")
         return

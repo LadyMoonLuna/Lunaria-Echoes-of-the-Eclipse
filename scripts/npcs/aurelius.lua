@@ -46,7 +46,7 @@ function OnPlayerInteract(player_id, world_hour, player_race, player_class, play
     local f_level = friendship_level or 0
     local moon = get_moon_phase()
 
-    -- Viajante Sem Classe (ClassID == 0): Iniciação como Mago Iniciado
+    -- Viajante Sem Classe (ClassID == 0): Iniciação como Arcanista Iniciado
     if player_class == 0 then
         npc_say("Deseja decifrar as equações místicas da realidade? Se você possui uma mente disciplinada e sede de conhecimento, posso lhe ensinar a canalizar o mana como um Iniciado (Tier 1)!")
         return

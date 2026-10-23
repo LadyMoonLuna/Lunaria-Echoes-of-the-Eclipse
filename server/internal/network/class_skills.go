@@ -21,7 +21,7 @@ type basicSkillShape struct {
 }
 
 // classSkillShape retorna a área das habilidades de dano das Classes Básicas (1 a 12) e das Variantes Secretas (13 a 18).
-// Habilidades que são projéteis (Arqueiro, Orbe de Magma do Mago, frascos do Alquimista) ou só
+// Habilidades que são projéteis (Sentinela dos Ventos, Orbe de Magma do Arcanista, frascos do Transmutador) ou só
 // buffs não têm área aqui e seguem o fluxo antigo.
 func classSkillShape(classID, actionType uint8) (basicSkillShape, bool) {
 	q := actionType == protocol.ActionSkillQ
@@ -168,7 +168,7 @@ func classSkillShape(classID, actionType uint8) (basicSkillShape, bool) {
 		switch {
 		case q: // Canhão de Moedas & Metralha
 			return basicSkillShape{radius: 7.0, minDot: 0.6}, true
-		case f: // Autodestruição Nuclear Goblin
+		case f: // Autodestruição Nuclear Gnarlin
 			return basicSkillShape{radius: 8.0, minDot: -1}, true
 		}
 
@@ -478,7 +478,7 @@ func (s *Server) applyDamageOverTime(attackerID uint32, mob *world.Mob, perTick 
 	}
 }
 
-// applyAcidPool aplica a Bomba de Ácido Corrosivo do Alquimista: derrete 35% da defesa e desacelera.
+// applyAcidPool aplica a Bomba de Ácido Corrosivo do Transmutador: derrete 35% da defesa e desacelera.
 func (s *Server) applyAcidPool(ownerID uint32, cx, cz, radius float32) {
 	if s.mobManager == nil {
 		return
@@ -504,7 +504,7 @@ func (s *Server) applyAcidPool(ownerID uint32, cx, cz, radius float32) {
 	}
 }
 
-// shadowStepTarget procura o monstro mais próximo à frente (até 8m) para o Passo das Sombras do Assassino.
+// shadowStepTarget procura o monstro mais próximo à frente (até 8m) para o Passo das Sombras do Lâmina Silente.
 // Retorna a posição logo atrás dele, ou ok=false se não houver alvo.
 func (s *Server) shadowStepTarget(player *world.Player, px, pz, aimX, aimZ float32) (float32, float32, bool) {
 	if s.mobManager == nil {
@@ -561,7 +561,7 @@ func isDarkCreature(mob *world.Mob) bool {
 
 // variantDamageAgainst aplica bônus de dano das Variantes que dependem do alvo.
 func variantDamageAgainst(classID uint8, mob *world.Mob, damage uint16) uint16 {
-	// Caçador de Vampiros (Exterminador Noturno): +40% de dano em criaturas sombrias
+	// Inquisidor de Prata (Exterminador Noturno): +40% de dano em criaturas sombrias
 	if classID == protocol.ClassVampireHunter && isDarkCreature(mob) {
 		return uint16(float32(damage) * 1.40)
 	}
@@ -717,7 +717,7 @@ func (s *Server) handleTranscendentPreEffects(player *world.Player, classID, act
 }
 
 // triggerLegendaryUltimate é o efeito global da Ultimate (F) das Classes Lendárias:
-// anúncio para o mundo inteiro e, no Imperador do Sol Negro, o céu vira Eclipse por 60s.
+// anúncio para o mundo inteiro e, no Soberano do Sol Negro, o céu vira Eclipse por 60s.
 func (s *Server) triggerLegendaryUltimate(player *world.Player, classID uint8) {
 	names := map[uint8]string{
 		protocol.ClassPagmaDescendant:   "QUEDA DO DEUS DA FORJA",

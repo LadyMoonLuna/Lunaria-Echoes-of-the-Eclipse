@@ -1332,7 +1332,7 @@ DropTables = {
         }
     },
     [22] = {
-        name = "Ymir, o Patriarca Gigante de Gelo (Boss)",
+        name = "Ymir, o Patriarca Jotunar (Boss)",
         drops = {
             { item_id = 50, name = "Núcleo de Gelo Ancestral", rate = 1.00, rare = false },
             { item_id = 12, name = "Placa Glacial Reforçada", rate = 1.00, rare = false },

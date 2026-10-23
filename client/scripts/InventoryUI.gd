@@ -149,7 +149,7 @@ const ITEM_CATALOG := {
 	14: {
 		"name": "Cálice da Alma Partida",
 		"category": "Relíquia do Abismo",
-		"desc": "Artefato sombrio funerário. Se você morrer durante a noite sob o luar carregando este cálice, sua alma renascerá como a Raça Secreta Revenant!",
+		"desc": "Artefato sombrio funerário. Se você morrer durante a noite sob o luar carregando este cálice, sua alma renascerá como a Raça Secreta Cinerion!",
 		"color": Color("#7e57c2"),
 		"usable": true,
 		"btn_text": "[Equipar / Ritual]"
@@ -165,15 +165,15 @@ const ITEM_CATALOG := {
 	16: {
 		"name": "Sangue do Progenitor Bestial",
 		"category": "Reagente Primordial",
-		"desc": "Sangue primordial extraído do Licantropo Alfa em frasco de vidro. Ao beber, desperta imediatamente a Linhagem Secreta Dhampir!",
+		"desc": "Sangue primordial extraído do Licantropo Alfa em frasco de vidro. Ao beber, desperta imediatamente a Linhagem Secreta Sangrael!",
 		"color": Color("#d50000"),
 		"usable": true,
-		"btn_text": "[Beber (Despertar Dhampir)]"
+		"btn_text": "[Beber (Despertar Sangrael)]"
 	},
 	17: {
 		"name": "Tomo da Foice do Eclipse",
 		"category": "Artefato Proibido",
-		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 27 — Ceifador do Eclipse!",
+		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 27 — Ceifador da Lua Negra!",
 		"color": Color("#aa00ff"),
 		"usable": true,
 		"btn_text": "[Consumir (Despertar Ceifador)]"
@@ -181,7 +181,7 @@ const ITEM_CATALOG := {
 	18: {
 		"name": "Núcleo de Forja Estelar",
 		"category": "Artefato Arcano",
-		"desc": "Fragmento de estrela pulsante com energia rúnica. Entregue ao ferreiro Garrick para despertar a Classe Secreta 14 — Artífice Rúnico!",
+		"desc": "Fragmento de estrela pulsante com energia rúnica. Entregue ao ferreiro Garrick para despertar a Classe Secreta 14 — Engenheiro Rúnico!",
 		"color": Color("#ffab00"),
 		"usable": true,
 		"btn_text": "[Ativar / Entregar a Garrick]"
@@ -221,10 +221,10 @@ const ITEM_CATALOG := {
 	29: {
 		"name": "Ampulheta Rúnica",
 		"category": "Artefato Temporal Secreto",
-		"desc": "Ampulheta que verte areia cintilante contra o fluxo cósmico. Ao usar, desperta a Linhagem Secreta 28 — Errante Temporal (Cronomante)!",
+		"desc": "Ampulheta que verte areia cintilante contra o fluxo cósmico. Ao usar, desperta a Linhagem Secreta 28 — Cronari!",
 		"color": Color("#ffd54f"),
 		"usable": true,
-		"btn_text": "[Usar (Despertar Cronomante)]"
+		"btn_text": "[Usar (Despertar Cronari)]"
 	},
 	30: {
 		"name": "Casulo de Seda Prateada",
@@ -267,7 +267,7 @@ const ITEM_CATALOG := {
 		"btn_text": "[Equipar Botas]"
 	},
 	35: {
-		"name": "Manoplas de Ferreiro",
+		"name": "Manoplas de Forjador de Estrelas",
 		"category": "Luvas",
 		"desc": "Luvas pesadas com rebites de latão da forja (+4 FOR, +3 MAS).",
 		"color": Color("#ffb74d"),
@@ -275,7 +275,7 @@ const ITEM_CATALOG := {
 		"btn_text": "[Equipar Luvas]"
 	},
 	36: {
-		"name": "Cinto de Alquimista",
+		"name": "Cinto de Transmutador",
 		"category": "Cinto",
 		"desc": "Cinto com pequenos frascos e runas de transmutação (+3 INT, +3 SPI).",
 		"color": Color("#66bb6a"),
@@ -325,7 +325,7 @@ const ITEM_CATALOG := {
 	56: {
 		"name": "Glândula Real do Escorpião",
 		"category": "Relíquia de Classe Única",
-		"desc": "Glândula pulsante do Escorpião Abissal (2%). Requisito do Carrasco do Veneno Vorpal (Demi-Humano Escorpião) — desperte-o num Mestre de Classe.",
+		"desc": "Glândula pulsante do Escorpião Abissal (2%). Requisito do Algoz Vorpal (Escarion) — desperte-o num Mestre de Classe.",
 		"color": Color("#76ff03"),
 		"usable": false,
 		"btn_text": ""
@@ -333,15 +333,15 @@ const ITEM_CATALOG := {
 	57: {
 		"name": "Sangue Puro de Vesperian",
 		"category": "Relíquia de Classe Única",
-		"desc": "Sangue do Lorde Vesperian (25%). Requisito do Aristocrata Carmesim (Dhampir) — desperte-o num Mestre de Classe.",
+		"desc": "Sangue do Lorde Vesperian (25%). Requisito do Conde Escarlate (Sangrael) — desperte-o num Mestre de Classe.",
 		"color": Color("#880e4f"),
 		"usable": false,
 		"btn_text": ""
 	},
 	58: {
-		"name": "Diagrama do Mecha Goblin",
+		"name": "Diagrama do Mecha Gnarlin",
 		"category": "Relíquia de Classe Única",
-		"desc": "Projeto contrabandeado do Mercado Negro de Varis. Requisito do Barão da Sucata (Goblin) — desperte-o num Mestre de Classe.",
+		"desc": "Projeto contrabandeado do Mercado Negro de Varis. Requisito do Barão Engrenagem (Gnarlin) — desperte-o num Mestre de Classe.",
 		"color": Color("#ffd600"),
 		"usable": false,
 		"btn_text": ""
@@ -758,17 +758,17 @@ func _on_item_used(item_id: int) -> void:
 	var world := get_parent()
 	if world and world.has_method("request_class_or_race_change"):
 		match item_id:
-			16: # Sangue do Progenitor Bestial -> Raça 5 Dhampir
-				world.request_class_or_race_change(true, 5, 1, "Dhampir", "ITEM:16")
+			16: # Sangue do Progenitor Bestial -> Raça 5 Sangrael
+				world.request_class_or_race_change(true, 5, 1, "Sangrael", "ITEM:16")
 				return
-			17: # Tomo da Foice do Eclipse -> Classe 27 Ceifador do Eclipse (Tier 5)
-				world.request_class_or_race_change(false, 27, 5, "Ceifador do Eclipse", "ITEM:17")
+			17: # Tomo da Foice do Eclipse -> Classe 27 Ceifador da Lua Negra (Tier 5)
+				world.request_class_or_race_change(false, 27, 5, "Ceifador da Lua Negra", "ITEM:17")
 				return
-			18: # Núcleo de Forja Estelar -> Classe 14 Artífice Rúnico (Tier 5)
-				world.request_class_or_race_change(false, 35, 5, "Artífice Rúnico", "ITEM:18")
+			18: # Núcleo de Forja Estelar -> Classe 14 Engenheiro Rúnico (Tier 5)
+				world.request_class_or_race_change(false, 35, 5, "Engenheiro Rúnico", "ITEM:18")
 				return
-			29: # Ampulheta Rúnica -> Raça 28 Errante Temporal
-				world.request_class_or_race_change(true, 28, 1, "Errante Temporal", "ITEM:29")
+			29: # Ampulheta Rúnica -> Raça 28 Cronari
+				world.request_class_or_race_change(true, 28, 1, "Cronari", "ITEM:29")
 				return
 			30: # Casulo de Seda Prateada -> Raça 21 Aracne
 				world.request_class_or_race_change(true, 21, 1, "Aracne", "ITEM:30")
@@ -776,14 +776,14 @@ func _on_item_used(item_id: int) -> void:
 			44: # Olho Multifacetado de Arachna -> Raça 21 Aracne
 				world.request_class_or_race_change(true, 21, 1, "Aracne", "ITEM:44")
 				return
-			47: # Ferrão de Escorpião Abissal -> Raça 43 Demi-Humano Escorpião
-				world.request_class_or_race_change(true, 43, 1, "Demi-Humano Escorpião", "ITEM:47")
+			47: # Ferrão de Escorpião Abissal -> Raça 43 Escarion
+				world.request_class_or_race_change(true, 43, 1, "Escarion", "ITEM:47")
 				return
-			52: # Coração de Geada Eterna -> Raça 31 Gigante de Gelo
-				world.request_class_or_race_change(true, 31, 1, "Gigante de Gelo", "ITEM:52")
+			52: # Coração de Geada Eterna -> Raça 31 Jotunar
+				world.request_class_or_race_change(true, 31, 1, "Jotunar", "ITEM:52")
 				return
-			54: # Sangue Puro do Progenitor -> Raça 5 Dhampir / Vampiro
-				world.request_class_or_race_change(true, 5, 1, "Dhampir / Vampiro", "ITEM:54")
+			54: # Sangue Puro do Progenitor -> Raça 5 Sangrael
+				world.request_class_or_race_change(true, 5, 1, "Sangrael", "ITEM:54")
 				return
 
 	var nm := get_node_or_null("/root/NetworkManager")

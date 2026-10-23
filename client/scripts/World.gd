@@ -93,48 +93,48 @@ const RACE_NAMES := [
 	"Noctari",
 	"Kharad",
 	"Varkai",
-	"Dhampir",
-	"Licantropo Primordial",
-	"Revenant",
-	"Celestino",
-	"Abissal",
-	"Autômato Rúnico",
-	"Alto Valeriano",
-	"Andarilho do Éter",
-	"Arconte Lunar",
-	"Espectro Umbral",
-	"Guardião Rúnico",
-	"Titã de Obsidiana",
-	"Soberano Dracônico",
-	"Fera do Frenesi",
+	"Sangrael",
+	"Lupharion",
+	"Cinerion",
+	"Seraphel",
+	"Umbryss",
+	"Runaric",
+	"Solvaren",
+	"Aetheris",
+	"Selenarca",
+	"Nyxara",
+	"Runakhar",
+	"Pyrokhar",
+	"Dravarkai",
+	"Ferovar",
 	"Sylvari",
-	"Esporiano",
+	"Myconid",
 	"Aracne",
-	"Draconato de Cinzas",
-	"Quimera",
-	"Boreal",
+	"Ignivarn",
+	"Chimeryth",
+	"Borealin",
 	"Thalassiano",
 	"Cambion",
 	"Nephilim",
-	"Errante Temporal",
-	"Meio-Celestial",
-	"Pyromante",
-	"Gigante de Gelo",
-	"Drago Terra",
-	"Drago Água",
-	"Drago Raio",
-	"Drago Místico",
-	"Orc",
-	"Anão",
-	"Elfo",
-	"Elfo Solar (Azgher)",
-	"Elfo Lunar (Tenebra)",
-	"Fadinha",
-	"Goblin",
-	"Demi-Humano Escorpião",
-	"Demi-Humano Tartaruga",
-	"Meio-Demônio (Succubus)",
-	"Demi-Humano Lobo"
+	"Cronari",
+	"Aurelith",
+	"Pyrael",
+	"Jotunar",
+	"Terravyrn",
+	"Hydravyrn",
+	"Fulgravyrn",
+	"Arcavyrn",
+	"Orkhan",
+	"Dvergar",
+	"Elarin",
+	"Solarin (Azgher)",
+	"Lunarin (Tenebra)",
+	"Faelith",
+	"Gnarlin",
+	"Escarion",
+	"Testudar",
+	"Lilitara",
+	"Ulvar"
 ]
 const ClassPaths = preload("res://scripts/ClassPaths.gd")
 
@@ -142,33 +142,33 @@ const CLASS_NAMES: Array = ClassPaths.CLASS_NAMES
 const TIER_NAMES := ["Sem Classe", "Comum", "Incomum", "Rara", "Épica", "Única", "Lendária"]
 
 const EVOLVED_CLASS_NAMES := {
-	1: ["", "Guerreiro", "Guardião", "Bastião de Ferro", "Vanguarda Real", "Vanguarda Real", "Vanguarda Real"],
-	2: ["", "Mago", "Mago do Véu", "Arquimago", "Tecelão do Eclipse", "Tecelão do Eclipse", "Tecelão do Eclipse"],
-	3: ["", "Arqueiro", "Patrulheiro", "Franco-Atirador", "Mestre Rastreador", "Mestre Rastreador", "Mestre Rastreador"],
-	4: ["", "Assassino", "Lâmina Oculta", "Sombra Letal", "Mestre das Sombras", "Mestre das Sombras", "Mestre das Sombras"],
-	5: ["", "Lutador", "Monge Marcial", "Mestre do Chi", "Campeão de Um Punho", "Campeão de Um Punho", "Campeão de Um Punho"],
-	6: ["", "Escudeiro", "Guarda Paladino", "Bastião Inabalável", "Fortaleza Eterna", "Fortaleza Eterna", "Fortaleza Eterna"],
-	7: ["", "Ferreiro", "Armeiro de Guerra", "Mestre da Bigorna", "Grão-Mestre Forjador", "Grão-Mestre Forjador", "Grão-Mestre Forjador"],
-	8: ["", "Alquimista", "Boticário Tóxico", "Grão-Mestre Químico", "Mestre da Transmutação", "Mestre da Transmutação", "Mestre da Transmutação"],
-	9: ["", "Escultor", "Entalhador Arcano", "Mestre do Luar", "Grande Escultor Divino", "Grande Escultor Divino", "Grande Escultor Divino"],
-	10: ["", "Domador", "Senhor das Feras", "Alfa da Matilha", "Grão-Mestre da Selva", "Grão-Mestre da Selva", "Grão-Mestre da Selva"],
-	11: ["", "Alfaiate de Guerra", "Tecelão de Aço", "Mestre Marionetista", "Tecelão da Realidade", "Tecelão da Realidade", "Tecelão da Realidade"],
-	12: ["", "Chef de Caça", "Açougueiro de Monstros", "Mestre Culinário Feral", "Grão-Chef Supremo", "Grão-Chef Supremo", "Grão-Chef Supremo"],
-	13: ["", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico"],
-	14: ["", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros"],
-	15: ["", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide"],
-	16: ["", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras"],
-	17: ["", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas"],
-	18: ["", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste"],
-	27: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
-	35: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
-	36: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
-	28: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
-	29: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
-	30: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
-	37: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
-	38: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
-	39: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
+	1: ["", "Espadachim da Aurora", "Guardião", "Bastião de Ferro", "Vanguarda Real", "Vanguarda Real", "Vanguarda Real"],
+	2: ["", "Arcanista", "Arcanista do Véu", "Arquimago", "Tecelão do Eclipse", "Tecelão do Eclipse", "Tecelão do Eclipse"],
+	3: ["", "Sentinela dos Ventos", "Patrulheiro", "Franco-Atirador", "Mestre Rastreador", "Mestre Rastreador", "Mestre Rastreador"],
+	4: ["", "Lâmina Silente", "Lâmina Oculta", "Sombra Letal", "Mestre das Sombras", "Mestre das Sombras", "Mestre das Sombras"],
+	5: ["", "Punho Celeste", "Monge Marcial", "Mestre do Chi", "Campeão de Um Punho", "Campeão de Um Punho", "Campeão de Um Punho"],
+	6: ["", "Guardião do Bastião", "Guarda Paladino", "Bastião Inabalável", "Fortaleza Eterna", "Fortaleza Eterna", "Fortaleza Eterna"],
+	7: ["", "Forjador de Estrelas", "Armeiro de Guerra", "Mestre da Bigorna", "Grão-Mestre Forjador", "Grão-Mestre Forjador", "Grão-Mestre Forjador"],
+	8: ["", "Transmutador", "Boticário Tóxico", "Grão-Mestre Químico", "Mestre da Transmutação", "Mestre da Transmutação", "Mestre da Transmutação"],
+	9: ["", "Escultor de Almas", "Entalhador Arcano", "Mestre do Luar", "Grande Escultor de Almas Divino", "Grande Escultor de Almas Divino", "Grande Escultor de Almas Divino"],
+	10: ["", "Senhor das Feras", "Senhor das Feras", "Alfa da Matilha", "Grão-Mestre da Selva", "Grão-Mestre da Selva", "Grão-Mestre da Selva"],
+	11: ["", "Tecelão Carmesim", "Tecelão de Aço", "Mestre Marionetista", "Tecelão da Realidade", "Tecelão da Realidade", "Tecelão da Realidade"],
+	12: ["", "Mestre do Banquete", "Açougueiro de Monstros", "Mestre Culinário Feral", "Grão-Chef Supremo", "Grão-Chef Supremo", "Grão-Chef Supremo"],
+	13: ["", "Lâmina Rúnica", "Lâmina Rúnica", "Lâmina Rúnica", "Lâmina Rúnica", "Lâmina Rúnica", "Lâmina Rúnica"],
+	14: ["", "Inquisidor de Prata", "Inquisidor de Prata", "Inquisidor de Prata", "Inquisidor de Prata", "Inquisidor de Prata", "Inquisidor de Prata"],
+	15: ["", "Valquíria Celeste", "Valquíria Celeste", "Valquíria Celeste", "Valquíria Celeste", "Valquíria Celeste", "Valquíria Celeste"],
+	16: ["", "Punho Fantasma", "Punho Fantasma", "Punho Fantasma", "Punho Fantasma", "Punho Fantasma", "Punho Fantasma"],
+	17: ["", "Forjador Carmesim", "Forjador Carmesim", "Forjador Carmesim", "Forjador Carmesim", "Forjador Carmesim", "Forjador Carmesim"],
+	18: ["", "Doutor Corvo", "Doutor Corvo", "Doutor Corvo", "Doutor Corvo", "Doutor Corvo", "Doutor Corvo"],
+	27: ["", "Ceifador da Lua Negra", "Ceifador da Lua Negra", "Ceifador da Lua Negra", "Ceifador da Lua Negra", "Ceifador da Lua Negra", "Soberano da Meia-Noite"],
+	35: ["", "Engenheiro Rúnico", "Engenheiro Rúnico", "Engenheiro Rúnico", "Engenheiro Rúnico", "Engenheiro Rúnico", "Engenheiro Arcano Supremo"],
+	36: ["", "Demiurgo Alquímico", "Demiurgo Alquímico", "Demiurgo Alquímico", "Demiurgo Alquímico", "Demiurgo Alquímico", "Demiurgo da Vida Sintética"],
+	28: ["", "Bailarino das Estrelas", "Bailarino das Estrelas", "Bailarino das Estrelas", "Bailarino das Estrelas", "Bailarino das Estrelas", "Soberano das Constelações"],
+	29: ["", "Inquisidor da Chama Branca", "Inquisidor da Chama Branca", "Inquisidor da Chama Branca", "Inquisidor da Chama Branca", "Inquisidor da Chama Branca", "Grão-Inquisidor das Chamas"],
+	30: ["", "Arauto do Ossuário", "Arauto do Ossuário", "Arauto do Ossuário", "Arauto do Ossuário", "Arauto do Ossuário", "Lorde do Ossuário Eterno"],
+	37: ["", "Senhor da Selva Primordial", "Senhor da Selva Primordial", "Senhor da Selva Primordial", "Senhor da Selva Primordial", "Senhor da Selva Primordial", "Avatar da Fera Ancestral"],
+	38: ["", "Cavaleiro do Vazio", "Cavaleiro do Vazio", "Cavaleiro do Vazio", "Cavaleiro do Vazio", "Cavaleiro do Vazio", "Guardião da Singularidade"],
+	39: ["", "Arauto do Trovão", "Arauto do Trovão", "Arauto do Trovão", "Arauto do Trovão", "Arauto do Trovão", "Soberano dos Relâmpagos"]
 }
 
 const TIER_COLORS := [
@@ -192,7 +192,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Postura defensiva temporária que recupera +15 de Stamina.",
 		"f_desc": "Salto para trás com foco aumentado reduzindo dano por 2s."
 	},
-	1: { # Guerreiro
+	1: { # Espadachim da Aurora
 		"basic": "Corte de Espada",
 		"q": "Corte Duplo",
 		"r": "Investida Imparável",
@@ -202,7 +202,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Dash frontal de 6m que empurra inimigos e quebra postura.",
 		"f_desc": "2.6x dano sísmico em área de 4.5m (+40% dano em alvos com <35% HP)."
 	},
-	2: { # Mago
+	2: { # Arcanista
 		"basic": "Orbe Arcano",
 		"q": "Orbe de Magma",
 		"r": "Prisão Glacial",
@@ -212,7 +212,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Congela e empurra inimigos em 5m por 2s.",
 		"f_desc": "2.8x dano arcano/fogo devastador em raio de 6m."
 	},
-	3: { # Arqueiro
+	3: { # Sentinela dos Ventos
 		"basic": "Disparo Preciso",
 		"q": "Tiro Perfurante",
 		"r": "Salto Acrobático",
@@ -222,7 +222,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Mortal para trás disparando flecha que prende o inimigo por 2s.",
 		"f_desc": "2.6x dano em chuva de flechas numa área de 6m."
 	},
-	4: { # Assassino
+	4: { # Lâmina Silente
 		"basic": "Talho Duplo",
 		"q": "Passo das Sombras",
 		"r": "Cortina de Fumaça",
@@ -232,7 +232,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Fica furtivo/intangível por 2.5s e ganha +30% velocidade.",
 		"f_desc": "Desfere 8 cortes letais em 4m causando 2.7x dano e hemorragia."
 	},
-	5: { # Lutador
+	5: { # Punho Celeste
 		"basic": "Golpe de Chi",
 		"q": "Gancho Demolidor",
 		"r": "Postura do Lótus Marcial",
@@ -242,7 +242,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Purifica debuffs, cura +40 HP e reduz dano em 50% por 3s.",
 		"f_desc": "Salta e soca o chão abrindo cratera de 5.5m com 2.75x dano."
 	},
-	6: { # Escudeiro
+	6: { # Guardião do Bastião
 		"basic": "Pancada de Bastião",
 		"q": "Esmagamento de Bastião",
 		"r": "Formação Impenetrável",
@@ -252,7 +252,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Bloqueia 80% do dano por 4s e concede escudo aos aliados próximos.",
 		"f_desc": "Crava o escudo no solo criando cúpula dourada que cura +70 HP e impede mortes por 4s."
 	},
-	7: { # Ferreiro
+	7: { # Forjador de Estrelas
 		"basic": "Martelada Pesada",
 		"q": "Golpe da Bigorna Incandescente",
 		"r": "Afiação & Têmpera em Campo",
@@ -262,7 +262,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Repara armas e concede +25% Ataque e Defesa ao grupo por 10s.",
 		"f_desc": "Invoca 4 armas espectrais forjadas que giram cortando tudo em 5.5m com 2.7x dano."
 	},
-	8: { # Alquimista
+	8: { # Transmutador
 		"basic": "Frasco Cáustico",
 		"q": "Frasco de Fogo Grego & Cura",
 		"r": "Bomba de Ácido Corrosivo",
@@ -272,7 +272,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Poça química que derrete 35% da defesa inimiga e desacelera.",
 		"f_desc": "Detona megabomba de 2.6x dano e transmutação com +30% status por 8s."
 	},
-	9: { # Escultor
+	9: { # Escultor de Almas
 		"basic": "Entalhe Prateado",
 		"q": "Entalhe em Velocidade",
 		"r": "Estátua Explosiva / Pele de Mármore",
@@ -282,7 +282,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Deixa uma escultura que explode nos inimigos e ganha 50% redução de dano.",
 		"f_desc": "Feixe de cortes prateados em 6m causando 2.8x Dano Verdadeiro."
 	},
-	10: { # Domador
+	10: { # Senhor das Feras
 		"basic": "Estalo de Domínio",
 		"q": "Estalo do Chicote: Investida!",
 		"r": "Fusão & Uivo Bestial",
@@ -292,7 +292,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Cura +50 HP seu e da fera, concedendo +30% velocidade e garras.",
 		"f_desc": "Invoca manada de feras domadas que atropelam toda a área em 7m com 2.8x dano."
 	},
-	11: { # Alfaiate de Guerra
+	11: { # Tecelão Carmesim
 		"basic": "Puntura Rúnica",
 		"q": "Teia de Fios Retalhadores",
 		"r": "Costurar Sombras / Marionete",
@@ -302,7 +302,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Prende os inimigos no chão por 2.5s com fios de aço e concede esquiva ao grupo.",
 		"f_desc": "Fecha uma redoma de fios de aço que tritura todos os alvos em 6m causando 2.7x dano."
 	},
-	12: { # Chef de Caça
+	12: { # Mestre do Banquete
 		"basic": "Corte de Açougue",
 		"q": "Desossar a Vivo!",
 		"r": "Banquete na Wok Flamejante",
@@ -312,7 +312,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.",
 		"f_desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade."
 	},
-	27: { # Ceifador do Eclipse
+	27: { # Ceifador da Lua Negra
 		"basic": "Foice das Sombras",
 		"q": "Colheita Noturna",
 		"r": "Drenagem Abissal",
@@ -322,7 +322,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.",
 		"f_desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida (2.4x dano)."
 	},
-	35: { # Artífice Rúnico
+	35: { # Engenheiro Rúnico
 		"basic": "Canhonada Rúnica",
 		"q": "Salva Rúnica",
 		"r": "Sobrecarga Eletrostática",
@@ -332,17 +332,17 @@ const CLASS_SKILLS := {
 		"r_desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.",
 		"f_desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano)."
 	},
-	36: { # Criador de Homúnculos
+	36: { # Demiurgo Alquímico
 		"basic": "Pulso Quimérico",
 		"q": "Infusão Mutagênica",
 		"r": "Névoa de Bioplasma",
-		"f": "Frenesi do Quimera Supremo",
+		"f": "Frenesi do Chimeryth Supremo",
 		"basic_desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre.",
 		"q_desc": "Elixir abissal corrosivo que dissolve resistências inimigas (1.75x dano).",
 		"r_desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.",
 		"f_desc": "O homúnculo cresce e desfere explosão de garras e ácido colossais (2.4x dano)."
 	},
-	28: { # Dançarino Astral
+	28: { # Bailarino das Estrelas
 		"basic": "Corte Astral",
 		"q": "Corte Cadente",
 		"r": "Valsa dos Espelhos",
@@ -352,7 +352,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.",
 		"f_desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano)."
 	},
-	29: { # Inquisidor das Cinzas
+	29: { # Inquisidor da Chama Branca
 		"basic": "Chama Penitente",
 		"q": "Chicote de Penitência",
 		"r": "Selo de Excomunhão",
@@ -362,7 +362,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.",
 		"f_desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano)."
 	},
-	30: { # Necromante de Ossos
+	30: { # Arauto do Ossuário
 		"basic": "Toque do Sepulcro",
 		"q": "Lança de Fêmur",
 		"r": "Explosão Óssea & Escudo",
@@ -372,7 +372,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Detona fragmentos ósseos em 5.0m e ergue barreira de ossos protetora.",
 		"f_desc": "Ergue vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal."
 	},
-	37: { # Domador Primordial
+	37: { # Senhor da Selva Primordial
 		"basic": "Patada Selvagem",
 		"q": "Investida do Alfa",
 		"r": "Uivo da Alcateia",
@@ -382,7 +382,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.",
 		"f_desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano)."
 	},
-	38: { # Cavaleiro da Ruptura
+	38: { # Cavaleiro do Vazio
 		"basic": "Golpe de Fenda",
 		"q": "Esmagamento Gravitacional",
 		"r": "Singularidade Reversa",
@@ -392,7 +392,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.",
 		"f_desc": "Cria um buraco negro em 6.5m que atordoa inimigos e desintegra matéria (2.8x dano)."
 	},
-	39: { # Arauto da Tempestade
+	39: { # Arauto do Trovão
 		"basic": "Faísca Elétrica",
 		"q": "Lança do Trovão",
 		"r": "Passo de Relâmpago",
@@ -446,7 +446,7 @@ const RACIAL_SKILL_NAMES := {
 	39: "Espada Solar de Azgher",
 	40: "Manto de Tenebra",
 	41: "Pó de Fada Estelar",
-	42: "Truque Sujo Goblin",
+	42: "Truque Sujo Gnarlin",
 	43: "Aguilhão de Toxina Vorpal",
 	44: "Lar Doce Casca",
 	45: "Drenar Força Vital",
@@ -713,102 +713,102 @@ const DEV_RACES := [
 	{"id": 3, "name": "Kharad", "badge": "Base Forja", "col": Color("#ff9800"), "desc": "Pele Pétrea: -15% dano físico e Bastião Sísmico [Z]"},
 	{"id": 4, "name": "Varkai", "badge": "Base Feral", "col": Color("#ff5722"), "desc": "Instinto Predador: +20% Velocidade e Salto Predatório [Z]"},
 	# Secretas Clássicas (5..10)
-	{"id": 5, "name": "Dhampir / Sanguis", "badge": "Vampírico", "col": Color("#e91e63"), "desc": "Vampirismo: +8% Roubo de Vida passivo e Dreno Sanguíneo"},
-	{"id": 6, "name": "Licantropo Primordial", "badge": "Lupino Alfa", "col": Color("#ff6f00"), "desc": "Fúria da Matilha: +25% Dano na Lua Cheia / Sangue"},
-	{"id": 7, "name": "Revenant (Amaldiçoado)", "badge": "Cinzas", "col": Color("#a7ffeb"), "desc": "Tenacidade Fúnebre: Sobrevive 4s com 1 HP ao morrer"},
-	{"id": 8, "name": "Celestino / Natus Solaris", "badge": "Luz Solar", "col": Color("#fff176"), "desc": "Aura Radiante: Queima inimigos e feixe purificador"},
-	{"id": 9, "name": "Abissal / Umbralis", "badge": "Sombra Cósmica", "col": Color("#7c4dff"), "desc": "Corpo de Éter: 10% chance de desvio total e Vácuo [Z]"},
-	{"id": 10, "name": "Autômato Rúnico / Gélido", "badge": "Gélido", "col": Color("#80deea"), "desc": "Presença Glacial: Reduz velocidade de atacantes em 20%"},
+	{"id": 5, "name": "Sangrael / Sanguis", "badge": "Vampírico", "col": Color("#e91e63"), "desc": "Vampirismo: +8% Roubo de Vida passivo e Dreno Sanguíneo"},
+	{"id": 6, "name": "Lupharion", "badge": "Lupino Alfa", "col": Color("#ff6f00"), "desc": "Fúria da Matilha: +25% Dano na Lua Cheia / Sangue"},
+	{"id": 7, "name": "Cinerion (Amaldiçoado)", "badge": "Cinzas", "col": Color("#a7ffeb"), "desc": "Tenacidade Fúnebre: Sobrevive 4s com 1 HP ao morrer"},
+	{"id": 8, "name": "Seraphel / Natus Solaris", "badge": "Luz Solar", "col": Color("#fff176"), "desc": "Aura Radiante: Queima inimigos e feixe purificador"},
+	{"id": 9, "name": "Umbryss", "badge": "Sombra Cósmica", "col": Color("#7c4dff"), "desc": "Corpo de Éter: 10% chance de desvio total e Vácuo [Z]"},
+	{"id": 10, "name": "Runaric / Gélido", "badge": "Gélido", "col": Color("#80deea"), "desc": "Presença Glacial: Reduz velocidade de atacantes em 20%"},
 	# Evoluções Ordem e Caos (11..18)
-	{"id": 11, "name": "Alto Valeriano", "badge": "Ordem Solar", "col": Color("#ffe082"), "desc": "Liderança Real: +20% Stamina Máxima e Estandarte Imperial"},
-	{"id": 12, "name": "Andarilho do Éter", "badge": "Caos Cósmico", "col": Color("#ce93d8"), "desc": "Corpo Etéreo: 15% ignorar dano e Fenda Dimensional"},
-	{"id": 13, "name": "Arconte Lunar", "badge": "Ordem Selene", "col": Color("#80d8ff"), "desc": "Bênção da Lua: +35% poder mágico e Cascata Lunar"},
-	{"id": 14, "name": "Espectro Umbral", "badge": "Caos Nyx", "col": Color("#b388ff"), "desc": "Véu Noturno: +30% velocidade e Manto de Invisibilidade"},
-	{"id": 15, "name": "Guardião Rúnico", "badge": "Ordem Forja", "col": Color("#ffcc80"), "desc": "Pele de Adamante: -25% dano físico e reflete 15%"},
-	{"id": 16, "name": "Titã de Obsidiana", "badge": "Caos Magma", "col": Color("#ffab91"), "desc": "Coração Vulcânico: Dano de fogo por segundo em golpes"},
-	{"id": 17, "name": "Soberano Dracônico / Predador Alfa", "badge": "Alcateia", "col": Color("#ff8a65"), "desc": "Espírito de Alcateia: +20% dano e velocidade em grupo"},
-	{"id": 18, "name": "Fera do Frenesi", "badge": "Frenesi", "col": Color("#ff1744"), "desc": "Sede de Sangue: +5% velocidade de ataque cumulativa"},
+	{"id": 11, "name": "Solvaren", "badge": "Ordem Solar", "col": Color("#ffe082"), "desc": "Liderança Real: +20% Stamina Máxima e Estandarte Imperial"},
+	{"id": 12, "name": "Aetheris", "badge": "Caos Cósmico", "col": Color("#ce93d8"), "desc": "Corpo Etéreo: 15% ignorar dano e Fenda Dimensional"},
+	{"id": 13, "name": "Selenarca", "badge": "Ordem Selene", "col": Color("#80d8ff"), "desc": "Bênção da Lua: +35% poder mágico e Cascata Lunar"},
+	{"id": 14, "name": "Nyxara", "badge": "Caos Nyx", "col": Color("#b388ff"), "desc": "Véu Noturno: +30% velocidade e Manto de Invisibilidade"},
+	{"id": 15, "name": "Runakhar", "badge": "Ordem Forja", "col": Color("#ffcc80"), "desc": "Pele de Adamante: -25% dano físico e reflete 15%"},
+	{"id": 16, "name": "Pyrokhar", "badge": "Caos Magma", "col": Color("#ffab91"), "desc": "Coração Vulcânico: Dano de fogo por segundo em golpes"},
+	{"id": 17, "name": "Dravarkai / Predador Alfa", "badge": "Alcateia", "col": Color("#ff8a65"), "desc": "Espírito de Alcateia: +20% dano e velocidade em grupo"},
+	{"id": 18, "name": "Ferovar", "badge": "Frenesi", "col": Color("#ff1744"), "desc": "Sede de Sangue: +5% velocidade de ataque cumulativa"},
 	# Novas Raças Secretas (19..28)
 	{"id": 19, "name": "Sylvari", "badge": "Nascido da Seiva", "col": Color("#81c784"), "desc": "Raízes Vivas: Regeneração acelerada e vínculo florestal"},
 	{"id": 20, "name": "Myconid", "badge": "Véu Fúngico", "col": Color("#c8e6c9"), "desc": "Esporos Vivos: Nuvem de veneno e cegueira ao redor"},
 	{"id": 21, "name": "Aracne", "badge": "Tecelão da Bruma", "col": Color("#a5d6a7"), "desc": "Pernas de Seda: Imune a lentidão e Teia Paralisante"},
-	{"id": 22, "name": "Draconato de Cinzas", "badge": "Escama-Negra", "col": Color("#ff6e40"), "desc": "Bafo de Cinzas: Queimadura contínua e explosão de calor"},
-	{"id": 23, "name": "Quimera", "badge": "Costurado", "col": Color("#ba68c8"), "desc": "Corpo Reativo: Adaptação física contra o último dano sofrido"},
-	{"id": 24, "name": "Boreal", "badge": "Coração de Geada", "col": Color("#80deea"), "desc": "Armadura de Gelo: Absorve impactos físicos com espinhos glaciais"},
+	{"id": 22, "name": "Ignivarn", "badge": "Escama-Negra", "col": Color("#ff6e40"), "desc": "Bafo de Cinzas: Queimadura contínua e explosão de calor"},
+	{"id": 23, "name": "Chimeryth", "badge": "Costurado", "col": Color("#ba68c8"), "desc": "Corpo Reativo: Adaptação física contra o último dano sofrido"},
+	{"id": 24, "name": "Borealin", "badge": "Coração de Geada", "col": Color("#80deea"), "desc": "Armadura de Gelo: Absorve impactos físicos com espinhos glaciais"},
 	{"id": 25, "name": "Thalassian", "badge": "Maré Negra", "col": Color("#4fc3f7"), "desc": "Filho da Maré: +25% poder na chuva e surto aquático"},
 	{"id": 26, "name": "Cambion", "badge": "Sangue de Enxofre", "col": Color("#ff5252"), "desc": "Pacto Abissal: Transforma parte da vida em poder devastador"},
 	{"id": 27, "name": "Nephilim", "badge": "Híbrido Crepúsculo", "col": Color("#ffe082"), "desc": "Luz e Trevas: Alterna bônus de dano sagrado e necrótico"},
-	{"id": 28, "name": "Errante Temporal", "badge": "Cronomante", "col": Color("#b388ff"), "desc": "Fios do Tempo: Reduz cooldowns e rebobina a posição"},
+	{"id": 28, "name": "Cronari", "badge": "Cronari", "col": Color("#b388ff"), "desc": "Fios do Tempo: Reduz cooldowns e rebobina a posição"},
 	# 18 Novas Raças do RPG (29..46)
-	{"id": 29, "name": "Meio-Celestial", "badge": "RPG Divino", "col": Color("#fff59d"), "desc": "Asas de Luz [Z]: Cura +65 HP, restaura Stamina e pulso luminoso."},
-	{"id": 30, "name": "Pyromante", "badge": "RPG Chamas", "col": Color("#ff3d00"), "desc": "Combustão [Z]: Explosão ígnea devastadora (2.8x) e renascimento em cinzas."},
-	{"id": 31, "name": "Gigante de Gelo", "badge": "RPG Glacial (1.45x)", "col": Color("#80deea"), "desc": "Memória Molecular [Z]: Pancada de estalagmites e +350 HP Máx por 15s."},
-	{"id": 32, "name": "Drago Terra", "badge": "RPG Carapaça", "col": Color("#8d6e63"), "desc": "Insulto Sísmico [Z]: Provoca monstros e -35% dano passivo permanente."},
-	{"id": 33, "name": "Drago Água", "badge": "RPG Marés", "col": Color("#29b6f6"), "desc": "Bênção de Netuno [Z]: Vaga marítima em cone e regeneração sob chuva."},
-	{"id": 34, "name": "Drago Raio", "badge": "RPG Fulgor", "col": Color("#ffd600"), "desc": "Descarga Elétrica [Z]: Feixe perfurante de choque rápido (1.85x)."},
-	{"id": 35, "name": "Drago Místico", "badge": "RPG Rúnico", "col": Color("#ab47bc"), "desc": "Infusão Arcana [Z]: Runas arcanas radiantes com amplificação mágica."},
-	{"id": 36, "name": "Orc", "badge": "RPG Brutal", "col": Color("#558b2f"), "desc": "Ataque Devastador [Z]: Golpe brutal (3.2x dano) e digestão de carcaças orgânicas."},
-	{"id": 37, "name": "Anão", "badge": "RPG Forja (0.82x)", "col": Color("#d7ccc8"), "desc": "Martelo Ancestral [Z]: Choque de bigorna com atordoamento em 5.5m."},
-	{"id": 38, "name": "Elfo", "badge": "RPG Silvestre", "col": Color("#aed581"), "desc": "Disparo Élfico [Z]: Projétil luminoso perfurante e esquiva ágil."},
-	{"id": 39, "name": "Elfo Solar (Azgher)", "badge": "RPG Solar", "col": Color("#ffb300"), "desc": "Espada Solar de Azgher [Z]: Talho solar em fogo sagrado purificador."},
-	{"id": 40, "name": "Elfo Lunar (Tenebra)", "badge": "RPG Sombra", "col": Color("#5c6bc0"), "desc": "Manto de Tenebra [Z]: Véu sombrio de evasão total com ataque crítico."},
-	{"id": 41, "name": "Fadinha", "badge": "RPG Alado (0.55x)", "col": Color("#f48fb1"), "desc": "Pó de Fada Estelar [Z]: Nuvem reluzente de cura em aliados e cegueira em inimigos."},
-	{"id": 42, "name": "Goblin", "badge": "RPG Trapaceiro (0.75x)", "col": Color("#7cb342"), "desc": "Truque Sujo Goblin [Z]: Bomba de fumaça cega, confunde e atordoa oponentes."},
-	{"id": 43, "name": "Demi-Humano Escorpião", "badge": "RPG Peçonha", "col": Color("#6a1b9a"), "desc": "Aguilhão de Toxina Vorpal [Z]: Estocada venenosa de dano corrosivo contínuo."},
-	{"id": 44, "name": "Demi-Humano Tartaruga", "badge": "RPG Blindado (1.35x)", "col": Color("#33691e"), "desc": "Lar Doce Casca [Z]: Casulo impenetrável (-45% dano passivo e absorção 85%)."},
-	{"id": 45, "name": "Meio-Demônio (Succubus)", "badge": "RPG Vampírico", "col": Color("#c2185b"), "desc": "Drenar Força Vital [Z]: Sifão demoníaco com roubo de 55 HP e 25% evasão passiva."},
-	{"id": 46, "name": "Demi-Humano Lobo", "badge": "RPG Feral", "col": Color("#78909c"), "desc": "Despertar Forma Bestial [Z]: Uivo lupino brutal com +35% velocidade e garras vorazes."},
+	{"id": 29, "name": "Aurelith", "badge": "RPG Divino", "col": Color("#fff59d"), "desc": "Asas de Luz [Z]: Cura +65 HP, restaura Stamina e pulso luminoso."},
+	{"id": 30, "name": "Pyrael", "badge": "RPG Chamas", "col": Color("#ff3d00"), "desc": "Combustão [Z]: Explosão ígnea devastadora (2.8x) e renascimento em cinzas."},
+	{"id": 31, "name": "Jotunar", "badge": "RPG Glacial (1.45x)", "col": Color("#80deea"), "desc": "Memória Molecular [Z]: Pancada de estalagmites e +350 HP Máx por 15s."},
+	{"id": 32, "name": "Terravyrn", "badge": "RPG Carapaça", "col": Color("#8d6e63"), "desc": "Insulto Sísmico [Z]: Provoca monstros e -35% dano passivo permanente."},
+	{"id": 33, "name": "Hydravyrn", "badge": "RPG Marés", "col": Color("#29b6f6"), "desc": "Bênção de Netuno [Z]: Vaga marítima em cone e regeneração sob chuva."},
+	{"id": 34, "name": "Fulgravyrn", "badge": "RPG Fulgor", "col": Color("#ffd600"), "desc": "Descarga Elétrica [Z]: Feixe perfurante de choque rápido (1.85x)."},
+	{"id": 35, "name": "Arcavyrn", "badge": "RPG Rúnico", "col": Color("#ab47bc"), "desc": "Infusão Arcana [Z]: Runas arcanas radiantes com amplificação mágica."},
+	{"id": 36, "name": "Orkhan", "badge": "RPG Brutal", "col": Color("#558b2f"), "desc": "Ataque Devastador [Z]: Golpe brutal (3.2x dano) e digestão de carcaças orgânicas."},
+	{"id": 37, "name": "Dvergar", "badge": "RPG Forja (0.82x)", "col": Color("#d7ccc8"), "desc": "Martelo Ancestral [Z]: Choque de bigorna com atordoamento em 5.5m."},
+	{"id": 38, "name": "Elarin", "badge": "RPG Silvestre", "col": Color("#aed581"), "desc": "Disparo Élfico [Z]: Projétil luminoso perfurante e esquiva ágil."},
+	{"id": 39, "name": "Solarin (Azgher)", "badge": "RPG Solar", "col": Color("#ffb300"), "desc": "Espada Solar de Azgher [Z]: Talho solar em fogo sagrado purificador."},
+	{"id": 40, "name": "Lunarin (Tenebra)", "badge": "RPG Sombra", "col": Color("#5c6bc0"), "desc": "Manto de Tenebra [Z]: Véu sombrio de evasão total com ataque crítico."},
+	{"id": 41, "name": "Faelith", "badge": "RPG Alado (0.55x)", "col": Color("#f48fb1"), "desc": "Pó de Fada Estelar [Z]: Nuvem reluzente de cura em aliados e cegueira em inimigos."},
+	{"id": 42, "name": "Gnarlin", "badge": "RPG Trapaceiro (0.75x)", "col": Color("#7cb342"), "desc": "Truque Sujo Gnarlin [Z]: Bomba de fumaça cega, confunde e atordoa oponentes."},
+	{"id": 43, "name": "Escarion", "badge": "RPG Peçonha", "col": Color("#6a1b9a"), "desc": "Aguilhão de Toxina Vorpal [Z]: Estocada venenosa de dano corrosivo contínuo."},
+	{"id": 44, "name": "Testudar", "badge": "RPG Blindado (1.35x)", "col": Color("#33691e"), "desc": "Lar Doce Casca [Z]: Casulo impenetrável (-45% dano passivo e absorção 85%)."},
+	{"id": 45, "name": "Lilitara", "badge": "RPG Vampírico", "col": Color("#c2185b"), "desc": "Drenar Força Vital [Z]: Sifão demoníaco com roubo de 55 HP e 25% evasão passiva."},
+	{"id": 46, "name": "Ulvar", "badge": "RPG Feral", "col": Color("#78909c"), "desc": "Despertar Forma Bestial [Z]: Uivo lupino brutal com +35% velocidade e garras vorazes."},
 	{"id": 47, "name": "Manamante", "badge": "Secreta Sangue Azul", "col": Color("#3d5afe"), "desc": "Coração de Mana [Z]: Queima 15% da Vida numa explosão arcana de 7m (+18% dano passivo)."}
 ]
 
 const DEV_CLASSES := [
-	{"id": 1, "name": "Guerreiro", "desc": "Combatente de espada. [Passiva] Sangue de Batalha (+15% Defesa, +10% Dano). [Q] Corte Duplo, [R] Investida Imparável, [F] Julgamento da Espada.", "col": Color("#4fc3f7")},
-	{"id": 2, "name": "Mago", "desc": "Conjurador com cajado/orbe. [Passiva] Ressonância Arcana (+20% Mágico). [Q] Orbe de Magma, [R] Prisão Glacial, [F] Chuva de Meteoros.", "col": Color("#ba68c8")},
-	{"id": 3, "name": "Arqueiro", "desc": "Atirador ágil de arco. [Passiva] Olho de Falcão (+20% Crítico, +12% Vel). [Q] Tiro Perfurante, [R] Salto Acrobático, [F] Tempestade de Mil Flechas.", "col": Color("#81c784")},
-	{"id": 4, "name": "Assassino", "desc": "Lâmina dupla veloz. [Passiva] Lâmina Silenciosa (+35% Crítico costas, +15% Esquiva). [Q] Passo das Sombras, [R] Cortina de Fumaça, [F] Lótus de Sangue.", "col": Color("#e57373")},
-	{"id": 5, "name": "Lutador", "desc": "Mestre do combate corpo a corpo. [Passiva] Punhos de Ferro & Chi (ignora 25% armadura). [Q] Gancho Demolidor, [R] Postura do Lótus Marcial, [F] Meteoro de Um Punho.", "col": Color("#ffb74d")},
-	{"id": 6, "name": "Escudeiro", "desc": "Defensor colossal com escudo e maça. [Passiva] Fortaleza Viva (+35% Defesa). [Q] Esmagamento de Bastião, [R] Formação Impenetrável, [F] Cidadela Inabalável.", "col": Color("#fff176")},
-	{"id": 7, "name": "Ferreiro", "desc": "Combatente forjador com martelo. [Passiva] Orgulho do Criador (+25% Dano forjadas). [Q] Golpe da Bigorna Incandescente, [R] Afiação & Têmpera em Campo, [F] Dança do Arsenal Forjado.", "col": Color("#ff9800")},
-	{"id": 8, "name": "Alquimista", "desc": "Mestre químico com catalisador e frascos. [Passiva] Reação Sintética (+35% frascos). [Q] Frasco de Fogo Grego & Cura, [R] Bomba de Ácido Corrosivo, [F] Transmutação do Behemoth.", "col": Color("#69f0ae")},
-	{"id": 9, "name": "Escultor", "desc": "Artista do luar com cinzel e adaga. [Passiva] Olho da Escultura & Estátua Viva. [Q] Entalhe em Velocidade, [R] Estátua Explosiva / Pele de Mármore, [F] Escultura do Luar.", "col": Color("#80deea")},
-	{"id": 10, "name": "Domador", "desc": "Senhor da matilha com chicote bestial. [Passiva] Luta acompanhado por Fera Domada. [Q] Estalo do Chicote: Investida!, [R] Fusão & Uivo Bestial, [F] Debandada das Feras.", "col": Color("#ffd740")},
-	{"id": 11, "name": "Alfaiate de Guerra", "desc": "Tecelão com fios de aço e agulhas rúnicas. [Passiva] Fios Monofilamento & Seda Blindada. [Q] Teia de Fios Retalhadores, [R] Costurar Sombras, [F] Gaiola de Fios Carmesins.", "col": Color("#ce93d8")},
-	{"id": 12, "name": "Chef de Caça", "desc": "Gourmet com cutelo gigante e wok de ferro. [Passiva] Células Gourmet. [Q] Desossar a Vivo! (+35 HP), [R] Banquete na Wok Flamejante, [F] Trinchar o Behemoth.", "col": Color("#ff7043")},
-	{"id": 13, "name": "Espadachim Rúnico", "desc": "Variante Secreta (Guerreiro/Mago, nv. 25+, sem reset). Espada Rúnica + Orbe. [Passiva] Lâmina Elemental. [Q] Corte Flamígero/Glacial, [R] Escudo de Runas, [F] Cometa da Espada Arcana.", "col": Color("#40c4ff")},
-	{"id": 14, "name": "Caçador de Vampiros", "desc": "Variante Secreta (Arqueiro/Assassino, nv. 25+, sem reset). Besta de Prata + Estaca. [Passiva] Exterminador Noturno (+40% em criaturas sombrias). [Q] Virote de Prata, [R] Corrente de Exorcismo, [F] Julgamento da Cruz Solar.", "col": Color("#eceff1")},
-	{"id": 15, "name": "Valquíria da Égide", "desc": "Variante Secreta (Escudeiro/Guerreiro, nv. 25+, sem reset). Lança Dourada + Escudo Alado. [Passiva] Voo da Valquíria. [Q] Estocada do Trovão, [R] Salto da Valquíria, [F] Chuva de Lanças Douradas.", "col": Color("#fff59d")},
-	{"id": 16, "name": "Monge das Sombras", "desc": "Variante Secreta (Lutador/Assassino, nv. 25+, sem reset). Manoplas Sombrias. [Passiva] Golpe do Ponto Vital Furtivo. [Q] Palma das Sombras, [R] Passo Fantasma, [F] Toque da Morte de Cinco Passos.", "col": Color("#7e57c2")},
-	{"id": 17, "name": "Forjador de Armas Amaldiçoadas", "desc": "Variante Secreta (Ferreiro, nv. 25+, sem reset). Martelo Carmesim + Espada Viva. [Passiva] Têmpera de Sangue (25% roubo de vida). [Q] Martelo Hemorrágico, [R] Sacrifício da Bigorna, [F] Despertar da Espada Demoníaca.", "col": Color("#c62828")},
-	{"id": 18, "name": "Médico da Peste", "desc": "Variante Secreta (Alquimista/Chef de Caça, nv. 25+, sem reset). Máscara de Corvo + Bisturi + Incensário. [Passiva] Imunidade & Cura Tóxica. [Q] Bisturi Cirúrgico, [R] Incenso Purificador, [F] Nuvem da Peste Negra.", "col": Color("#7cb342")},
-	{"id": 19, "name": "Carrasco do Veneno Vorpal", "desc": "Única de Raça (Demi-Humano Escorpião). [Q] Ferrão Duplo Vorpal, [R] Ecdise Ácida, [F] Execução da Terceira Dose Letal (4.0x verdadeiro).", "col": Color("#76ff03")},
-	{"id": 20, "name": "Soberano da Teia Carmesim", "desc": "Única de Raça (Aracne). [Q] Fios de Seda Cortante, [R] Casulo de Drenagem, [F] Domínio da Viúva Negra (3.5x).", "col": Color("#d50000")},
-	{"id": 21, "name": "Rei-Fera da Alcateia de Sangue", "desc": "Única de Raça (Lobo / Licantropo). [Q] Frenesi de Mordidas, [R] Uivo do Eclipse Lupino, [F] Caçada Selvagem (3.6x).", "col": Color("#b71c1c")},
-	{"id": 22, "name": "Runomante da Montanha Eterna", "desc": "Única de Raça (Anão / Kharad). [Q] Martelo Trovão, [R] Bigorna Ancestral Viva, [F] Forja do Ragnarok (3.6x).", "col": Color("#ffab40")},
-	{"id": 23, "name": "Bastião do Mundo", "desc": "Única de Raça (Tartaruga). [Q] Giro de Carapaça, [R] Fortaleza Hidráulica, [F] Peso do Oceano Profundo (3.5x).", "col": Color("#2e7d32")},
-	{"id": 24, "name": "Arquifada da Árvore do Mundo", "desc": "Única de Raça (Fadinha). [Q] Rajada de Pó Estelar, [R] Anel de Cogumelos, [F] Despertar de Titânia (3.5x).", "col": Color("#f48fb1")},
-	{"id": 25, "name": "Aristocrata Carmesim", "desc": "Única de Raça (Dhampir). [Q] Lança de Sangue Congelado, [R] Enxame da Noite, [F] Trono de Sangue (3.6x).", "col": Color("#880e4f")},
-	{"id": 26, "name": "Barão da Sucata", "desc": "Única de Raça (Goblin). [Q] Canhão de Moedas, [R] Propulsor Turbo, [F] Autodestruição Nuclear (3.8x).", "col": Color("#ffd600")},
-	{"id": 27, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
-	{"id": 35, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
-	{"id": 36, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
-	{"id": 28, "name": "Dançarino Astral", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
-	{"id": 29, "name": "Inquisidor das Cinzas", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
-	{"id": 30, "name": "Necromante de Ossos", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
-	{"id": 37, "name": "Domador Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
-	{"id": 38, "name": "Cavaleiro da Ruptura", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
-	{"id": 39, "name": "Arauto da Tempestade", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")},
-	{"id": 31, "name": "Descendente de Pagma", "desc": "LENDÁRIA (Tier 6). [Q] Dança da Espada: Onda, [R] Transcendência de 6 Espadas, [F] Queda do Deus da Forja (4.8x).", "col": Color("#ffd700")},
-	{"id": 32, "name": "Escultor do Luar Lendário", "desc": "LENDÁRIA (Tier 6). [Q] Lâmina da Lua Radiante, [R] Destruição Escultural (+80% ATK), [F] Legião Imperial do Luar (4.6x).", "col": Color("#b3e5fc")},
-	{"id": 33, "name": "Monarca dos Dragões", "desc": "LENDÁRIA (Tier 6). [Q] Garra do Monarca, [R] Rugido de Subjugação, [F] Cataclismo do Rei Dragão (5.0x).", "col": Color("#ff6d00")},
-	{"id": 34, "name": "Imperador do Sol Negro", "desc": "LENDÁRIA (Tier 6). [Q] Corte do Horizonte de Eventos, [R] Égide da Aurora e Abismo, [F] Apocalipse do Sol Negro (5.0x, céu em Eclipse).", "col": Color("#4a148c")}
+	{"id": 1, "name": "Espadachim da Aurora", "desc": "Combatente de espada. [Passiva] Sangue de Batalha (+15% Defesa, +10% Dano). [Q] Corte Duplo, [R] Investida Imparável, [F] Julgamento da Espada.", "col": Color("#4fc3f7")},
+	{"id": 2, "name": "Arcanista", "desc": "Conjurador com cajado/orbe. [Passiva] Ressonância Arcana (+20% Mágico). [Q] Orbe de Magma, [R] Prisão Glacial, [F] Chuva de Meteoros.", "col": Color("#ba68c8")},
+	{"id": 3, "name": "Sentinela dos Ventos", "desc": "Atirador ágil de arco. [Passiva] Olho de Falcão (+20% Crítico, +12% Vel). [Q] Tiro Perfurante, [R] Salto Acrobático, [F] Tempestade de Mil Flechas.", "col": Color("#81c784")},
+	{"id": 4, "name": "Lâmina Silente", "desc": "Lâmina dupla veloz. [Passiva] Lâmina Silenciosa (+35% Crítico costas, +15% Esquiva). [Q] Passo das Sombras, [R] Cortina de Fumaça, [F] Lótus de Sangue.", "col": Color("#e57373")},
+	{"id": 5, "name": "Punho Celeste", "desc": "Mestre do combate corpo a corpo. [Passiva] Punhos de Ferro & Chi (ignora 25% armadura). [Q] Gancho Demolidor, [R] Postura do Lótus Marcial, [F] Meteoro de Um Punho.", "col": Color("#ffb74d")},
+	{"id": 6, "name": "Guardião do Bastião", "desc": "Defensor colossal com escudo e maça. [Passiva] Fortaleza Viva (+35% Defesa). [Q] Esmagamento de Bastião, [R] Formação Impenetrável, [F] Cidadela Inabalável.", "col": Color("#fff176")},
+	{"id": 7, "name": "Forjador de Estrelas", "desc": "Combatente forjador com martelo. [Passiva] Orgulho do Criador (+25% Dano forjadas). [Q] Golpe da Bigorna Incandescente, [R] Afiação & Têmpera em Campo, [F] Dança do Arsenal Forjado.", "col": Color("#ff9800")},
+	{"id": 8, "name": "Transmutador", "desc": "Mestre químico com catalisador e frascos. [Passiva] Reação Sintética (+35% frascos). [Q] Frasco de Fogo Grego & Cura, [R] Bomba de Ácido Corrosivo, [F] Transmutação do Behemoth.", "col": Color("#69f0ae")},
+	{"id": 9, "name": "Escultor de Almas", "desc": "Artista do luar com cinzel e adaga. [Passiva] Olho da Escultura & Estátua Viva. [Q] Entalhe em Velocidade, [R] Estátua Explosiva / Pele de Mármore, [F] Escultura do Luar.", "col": Color("#80deea")},
+	{"id": 10, "name": "Senhor das Feras", "desc": "Senhor da matilha com chicote bestial. [Passiva] Luta acompanhado por Fera Domada. [Q] Estalo do Chicote: Investida!, [R] Fusão & Uivo Bestial, [F] Debandada das Feras.", "col": Color("#ffd740")},
+	{"id": 11, "name": "Tecelão Carmesim", "desc": "Tecelão com fios de aço e agulhas rúnicas. [Passiva] Fios Monofilamento & Seda Blindada. [Q] Teia de Fios Retalhadores, [R] Costurar Sombras, [F] Gaiola de Fios Carmesins.", "col": Color("#ce93d8")},
+	{"id": 12, "name": "Mestre do Banquete", "desc": "Gourmet com cutelo gigante e wok de ferro. [Passiva] Células Gourmet. [Q] Desossar a Vivo! (+35 HP), [R] Banquete na Wok Flamejante, [F] Trinchar o Behemoth.", "col": Color("#ff7043")},
+	{"id": 13, "name": "Lâmina Rúnica", "desc": "Variante Secreta (Espadachim da Aurora/Arcanista, nv. 25+, sem reset). Espada Rúnica + Orbe. [Passiva] Lâmina Elemental. [Q] Corte Flamígero/Glacial, [R] Escudo de Runas, [F] Cometa da Espada Arcana.", "col": Color("#40c4ff")},
+	{"id": 14, "name": "Inquisidor de Prata", "desc": "Variante Secreta (Sentinela dos Ventos/Lâmina Silente, nv. 25+, sem reset). Besta de Prata + Estaca. [Passiva] Exterminador Noturno (+40% em criaturas sombrias). [Q] Virote de Prata, [R] Corrente de Exorcismo, [F] Julgamento da Cruz Solar.", "col": Color("#eceff1")},
+	{"id": 15, "name": "Valquíria Celeste", "desc": "Variante Secreta (Guardião do Bastião/Espadachim da Aurora, nv. 25+, sem reset). Lança Dourada + Escudo Alado. [Passiva] Voo da Valquíria. [Q] Estocada do Trovão, [R] Salto da Valquíria, [F] Chuva de Lanças Douradas.", "col": Color("#fff59d")},
+	{"id": 16, "name": "Punho Fantasma", "desc": "Variante Secreta (Punho Celeste/Lâmina Silente, nv. 25+, sem reset). Manoplas Sombrias. [Passiva] Golpe do Ponto Vital Furtivo. [Q] Palma das Sombras, [R] Passo Fantasma, [F] Toque da Morte de Cinco Passos.", "col": Color("#7e57c2")},
+	{"id": 17, "name": "Forjador Carmesim", "desc": "Variante Secreta (Forjador de Estrelas, nv. 25+, sem reset). Martelo Carmesim + Espada Viva. [Passiva] Têmpera de Sangue (25% roubo de vida). [Q] Martelo Hemorrágico, [R] Sacrifício da Bigorna, [F] Despertar da Espada Demoníaca.", "col": Color("#c62828")},
+	{"id": 18, "name": "Doutor Corvo", "desc": "Variante Secreta (Transmutador/Mestre do Banquete, nv. 25+, sem reset). Máscara de Corvo + Bisturi + Incensário. [Passiva] Imunidade & Cura Tóxica. [Q] Bisturi Cirúrgico, [R] Incenso Purificador, [F] Nuvem da Peste Negra.", "col": Color("#7cb342")},
+	{"id": 19, "name": "Algoz Vorpal", "desc": "Única de Raça (Escarion). [Q] Ferrão Duplo Vorpal, [R] Ecdise Ácida, [F] Execução da Terceira Dose Letal (4.0x verdadeiro).", "col": Color("#76ff03")},
+	{"id": 20, "name": "Senhor da Teia Escarlate", "desc": "Única de Raça (Aracne). [Q] Fios de Seda Cortante, [R] Casulo de Drenagem, [F] Domínio da Viúva Negra (3.5x).", "col": Color("#d50000")},
+	{"id": 21, "name": "Rei-Lobo do Eclipse", "desc": "Única de Raça (Ulvar / Lupharion). [Q] Frenesi de Mordidas, [R] Uivo do Eclipse Lupino, [F] Caçada Selvagem (3.6x).", "col": Color("#b71c1c")},
+	{"id": 22, "name": "Runomante Ancestral", "desc": "Única de Raça (Dvergar / Kharad). [Q] Martelo Trovão, [R] Bigorna Ancestral Viva, [F] Forja do Ragnarok (3.6x).", "col": Color("#ffab40")},
+	{"id": 23, "name": "Colosso Abissal", "desc": "Única de Raça (Tartaruga). [Q] Giro de Carapaça, [R] Fortaleza Hidráulica, [F] Peso do Oceano Profundo (3.5x).", "col": Color("#2e7d32")},
+	{"id": 24, "name": "Arquifada de Yggdra", "desc": "Única de Raça (Faelith). [Q] Rajada de Pó Estelar, [R] Anel de Cogumelos, [F] Despertar de Titânia (3.5x).", "col": Color("#f48fb1")},
+	{"id": 25, "name": "Conde Escarlate", "desc": "Única de Raça (Sangrael). [Q] Lança de Sangue Congelado, [R] Enxame da Noite, [F] Trono de Sangue (3.6x).", "col": Color("#880e4f")},
+	{"id": 26, "name": "Barão Engrenagem", "desc": "Única de Raça (Gnarlin). [Q] Canhão de Moedas, [R] Propulsor Turbo, [F] Autodestruição Nuclear (3.8x).", "col": Color("#ffd600")},
+	{"id": 27, "name": "Ceifador da Lua Negra", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
+	{"id": 35, "name": "Engenheiro Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
+	{"id": 36, "name": "Demiurgo Alquímico", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
+	{"id": 28, "name": "Bailarino das Estrelas", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
+	{"id": 29, "name": "Inquisidor da Chama Branca", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
+	{"id": 30, "name": "Arauto do Ossuário", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
+	{"id": 37, "name": "Senhor da Selva Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
+	{"id": 38, "name": "Cavaleiro do Vazio", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
+	{"id": 39, "name": "Arauto do Trovão", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")},
+	{"id": 31, "name": "Herdeiro da Forja Divina", "desc": "LENDÁRIA (Tier 6). [Q] Dança da Espada: Onda, [R] Transcendência de 6 Espadas, [F] Queda do Deus da Forja (4.8x).", "col": Color("#ffd700")},
+	{"id": 32, "name": "Mestre Escultor do Luar", "desc": "LENDÁRIA (Tier 6). [Q] Lâmina da Lua Radiante, [R] Destruição Escultural (+80% ATK), [F] Legião Imperial do Luar (4.6x).", "col": Color("#b3e5fc")},
+	{"id": 33, "name": "Imperador Dracônico", "desc": "LENDÁRIA (Tier 6). [Q] Garra do Monarca, [R] Rugido de Subjugação, [F] Cataclismo do Rei Dragão (5.0x).", "col": Color("#ff6d00")},
+	{"id": 34, "name": "Soberano do Sol Negro", "desc": "LENDÁRIA (Tier 6). [Q] Corte do Horizonte de Eventos, [R] Égide da Aurora e Abismo, [F] Apocalipse do Sol Negro (5.0x, céu em Eclipse).", "col": Color("#4a148c")}
 ]
 
 const DEV_ITEMS := [
 	# Relíquias Secretas 0.1%
-	{"id": 14, "name": "Cálice da Alma Partida", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desperta o Revenant da Cripta. Drop de Acólito do Eclipse."},
+	{"id": 14, "name": "Cálice da Alma Partida", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desperta o Cinerion da Cripta. Drop de Acólito do Eclipse."},
 	{"id": 15, "name": "Chave Rúnica da Cripta", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Chave sagrada antiga das catacumbas da Vigília. Drop Comandante Vaelen."},
 	{"id": 16, "name": "Medalhão da Vigília", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Insígnia dos cavaleiros juramentados. Drop Executor de Ferro."},
-	{"id": 17, "name": "Tomo da Foice do Eclipse", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Liturgia secreta do Ceifador do Eclipse. Drop Acólitos e Malakor."},
+	{"id": 17, "name": "Tomo da Foice do Eclipse", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Liturgia secreta do Ceifador da Lua Negra. Drop Acólitos e Malakor."},
 	{"id": 30, "name": "Casulo de Seda Prateada", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Segredos da linhagem Aracne. Drop de predadores no Bosque."},
 	# Equipamentos
 	{"id": 10, "name": "Espada Longa de Ferro", "cat": "Mão Primária", "rate": "15.0%", "desc": "Lâmina forjada de ferro temperado."},
@@ -843,14 +843,14 @@ const DEV_ITEMS := [
 	{"id": 44, "name": "Olho Multifacetado de Arachna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desbloqueia a Raça Secreta 21 Aracne (Tecelão da Bruma)."},
 	{"id": 45, "name": "Manto de Seda Imperial", "cat": "Manto/Capa", "rate": "100.0%", "desc": "Manto lendário tecido por Arachna (+45 HP, +6 INT, +5 ESP)."},
 	{"id": 46, "name": "Ácido Puro", "cat": "Material", "rate": "100.0%", "desc": "Fluido cáustico corrosivo colhido do Lodo Ácido."},
-	{"id": 47, "name": "Ferrão de Escorpião Abissal", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Ferrão letal que desbloqueia a Raça Demi-Humano Escorpião."},
+	{"id": 47, "name": "Ferrão de Escorpião Abissal", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Ferrão letal que desbloqueia a Raça Escarion."},
 	{"id": 48, "name": "Veneno Vorpal", "cat": "Troféu", "rate": "100.0%", "desc": "Toxina negra de altíssima letalidade."},
 	{"id": 49, "name": "Retalho Quimérico Costurado", "cat": "Material", "rate": "100.0%", "desc": "Tecido mutagênico do Experimento Nº 0."},
 	{"id": 50, "name": "Núcleo de Gelo Antigo", "cat": "Troféu", "rate": "100.0%", "desc": "Fragmento glacial ancestral extraído de Golens e Ymir."},
 	{"id": 51, "name": "Escama Dracônica Primordial", "cat": "Material", "rate": "100.0%", "desc": "Escama blindada resistente a impacto e gelo extremo."},
-	{"id": 52, "name": "Coração de Geada Eterna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Coração de Ymir que desperta a Raça 24 Boreal (Gigante de Gelo)."},
+	{"id": 52, "name": "Coração de Geada Eterna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Coração de Ymir que desperta a Raça 24 Borealin (Jotunar)."},
 	{"id": 53, "name": "Insígnia do Guarda Carmesim", "cat": "Distintivo", "rate": "100.0%", "desc": "Emblema de honra dos guardas góticos de Vesperian."},
-	{"id": 54, "name": "Sangue Puro do Progenitor", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Sangue milenar de Lorde Vesperian que desperta a Raça Dhampir/Vampiro!"},
+	{"id": 54, "name": "Sangue Puro do Progenitor", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Sangue milenar de Lorde Vesperian que desperta a Raça Sangrael!"},
 	{"id": 55, "name": "Anel Carmesim de Vesperian", "cat": "Anel", "rate": "100.0%", "desc": "Anel de prata e rubi (+6 FOR, +6 CON, +10% Roubo de Vida)."}
 ]
 
@@ -875,7 +875,7 @@ const DEV_BESTIARY := [
 	{"name": "Comandante Vaelen, o Traidor (Boss)", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "3200 HP", "spawn": "Trono da Cidadela nas Ruínas", "drops": [10, 15, 20, 28], "col": Color("#ff9800")},
 	{"name": "Golem de Gelo Antigo", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "720 HP", "spawn": "Setor norte nevado da ZoneID 2", "drops": [50, 10], "col": Color("#4fc3f7")},
 	{"name": "Draco de Geada Selvagem", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "950 HP", "spawn": "Penhascos e cumes gélidos", "drops": [51, 4], "col": Color("#29b6f6")},
-	{"name": "★ Ymir, o Patriarca Gigante de Gelo [BOSS] ★", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "5200 HP", "spawn": "❄️ Trono de Gelo em (0, 150)", "drops": [50, 52], "col": Color("#00e5ff")},
+	{"name": "★ Ymir, o Patriarca Jotunar [BOSS] ★", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "5200 HP", "spawn": "❄️ Trono de Gelo em (0, 150)", "drops": [50, 52], "col": Color("#00e5ff")},
 
 	# ZoneID 3 — Santuário do Eclipse (600x600m)
 	{"name": "Cultista Sombrio", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "400 HP", "spawn": "Círculos rituais do templo", "drops": [3, 14, 17, 28], "col": Color("#8e24aa")},
@@ -889,7 +889,7 @@ const DEV_BESTIARY := [
 const DEV_TELEPORTS := [
 	{"name": "🏛️ Praça Central da Vila", "val": 0, "col": Color(0.2, 0.35, 0.55)},
 	{"name": "⛪ Igreja da Luz", "val": 1, "col": Color(0.55, 0.5, 0.2)},
-	{"name": "🔮 Torre do Mago", "val": 2, "col": Color(0.45, 0.25, 0.6)},
+	{"name": "🔮 Torre do Arcanista", "val": 2, "col": Color(0.45, 0.25, 0.6)},
 	{"name": "🐀 Entrada dos Esgotos", "val": 3, "col": Color(0.35, 0.4, 0.3)},
 	{"name": "🌲 Floresta / Bosque", "val": 4, "col": Color(0.25, 0.5, 0.3)},
 	{"name": "⚔️ Ruínas da Vigília", "val": 5, "col": Color(0.6, 0.35, 0.2)},
@@ -3236,7 +3236,7 @@ func _on_projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_p
 			light.omni_range = 4.5
 			p_node.add_child(light)
 
-		6: # Frasco Químico (Alquimista - Skill Q)
+		6: # Frasco Químico (Transmutador - Skill Q)
 			var flask := MeshInstance3D.new()
 			var flask_sphere := SphereMesh.new()
 			flask_sphere.radius = 0.22
@@ -3271,7 +3271,7 @@ func _on_projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_p
 			light.omni_range = 4.5
 			p_node.add_child(light)
 
-		7: # Lança de Fêmur (Necromante de Ossos - Skill Q): Projétil alongado branco-ósseo com rastro verde-fantasma
+		7: # Lança de Fêmur (Arauto do Ossuário - Skill Q): Projétil alongado branco-ósseo com rastro verde-fantasma
 			var bone_spear := MeshInstance3D.new()
 			var bone_mesh := CylinderMesh.new()
 			bone_mesh.top_radius = 0.035
@@ -3321,7 +3321,7 @@ func _on_projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_p
 			b_light.omni_range = 4.8
 			p_node.add_child(b_light)
 
-		8: # Lança do Trovão (Arauto da Tempestade - Skill Q): Feixe elétrico ultrarrápido azul-claro
+		8: # Lança do Trovão (Arauto do Trovão - Skill Q): Feixe elétrico ultrarrápido azul-claro
 			var bolt := MeshInstance3D.new()
 			var bolt_mesh := CylinderMesh.new()
 			bolt_mesh.top_radius = 0.025
@@ -3994,7 +3994,7 @@ func _build_zone_0_village(root: Node3D) -> void:
 	# Portal Area3D dourado na porta da Igreja levando à Zona 5 (Portal ID 9)
 	_create_portal_area(root, Vector3(-50.0, 0.0, -36.0), "⛪ Entrar na Igreja da Luz Sagrada", Color(1.0, 0.85, 0.2), 5, 9)
 
-	# F. Torre do Mago / Torre Arcana (50, 0, -45)
+	# F. Torre do Arcanista / Torre Arcana (50, 0, -45)
 	var tower_mesh := MeshInstance3D.new()
 	var tm_cyl := CylinderMesh.new()
 	tm_cyl.top_radius = 4.0
@@ -4059,7 +4059,7 @@ func _build_zone_0_village(root: Node3D) -> void:
 
 	# 5. Novas Estruturas das Raças nos Arredores da Vila (Entre ±90m e ±220m)
 
-	# A. Acampamento de Guerra Orc & Arena Tribal (130, 0, 80)
+	# A. Acampamento de Guerra Orkhan & Arena Tribal (130, 0, 80)
 	var orc_root := Node3D.new()
 	orc_root.position = Vector3(130.0, 0.0, 80.0)
 	root.add_child(orc_root)
@@ -4083,7 +4083,7 @@ func _build_zone_0_village(root: Node3D) -> void:
 	orc_root.add_child(orc_fire)
 	var orc_lbl := Label3D.new()
 	orc_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	orc_lbl.text = "⛺ Acampamento de Guerra Orc & Arena Tribal"
+	orc_lbl.text = "⛺ Acampamento de Guerra Orkhan & Arena Tribal"
 	orc_lbl.font_size = 24
 	orc_lbl.outline_size = 8
 	orc_lbl.modulate = Color(1.0, 0.45, 0.2)
@@ -4183,14 +4183,14 @@ func _build_zone_0_village(root: Node3D) -> void:
 	draco_lbl.position = Vector3(0, 4.0, 0)
 	draco_root.add_child(draco_lbl)
 
-	# E. Favela de Engrenagens Goblin (-120, 0, 90)
+	# E. Favela de Engrenagens Gnarlin (-120, 0, 90)
 	var gob_root := Node3D.new()
 	gob_root.position = Vector3(-120.0, 0.0, 90.0)
 	root.add_child(gob_root)
-	_create_solid_building(gob_root, "GoblinShack", Vector3.ZERO, Vector3(6.5, 3.2, 6.5), Color(0.3, 0.28, 0.22), Color(0.4, 0.35, 0.15), "Favela Goblin", Color(0.6, 0.9, 0.2), "south")
+	_create_solid_building(gob_root, "GoblinShack", Vector3.ZERO, Vector3(6.5, 3.2, 6.5), Color(0.3, 0.28, 0.22), Color(0.4, 0.35, 0.15), "Favela Gnarlin", Color(0.6, 0.9, 0.2), "south")
 	var gob_lbl := Label3D.new()
 	gob_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	gob_lbl.text = "⚙️ Favela de Engrenagens Goblin"
+	gob_lbl.text = "⚙️ Favela de Engrenagens Gnarlin"
 	gob_lbl.font_size = 24
 	gob_lbl.outline_size = 8
 	gob_lbl.modulate = Color(0.65, 0.9, 0.25)

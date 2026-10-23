@@ -40,7 +40,7 @@ const MASTER_DATA := {
 		"title": "Garrick, o Mestre Ferreiro",
 		"sub": "Forja da Bigorna Ancestral & Aço Temperado",
 		"class_id": 7,
-		"class_name": "Ferreiro",
+		"class_name": "Forjador de Estrelas",
 		"greeting": "Pela bigorna sagrada! O fogo da forja purifica o aço e molda guerreiros imbatíveis. Quer afiar sua lâmina, reparar sua armadura ou aprender a arte do Ferreiro de Combate?",
 		"color": Color("#ff9800"),
 		"talk_quotes": [
@@ -60,7 +60,7 @@ const MASTER_DATA := {
 		"title": "Lyra, a Mestra Alquimista",
 		"sub": "Transmutação Elemental & Elixires da Vida",
 		"class_id": 8,
-		"class_name": "Alquimista",
+		"class_name": "Transmutador",
 		"greeting": "O equilíbrio dos elementos governa todo o universo! Quer aprender a manipular poções corrosivas de ácido e frascos curativos de éter? Junte-se à arte alquímica!",
 		"color": Color("#00e676"),
 		"talk_quotes": [
@@ -78,9 +78,9 @@ const MASTER_DATA := {
 	},
 	104: { # Varis, o Mercador Sombrio
 		"title": "Varis, o Mercador do Beco Sombrio",
-		"sub": "Ceifador do Eclipse & Pactos Proibidos",
+		"sub": "Ceifador da Lua Negra & Pactos Proibidos",
 		"class_id": 27,
-		"class_name": "Ceifador do Eclipse",
+		"class_name": "Ceifador da Lua Negra",
 		"greeting": "Pssiu... A luz da vila é fraca demais contra o que rasteja lá fora. Se você não tem medo de ceifar almas com uma foice colossal, as sombras o acolherão...",
 		"color": Color("#d500f9"),
 		"talk_quotes": [
@@ -91,7 +91,7 @@ const MASTER_DATA := {
 		],
 		"services": [
 			{"icon": "💀", "title": "Troca Obscura: Cálice da Alma Partida", "desc": "Entregue uma Glândula de Veneno Sombrio para obter o Cálice Proibido.", "action": "chalice"},
-			{"icon": "📖", "title": "Adquirir Tomo do Ceifador do Eclipse", "desc": "Grimório proibido que permite despertar a classe Ceifador do Eclipse.", "action": "scythe_tome"},
+			{"icon": "📖", "title": "Adquirir Tomo do Ceifador da Lua Negra", "desc": "Grimório proibido que permite despertar a classe Ceifador da Lua Negra.", "action": "scythe_tome"},
 			{"icon": "🌑", "title": "Anel de Obsidiana das Sombras", "desc": "Relíquia que potencializa o dano crítico e furtividade nas trevas.", "action": "obsidian_ring"},
 			{"icon": "🗡️", "title": "Adagas Envenenadas de Contrabando", "desc": "Armas leves imbuidas com secreção de aranhas do esgoto.", "action": "poison_dagger"}
 		]
@@ -100,8 +100,8 @@ const MASTER_DATA := {
 		"title": "Capitão Randel, Comandante da Guarda",
 		"sub": "Mestre da Lâmina & Vanguarda Real",
 		"class_id": 1,
-		"class_name": "Guerreiro",
-		"greeting": "A vila precisa de escudos fortes e lâminas afiadas contra os monstros do eclipse! Venha recruta, jure lealdade à vanguarda e torne-se um nobre Guerreiro!",
+		"class_name": "Espadachim da Aurora",
+		"greeting": "A vila precisa de escudos fortes e lâminas afiadas contra os monstros do eclipse! Venha recruta, jure lealdade à vanguarda e torne-se um nobre Espadachim da Aurora!",
 		"color": Color("#64b5f6"),
 		"talk_quotes": [
 			"A sentinela que dorme no posto condena toda a aldeia. Mantenha os olhos afiados no horizonte norte.",
@@ -120,8 +120,8 @@ const MASTER_DATA := {
 		"title": "Guarda Valen, Patrulheiro da Vila",
 		"sub": "Arquearia Silvana & Rastreamento Primordial",
 		"class_id": 3,
-		"class_name": "Arqueiro",
-		"greeting": "Passos silenciosos na mata e olhos afiados nas trevas. Quer dominar o arco, flechas perfurantes e armadilhas táticas? Aprenda as artes do Arqueiro!",
+		"class_name": "Sentinela dos Ventos",
+		"greeting": "Passos silenciosos na mata e olhos afiados nas trevas. Quer dominar o arco, flechas perfurantes e armadilhas táticas? Aprenda as artes do Sentinela dos Ventos!",
 		"color": Color("#69f0ae"),
 		"talk_quotes": [
 			"O vento na relva entrega a aproximação de qualquer predador antes mesmo que você o veja.",
@@ -140,7 +140,7 @@ const MASTER_DATA := {
 		"title": "Irmã Seraphina, Mestra Guardiã",
 		"sub": "Igreja da Luz Solar & Bênçãos Lunares",
 		"class_id": 6,
-		"class_name": "Escudeiro",
+		"class_name": "Guardião do Bastião",
 		"greeting": "A Luz celestial dissipa as sombras mais antigas. Se seu espírito busca conforto, purificação das feridas ou a vocação de escudo inabalável, você encontrou seu refúgio.",
 		"color": Color("#ffd54f"),
 		"talk_quotes": [
@@ -160,8 +160,8 @@ const MASTER_DATA := {
 		"title": "Mestre Aurelius, Arquimago das Luas",
 		"sub": "Observatório Astral & Cúpula Arcana",
 		"class_id": 2,
-		"class_name": "Mago",
-		"greeting": "As dez fases da lua regem as correntes do éter em Lunaria. Venha decifrar os mistérios do cosmos e despertar as energias do Mago!",
+		"class_name": "Arcanista",
+		"greeting": "As dez fases da lua regem as correntes do éter em Lunaria. Venha decifrar os mistérios do cosmos e despertar as energias do Arcanista!",
 		"color": Color("#4fc3f7"),
 		"talk_quotes": [
 			"Observe atentamente as órbitas lunares. Na Lua Cheia o éter se expande, e na Lua de Sangue ele entra em fúria.",
@@ -180,7 +180,7 @@ const MASTER_DATA := {
 		"title": "Kaelen, Mestre Caçador de Feras",
 		"sub": "Posto da Fronteira & Rastreamento da Bruma",
 		"class_id": 3,
-		"class_name": "Arqueiro",
+		"class_name": "Sentinela dos Ventos",
 		"greeting": "A floresta não perdoa os imprudentes. Os Lobos da Bruma caçam em matilha, e sob a Lua Cheia o Alfa desperta. Quer aprender a ler os rastros ou precisa de equipamentos de caça?",
 		"color": Color("#81c784"),
 		"talk_quotes": [

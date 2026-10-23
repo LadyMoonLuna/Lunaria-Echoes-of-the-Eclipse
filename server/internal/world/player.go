@@ -83,7 +83,7 @@ type Player struct {
 	InAutopsy           bool      // Flag de autópsia ativa
 	AutopsyProtectUntil time.Time // Janela de imunidade contra aggro de mobs
 
-	// Histórico Temporal para Errante Temporal (Cronomante - Raça 28)
+	// Histórico Temporal para Cronari (Cronari - Raça 28)
 	TimeHistory    []TimeHistorySnapshot
 	LastRecordTime time.Time
 
@@ -92,13 +92,13 @@ type Player struct {
 	UnlockedRecipes map[uint8]bool // RecipeID -> Desbloqueada
 
 	// Desafios de Obtenção das Classes Secretas (10 a 15)
-	UntouchedKills         int       // Abates sem sofrer dano (Dançarino Astral - Classe 10)
-	LowHPKills             int       // Abates com HP <= 30% (Inquisidor das Cinzas - Classe 11)
-	PerfectAutopsiesStreak int       // Sequência de autópsias perfeitas na Zona Verde (Necromante de Ossos - Classe 12)
-	SoloAlphaWolfKilled    bool      // Lobo Alfa derrotado 100% Solo (Domador Primordial - Classe 13)
-	BlockedBossRupture     bool      // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro da Ruptura - Classe 14)
-	PyromancerRevived      bool      // Passiva Chama da Vida (Pyromante - Raça 30)
-	AristocratRevivedAt    time.Time // Passiva Imortalidade do Sangue (Aristocrata Carmesim - Classe 25)
+	UntouchedKills         int       // Abates sem sofrer dano (Bailarino das Estrelas - Classe 10)
+	LowHPKills             int       // Abates com HP <= 30% (Inquisidor da Chama Branca - Classe 11)
+	PerfectAutopsiesStreak int       // Sequência de autópsias perfeitas na Zona Verde (Arauto do Ossuário - Classe 12)
+	SoloAlphaWolfKilled    bool      // Lobo Alfa derrotado 100% Solo (Senhor da Selva Primordial - Classe 13)
+	BlockedBossRupture     bool      // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro do Vazio - Classe 14)
+	PyromancerRevived      bool      // Passiva Chama da Vida (Pyrael - Raça 30)
+	AristocratRevivedAt    time.Time // Passiva Imortalidade do Sangue (Conde Escarlate - Classe 25)
 
 	// Cooldowns das Habilidades
 	LastActionTimes map[uint8]time.Time
@@ -186,41 +186,41 @@ func GetBaseRaceAttributes(raceID uint8) (str, dex, con, agi, intStat, spi, mas,
 		return 5, 10, 5, 12, 12, 9, 8, 9
 
 	// Quadrante 5: 18 Novas Raças do RPG (29 a 46)
-	case protocol.RaceHalfCelestial: // 29: Meio-Celestial
+	case protocol.RaceHalfCelestial: // 29: Aurelith
 		return 8, 8, 8, 8, 9, 11, 7, 7
-	case protocol.RacePyromancer: // 30: Pyromante
+	case protocol.RacePyromancer: // 30: Pyrael
 		return 6, 8, 7, 8, 12, 6, 7, 6
-	case protocol.RaceFrostGiant: // 31: Gigante de Gelo
+	case protocol.RaceFrostGiant: // 31: Jotunar
 		return 14, 4, 15, 4, 6, 6, 9, 4
-	case protocol.RaceDragonEarth: // 32: Drago (Terra)
+	case protocol.RaceDragonEarth: // 32: Terravyrn
 		return 12, 5, 14, 4, 5, 6, 10, 5
-	case protocol.RaceDragonWater: // 33: Drago (Água)
+	case protocol.RaceDragonWater: // 33: Hydravyrn
 		return 8, 9, 9, 8, 9, 9, 7, 7
-	case protocol.RaceDragonLightning: // 34: Drago (Raio)
+	case protocol.RaceDragonLightning: // 34: Fulgravyrn
 		return 8, 11, 7, 12, 10, 5, 8, 7
-	case protocol.RaceDragonMystic: // 35: Drago (Místico)
+	case protocol.RaceDragonMystic: // 35: Arcavyrn
 		return 6, 8, 8, 7, 13, 10, 6, 6
-	case protocol.RaceOrc: // 36: Orc
+	case protocol.RaceOrc: // 36: Orkhan
 		return 13, 6, 13, 6, 3, 3, 9, 5
-	case protocol.RaceDwarf: // 37: Anão
+	case protocol.RaceDwarf: // 37: Dvergar
 		return 11, 5, 13, 4, 6, 7, 12, 5
-	case protocol.RaceElf: // 38: Elfo
+	case protocol.RaceElf: // 38: Elarin
 		return 5, 11, 5, 12, 10, 8, 7, 6
-	case protocol.RaceSolarElf: // 39: Elfo Solar (Azgher)
+	case protocol.RaceSolarElf: // 39: Solarin (Azgher)
 		return 6, 10, 6, 10, 11, 10, 7, 7
-	case protocol.RaceLunarElf: // 40: Elfo Lunar (Tenebra)
+	case protocol.RaceLunarElf: // 40: Lunarin (Tenebra)
 		return 5, 11, 5, 12, 10, 8, 8, 8
-	case protocol.RaceFairy: // 41: Fadinha
+	case protocol.RaceFairy: // 41: Faelith
 		return 3, 10, 4, 13, 11, 11, 5, 10
-	case protocol.RaceGoblin: // 42: Goblin
+	case protocol.RaceGoblin: // 42: Gnarlin
 		return 6, 12, 5, 13, 6, 3, 10, 12
-	case protocol.RaceScorpionDemi: // 43: Demi-Humano Escorpião
+	case protocol.RaceScorpionDemi: // 43: Escarion
 		return 9, 10, 8, 10, 7, 3, 11, 6
-	case protocol.RaceTurtleDemi: // 44: Demi-Humano Tartaruga
+	case protocol.RaceTurtleDemi: // 44: Testudar
 		return 9, 4, 16, 3, 6, 8, 9, 5
-	case protocol.RaceHalfDemon: // 45: Meio-Demônio (Succubus)
+	case protocol.RaceHalfDemon: // 45: Lilitara
 		return 8, 10, 7, 10, 11, 4, 8, 8
-	case protocol.RaceWolfDemi: // 46: Demi-Humano Lobo
+	case protocol.RaceWolfDemi: // 46: Ulvar
 		return 12, 9, 10, 11, 3, 4, 8, 7
 	case protocol.RaceManamancer: // 47: Manamante
 		return 3, 6, 8, 6, 13, 11, 7, 4
@@ -234,72 +234,72 @@ func GetBaseRaceAttributes(raceID uint8) (str, dex, con, agi, intStat, spi, mas,
 func GetClassBaseAttributes(classID uint8) (str, dex, con, agi, intStat, spi, mas, lck uint8) {
 	switch classID {
 	// As 6 Classes Básicas de Combate (IDs 1 a 6)
-	case protocol.ClassWarrior: // 1: Guerreiro (+3 FOR, +1 DES, +3 CON, +1 AGI, +1 ESP, +1 PER)
+	case protocol.ClassWarrior: // 1: Espadachim da Aurora (+3 FOR, +1 DES, +3 CON, +1 AGI, +1 ESP, +1 PER)
 		return 3, 1, 3, 1, 0, 1, 1, 0
-	case protocol.ClassMage: // 2: Mago (+1 DES, +1 CON, +1 AGI, +4 INT, +2 ESP, +1 PER)
+	case protocol.ClassMage: // 2: Arcanista (+1 DES, +1 CON, +1 AGI, +4 INT, +2 ESP, +1 PER)
 		return 0, 1, 1, 1, 4, 2, 1, 0
-	case protocol.ClassArcher: // 3: Arqueiro (+1 FOR, +4 DES, +1 CON, +3 AGI, +1 PER)
+	case protocol.ClassArcher: // 3: Sentinela dos Ventos (+1 FOR, +4 DES, +1 CON, +3 AGI, +1 PER)
 		return 1, 4, 1, 3, 0, 0, 1, 0
-	case protocol.ClassAssassin: // 4: Assassino (+2 FOR, +4 DES, +1 CON, +4 AGI, +2 PER, +1 SOR)
+	case protocol.ClassAssassin: // 4: Lâmina Silente (+2 FOR, +4 DES, +1 CON, +4 AGI, +2 PER, +1 SOR)
 		return 2, 4, 1, 4, 0, 0, 2, 1
-	case protocol.ClassFighter: // 5: Lutador (+4 FOR, +2 DES, +3 CON, +2 AGI, +2 PER)
+	case protocol.ClassFighter: // 5: Punho Celeste (+4 FOR, +2 DES, +3 CON, +2 AGI, +2 PER)
 		return 4, 2, 3, 2, 0, 0, 2, 0
-	case protocol.ClassShieldBearer: // 6: Escudeiro (+3 FOR, +5 CON, +1 AGI, +2 ESP, +2 PER)
+	case protocol.ClassShieldBearer: // 6: Guardião do Bastião (+3 FOR, +5 CON, +1 AGI, +2 ESP, +2 PER)
 		return 3, 0, 5, 1, 0, 2, 2, 0
 
 	// As 6 Classes Básicas de Produção Combatentes (IDs 7 a 12)
-	case protocol.ClassBlacksmith: // 7: Ferreiro (+4 FOR, +4 CON, +2 PER, +1 MAS)
+	case protocol.ClassBlacksmith: // 7: Forjador de Estrelas (+4 FOR, +4 CON, +2 PER, +1 MAS)
 		return 4, 0, 4, 0, 0, 0, 2, 1
-	case protocol.ClassAlchemist: // 8: Alquimista (+2 DES, +2 CON, +1 AGI, +3 INT, +1 ESP, +2 PER)
+	case protocol.ClassAlchemist: // 8: Transmutador (+2 DES, +2 CON, +1 AGI, +3 INT, +1 ESP, +2 PER)
 		return 0, 2, 2, 1, 3, 1, 2, 0
-	case protocol.ClassSculptor: // 9: Escultor (+2 FOR, +3 DES, +2 CON, +2 AGI, +2 INT, +3 PER, +1 SOR)
+	case protocol.ClassSculptor: // 9: Escultor de Almas (+2 FOR, +3 DES, +2 CON, +2 AGI, +2 INT, +3 PER, +1 SOR)
 		return 2, 3, 2, 2, 2, 0, 3, 1
-	case protocol.ClassTamer: // 10: Domador (+3 FOR, +2 DES, +3 CON, +2 AGI, +2 ESP, +2 PER)
+	case protocol.ClassTamer: // 10: Senhor das Feras (+3 FOR, +2 DES, +3 CON, +2 AGI, +2 ESP, +2 PER)
 		return 3, 2, 3, 2, 0, 2, 2, 0
-	case protocol.ClassWarTailor: // 11: Alfaiate de Guerra (+1 FOR, +4 DES, +2 CON, +3 AGI, +2 INT, +2 PER)
+	case protocol.ClassWarTailor: // 11: Tecelão Carmesim (+1 FOR, +4 DES, +2 CON, +3 AGI, +2 INT, +2 PER)
 		return 1, 4, 2, 3, 2, 0, 2, 0
-	case protocol.ClassHuntingChef: // 12: Chef de Caça (+3 FOR, +2 DES, +4 CON, +1 AGI, +1 INT, +2 PER, +1 SOR)
+	case protocol.ClassHuntingChef: // 12: Mestre do Banquete (+3 FOR, +2 DES, +4 CON, +1 AGI, +1 INT, +2 PER, +1 SOR)
 		return 3, 2, 4, 1, 1, 0, 2, 1
 
 	// Classes Secretas Variantes (IDs 13 a 18 - Tier 3 Raro / Tier 4 Épico)
-	case protocol.ClassRunicSpellblade: // 13: Espadachim Rúnico (+4 FOR, +2 DES, +3 CON, +2 AGI, +4 INT, +1 ESP, +3 PER, +1 SOR)
+	case protocol.ClassRunicSpellblade: // 13: Lâmina Rúnica (+4 FOR, +2 DES, +3 CON, +2 AGI, +4 INT, +1 ESP, +3 PER, +1 SOR)
 		return 4, 2, 3, 2, 4, 1, 3, 1
-	case protocol.ClassVampireHunter: // 14: Caçador de Vampiros (+3 FOR, +5 DES, +2 CON, +4 AGI, +1 INT, +2 ESP, +4 PER, +2 SOR)
+	case protocol.ClassVampireHunter: // 14: Inquisidor de Prata (+3 FOR, +5 DES, +2 CON, +4 AGI, +1 INT, +2 ESP, +4 PER, +2 SOR)
 		return 3, 5, 2, 4, 1, 2, 4, 2
-	case protocol.ClassAegisValkyrie: // 15: Valquíria da Égide (+4 FOR, +1 DES, +6 CON, +2 AGI, +1 INT, +3 ESP, +3 PER, +1 SOR)
+	case protocol.ClassAegisValkyrie: // 15: Valquíria Celeste (+4 FOR, +1 DES, +6 CON, +2 AGI, +1 INT, +3 ESP, +3 PER, +1 SOR)
 		return 4, 1, 6, 2, 1, 3, 3, 1
-	case protocol.ClassShadowMonk: // 16: Monge das Sombras (+4 FOR, +4 DES, +3 CON, +5 AGI, +1 INT, +1 ESP, +4 PER, +2 SOR)
+	case protocol.ClassShadowMonk: // 16: Punho Fantasma (+4 FOR, +4 DES, +3 CON, +5 AGI, +1 INT, +1 ESP, +4 PER, +2 SOR)
 		return 4, 4, 3, 5, 1, 1, 4, 2
-	case protocol.ClassCursedSmith: // 17: Forjador de Armas Amaldiçoadas (+5 FOR, +1 DES, +5 CON, +1 AGI, +1 INT, +1 ESP, +4 PER, +3 SOR)
+	case protocol.ClassCursedSmith: // 17: Forjador Carmesim (+5 FOR, +1 DES, +5 CON, +1 AGI, +1 INT, +1 ESP, +4 PER, +3 SOR)
 		return 5, 1, 5, 1, 1, 1, 4, 3
-	case protocol.ClassPlagueDoctor: // 18: Médico da Peste (+2 FOR, +3 DES, +4 CON, +2 AGI, +4 INT, +3 ESP, +3 PER, +2 SOR)
+	case protocol.ClassPlagueDoctor: // 18: Doutor Corvo (+2 FOR, +3 DES, +4 CON, +2 AGI, +4 INT, +3 ESP, +3 PER, +2 SOR)
 		return 2, 3, 4, 2, 4, 3, 3, 2
 
 	// Classes Únicas Exclusivas de Raça (19 a 26)
-	case protocol.ClassVorpalExecutioner: // 19: Carrasco do Veneno Vorpal
+	case protocol.ClassVorpalExecutioner: // 19: Algoz Vorpal
 		return 3, 6, 3, 5, 2, 0, 3, 1
-	case protocol.ClassCrimsonWebSovereign: // 20: Soberano da Teia Carmesim
+	case protocol.ClassCrimsonWebSovereign: // 20: Senhor da Teia Escarlate
 		return 2, 6, 3, 4, 4, 1, 3, 1
-	case protocol.ClassBloodPackKing: // 21: Rei-Fera da Alcateia de Sangue
+	case protocol.ClassBloodPackKing: // 21: Rei-Lobo do Eclipse
 		return 6, 3, 4, 5, 0, 2, 3, 1
-	case protocol.ClassMountainRunemancer: // 22: Runomante da Montanha Eterna
+	case protocol.ClassMountainRunemancer: // 22: Runomante Ancestral
 		return 6, 1, 6, 1, 3, 2, 4, 1
-	case protocol.ClassWorldBastion: // 23: Bastião do Mundo
+	case protocol.ClassWorldBastion: // 23: Colosso Abissal
 		return 5, 1, 8, 1, 1, 3, 3, 1
-	case protocol.ClassWorldTreeArchfairy: // 24: Arquifada da Árvore do Mundo
+	case protocol.ClassWorldTreeArchfairy: // 24: Arquifada de Yggdra
 		return 1, 3, 2, 4, 6, 6, 2, 2
-	case protocol.ClassCrimsonAristocrat: // 25: Aristocrata Carmesim
+	case protocol.ClassCrimsonAristocrat: // 25: Conde Escarlate
 		return 3, 5, 3, 4, 5, 2, 3, 2
-	case protocol.ClassScrapBaron: // 26: Barão da Sucata & Mecha Goblin
+	case protocol.ClassScrapBaron: // 26: Barão Engrenagem
 		return 3, 5, 4, 3, 3, 0, 3, 5
 	// Classes Lendárias (31 a 34)
-	case protocol.ClassPagmaDescendant: // 31: Descendente de Pagma
+	case protocol.ClassPagmaDescendant: // 31: Herdeiro da Forja Divina
 		return 8, 6, 6, 4, 2, 2, 6, 2
-	case protocol.ClassMoonlightSculptor: // 32: Escultor do Luar Lendário
+	case protocol.ClassMoonlightSculptor: // 32: Mestre Escultor do Luar
 		return 4, 8, 4, 6, 6, 2, 6, 2
-	case protocol.ClassDragonMonarch: // 33: Monarca dos Dragões
+	case protocol.ClassDragonMonarch: // 33: Imperador Dracônico
 		return 7, 3, 7, 4, 2, 6, 5, 2
-	case protocol.ClassBlackSunEmperor: // 34: Imperador do Sol Negro
+	case protocol.ClassBlackSunEmperor: // 34: Soberano do Sol Negro
 		return 7, 6, 4, 5, 7, 6, 3, 2
 	// Classes Únicas Gerais (27 a 30 e 35 a 39)
 	case protocol.ClassEclipseReaper: // 27: Ceifador (Tier 5 Única: +5 FOR, +3 DES, +3 CON, +3 AGI, +2 INT, +3 PER, +1 SOR)
@@ -308,17 +308,17 @@ func GetClassBaseAttributes(classID uint8) (str, dex, con, agi, intStat, spi, ma
 		return 4, 1, 4, 1, 4, 0, 4, 2
 	case protocol.ClassHomunculusCreator: // 36: Criador (Tier 5 Única: +1 FOR, +1 DES, +3 CON, +1 AGI, +5 INT, +3 ESP, +4 PER, +2 SOR)
 		return 1, 1, 3, 1, 5, 3, 4, 2
-	case protocol.ClassAstralDancer: // 28: Dançarino Astral (Tier 5 Única: +2 FOR, +6 DES, +2 CON, +6 AGI, +2 INT, +2 PER, +3 SOR)
+	case protocol.ClassAstralDancer: // 28: Bailarino das Estrelas (Tier 5 Única: +2 FOR, +6 DES, +2 CON, +6 AGI, +2 INT, +2 PER, +3 SOR)
 		return 2, 6, 2, 6, 2, 0, 2, 3
-	case protocol.ClassAshInquisitor: // 29: Inquisidor das Cinzas (Tier 5 Única: +4 FOR, +2 DES, +4 CON, +2 AGI, +3 INT, +5 ESP, +2 PER, +1 SOR)
+	case protocol.ClassAshInquisitor: // 29: Inquisidor da Chama Branca (Tier 5 Única: +4 FOR, +2 DES, +4 CON, +2 AGI, +3 INT, +5 ESP, +2 PER, +1 SOR)
 		return 4, 2, 4, 2, 3, 5, 2, 1
-	case protocol.ClassBoneNecromancer: // 30: Necromante de Ossos (Tier 5 Única: +1 FOR, +2 DES, +3 CON, +1 AGI, +6 INT, +5 ESP, +3 PER, +2 SOR)
+	case protocol.ClassBoneNecromancer: // 30: Arauto do Ossuário (Tier 5 Única: +1 FOR, +2 DES, +3 CON, +1 AGI, +6 INT, +5 ESP, +3 PER, +2 SOR)
 		return 1, 2, 3, 1, 6, 5, 3, 2
-	case protocol.ClassPrimordialTamer: // 37: Domador Primordial (Tier 5 Única: +6 FOR, +3 DES, +5 CON, +4 AGI, +1 INT, +4 ESP, +3 PER, +1 SOR)
+	case protocol.ClassPrimordialTamer: // 37: Senhor da Selva Primordial (Tier 5 Única: +6 FOR, +3 DES, +5 CON, +4 AGI, +1 INT, +4 ESP, +3 PER, +1 SOR)
 		return 6, 3, 5, 4, 1, 4, 3, 1
-	case protocol.ClassRiftKnight: // 38: Cavaleiro da Ruptura (Tier 5 Única: +5 FOR, +1 DES, +7 CON, +1 AGI, +3 INT, +2 ESP, +3 PER, +1 SOR)
+	case protocol.ClassRiftKnight: // 38: Cavaleiro do Vazio (Tier 5 Única: +5 FOR, +1 DES, +7 CON, +1 AGI, +3 INT, +2 ESP, +3 PER, +1 SOR)
 		return 5, 1, 7, 1, 3, 2, 3, 1
-	case protocol.ClassStormHerald: // 39: Arauto da Tempestade (Tier 5 Única: +2 FOR, +3 DES, +2 CON, +4 AGI, +6 INT, +4 ESP, +3 PER, +3 SOR)
+	case protocol.ClassStormHerald: // 39: Arauto do Trovão (Tier 5 Única: +2 FOR, +3 DES, +2 CON, +4 AGI, +6 INT, +4 ESP, +3 PER, +3 SOR)
 		return 2, 3, 2, 4, 6, 4, 3, 3
 	default: // 0: Viajante / Sem Classe
 		return 0, 0, 0, 0, 0, 0, 0, 0
@@ -451,7 +451,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 	}
 
 	switch classID {
-	case protocol.ClassWarrior: // 1: Guerreiro
+	case protocol.ClassWarrior: // 1: Espadachim da Aurora
 		switch subPath {
 		case 1: // Gladiador ➔ Senhor da Carnificina (Dano em Área)
 			return 1.10, 1.00, 1.05, 0.95, 1.15
@@ -462,7 +462,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Berserker ➔ Tirano Carmesim (Roubo de Vida/Frenesi)
 			return 0.95, 1.10, 0.90, 1.05, 1.20
 		}
-	case protocol.ClassMage: // 2: Mago
+	case protocol.ClassMage: // 2: Arcanista
 		switch subPath {
 		case 1: // Piromante ➔ Arquimago Solar
 			return 0.95, 0.90, 0.95, 1.00, 1.25
@@ -473,18 +473,18 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Bruxo do Vazio ➔ Arconte Gravitacional
 			return 1.05, 1.20, 1.05, 0.95, 1.10
 		}
-	case protocol.ClassArcher: // 3: Arqueiro
+	case protocol.ClassArcher: // 3: Sentinela dos Ventos
 		switch subPath {
 		case 1: // Franco-Atirador ➔ Atirador Fantasma
 			return 0.90, 1.00, 0.90, 0.95, 1.25
 		case 2: // Dançarino do Vento ➔ Tempestade de Flechas
 			return 0.95, 1.15, 0.95, 1.20, 1.05
-		case 3: // Arqueiro Arcano ➔ Sagitário Estelar
+		case 3: // Sentinela dos Ventos Arcano ➔ Sagitário Estelar
 			return 0.95, 1.10, 1.00, 1.05, 1.20
 		case 4: // Rastreador ➔ Predador de Armadilhas
 			return 1.15, 1.10, 1.15, 0.95, 1.00
 		}
-	case protocol.ClassAssassin: // 4: Assassino
+	case protocol.ClassAssassin: // 4: Lâmina Silente
 		switch subPath {
 		case 1: // Lâmina da Noite ➔ Ceifador Silencioso
 			return 0.90, 1.05, 0.90, 1.10, 1.30
@@ -495,7 +495,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Shinobi ➔ Espectro de Seis Sombras
 			return 0.90, 1.25, 0.95, 1.15, 1.10
 		}
-	case protocol.ClassFighter: // 5: Lutador
+	case protocol.ClassFighter: // 5: Punho Celeste
 		switch subPath {
 		case 1: // Pugilista ➔ Punho de Titã
 			return 1.05, 1.10, 1.05, 0.95, 1.25
@@ -506,7 +506,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Brawler Místico ➔ Avatar Marcial
 			return 0.95, 1.10, 1.00, 1.10, 1.20
 		}
-	case protocol.ClassShieldBearer: // 6: Escudeiro
+	case protocol.ClassShieldBearer: // 6: Guardião do Bastião
 		switch subPath {
 		case 1: // Guardião ➔ Égide Imortal
 			return 1.30, 1.05, 1.25, 0.90, 0.85
@@ -517,7 +517,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Templário ➔ Paladino da Catedral
 			return 1.10, 1.10, 1.20, 0.95, 0.90
 		}
-	case protocol.ClassBlacksmith: // 7: Ferreiro
+	case protocol.ClassBlacksmith: // 7: Forjador de Estrelas
 		switch subPath {
 		case 1: // Mestre Armeiro ➔ Artesão Overgeared
 			return 1.05, 1.05, 1.05, 0.95, 1.20
@@ -528,7 +528,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Engenheiro Bélico ➔ Artilharia Rúnica
 			return 0.95, 1.20, 1.05, 1.00, 1.20
 		}
-	case protocol.ClassAlchemist: // 8: Alquimista
+	case protocol.ClassAlchemist: // 8: Transmutador
 		switch subPath {
 		case 1: // Granadeiro ➔ Arquimago da Detonação
 			return 0.90, 1.05, 0.95, 1.00, 1.30
@@ -539,29 +539,29 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Criador de Golems ➔ Senhor das Quimeras
 			return 1.10, 1.15, 1.20, 0.95, 0.95
 		}
-	case protocol.ClassSculptor: // 9: Escultor
+	case protocol.ClassSculptor: // 9: Escultor de Almas
 		switch subPath {
-		case 1: // Lâmina Escultora ➔ Escultor da Luz Lunar
+		case 1: // Lâmina Escultora ➔ Escultor de Almas da Luz Lunar
 			return 0.95, 1.10, 0.90, 1.20, 1.20
 		case 2: // Animador ➔ Soberano das Estátuas Vivas
 			return 1.15, 1.10, 1.25, 0.95, 0.95
-		case 3: // Escultor Elemental ➔ Mestre da Catástrofe
+		case 3: // Escultor de Almas Elemental ➔ Mestre da Catástrofe
 			return 0.90, 1.10, 0.95, 1.00, 1.25
 		case 4: // Monumentalista ➔ Criador de Maravilhas
 			return 1.30, 1.00, 1.20, 0.85, 1.00
 		}
-	case protocol.ClassTamer: // 10: Domador
+	case protocol.ClassTamer: // 10: Senhor das Feras
 		switch subPath {
 		case 1: // Líder de Alcateia ➔ Imperador da Matilha
 			return 0.95, 1.10, 1.00, 1.15, 1.25
-		case 2: // Domador de Gigantes ➔ Domador de Titãs
+		case 2: // Senhor das Feras de Gigantes ➔ Senhor das Feras de Titãs
 			return 1.20, 1.00, 1.25, 0.90, 1.05
-		case 3: // Guerreiro Simbiótico ➔ Quimera Humana
+		case 3: // Espadachim da Aurora Simbiótico ➔ Chimeryth Humana
 			return 1.25, 0.90, 1.10, 1.00, 1.25
 		case 4: // Ginete Selvagem ➔ Cavalaria Mítica
 			return 1.05, 1.15, 0.95, 1.25, 1.10
 		}
-	case protocol.ClassWarTailor: // 11: Alfaiate de Guerra
+	case protocol.ClassWarTailor: // 11: Tecelão Carmesim
 		switch subPath {
 		case 1: // Retalhador de Fios ➔ Mestre dos Fios Invisíveis
 			return 0.90, 1.10, 0.95, 1.10, 1.25
@@ -572,7 +572,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		case 4: // Agulha Fantasma ➔ Pontos de Pressão
 			return 0.90, 1.15, 0.90, 1.15, 1.25
 		}
-	case protocol.ClassHuntingChef: // 12: Chef de Caça
+	case protocol.ClassHuntingChef: // 12: Mestre do Banquete
 		switch subPath {
 		case 1: // Açougueiro ➔ Chef Carniceiro Abissal
 			return 1.05, 1.05, 0.90, 1.05, 1.30
@@ -601,127 +601,127 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 	case protocol.ClassNone: // 0: Viajante / Sem Classe
 		baseHP = 110
 		baseStamina = 90
-	case protocol.ClassWarrior: // 1: Guerreiro
+	case protocol.ClassWarrior: // 1: Espadachim da Aurora
 		baseHP = 140
 		baseStamina = 100
-	case protocol.ClassMage: // 2: Mago
+	case protocol.ClassMage: // 2: Arcanista
 		baseHP = 95
 		baseStamina = 110
-	case protocol.ClassArcher: // 3: Arqueiro
+	case protocol.ClassArcher: // 3: Sentinela dos Ventos
 		baseHP = 105
 		baseStamina = 135
-	case protocol.ClassAssassin: // 4: Assassino
+	case protocol.ClassAssassin: // 4: Lâmina Silente
 		baseHP = 110
 		baseStamina = 140
-	case protocol.ClassFighter: // 5: Lutador
+	case protocol.ClassFighter: // 5: Punho Celeste
 		baseHP = 135
 		baseStamina = 125
-	case protocol.ClassShieldBearer: // 6: Escudeiro
+	case protocol.ClassShieldBearer: // 6: Guardião do Bastião
 		baseHP = 160
 		baseStamina = 100
-	case protocol.ClassBlacksmith: // 7: Ferreiro
+	case protocol.ClassBlacksmith: // 7: Forjador de Estrelas
 		baseHP = 155
 		baseStamina = 100
-	case protocol.ClassAlchemist: // 8: Alquimista
+	case protocol.ClassAlchemist: // 8: Transmutador
 		baseHP = 110
 		baseStamina = 120
-	case protocol.ClassSculptor: // 9: Escultor
+	case protocol.ClassSculptor: // 9: Escultor de Almas
 		baseHP = 120
 		baseStamina = 125
-	case protocol.ClassTamer: // 10: Domador
+	case protocol.ClassTamer: // 10: Senhor das Feras
 		baseHP = 135
 		baseStamina = 120
-	case protocol.ClassWarTailor: // 11: Alfaiate de Guerra
+	case protocol.ClassWarTailor: // 11: Tecelão Carmesim
 		baseHP = 115
 		baseStamina = 130
-	case protocol.ClassHuntingChef: // 12: Chef de Caça
+	case protocol.ClassHuntingChef: // 12: Mestre do Banquete
 		baseHP = 145
 		baseStamina = 115
 
 	// Classes Secretas Variantes (IDs 13 a 18 - Tier 3 Raro / Tier 4 Épico)
-	case protocol.ClassRunicSpellblade: // 13: Espadachim Rúnico
+	case protocol.ClassRunicSpellblade: // 13: Lâmina Rúnica
 		baseHP = 145
 		baseStamina = 120
-	case protocol.ClassVampireHunter: // 14: Caçador de Vampiros
+	case protocol.ClassVampireHunter: // 14: Inquisidor de Prata
 		baseHP = 135
 		baseStamina = 135
-	case protocol.ClassAegisValkyrie: // 15: Valquíria da Égide
+	case protocol.ClassAegisValkyrie: // 15: Valquíria Celeste
 		baseHP = 165
 		baseStamina = 115
-	case protocol.ClassShadowMonk: // 16: Monge das Sombras
+	case protocol.ClassShadowMonk: // 16: Punho Fantasma
 		baseHP = 140
 		baseStamina = 130
-	case protocol.ClassCursedSmith: // 17: Forjador de Armas Amaldiçoadas
+	case protocol.ClassCursedSmith: // 17: Forjador Carmesim
 		baseHP = 160
 		baseStamina = 110
-	case protocol.ClassPlagueDoctor: // 18: Médico da Peste
+	case protocol.ClassPlagueDoctor: // 18: Doutor Corvo
 		baseHP = 135
 		baseStamina = 125
 
 	// Classes Únicas Exclusivas de Raça (19 a 26)
-	case protocol.ClassVorpalExecutioner: // 19: Carrasco do Veneno Vorpal
+	case protocol.ClassVorpalExecutioner: // 19: Algoz Vorpal
 		baseHP = 135
 		baseStamina = 140
-	case protocol.ClassCrimsonWebSovereign: // 20: Soberano da Teia Carmesim
+	case protocol.ClassCrimsonWebSovereign: // 20: Senhor da Teia Escarlate
 		baseHP = 140
 		baseStamina = 130
-	case protocol.ClassBloodPackKing: // 21: Rei-Fera da Alcateia de Sangue
+	case protocol.ClassBloodPackKing: // 21: Rei-Lobo do Eclipse
 		baseHP = 170
 		baseStamina = 125
-	case protocol.ClassMountainRunemancer: // 22: Runomante da Montanha Eterna
+	case protocol.ClassMountainRunemancer: // 22: Runomante Ancestral
 		baseHP = 185
 		baseStamina = 100
-	case protocol.ClassWorldBastion: // 23: Bastião do Mundo
+	case protocol.ClassWorldBastion: // 23: Colosso Abissal
 		baseHP = 210
 		baseStamina = 90
-	case protocol.ClassWorldTreeArchfairy: // 24: Arquifada da Árvore do Mundo
+	case protocol.ClassWorldTreeArchfairy: // 24: Arquifada de Yggdra
 		baseHP = 115
 		baseStamina = 150
-	case protocol.ClassCrimsonAristocrat: // 25: Aristocrata Carmesim
+	case protocol.ClassCrimsonAristocrat: // 25: Conde Escarlate
 		baseHP = 150
 		baseStamina = 130
-	case protocol.ClassScrapBaron: // 26: Barão da Sucata & Mecha Goblin
+	case protocol.ClassScrapBaron: // 26: Barão Engrenagem
 		baseHP = 160
 		baseStamina = 120
 	// Classes Lendárias (31 a 34)
-	case protocol.ClassPagmaDescendant: // 31: Descendente de Pagma
+	case protocol.ClassPagmaDescendant: // 31: Herdeiro da Forja Divina
 		baseHP = 220
 		baseStamina = 160
-	case protocol.ClassMoonlightSculptor: // 32: Escultor do Luar Lendário
+	case protocol.ClassMoonlightSculptor: // 32: Mestre Escultor do Luar
 		baseHP = 190
 		baseStamina = 180
-	case protocol.ClassDragonMonarch: // 33: Monarca dos Dragões
+	case protocol.ClassDragonMonarch: // 33: Imperador Dracônico
 		baseHP = 240
 		baseStamina = 150
-	case protocol.ClassBlackSunEmperor: // 34: Imperador do Sol Negro
+	case protocol.ClassBlackSunEmperor: // 34: Soberano do Sol Negro
 		baseHP = 210
 		baseStamina = 170
 	// Classes Únicas Gerais (27 a 30 e 35 a 39)
 	case protocol.ClassEclipseReaper: // 27: Ceifador
 		baseHP = 160
 		baseStamina = 110
-	case protocol.ClassRunicArtificer: // 35: Artífice Rúnico
+	case protocol.ClassRunicArtificer: // 35: Engenheiro Rúnico
 		baseHP = 150
 		baseStamina = 115
-	case protocol.ClassHomunculusCreator: // 36: Criador de Homúnculos
+	case protocol.ClassHomunculusCreator: // 36: Demiurgo Alquímico
 		baseHP = 130
 		baseStamina = 125
-	case protocol.ClassAstralDancer: // 28: Dançarino Astral
+	case protocol.ClassAstralDancer: // 28: Bailarino das Estrelas
 		baseHP = 135
 		baseStamina = 140
-	case protocol.ClassAshInquisitor: // 29: Inquisidor das Cinzas
+	case protocol.ClassAshInquisitor: // 29: Inquisidor da Chama Branca
 		baseHP = 145
 		baseStamina = 115
-	case protocol.ClassBoneNecromancer: // 30: Necromante de Ossos
+	case protocol.ClassBoneNecromancer: // 30: Arauto do Ossuário
 		baseHP = 130
 		baseStamina = 120
-	case protocol.ClassPrimordialTamer: // 37: Domador Primordial
+	case protocol.ClassPrimordialTamer: // 37: Senhor da Selva Primordial
 		baseHP = 165
 		baseStamina = 120
-	case protocol.ClassRiftKnight: // 38: Cavaleiro da Ruptura
+	case protocol.ClassRiftKnight: // 38: Cavaleiro do Vazio
 		baseHP = 180
 		baseStamina = 100
-	case protocol.ClassStormHerald: // 39: Arauto da Tempestade
+	case protocol.ClassStormHerald: // 39: Arauto do Trovão
 		baseHP = 125
 		baseStamina = 130
 	}
@@ -745,19 +745,19 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 	case protocol.RaceDhampir: // 5
 		modHP = 10
 		modStamina = 15
-	case protocol.RacePrimordialLycanthrope: // 6 (Licantropo Primordial)
+	case protocol.RacePrimordialLycanthrope: // 6 (Lupharion)
 		modHP = 15 + 80      // +80 MaxHP da evolução Varkai
 		modStamina = 10 + 30 // +30 MaxStamina da evolução Varkai
-	case protocol.RaceRevenant: // 7 (Amaldiçoado das Cinzas / Revenant)
+	case protocol.RaceRevenant: // 7 (Cinerion)
 		modHP = 10 + 50 // +50 MaxHP do despertar sombrio
 		modStamina = 10
-	case protocol.RaceCelestine: // 8 (Celestino)
+	case protocol.RaceCelestine: // 8 (Seraphel)
 		modHP = 25
 		modStamina = 25
-	case protocol.RaceAbyssal: // 9 (Abissal)
+	case protocol.RaceAbyssal: // 9 (Umbryss)
 		modHP = 10 + 40
 		modStamina = 15 + 15
-	case protocol.RaceRunicAutomaton: // 10 (Autômato Rúnico)
+	case protocol.RaceRunicAutomaton: // 10 (Runaric)
 		modHP = 60
 		modStamina = 15
 	case protocol.RaceHighValerian: // 11
@@ -787,19 +787,19 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 	case protocol.RaceSylvari: // 19 (Sylvari)
 		modHP = 20
 		modStamina = 20
-	case protocol.RaceMyconid: // 20 (Esporiano / Myconid)
+	case protocol.RaceMyconid: // 20 (Myconid)
 		modHP = 35
 		modStamina = 10
 	case protocol.RaceArachne: // 21 (Aracne)
 		modHP = 15
 		modStamina = 25
-	case protocol.RaceAshDragonborn: // 22 (Draconato de Cinzas)
+	case protocol.RaceAshDragonborn: // 22 (Ignivarn)
 		modHP = 50
 		modStamina = 15
-	case protocol.RaceChimera: // 23 (Quimera)
+	case protocol.RaceChimera: // 23 (Chimeryth)
 		modHP = 30
 		modStamina = 25
-	case protocol.RaceBoreal: // 24 (Boreal)
+	case protocol.RaceBoreal: // 24 (Borealin)
 		modHP = 30
 		modStamina = 20
 	case protocol.RaceThalassian: // 25 (Thalassiano)
@@ -811,63 +811,63 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 	case protocol.RaceNephilim: // 27 (Nephilim)
 		modHP = 35
 		modStamina = 30
-	case protocol.RaceTimeWanderer: // 28 (Errante Temporal)
+	case protocol.RaceTimeWanderer: // 28 (Cronari)
 		modHP = 20
 		modStamina = 40
 
 	// Quadrante 5: 18 Novas Raças do RPG (29 a 46)
-	case protocol.RaceHalfCelestial: // 29: Meio-Celestial
+	case protocol.RaceHalfCelestial: // 29: Aurelith
 		modHP = 35
 		modStamina = 25
-	case protocol.RacePyromancer: // 30: Pyromante
+	case protocol.RacePyromancer: // 30: Pyrael
 		modHP = 20
 		modStamina = 30
-	case protocol.RaceFrostGiant: // 31: Gigante de Gelo
+	case protocol.RaceFrostGiant: // 31: Jotunar
 		modHP = 85
 		modStamina = 10
-	case protocol.RaceDragonEarth: // 32: Drago (Terra)
+	case protocol.RaceDragonEarth: // 32: Terravyrn
 		modHP = 75
 		modStamina = 15
-	case protocol.RaceDragonWater: // 33: Drago (Água)
+	case protocol.RaceDragonWater: // 33: Hydravyrn
 		modHP = 35
 		modStamina = 35
-	case protocol.RaceDragonLightning: // 34: Drago (Raio)
+	case protocol.RaceDragonLightning: // 34: Fulgravyrn
 		modHP = 30
 		modStamina = 45
-	case protocol.RaceDragonMystic: // 35: Drago (Místico)
+	case protocol.RaceDragonMystic: // 35: Arcavyrn
 		modHP = 25
 		modStamina = 40
-	case protocol.RaceOrc: // 36: Orc
+	case protocol.RaceOrc: // 36: Orkhan
 		modHP = 70
 		modStamina = 20
-	case protocol.RaceDwarf: // 37: Anão
+	case protocol.RaceDwarf: // 37: Dvergar
 		modHP = 65
 		modStamina = 15
-	case protocol.RaceElf: // 38: Elfo
+	case protocol.RaceElf: // 38: Elarin
 		modHP = 15
 		modStamina = 35
-	case protocol.RaceSolarElf: // 39: Elfo Solar (Azgher)
+	case protocol.RaceSolarElf: // 39: Solarin (Azgher)
 		modHP = 20
 		modStamina = 35
-	case protocol.RaceLunarElf: // 40: Elfo Lunar (Tenebra)
+	case protocol.RaceLunarElf: // 40: Lunarin (Tenebra)
 		modHP = 20
 		modStamina = 40
-	case protocol.RaceFairy: // 41: Fadinha
+	case protocol.RaceFairy: // 41: Faelith
 		modHP = 10
 		modStamina = 50
-	case protocol.RaceGoblin: // 42: Goblin
+	case protocol.RaceGoblin: // 42: Gnarlin
 		modHP = 15
 		modStamina = 45
-	case protocol.RaceScorpionDemi: // 43: Demi-Humano Escorpião
+	case protocol.RaceScorpionDemi: // 43: Escarion
 		modHP = 35
 		modStamina = 30
-	case protocol.RaceTurtleDemi: // 44: Demi-Humano Tartaruga
+	case protocol.RaceTurtleDemi: // 44: Testudar
 		modHP = 90
 		modStamina = 10
-	case protocol.RaceHalfDemon: // 45: Meio-Demônio (Succubus)
+	case protocol.RaceHalfDemon: // 45: Lilitara
 		modHP = 30
 		modStamina = 35
-	case protocol.RaceWolfDemi: // 46: Demi-Humano Lobo
+	case protocol.RaceWolfDemi: // 46: Ulvar
 		modHP = 50
 		modStamina = 35
 	case protocol.RaceManamancer: // 47: Manamante (Sangue Azul: Vida e Mana são uma só reserva)
@@ -1557,7 +1557,7 @@ func (p *Player) GetAttributes() (str, dex, con, agi, intStat, spi, mas, lck uin
 	return p.getAttributesLocked()
 }
 
-// EvolveToPrimordialLycanthrope evolui a raça do jogador para Licantropo Primordial (RaceID = 6),
+// EvolveToPrimordialLycanthrope evolui a raça do jogador para Lupharion (RaceID = 6),
 // concedendo +80 MaxHP, +30 MaxStamina e curando totalmente o jogador.
 func (p *Player) EvolveToPrimordialLycanthrope() {
 	p.Mu.Lock()
@@ -1766,7 +1766,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Drago Terra (Couraça Ancestral): reduz dano em 35%
+	// Passiva Terravyrn (Couraça Ancestral): reduz dano em 35%
 	if p.RaceID == protocol.RaceDragonEarth && amount > 0 {
 		amount = uint16(float32(amount) * 0.65)
 		if amount == 0 {
@@ -1774,7 +1774,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Orc (Músculos de Aço): reduz dano em 20%
+	// Passiva Orkhan (Músculos de Aço): reduz dano em 20%
 	if p.RaceID == protocol.RaceOrc && amount > 0 {
 		amount = uint16(float32(amount) * 0.80)
 		if amount == 0 {
@@ -1782,7 +1782,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Demi Tartaruga (Armadura Orgânica): reduz dano em 45%
+	// Passiva Testudar (Armadura Orgânica): reduz dano em 45%
 	if p.RaceID == protocol.RaceTurtleDemi && amount > 0 {
 		amount = uint16(float32(amount) * 0.55)
 		if amount == 0 {
@@ -1790,7 +1790,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Succubus (Aparência Inofensiva): 25% de chance de anular o ataque
+	// Passiva Lilitara (Aparência Inofensiva): 25% de chance de anular o ataque
 	if p.RaceID == protocol.RaceHalfDemon && rand.Float32() < 0.25 {
 		return p.HP, false
 	}
@@ -1814,7 +1814,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Médico da Peste (Imunidade & Cura Tóxica): -15% de dano recebido
+	// Passiva Doutor Corvo (Imunidade & Cura Tóxica): -15% de dano recebido
 	if p.ClassID == protocol.ClassPlagueDoctor && amount > 0 {
 		amount = uint16(float32(amount) * 0.85)
 		if amount == 0 {
@@ -1822,12 +1822,12 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Assassino (Lâmina Silenciosa): 15% de chance de esquivar do golpe
+	// Passiva Lâmina Silente (Lâmina Silenciosa): 15% de chance de esquivar do golpe
 	if p.ClassID == protocol.ClassAssassin && amount > 0 && rand.Float32() < 0.15 {
 		return p.HP, false
 	}
 
-	// Passiva Guerreiro (Sangue de Batalha): +15% de Defesa Física
+	// Passiva Espadachim da Aurora (Sangue de Batalha): +15% de Defesa Física
 	if p.ClassID == protocol.ClassWarrior && amount > 0 {
 		amount = uint16(float32(amount) * 0.85)
 		if amount == 0 {
@@ -1835,7 +1835,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Escudeiro (Fortaleza Viva): +35% de Defesa Total (o reflexo de 20% é aplicado em handleMobAttack)
+	// Passiva Guardião do Bastião (Fortaleza Viva): +35% de Defesa Total (o reflexo de 20% é aplicado em handleMobAttack)
 	if p.ClassID == protocol.ClassShieldBearer && amount > 0 {
 		amount = uint16(float32(amount) * 0.65)
 		if amount == 0 {
@@ -1843,7 +1843,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
-	// Passiva Cavaleiro da Ruptura (Classe 14): reduz todo dano recebido em 30%
+	// Passiva Cavaleiro do Vazio (Classe 14): reduz todo dano recebido em 30%
 	if p.ClassID == protocol.ClassRiftKnight && amount > 0 {
 		amount = uint16(float32(amount) * 0.70)
 		if amount == 0 {
@@ -1852,12 +1852,12 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 	}
 
 	if amount > 0 {
-		// Ao sofrer qualquer dano, zera a sequência de abates intocados (Dançarino Astral)
+		// Ao sofrer qualquer dano, zera a sequência de abates intocados (Bailarino das Estrelas)
 		p.UntouchedKills = 0
 	}
 
 	if amount >= p.HP {
-		// Passiva Pyromante (Chama da Vida): revive 1x com 50% HP virando chama
+		// Passiva Pyrael (Chama da Vida): revive 1x com 50% HP virando chama
 		if p.RaceID == protocol.RacePyromancer && !p.PyromancerRevived {
 			p.PyromancerRevived = true
 			p.HP = p.MaxHP / 2
@@ -1865,7 +1865,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 			p.BuffActiveUntil = time.Now().Add(10 * time.Second)
 			return p.HP, false
 		}
-		// Passiva Aristocrata Carmesim (Imortalidade do Sangue): volta com 30% de Vida, a cada 10 minutos
+		// Passiva Conde Escarlate (Imortalidade do Sangue): volta com 30% de Vida, a cada 10 minutos
 		if p.ClassID == protocol.ClassCrimsonAristocrat && time.Since(p.AristocratRevivedAt) >= AristocratReviveCooldown {
 			p.AristocratRevivedAt = time.Now()
 			p.HP = p.MaxHP * 30 / 100
@@ -1879,7 +1879,7 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 	return p.HP, false
 }
 
-// AristocratReviveCooldown é a recarga da Imortalidade do Sangue do Aristocrata Carmesim.
+// AristocratReviveCooldown é a recarga da Imortalidade do Sangue do Conde Escarlate.
 const AristocratReviveCooldown = 10 * time.Minute
 
 // UpdateFromMove atualiza posição, rotação e endereço UDP caso o Seq seja estritamente superior ao LastSeq.
@@ -2286,7 +2286,7 @@ func (p *Player) RecordTimeSnapshot(x, y, z float32, hp uint16, stam float32) {
 	}
 }
 
-// RewindTimeDestiny restaura o jogador para 3 segundos atrás (Skill Z do Errante Temporal).
+// RewindTimeDestiny restaura o jogador para 3 segundos atrás (Skill Z do Cronari).
 func (p *Player) RewindTimeDestiny() (TimeHistorySnapshot, bool) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -2352,7 +2352,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 	}
 
 	switch itemID {
-	case protocol.ItemRawWolfMeat: // 2: Carne Crua de Lobo (+45 HP / +90 HP Quimera)
+	case protocol.ItemRawWolfMeat: // 2: Carne Crua de Lobo (+45 HP / +90 HP Chimeryth)
 		p.consumeOneItemLocked(itemID)
 		healAmt := uint16(45)
 		msg := "Você consumiu Carne Crua de Lobo e recuperou +45 HP."
@@ -2367,7 +2367,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		}
 		return true, msg
 
-	case protocol.ItemCookedNobleMeat: // 3: Carne Nobre Assada (+90 HP, +40 Stamina / dobro Quimera)
+	case protocol.ItemCookedNobleMeat: // 3: Carne Nobre Assada (+90 HP, +40 Stamina / dobro Chimeryth)
 		p.consumeOneItemLocked(itemID)
 		healAmt := uint16(90)
 		stamAmt := float32(40)
@@ -2393,15 +2393,15 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		p.WolfPotionUntil = time.Now().Add(20 * time.Second)
 		return true, "Você bebeu a Poção de Sangue Lupino (+20% Velocidade e Crítico por 20s)!"
 
-	case protocol.ItemBeastProgenitorBlood: // 16: Sangue do Progenitor Bestial (Desperta linhagem Dhampir)
+	case protocol.ItemBeastProgenitorBlood: // 16: Sangue do Progenitor Bestial (Desperta linhagem Sangrael)
 		p.consumeOneItemLocked(itemID)
 		p.RaceID = protocol.RaceDhampir
 		p.recalculateStatsLocked()
 		p.HP = p.MaxHP
 		p.Stamina = float32(p.MaxStamina)
-		return true, "O Sangue do Progenitor Bestial ferve em suas veias! Você despertou como Dhampir!"
+		return true, "O Sangue do Progenitor Bestial ferve em suas veias! Você despertou como Sangrael!"
 
-	case protocol.ItemEclipseScytheTome: // 17: Tomo da Foice do Eclipse (Ceifador do Eclipse, Tier 5 Única, Reset Nível 1)
+	case protocol.ItemEclipseScytheTome: // 17: Tomo da Foice do Eclipse (Ceifador da Lua Negra, Tier 5 Única, Reset Nível 1)
 		p.consumeOneItemLocked(itemID)
 		p.ClassID = protocol.ClassEclipseReaper
 		p.ClassTier = protocol.TierUnique
@@ -2420,9 +2420,9 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		p.recalculateStatsLocked()
 		p.HP = p.MaxHP
 		p.Stamina = float32(p.MaxStamina)
-		return true, "Você leu o Tomo da Foice do Eclipse e renasceu como Ceifador do Eclipse (Tier Única - Nível 1)!"
+		return true, "Você leu o Tomo da Foice do Eclipse e renasceu como Ceifador da Lua Negra (Tier Única - Nível 1)!"
 
-	case protocol.ItemStarforgeCore: // 18: Núcleo de Forja Estelar (Artífice Rúnico, Tier 5 Única, Reset Nível 1)
+	case protocol.ItemStarforgeCore: // 18: Núcleo de Forja Estelar (Engenheiro Rúnico, Tier 5 Única, Reset Nível 1)
 		p.consumeOneItemLocked(itemID)
 		p.ClassID = protocol.ClassRunicArtificer
 		p.ClassTier = protocol.TierUnique
@@ -2441,7 +2441,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		p.recalculateStatsLocked()
 		p.HP = p.MaxHP
 		p.Stamina = float32(p.MaxStamina)
-		return true, "A energia rúnica do Núcleo de Forja transborda! Você despertou como Artífice Rúnico (Tier Única - Nível 1)!"
+		return true, "A energia rúnica do Núcleo de Forja transborda! Você despertou como Engenheiro Rúnico (Tier Única - Nível 1)!"
 
 	case protocol.ItemRunicWarhammerRecipe: // 26: Receita do Malho de Batalha Rúnico
 		p.consumeOneItemLocked(itemID)
@@ -2452,7 +2452,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		p.Inventory[protocol.ItemRunicWarhammer]++
 		return true, "Você aprendeu a receita secreta e forjou o lendário Malho de Batalha Rúnico (+45 Dano Melee, +8 FOR, +6 CON, +4 MAS)!"
 
-	case protocol.ItemOrganicTrash: // 28: Lixo Orgânico (Alimento e Buff exclusivo Myconid e Orc)
+	case protocol.ItemOrganicTrash: // 28: Lixo Orgânico (Alimento e Buff exclusivo Myconid e Orkhan)
 		if p.RaceID == protocol.RaceMyconid || p.RaceID == protocol.RaceOrc {
 			p.consumeOneItemLocked(itemID)
 			p.HP += 50
@@ -2465,13 +2465,13 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		}
 		return false, "Apenas os Esporianos / Myconids e Orcs possuem flora intestinal para digerir lixo orgânico."
 
-	case protocol.ItemRunicHourglass: // 29: Ampulheta Rúnica (Desperta Raça Secreta 28 Errante Temporal)
+	case protocol.ItemRunicHourglass: // 29: Ampulheta Rúnica (Desperta Raça Secreta 28 Cronari)
 		p.consumeOneItemLocked(itemID)
 		p.RaceID = protocol.RaceTimeWanderer
 		p.recalculateStatsLocked()
 		p.HP = p.MaxHP
 		p.Stamina = float32(p.MaxStamina)
-		return true, "O tempo congela ao seu redor... Você despertou como Errante Temporal (Cronomante)!"
+		return true, "O tempo congela ao seu redor... Você despertou como Cronari!"
 
 	case protocol.ItemSilverSilkCocoon, protocol.ItemArachnaEye: // 30, 44: Casulo / Olho Multifacetado de Arachna (Desperta Raça Secreta 21 Aracne)
 		p.consumeOneItemLocked(itemID)
@@ -2481,21 +2481,21 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		p.Stamina = float32(p.MaxStamina)
 		return true, "O Olho de Arachna vibra com pura energia aracnídea... Você despertou como Aracne (Tecelão da Bruma)!"
 
-	case protocol.ItemEternalFrostHeart: // 52: Coração de Geada Eterna (Desperta Raça Secreta 24 Boreal / Gigante de Gelo)
+	case protocol.ItemEternalFrostHeart: // 52: Coração de Geada Eterna (Desperta Raça Secreta 24 Borealin / Jotunar)
 		p.consumeOneItemLocked(itemID)
 		p.RaceID = protocol.RaceBoreal
 		p.recalculateStatsLocked()
 		p.HP = p.MaxHP
 		p.Stamina = float32(p.MaxStamina)
-		return true, "O frio ancestral de Ymir congela suas veias e endurece seus ossos... Você despertou como Boreal (Gigante de Gelo)!"
+		return true, "O frio ancestral de Ymir congela suas veias e endurece seus ossos... Você despertou como Borealin (Jotunar)!"
 
-	case protocol.ItemProgenitorPureBlood: // 54: Sangue Puro do Progenitor (Desperta Raça Secreta 5 Dhampir / Vampiro)
+	case protocol.ItemProgenitorPureBlood: // 54: Sangue Puro do Progenitor (Desperta Raça Secreta 5 Sangrael)
 		p.consumeOneItemLocked(itemID)
 		p.RaceID = protocol.RaceDhampir
 		p.recalculateStatsLocked()
 		p.HP = p.MaxHP
 		p.Stamina = float32(p.MaxStamina)
-		return true, "O sangue milenar de Lorde Vesperian queima em seu coração... Você despertou como Dhampir (Progenitor Vampírico)!"
+		return true, "O sangue milenar de Lorde Vesperian queima em seu coração... Você despertou como Sangrael (Progenitor Vampírico)!"
 
 	case protocol.ItemAbyssalScorpionStinger: // 47: Ferrão de Escorpião Abissal (Desperta Linhagem de Escorpião)
 		p.consumeOneItemLocked(itemID)
@@ -2517,7 +2517,7 @@ func (p *Player) consumeOneItemLocked(itemID uint8) {
 	}
 }
 
-// EvolveToRevenant desperta a Raça Secreta 7 (Amaldiçoado das Cinzas / Revenant).
+// EvolveToRevenant desperta a Raça Secreta 7 (Cinerion).
 func (p *Player) EvolveToRevenant() {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -2527,7 +2527,7 @@ func (p *Player) EvolveToRevenant() {
 	p.Stamina = float32(p.MaxStamina)
 }
 
-// EvolveToDhampir desperta a Raça Secreta 5 (Dhampir).
+// EvolveToDhampir desperta a Raça Secreta 5 (Sangrael).
 func (p *Player) EvolveToDhampir() {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()

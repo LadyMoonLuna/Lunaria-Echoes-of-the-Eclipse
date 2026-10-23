@@ -255,10 +255,10 @@ func TestInternalAndSubterraneanPortals(t *testing.T) {
 		t.Fatalf("coordenada de retorno da Igreja incorreta: (%.1f, %.1f)", px, pz)
 	}
 
-	// 2. Torre do Mago (Portal 11: Vila -> Torre)
+	// 2. Torre do Arcanista (Portal 11: Vila -> Torre)
 	server.handlePortalTravel(1, 0, 11)
 	if player.GetZone() != world.ZoneMageTower {
-		t.Fatalf("jogador deveria estar na Torre do Mago (Zona 6), obteve %d", player.GetZone())
+		t.Fatalf("jogador deveria estar na Torre do Arcanista (Zona 6), obteve %d", player.GetZone())
 	}
 	player.Mu.RLock()
 	px, pz = player.PosX, player.PosZ
@@ -267,7 +267,7 @@ func TestInternalAndSubterraneanPortals(t *testing.T) {
 		t.Fatalf("coordenada de chegada na Torre incorreta: (%.1f, %.1f)", px, pz)
 	}
 
-	// Saída da Torre do Mago (Portal 12: Torre -> Vila)
+	// Saída da Torre do Arcanista (Portal 12: Torre -> Vila)
 	server.handlePortalTravel(1, 0, 12)
 	if player.GetZone() != world.ZoneVillage {
 		t.Fatalf("jogador deveria estar na Vila (Zona 0), obteve %d", player.GetZone())

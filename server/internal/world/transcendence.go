@@ -80,21 +80,21 @@ type UniqueRequirement struct {
 // UniqueRequirements lista as 8 Classes Únicas Exclusivas de Raça (19 a 26).
 // Com classes e item, basta um dos dois; só com item, o item é obrigatório; só com classes, a classe é obrigatória.
 var UniqueRequirements = map[uint8]UniqueRequirement{
-	protocol.ClassVorpalExecutioner: {Races: []uint8{protocol.RaceScorpionDemi}, RaceName: "Demi-Humano Escorpião",
+	protocol.ClassVorpalExecutioner: {Races: []uint8{protocol.RaceScorpionDemi}, RaceName: "Escarion",
 		Classes: []uint8{protocol.ClassAssassin, protocol.ClassAlchemist}, Item: protocol.ItemRoyalVenomGland, ItemName: "Glândula Real"},
 	protocol.ClassCrimsonWebSovereign: {Races: []uint8{protocol.RaceArachne}, RaceName: "Aracne",
 		Classes: []uint8{protocol.ClassWarTailor, protocol.ClassAssassin}, Item: protocol.ItemArachnaEye, ItemName: "Olho de Arachna"},
-	protocol.ClassBloodPackKing: {Races: []uint8{protocol.RaceWolfDemi, protocol.RacePrimordialLycanthrope}, RaceName: "Demi-Humano Lobo ou Licantropo",
+	protocol.ClassBloodPackKing: {Races: []uint8{protocol.RaceWolfDemi, protocol.RacePrimordialLycanthrope}, RaceName: "Ulvar ou Lupharion",
 		Classes: []uint8{protocol.ClassTamer, protocol.ClassFighter}},
-	protocol.ClassMountainRunemancer: {Races: []uint8{protocol.RaceDwarf, protocol.RaceKharad}, RaceName: "Anão ou Kharad",
+	protocol.ClassMountainRunemancer: {Races: []uint8{protocol.RaceDwarf, protocol.RaceKharad}, RaceName: "Dvergar ou Kharad",
 		Classes: []uint8{protocol.ClassBlacksmith}},
-	protocol.ClassWorldBastion: {Races: []uint8{protocol.RaceTurtleDemi}, RaceName: "Demi-Humano Tartaruga",
+	protocol.ClassWorldBastion: {Races: []uint8{protocol.RaceTurtleDemi}, RaceName: "Testudar",
 		Classes: []uint8{protocol.ClassShieldBearer}},
-	protocol.ClassWorldTreeArchfairy: {Races: []uint8{protocol.RaceFairy}, RaceName: "Fadinha",
+	protocol.ClassWorldTreeArchfairy: {Races: []uint8{protocol.RaceFairy}, RaceName: "Faelith",
 		Classes: []uint8{protocol.ClassMage, protocol.ClassAlchemist}},
-	protocol.ClassCrimsonAristocrat: {Races: []uint8{protocol.RaceDhampir}, RaceName: "Dhampir / Vampiro",
+	protocol.ClassCrimsonAristocrat: {Races: []uint8{protocol.RaceDhampir}, RaceName: "Sangrael",
 		Item: protocol.ItemVesperianPureBlood, ItemName: "Sangue Puro de Vesperian"},
-	protocol.ClassScrapBaron: {Races: []uint8{protocol.RaceGoblin}, RaceName: "Goblin",
+	protocol.ClassScrapBaron: {Races: []uint8{protocol.RaceGoblin}, RaceName: "Gnarlin",
 		Item: protocol.ItemMechaBlueprint, ItemName: "Diagrama do Mecha"},
 }
 
@@ -171,7 +171,7 @@ var LegendaryForUnique = map[uint8]uint8{
 	protocol.ClassVorpalExecutioner:   protocol.ClassDragonMonarch,
 }
 
-// LegendaryOffer retorna a Lendária destinada à Classe Única (Imperador do Sol Negro por padrão).
+// LegendaryOffer retorna a Lendária destinada à Classe Única (Soberano do Sol Negro por padrão).
 func LegendaryOffer(uniqueClass uint8) uint8 {
 	if l, ok := LegendaryForUnique[uniqueClass]; ok {
 		return l

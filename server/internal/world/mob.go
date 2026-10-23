@@ -58,11 +58,11 @@ type Mob struct {
 	SlowUntil time.Time
 	StunUntil time.Time
 
-	// Quebra de Armadura (Ferreiro, Alquimista, Escultor, Chef de Caça): +X% de dano recebido até ArmorBreakUntil
+	// Quebra de Armadura (Forjador de Estrelas, Transmutador, Escultor de Almas, Mestre do Banquete): +X% de dano recebido até ArmorBreakUntil
 	ArmorBreakPct   float32
 	ArmorBreakUntil time.Time
 
-	// Envenenado (Carrasco do Veneno Vorpal, Soberano da Teia): a Terceira Dose Letal causa dano cheio
+	// Envenenado (Algoz Vorpal, Soberano da Teia): a Terceira Dose Letal causa dano cheio
 	PoisonedUntil time.Time
 }
 
@@ -456,8 +456,8 @@ func NewMobManager() *MobManager {
 	// MobType 21: Draco de Geada Selvagem (950 HP)
 	mm.Mobs[225] = NewMobWithZone(225, "Draco de Geada Selvagem", protocol.MobTypeWildFrostDrake, ZoneRuins, 0.0, 0.0, 175.0, 950, 4.0)
 
-	// MobType 22: Ymir, o Patriarca Gigante de Gelo (Boss - 5200 HP em (0, 150))
-	mm.Mobs[226] = NewMobWithZone(226, "Ymir, o Patriarca Gigante de Gelo", protocol.MobTypeYmirFrostPatriarch, ZoneRuins, 0.0, 0.0, 150.0, 5200, 2.8)
+	// MobType 22: Ymir, o Patriarca Jotunar (Boss - 5200 HP em (0, 150))
+	mm.Mobs[226] = NewMobWithZone(226, "Ymir, o Patriarca Jotunar", protocol.MobTypeYmirFrostPatriarch, ZoneRuins, 0.0, 0.0, 150.0, 5200, 2.8)
 
 	// =========================================================================
 	// 3. ZONE 3: SANTUÁRIO DO ECLIPSE (ZoneSanctuary = 3, 600x600m)

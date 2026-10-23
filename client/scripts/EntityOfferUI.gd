@@ -12,10 +12,10 @@ var option_b_id: int = 0
 const ENTITY_LORE := {
 	1: { # Valeriano
 		"title": "O Trono Solar & O Sussurro do Éter",
-		"lore": "Mortal, seu sangue despertou. Você erguerá o Estandarte Dourado da Ordem como um Alto Valeriano, ou rasgará o espaço como um Andarilho do Éter?",
+		"lore": "Mortal, seu sangue despertou. Você erguerá o Estandarte Dourado da Ordem como um Solvaren, ou rasgará o espaço como um Aetheris?",
 		"opt_a": {
 			"id": 11,
-			"name": "Alto Valeriano",
+			"name": "Solvaren",
 			"path": "Caminho da Ordem Solar",
 			"color": Color("#ffd700"),
 			"skill_z": "[Z] Estandarte Imperial: Onda de luz que cura +45 HP em aliados, restaura +50 Stamina e concede +30% de Dano por 12s.",
@@ -23,7 +23,7 @@ const ENTITY_LORE := {
 		},
 		"opt_b": {
 			"id": 12,
-			"name": "Andarilho do Éter",
+			"name": "Aetheris",
 			"path": "Caminho do Caos & Espaço",
 			"color": Color("#9c27b0"),
 			"skill_z": "[Z] Fenda Dimensional: Rasga o espaço, teleportando 6m para frente com explosão de vácuo (dano etéreo puro).",
@@ -32,10 +32,10 @@ const ENTITY_LORE := {
 	},
 	2: { # Noctari
 		"title": "O Chamado de Selene & O Véu de Nyx",
-		"lore": "Filho das estrelas, a Lua aguarda seu juramento. Você brilhará na luz curativa do Arconte Lunar, ou caminhará invisível como um Espectro Umbral?",
+		"lore": "Filho das estrelas, a Lua aguarda seu juramento. Você brilhará na luz curativa do Selenarca, ou caminhará invisível como um Nyxara?",
 		"opt_a": {
 			"id": 21,
-			"name": "Arconte Lunar",
+			"name": "Selenarca",
 			"path": "Caminho da Ordem de Selene",
 			"color": Color("#00e5ff"),
 			"skill_z": "[Z] Luz Purificadora: Cascata lunar de 6.0m curando +60 HP e cegando inimigos com alto dano sagrado.",
@@ -43,7 +43,7 @@ const ENTITY_LORE := {
 		},
 		"opt_b": {
 			"id": 22,
-			"name": "Espectro Umbral",
+			"name": "Nyxara",
 			"path": "Caminho do Caos de Nyx",
 			"color": Color("#7c4dff"),
 			"skill_z": "[Z] Manto das Sombras: Fica invisível por 4s; o próximo golpe desferido causa +100% de Dano Crítico garantido.",
@@ -52,10 +52,10 @@ const ENTITY_LORE := {
 	},
 	3: { # Kharad
 		"title": "O Pai da Forja & O Abismo de Obsidiana",
-		"lore": "A bigorna ancestral ressoa! Você gravará sua pele com o aço sagrado do Guardião Rúnico, ou deixará o magma ferver como um Titã de Obsidiana?",
+		"lore": "A bigorna ancestral ressoa! Você gravará sua pele com o aço sagrado do Runakhar, ou deixará o magma ferver como um Pyrokhar?",
 		"opt_a": {
 			"id": 31,
-			"name": "Guardião Rúnico",
+			"name": "Runakhar",
 			"path": "Caminho da Ordem da Bigorna",
 			"color": Color("#ffa726"),
 			"skill_z": "[Z] Armadura Rúnica Impenetrável: Absorve 80% do dano recebido por 6s e reflete 40% do dano de volta aos agressores.",
@@ -63,7 +63,7 @@ const ENTITY_LORE := {
 		},
 		"opt_b": {
 			"id": 32,
-			"name": "Titã de Obsidiana",
+			"name": "Pyrokhar",
 			"path": "Caminho do Caos Magmático",
 			"color": Color("#ff3d00"),
 			"skill_z": "[Z] Erupção Cataclísmica: Libera uma geiser de magma de 5.5m que incendeia inimigos causando dano contínuo devastador.",
@@ -72,10 +72,10 @@ const ENTITY_LORE := {
 	},
 	4: { # Varkai
 		"title": "O Dragão Ancestral & A Fera Sangrenta",
-		"lore": "Duas feras rugem em suas veias! Você despertará as chamas reais do Soberano Dracônico, ou entregará sua mente à Fera do Frenesi?",
+		"lore": "Duas feras rugem em suas veias! Você despertará as chamas reais do Dravarkai, ou entregará sua mente à Ferovar?",
 		"opt_a": {
 			"id": 41,
-			"name": "Soberano Dracônico",
+			"name": "Dravarkai",
 			"path": "Caminho da Ordem Dracônica",
 			"color": Color("#e53935"),
 			"skill_z": "[Z] Baforada Nobre do Dragão: Cone colossal de chamas dracônicas que derrete armaduras e concede lifesteal.",
@@ -83,14 +83,14 @@ const ENTITY_LORE := {
 		},
 		"opt_b": {
 			"id": 42,
-			"name": "Fera do Frenesi",
+			"name": "Ferovar",
 			"path": "Caminho do Caos Sangrento",
 			"color": Color("#c2185b"),
-			"skill_z": "[Z] Frenesi Assassino: Salto bestial rasgando o alvo; cura +25 HP por arranhão e aumenta velocidade em 40%.",
+			"skill_z": "[Z] Frenesi Lâmina Silente: Salto bestial rasgando o alvo; cura +25 HP por arranhão e aumenta velocidade em 40%.",
 			"passive": "Fome Canibal: Abater inimigos restaura 15% do HP e 25% da Stamina instantaneamente."
 		}
 	},
-	5: { # Raças Secretas (Dhampir, Revenant, Licantropo, Abissal)
+	5: { # Raças Secretas (Sangrael, Cinerion, Lupharion, Umbryss)
 		"title": "Pacto da Entidade Abissal",
 		"lore": "Mortal tolo... A escuridão primordial estende a mão. Entregue-se à metamorfose proibida e reclame o poder do abismo!",
 		"opt_a": {

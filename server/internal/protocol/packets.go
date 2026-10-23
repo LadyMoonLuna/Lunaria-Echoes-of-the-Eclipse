@@ -71,10 +71,10 @@ const (
 	ProjTypeArcaneOrb      uint8 = 3 // Orbe Arcano (Iniciado - Ataque Básico)
 	ProjTypeElementalComet uint8 = 4 // Cometa Elemental (Iniciado - Skill Q / Artífice)
 	ProjTypeHolySpear      uint8 = 5 // Lança do Julgamento (Acólito - Skill R)
-	ProjTypeAcidFlask      uint8 = 6 // Frasco Químico / Bomba de Ácido (Alquimista)
+	ProjTypeAcidFlask      uint8 = 6 // Frasco Químico / Bomba de Ácido (Transmutador)
 	ProjTypeShadowBolt     uint8 = 7 // Projétil Sombrio (Cultista Sombrio / Malakor)
-	ProjTypeBoneSpear      uint8 = 7 // Lança de Fêmur (Necromante de Ossos - Skill Q)
-	ProjTypeLightningSpear uint8 = 8 // Lança do Trovão (Arauto da Tempestade - Skill Q)
+	ProjTypeBoneSpear      uint8 = 7 // Lança de Fêmur (Arauto do Ossuário - Skill Q)
+	ProjTypeLightningSpear uint8 = 8 // Lança do Trovão (Arauto do Trovão - Skill Q)
 )
 
 // Tipos de Mobs do Marco 4 e Expansão
@@ -102,7 +102,7 @@ const (
 	MobTypeStitchedChimeraZero  uint8 = 19 // Experimento Nº 0: A Quimera Costurada (Mini-Boss - HP 2.800)
 	MobTypeAncientIceGolem      uint8 = 20 // Golem de Gelo Antigo (HP 720)
 	MobTypeWildFrostDrake       uint8 = 21 // Draco de Geada Selvagem (HP 950)
-	MobTypeYmirFrostPatriarch   uint8 = 22 // Ymir, o Patriarca Gigante de Gelo (Boss - HP 5.200)
+	MobTypeYmirFrostPatriarch   uint8 = 22 // Ymir, o Patriarca Jotunar (Boss - HP 5.200)
 	MobTypeVesperianBloodGuard  uint8 = 23 // Guarda Sanguinário de Vesperian (HP 680)
 	MobTypeLordVesperianVampire uint8 = 24 // Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto - HP 8.500)
 )
@@ -127,55 +127,55 @@ const (
 	RaceVarkai   uint8 = 4 // Varkai
 
 	// 6 Raças Secretas Originais (5 a 10)
-	RaceDhampir               uint8 = 5  // Dhampir / Vampiro
-	RacePrimordialLycanthrope uint8 = 6  // Licantropo Primordial (Evolução Secreta Varkai)
-	RaceRevenant              uint8 = 7  // Amaldiçoado das Cinzas / Revenant
-	RaceCelestine             uint8 = 8  // Celestino
-	RaceCelestial             uint8 = 8  // Celestino (Alias)
-	RaceAbyssal               uint8 = 9  // Abissal
-	RaceRunicAutomaton        uint8 = 10 // Autômato Rúnico
+	RaceDhampir               uint8 = 5  // Sangrael
+	RacePrimordialLycanthrope uint8 = 6  // Lupharion (Evolução Secreta Varkai)
+	RaceRevenant              uint8 = 7  // Cinerion
+	RaceCelestine             uint8 = 8  // Seraphel
+	RaceCelestial             uint8 = 8  // Seraphel (Alias)
+	RaceAbyssal               uint8 = 9  // Umbryss (Filho do Eclipse)
+	RaceRunicAutomaton        uint8 = 10 // Runaric
 
 	// Evoluções Raciais Ordem / Caos (11 a 18)
-	RaceHighValerian      uint8 = 11 // Alto Valeriano (Caminho A - Ordem)
-	RaceAetherWalker      uint8 = 12 // Andarilho do Éter (Caminho B - Caos)
-	RaceLunarArchon       uint8 = 13 // Arconte Lunar (Caminho A - Ordem)
-	RaceUmbralSpecter     uint8 = 14 // Espectro Umbral (Caminho B - Caos)
-	RaceRunicGuardian     uint8 = 15 // Guardião Rúnico (Caminho A - Ordem)
-	RaceObsidianTitan     uint8 = 16 // Titã de Obsidiana (Caminho B - Caos)
-	RaceDraconicSovereign uint8 = 17 // Soberano Dracônico (Caminho A - Ordem)
-	RaceFrenzyBeast       uint8 = 18 // Fera do Frenesi (Caminho B - Caos)
+	RaceHighValerian      uint8 = 11 // Solvaren (Caminho A - Ordem)
+	RaceAetherWalker      uint8 = 12 // Aetheris (Caminho B - Caos)
+	RaceLunarArchon       uint8 = 13 // Selenarca (Caminho A - Ordem)
+	RaceUmbralSpecter     uint8 = 14 // Nyxara (Caminho B - Caos)
+	RaceRunicGuardian     uint8 = 15 // Runakhar (Caminho A - Ordem)
+	RaceObsidianTitan     uint8 = 16 // Pyrokhar (Caminho B - Caos)
+	RaceDraconicSovereign uint8 = 17 // Dravarkai (Caminho A - Ordem)
+	RaceFrenzyBeast       uint8 = 18 // Ferovar (Caminho B - Caos)
 
 	// 10 Novas Raças com Mecânicas Exclusivas (19 a 28)
 	RaceSylvari       uint8 = 19 // Sylvari (Nascido da Seiva)
-	RaceMyconid       uint8 = 20 // Esporiano / Myconid (Véu Fúngico)
+	RaceMyconid       uint8 = 20 // Myconid (Véu Fúngico)
 	RaceArachne       uint8 = 21 // Aracne (Tecelão da Bruma)
-	RaceAshDragonborn uint8 = 22 // Draconato de Cinzas (Escama-Negra)
-	RaceChimera       uint8 = 23 // Quimera (O Experimento Costurado)
-	RaceBoreal        uint8 = 24 // Boreal (Coração de Geada)
+	RaceAshDragonborn uint8 = 22 // Ignivarn (Escama-Negra)
+	RaceChimera       uint8 = 23 // Chimeryth (O Experimento Costurado)
+	RaceBoreal        uint8 = 24 // Borealin (Coração de Geada)
 	RaceThalassian    uint8 = 25 // Thalassiano (Filho da Maré Negra)
 	RaceCambion       uint8 = 26 // Cambion (Sangue-de-Enxofre)
 	RaceNephilim      uint8 = 27 // Nephilim (Híbrido do Crepúsculo)
-	RaceTimeWanderer  uint8 = 28 // Errante Temporal (Cronomante)
+	RaceTimeWanderer  uint8 = 28 // Cronari
 
 	// Quadrante 5: 18 Novas Raças do RPG (29 a 46)
-	RaceHalfCelestial   uint8 = 29 // Meio-Celestial (Ser de Luz)
-	RacePyromancer      uint8 = 30 // Pyromante (Fulgor & Chama da Vida)
-	RaceFrostGiant      uint8 = 31 // Gigante de Gelo (Pele Gélida - 1.45x)
-	RaceDragonEarth     uint8 = 32 // Drago (Terra) (Couraça Ancestral)
-	RaceDragonWater     uint8 = 33 // Drago (Água) (Lima da Água)
-	RaceDragonLightning uint8 = 34 // Drago (Raio) (Para-Raios)
-	RaceDragonMystic    uint8 = 35 // Drago (Místico) (Sangue Místico)
-	RaceOrc             uint8 = 36 // Orc (Barriga de Ferro & Músculos de Aço)
-	RaceDwarf           uint8 = 37 // Anão (Ímpeto da Forja - 0.82x)
-	RaceElf             uint8 = 38 // Elfo (Pés Velozes & Corpo Esguio)
-	RaceSolarElf        uint8 = 39 // Elfo Solar (Devoto de Azgher)
-	RaceLunarElf        uint8 = 40 // Elfo Lunar (Devoto de Tenebra)
-	RaceFairy           uint8 = 41 // Fadinha (Espírito da Natureza - 0.55x)
-	RaceGoblin          uint8 = 42 // Goblin (Cleptomancia - 0.75x)
-	RaceScorpionDemi    uint8 = 43 // Demi-Humano Escorpião (Sangue Ruim)
-	RaceTurtleDemi      uint8 = 44 // Demi-Humano Tartaruga (Armadura Orgânica - 1.35x)
-	RaceHalfDemon       uint8 = 45 // Meio-Demônio / Succubus (Aparência Inofensiva)
-	RaceWolfDemi        uint8 = 46 // Demi-Humano Lobo (Olfato & Instinto)
+	RaceHalfCelestial   uint8 = 29 // Aurelith (Ser de Luz)
+	RacePyromancer      uint8 = 30 // Pyrael (Fulgor & Chama da Vida)
+	RaceFrostGiant      uint8 = 31 // Jotunar (Pele Gélida - 1.45x)
+	RaceDragonEarth     uint8 = 32 // Terravyrn (Couraça Ancestral)
+	RaceDragonWater     uint8 = 33 // Hydravyrn (Lima da Água)
+	RaceDragonLightning uint8 = 34 // Fulgravyrn (Para-Raios)
+	RaceDragonMystic    uint8 = 35 // Arcavyrn (Sangue Místico)
+	RaceOrc             uint8 = 36 // Orkhan (Barriga de Ferro & Músculos de Aço)
+	RaceDwarf           uint8 = 37 // Dvergar (Ímpeto da Forja - 0.82x)
+	RaceElf             uint8 = 38 // Elarin (Pés Velozes & Corpo Esguio)
+	RaceSolarElf        uint8 = 39 // Solarin (Devoto de Azgher)
+	RaceLunarElf        uint8 = 40 // Lunarin (Devoto de Tenebra)
+	RaceFairy           uint8 = 41 // Faelith (Espírito da Natureza - 0.55x)
+	RaceGoblin          uint8 = 42 // Gnarlin (Cleptomancia - 0.75x)
+	RaceScorpionDemi    uint8 = 43 // Escarion (Sangue Ruim)
+	RaceTurtleDemi      uint8 = 44 // Testudar (Armadura Orgânica - 1.35x)
+	RaceHalfDemon       uint8 = 45 // Lilitara (Aparência Inofensiva)
+	RaceWolfDemi        uint8 = 46 // Ulvar (Olfato & Instinto)
 	RaceManamancer      uint8 = 47 // Manamante (Coração de Mana — conjura com a própria Vida)
 
 	// RaceMaxID é o maior ID de raça válido.
@@ -218,11 +218,11 @@ const (
 	ItemAncestralFangRing uint8 = 13 // Anel de Presa Ancestral (Acessório/Anel 1: +3 DES, +3 AGI)
 
 	// Itens de Eventos & Rituais Secretos
-	ItemBrokenSoulChalice    uint8 = 14 // Cálice da Alma Partida (Morte à noite desperta Raça 7 Revenant - Drop 0.1%)
+	ItemBrokenSoulChalice    uint8 = 14 // Cálice da Alma Partida (Morte à noite desperta Raça 7 Cinerion - Drop 0.1%)
 	ItemLycanAlphaHeart      uint8 = 15 // Coração do Licantropo Alfa (Relíquia: +15% Roubo de Vida, +5 em todos status - Drop 0.1%)
-	ItemBeastProgenitorBlood uint8 = 16 // Sangue do Progenitor Bestial (Desperta Dhampir - Drop 0.1%)
-	ItemEclipseScytheTome    uint8 = 17 // Tomo da Foice do Eclipse (Desperta Classe Secreta 7 Ceifador do Eclipse - Drop 0.1%)
-	ItemStarforgeCore        uint8 = 18 // Núcleo de Forja Estelar (Desperta Classe Secreta 8 Artífice Rúnico - Drop 0.1%)
+	ItemBeastProgenitorBlood uint8 = 16 // Sangue do Progenitor Bestial (Desperta Sangrael - Drop 0.1%)
+	ItemEclipseScytheTome    uint8 = 17 // Tomo da Foice do Eclipse (Desperta Classe Secreta 7 Ceifador da Lua Negra - Drop 0.1%)
+	ItemStarforgeCore        uint8 = 18 // Núcleo de Forja Estelar (Desperta Classe Secreta 8 Engenheiro Rúnico - Drop 0.1%)
 	ItemTitansHammerTome     uint8 = 18 // Alias: Tomo do Martelo Titânico / Núcleo de Forja Estelar
 
 	// Itens do Santuário do Eclipse
@@ -240,7 +240,7 @@ const (
 	ItemOrganicTrash         uint8 = 28 // Lixo Orgânico / Restos Estragados (Falha na autópsia / corte na Zona Vermelha)
 
 	// Itens Secretos de Desbloqueio de Raças/Classes (Chance 0.1%)
-	ItemRunicHourglass   uint8 = 29 // Ampulheta Rúnica (Desperta Raça 28 Cronomante / Errante Temporal - Drop 0.1%)
+	ItemRunicHourglass   uint8 = 29 // Ampulheta Rúnica (Desperta Raça 28 Cronari / Cronari - Drop 0.1%)
 	ItemSilverSilkCocoon uint8 = 30 // Casulo de Seda Prateada (Desperta Raça 21 Aracne - Drop 0.1%)
 
 	// Equipamentos para os 12 Slots Reais
@@ -248,8 +248,8 @@ const (
 	ItemSteelChestplate     uint8 = 32 // Peitoral de Aço (Peitoral: +60 HP, +5 CON)
 	ItemWolfLeatherPants    uint8 = 33 // Calças de Couro Lupino (Calças: +30 HP, +3 AGI)
 	ItemMistwalkerBoots     uint8 = 34 // Botas Passo-da-Bruma (Botas: +25 HP, +4 AGI, +2 DES)
-	ItemBlacksmithGauntlets uint8 = 35 // Manoplas de Ferreiro (Luvas: +4 FOR, +3 MAS)
-	ItemAlchemistBelt       uint8 = 36 // Cinto de Alquimista (Cinto: +3 INT, +3 SPI)
+	ItemBlacksmithGauntlets uint8 = 35 // Manoplas de Forjador de Estrelas (Luvas: +4 FOR, +3 MAS)
+	ItemAlchemistBelt       uint8 = 36 // Cinto de Transmutador (Cinto: +3 INT, +3 SPI)
 	ItemSilverMoonAmulet    uint8 = 37 // Colar da Lua Prateada (Colar: +4 INT, +4 SPI, +3 LCK)
 	ItemBloodRubyRing       uint8 = 38 // Anel de Rubi Sanguinário (Anel: +4 FOR, +3 CON)
 	ItemObsidianRing        uint8 = 39 // Anel de Obsidiana (Anel: +4 CON, +3 MAS)
@@ -262,18 +262,18 @@ const (
 	ItemArachnaEye             uint8 = 44 // Olho Multifacetado de Arachna (0.1% - Desbloqueia Raça 21 Aracne)
 	ItemImperialSilkCloak      uint8 = 45 // Manto de Seda Imperial (Capa: +45 HP, +6 INT, +5 SPI)
 	ItemPureAcid               uint8 = 46 // Ácido Puro (Alquimia / Corrosivo)
-	ItemAbyssalScorpionStinger uint8 = 47 // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Demi-Humano Escorpião)
+	ItemAbyssalScorpionStinger uint8 = 47 // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Escarion)
 	ItemVorpalPoison           uint8 = 48 // Veneno Vorpal (Toxina Letal)
 	ItemChimeraFleshPart       uint8 = 49 // Retalho Quimérico Costurado (Mutagênico)
 	ItemAncientIceCore         uint8 = 50 // Núcleo de Gelo Antigo (Gélido)
 	ItemPrimordialDragonScale  uint8 = 51 // Escama Dracônica Primordial (Armadura Superior)
-	ItemEternalFrostHeart      uint8 = 52 // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Boreal / Gigante de Gelo)
+	ItemEternalFrostHeart      uint8 = 52 // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Borealin / Jotunar)
 	ItemCrimsonGuardInsignia   uint8 = 53 // Insígnia do Guarda Carmesim
-	ItemProgenitorPureBlood    uint8 = 54 // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Dhampir / Vampiro)
+	ItemProgenitorPureBlood    uint8 = 54 // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Sangrael)
 	ItemVesperianCrimsonRing   uint8 = 55 // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
-	ItemRoyalVenomGland        uint8 = 56 // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Carrasco do Veneno Vorpal)
-	ItemVesperianPureBlood     uint8 = 57 // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Aristocrata Carmesim)
-	ItemMechaBlueprint         uint8 = 58 // Diagrama do Mecha Goblin (Mercado Negro de Varis - requisito do Barão da Sucata)
+	ItemRoyalVenomGland        uint8 = 56 // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Algoz Vorpal)
+	ItemVesperianPureBlood     uint8 = 57 // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Conde Escarlate)
+	ItemMechaBlueprint         uint8 = 58 // Diagrama do Mecha Gnarlin (Mercado Negro de Varis - requisito do Barão Engrenagem)
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -282,59 +282,59 @@ const (
 	ClassTraveler uint8 = 0 // Alias
 
 	// As 6 Classes Básicas de Combate (IDs 1 a 6)
-	ClassWarrior      uint8 = 1 // Guerreiro (Arma: Espada)
+	ClassWarrior      uint8 = 1 // Espadachim da Aurora (Arma: Espada)
 	ClassSwordsman    uint8 = 1 // Alias retrocompatível
-	ClassMage         uint8 = 2 // Mago (Arma: Cajado / Orbe Arcano)
+	ClassMage         uint8 = 2 // Arcanista (Arma: Cajado / Orbe Arcano)
 	ClassInitiate     uint8 = 2 // Alias retrocompatível
-	ClassArcher       uint8 = 3 // Arqueiro (Arma: Arco)
+	ClassArcher       uint8 = 3 // Sentinela dos Ventos (Arma: Arco)
 	ClassScout        uint8 = 3 // Alias retrocompatível
-	ClassAssassin     uint8 = 4 // Assassino (Arma: Duas Adagas)
+	ClassAssassin     uint8 = 4 // Lâmina Silente (Arma: Duas Adagas)
 	ClassAcolyte      uint8 = 4 // Alias retrocompatível
-	ClassFighter      uint8 = 5 // Lutador (Arma: Manoplas Pesadas)
-	ClassShieldBearer uint8 = 6 // Escudeiro (Arma: Escudo Colossal + Maça Curta)
+	ClassFighter      uint8 = 5 // Punho Celeste (Arma: Manoplas Pesadas)
+	ClassShieldBearer uint8 = 6 // Guardião do Bastião (Arma: Escudo Colossal + Maça Curta)
 
 	// As 6 Classes Básicas de Produção Combatentes (IDs 7 a 12)
-	ClassBlacksmith  uint8 = 7  // Ferreiro (Arma: Martelo de Forja)
-	ClassAlchemist   uint8 = 8  // Alquimista (Arma: Catalisador & Frascos Químicos)
-	ClassSculptor    uint8 = 9  // Escultor (Arma: Cinzel & Adaga do Luar)
-	ClassTamer       uint8 = 10 // Domador (Arma: Chicote Bestial)
-	ClassWarTailor   uint8 = 11 // Alfaiate de Guerra (Arma: Fios de Aço & Agulhas Rúnicas)
-	ClassHuntingChef uint8 = 12 // Chef de Caça (Arma: Cutelo Gigante & Wok de Ferro)
+	ClassBlacksmith  uint8 = 7  // Forjador de Estrelas (Arma: Martelo de Forja)
+	ClassAlchemist   uint8 = 8  // Transmutador (Arma: Catalisador & Frascos Químicos)
+	ClassSculptor    uint8 = 9  // Escultor de Almas (Arma: Cinzel & Adaga do Luar)
+	ClassTamer       uint8 = 10 // Senhor das Feras (Arma: Chicote Bestial)
+	ClassWarTailor   uint8 = 11 // Tecelão Carmesim (Arma: Fios de Aço & Agulhas Rúnicas)
+	ClassHuntingChef uint8 = 12 // Mestre do Banquete (Arma: Cutelo Gigante & Wok de Ferro)
 
 	// Classes Secretas Variantes (IDs 13 a 18 - Tier 3 Raro / Tier 4 Épico, SEM Reset de Nível)
-	ClassRunicSpellblade uint8 = 13 // Espadachim Rúnico (Spellblade)
-	ClassVampireHunter   uint8 = 14 // Caçador de Vampiros (Inquisidor de Prata)
-	ClassAegisValkyrie   uint8 = 15 // Valquíria da Égide (Lanceiro Celeste)
-	ClassShadowMonk      uint8 = 16 // Monge das Sombras (Punho Silencioso)
-	ClassCursedSmith     uint8 = 17 // Forjador de Armas Amaldiçoadas
-	ClassPlagueDoctor    uint8 = 18 // Médico da Peste (Doutor Corvo)
+	ClassRunicSpellblade uint8 = 13 // Lâmina Rúnica (Spellblade)
+	ClassVampireHunter   uint8 = 14 // Inquisidor de Prata (Inquisidor de Prata)
+	ClassAegisValkyrie   uint8 = 15 // Valquíria Celeste (Lanceiro Celeste)
+	ClassShadowMonk      uint8 = 16 // Punho Fantasma (Punho Silencioso)
+	ClassCursedSmith     uint8 = 17 // Forjador Carmesim
+	ClassPlagueDoctor    uint8 = 18 // Doutor Corvo (Doutor Corvo)
 
 	// Classes Secretas ÚNICAS Exclusivas de Raça (IDs 19 a 26 - Tier 5 travado, +11 pts/nível, Reset para o Nível 1)
-	ClassVorpalExecutioner   uint8 = 19 // Carrasco do Veneno Vorpal (Demi-Humano Escorpião)
-	ClassCrimsonWebSovereign uint8 = 20 // Soberano da Teia Carmesim (Aracne)
-	ClassBloodPackKing       uint8 = 21 // Rei-Fera da Alcateia de Sangue (Demi-Humano Lobo / Licantropo)
-	ClassMountainRunemancer  uint8 = 22 // Runomante da Montanha Eterna (Anão / Kharad)
-	ClassWorldBastion        uint8 = 23 // Bastião do Mundo (Demi-Humano Tartaruga)
-	ClassWorldTreeArchfairy  uint8 = 24 // Arquifada da Árvore do Mundo (Fadinha)
-	ClassCrimsonAristocrat   uint8 = 25 // Aristocrata Carmesim / Nosferatu Real (Dhampir)
-	ClassScrapBaron          uint8 = 26 // Barão da Sucata & Mecha Goblin (Goblin)
+	ClassVorpalExecutioner   uint8 = 19 // Algoz Vorpal (Escarion)
+	ClassCrimsonWebSovereign uint8 = 20 // Senhor da Teia Escarlate (Aracne)
+	ClassBloodPackKing       uint8 = 21 // Rei-Lobo do Eclipse (Ulvar / Lupharion)
+	ClassMountainRunemancer  uint8 = 22 // Runomante Ancestral (Dvergar / Kharad)
+	ClassWorldBastion        uint8 = 23 // Colosso Abissal (Testudar)
+	ClassWorldTreeArchfairy  uint8 = 24 // Arquifada de Yggdra (Faelith)
+	ClassCrimsonAristocrat   uint8 = 25 // Conde Escarlate / Nosferatu Real (Sangrael)
+	ClassScrapBaron          uint8 = 26 // Barão Engrenagem (Gnarlin)
 
 	// Classes Secretas ÚNICAS Gerais (IDs 27 a 30 e 35 a 39 - Tier 5 travado, +11 pts/nível, Reset para o Nível 1)
-	ClassEclipseReaper     uint8 = 27 // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
-	ClassAstralDancer      uint8 = 28 // Dançarino Astral (Crítico e Esquiva: HP 135, Stam 140)
-	ClassAshInquisitor     uint8 = 29 // Inquisidor das Cinzas (Dano com Vida Baixa: HP 145, Stam 115)
-	ClassBoneNecromancer   uint8 = 30 // Necromante de Ossos (Lança Óssea & Cura no Abate: HP 130, Stam 120)
-	ClassRunicArtificer    uint8 = 35 // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
-	ClassHomunculusCreator uint8 = 36 // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
-	ClassPrimordialTamer   uint8 = 37 // Domador Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
-	ClassRiftKnight        uint8 = 38 // Cavaleiro da Ruptura (Resistência e Gravidade: HP 180, Stam 100)
-	ClassStormHerald       uint8 = 39 // Arauto da Tempestade (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
+	ClassEclipseReaper     uint8 = 27 // Ceifador da Lua Negra (Melee Foice: HP 160, Stam 110, Lifesteal)
+	ClassAstralDancer      uint8 = 28 // Bailarino das Estrelas (Crítico e Esquiva: HP 135, Stam 140)
+	ClassAshInquisitor     uint8 = 29 // Inquisidor da Chama Branca (Dano com Vida Baixa: HP 145, Stam 115)
+	ClassBoneNecromancer   uint8 = 30 // Arauto do Ossuário (Lança Óssea & Cura no Abate: HP 130, Stam 120)
+	ClassRunicArtificer    uint8 = 35 // Engenheiro Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
+	ClassHomunculusCreator uint8 = 36 // Demiurgo Alquímico (Elixires e Regeneração: HP 130, Stam 125)
+	ClassPrimordialTamer   uint8 = 37 // Senhor da Selva Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
+	ClassRiftKnight        uint8 = 38 // Cavaleiro do Vazio (Resistência e Gravidade: HP 180, Stam 100)
+	ClassStormHerald       uint8 = 39 // Arauto do Trovão (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
 
 	// Classes Secretas LENDÁRIAS (IDs 31 a 34 - Tier 6 Mítico, +15 pts/nível, +50 status, Reset para o Nível 1)
-	ClassPagmaDescendant   uint8 = 31 // Descendente de Pagma / Deus da Forja & Espada
-	ClassMoonlightSculptor uint8 = 32 // Escultor do Luar Lendário
-	ClassDragonMonarch     uint8 = 33 // Monarca dos Dragões & Feras Primordiais
-	ClassBlackSunEmperor   uint8 = 34 // Imperador do Sol Negro (Monarca do Eclipse)
+	ClassPagmaDescendant   uint8 = 31 // Herdeiro da Forja Divina
+	ClassMoonlightSculptor uint8 = 32 // Mestre Escultor do Luar
+	ClassDragonMonarch     uint8 = 33 // Imperador Dracônico
+	ClassBlackSunEmperor   uint8 = 34 // Soberano do Sol Negro
 
 	// ClassMaxID é o maior ID de classe válido.
 	ClassMaxID uint8 = 39

@@ -16,7 +16,7 @@ var current_sub_path: int = 0 # Caminho Evolutivo (1 a 4) — muda a velocidade 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 var network_timer: float = 0.0
 
-var current_race_id: int = 1   # 1=Valeriano, 2=Noctari, 3=Kharad, 4=Varkai, 5=Dhampir
+var current_race_id: int = 1   # 1=Valeriano, 2=Noctari, 3=Kharad, 4=Varkai, 5=Sangrael
 var current_class_id: int = 1  # 1..15
 
 var is_attacking: bool = false
@@ -204,33 +204,33 @@ func _get_aim_direction() -> Vector3:
 
 func _get_class_color() -> Color:
 	match current_class_id:
-		1: return Color("#64b5f6") # Guerreiro: Azul Aço
-		2: return Color("#00e5ff") # Mago: Ciano Arcano
-		3: return Color("#69f0ae") # Arqueiro: Verde Falcão
-		4: return Color("#7c4dff") # Assassino: Violeta Sombrio
-		5: return Color("#ffab40") # Lutador: Laranja Chi
-		6: return Color("#ffd54f") # Escudeiro: Dourado Bastião
-		7: return Color("#ff6d00") # Ferreiro: Brasa da Forja
-		8: return Color("#00e676") # Alquimista: Verde Ácido
-		9: return Color("#e1f5fe") # Escultor: Prata do Luar
-		10: return Color("#a1887f") # Domador: Castanho Bestial
-		11: return Color("#ff1744") # Alfaiate de Guerra: Carmesim dos Fios
-		12: return Color("#ff7043") # Chef de Caça: Chama da Wok
-		13: return Color("#40c4ff") # Espadachim Rúnico
-		14: return Color("#eceff1") # Caçador de Vampiros
-		15: return Color("#fff59d") # Valquíria da Égide
-		16: return Color("#4a148c") # Monge das Sombras
-		17: return Color("#b71c1c") # Forjador de Armas Amaldiçoadas
-		18: return Color("#558b2f") # Médico da Peste
-		27: return Color("#d500f9") # Ceifador do Eclipse
-		35: return Color("#ffb300") # Artífice Rúnico
-		36: return Color("#ea80fc") # Criador de Homúnculos
-		28: return Color("#00e5ff") # Dançarino Astral
-		29: return Color("#ff1744") # Inquisidor das Cinzas
-		30: return Color("#00e676") # Necromante de Ossos
-		37: return Color("#80d8ff") # Domador Primordial
-		38: return Color("#7c4dff") # Cavaleiro da Ruptura
-		39: return Color("#00b0ff") # Arauto da Tempestade
+		1: return Color("#64b5f6") # Espadachim da Aurora: Azul Aço
+		2: return Color("#00e5ff") # Arcanista: Ciano Arcano
+		3: return Color("#69f0ae") # Sentinela dos Ventos: Verde Falcão
+		4: return Color("#7c4dff") # Lâmina Silente: Violeta Sombrio
+		5: return Color("#ffab40") # Punho Celeste: Laranja Chi
+		6: return Color("#ffd54f") # Guardião do Bastião: Dourado Bastião
+		7: return Color("#ff6d00") # Forjador de Estrelas: Brasa da Forja
+		8: return Color("#00e676") # Transmutador: Verde Ácido
+		9: return Color("#e1f5fe") # Escultor de Almas: Prata do Luar
+		10: return Color("#a1887f") # Senhor das Feras: Castanho Bestial
+		11: return Color("#ff1744") # Tecelão Carmesim: Carmesim dos Fios
+		12: return Color("#ff7043") # Mestre do Banquete: Chama da Wok
+		13: return Color("#40c4ff") # Lâmina Rúnica
+		14: return Color("#eceff1") # Inquisidor de Prata
+		15: return Color("#fff59d") # Valquíria Celeste
+		16: return Color("#4a148c") # Punho Fantasma
+		17: return Color("#b71c1c") # Forjador Carmesim
+		18: return Color("#558b2f") # Doutor Corvo
+		27: return Color("#d500f9") # Ceifador da Lua Negra
+		35: return Color("#ffb300") # Engenheiro Rúnico
+		36: return Color("#ea80fc") # Demiurgo Alquímico
+		28: return Color("#00e5ff") # Bailarino das Estrelas
+		29: return Color("#ff1744") # Inquisidor da Chama Branca
+		30: return Color("#00e676") # Arauto do Ossuário
+		37: return Color("#80d8ff") # Senhor da Selva Primordial
+		38: return Color("#7c4dff") # Cavaleiro do Vazio
+		39: return Color("#00b0ff") # Arauto do Trovão
 		_: return Color("#ffffff")
 
 func _spawn_skill_q_flash() -> void:
@@ -452,49 +452,49 @@ func _perform_racial_skill() -> void:
 
 func _get_race_color() -> Color:
 	match current_race_id:
-		1, 11: return Color("#ffd700") # Valeriano / Alto Valeriano: Ouro Solar
-		12: return Color("#ba68c8") # Andarilho do Éter: Púrpura Etéreo
-		2, 13: return Color("#00e5ff") # Noctari / Arconte Lunar: Ciano Astral
-		14: return Color("#7c4dff") # Espectro Umbral: Roxo Umbral
-		3, 15: return Color("#ff9800") # Kharad / Guardião Rúnico: Laranja Magma
-		16: return Color("#ff3d00") # Titã de Obsidiana: Vermelho Lava
-		4, 17: return Color("#ff1744") # Varkai / Soberano Dracônico: Carmesim Dracônico
-		18: return Color("#ad1457") # Fera do Frenesi: Magenta Sangue
-		5: return Color("#d500f9") # Dhampir: Sangue Vampírico
-		6: return Color("#ff6f00") # Licantropo Primordial: Feral Âmbar
-		7: return Color("#69f0ae") # Revenant: Ectoplasma Espectral
-		8: return Color("#fff59d") # Celestino: Branco Solar
-		9: return Color("#18ffff") # Abissal: Azul Vazio
-		10: return Color("#00e5ff") # Autômato Rúnico: Ciano Elétrico
+		1, 11: return Color("#ffd700") # Valeriano / Solvaren: Ouro Solar
+		12: return Color("#ba68c8") # Aetheris: Púrpura Etéreo
+		2, 13: return Color("#00e5ff") # Noctari / Selenarca: Ciano Astral
+		14: return Color("#7c4dff") # Nyxara: Roxo Umbral
+		3, 15: return Color("#ff9800") # Kharad / Runakhar: Laranja Magma
+		16: return Color("#ff3d00") # Pyrokhar: Vermelho Lava
+		4, 17: return Color("#ff1744") # Varkai / Dravarkai: Carmesim Dracônico
+		18: return Color("#ad1457") # Ferovar: Magenta Sangue
+		5: return Color("#d500f9") # Sangrael: Sangue Vampírico
+		6: return Color("#ff6f00") # Lupharion: Feral Âmbar
+		7: return Color("#69f0ae") # Cinerion: Ectoplasma Espectral
+		8: return Color("#fff59d") # Seraphel: Branco Solar
+		9: return Color("#18ffff") # Umbryss: Azul Vazio
+		10: return Color("#00e5ff") # Runaric: Ciano Elétrico
 		19: return Color("#4caf50") # Sylvari: Verde Floresta
-		20: return Color("#9c27b0") # Esporiano / Myconid: Violeta Fúngico
+		20: return Color("#9c27b0") # Myconid: Violeta Fúngico
 		21: return Color("#eceff1") # Aracne: Seda Prateada
-		22: return Color("#ff6d00") # Draconato de Cinzas: Magma Laranja
-		23: return Color("#76ff03") # Quimera: Verde Ácido Mutante
-		24: return Color("#80d8ff") # Boreal: Cristal Azul Gelo
+		22: return Color("#ff6d00") # Ignivarn: Magma Laranja
+		23: return Color("#76ff03") # Chimeryth: Verde Ácido Mutante
+		24: return Color("#80d8ff") # Borealin: Cristal Azul Gelo
 		25: return Color("#006064") # Thalassiano: Azul Abissal
 		26: return Color("#c62828") # Cambion: Vermelho Enxofre
 		27: return Color("#ffd700") # Nephilim: Ouro e Sombra
-		28: return Color("#ffd54f") # Errante Temporal: Areia Dourada
+		28: return Color("#ffd54f") # Cronari: Areia Dourada
 		# Quadrante 5: 18 Novas Raças (29 a 46)
-		29: return Color("#fff59d") # Meio-Celestial: Luz Solar Divina
-		30: return Color("#ff3d00") # Pyromante: Fogo Vivo e Brasa
-		31: return Color("#80deea") # Gigante de Gelo: Glacial Cristalino
-		32: return Color("#8d6e63") # Drago Terra: Carapaça Telúrica
-		33: return Color("#29b6f6") # Drago Água: Maré Aquática
-		34: return Color("#ffd600") # Drago Raio: Eletricidade Áurea
-		35: return Color("#ab47bc") # Drago Místico: Runas Violetas
-		36: return Color("#558b2f") # Orc: Fúria Verde Marcial
-		37: return Color("#d7ccc8") # Anão: Aço e Forja Pétrea
-		38: return Color("#aed581") # Elfo: Verde Élfico Esguio
-		39: return Color("#ffb300") # Elfo Solar: Ouro de Azgher
-		40: return Color("#5c6bc0") # Elfo Lunar: Véu de Tenebra
-		41: return Color("#f48fb1") # Fadinha: Pó Rosa Cintilante
-		42: return Color("#7cb342") # Goblin: Verde Astuto
-		43: return Color("#6a1b9a") # Demi-Humano Escorpião: Veneno Púrpura
-		44: return Color("#33691e") # Demi-Humano Tartaruga: Casco Blindado
-		45: return Color("#c2185b") # Meio-Demônio (Succubus): Sombra Carmesim
-		46: return Color("#78909c") # Demi-Humano Lobo: Cinza Feral Lupino
+		29: return Color("#fff59d") # Aurelith: Luz Solar Divina
+		30: return Color("#ff3d00") # Pyrael: Fogo Vivo e Brasa
+		31: return Color("#80deea") # Jotunar: Glacial Cristalino
+		32: return Color("#8d6e63") # Terravyrn: Carapaça Telúrica
+		33: return Color("#29b6f6") # Hydravyrn: Maré Aquática
+		34: return Color("#ffd600") # Fulgravyrn: Eletricidade Áurea
+		35: return Color("#ab47bc") # Arcavyrn: Runas Violetas
+		36: return Color("#558b2f") # Orkhan: Fúria Verde Marcial
+		37: return Color("#d7ccc8") # Dvergar: Aço e Forja Pétrea
+		38: return Color("#aed581") # Elarin: Verde Élfico Esguio
+		39: return Color("#ffb300") # Solarin: Ouro de Azgher
+		40: return Color("#5c6bc0") # Lunarin: Véu de Tenebra
+		41: return Color("#f48fb1") # Faelith: Pó Rosa Cintilante
+		42: return Color("#7cb342") # Gnarlin: Verde Astuto
+		43: return Color("#6a1b9a") # Escarion: Veneno Púrpura
+		44: return Color("#33691e") # Testudar: Casco Blindado
+		45: return Color("#c2185b") # Lilitara: Sombra Carmesim
+		46: return Color("#78909c") # Ulvar: Cinza Feral Lupino
 		47: return Color("#3d5afe") # Manamante: Azul de Mana
 		_: return Color("#ffd700")
 
@@ -549,15 +549,15 @@ func _spawn_racial_aura_burst() -> void:
 	match current_race_id:
 		19: # Sylvari: Raízes brotando no chão
 			_spawn_roots_fx(global_position)
-		20: # Esporiano: Nuvem de esporos roxos
+		20: # Myconid: Nuvem de esporos roxos
 			_spawn_spores_fx(global_position)
 		21: # Aracne: Disparo de seda prateada
 			_spawn_web_fx(global_position, _get_aim_direction())
-		22: # Draconato: Cone de fogo vulcânico e magma
+		22: # Ignivarn: Cone de fogo vulcânico e magma
 			_spawn_magma_cone_fx(global_position, _get_aim_direction())
-		23: # Quimera: Onda de choque mutante bio-ácida
+		23: # Chimeryth: Onda de choque mutante bio-ácida
 			_spawn_chimera_fx(global_position)
-		24: # Boreal: Anel de congelamento de gelo absoluto
+		24: # Borealin: Anel de congelamento de gelo absoluto
 			_spawn_frost_ring_fx(global_position)
 		25: # Thalassiano: Erupção de gêiser d'água abissal
 			_spawn_geyser_fx(global_position)
@@ -565,44 +565,44 @@ func _spawn_racial_aura_burst() -> void:
 			_spawn_chains_fx(global_position)
 		27: # Nephilim: Asas de luz solar e sombra negra
 			_spawn_nephilim_fx(global_position)
-		28: # Errante Temporal: Mostrador cronológico de areia dourada
+		28: # Cronari: Mostrador cronológico de areia dourada
 			_spawn_chrono_dial_fx(global_position)
 		# Quadrante 5: 18 Novas Raças
-		29: # Meio-Celestial: Asas de Luz radiantes
+		29: # Aurelith: Asas de Luz radiantes
 			_spawn_light_wings_burst_fx(global_position)
-		30: # Pyromante: Combustão explosiva
+		30: # Pyrael: Combustão explosiva
 			_spawn_fire_burst_fx(global_position)
-		31: # Gigante de Gelo: Memória Molecular / Impacto criogênico
+		31: # Jotunar: Memória Molecular / Impacto criogênico
 			_spawn_frost_slam_fx(global_position)
-		32: # Drago Terra: Insulto Sísmico com taunt e poeira
+		32: # Terravyrn: Insulto Sísmico com taunt e poeira
 			_spawn_seismic_taunt_fx(global_position)
-		33: # Drago Água: Bênção de Netuno / Onda de pressão
+		33: # Hydravyrn: Bênção de Netuno / Onda de pressão
 			_spawn_aqua_wave_fx(global_position, _get_aim_direction())
-		34: # Drago Raio: Descarga Elétrica fulminante
+		34: # Fulgravyrn: Descarga Elétrica fulminante
 			_spawn_lightning_strike_fx(global_position)
-		35: # Drago Místico: Infusão Arcana e runas radiantes
+		35: # Arcavyrn: Infusão Arcana e runas radiantes
 			_spawn_mystic_runes_fx(global_position)
-		36: # Orc: Ataque Devastador brutal
+		36: # Orkhan: Ataque Devastador brutal
 			_spawn_orc_smash_fx(global_position)
-		37: # Anão: Martelo Ancestral com choque de bigorna
+		37: # Dvergar: Martelo Ancestral com choque de bigorna
 			_spawn_dwarf_hammer_fx(global_position)
-		38: # Elfo: Disparo Élfico de mana luminoso
+		38: # Elarin: Disparo Élfico de mana luminoso
 			_spawn_elf_shot_fx(global_position, _get_aim_direction())
-		39: # Elfo Solar: Espada Solar de Azgher
+		39: # Solarin: Espada Solar de Azgher
 			_spawn_solar_blade_fx(global_position)
-		40: # Elfo Lunar: Manto de Tenebra
+		40: # Lunarin: Manto de Tenebra
 			_spawn_lunar_shroud_fx(global_position)
-		41: # Fadinha: Pó de Fada Estelar curativo
+		41: # Faelith: Pó de Fada Estelar curativo
 			_spawn_fairy_dust_fx(global_position)
-		42: # Goblin: Truque Sujo Goblin / Bomba de fumaça
+		42: # Gnarlin: Truque Sujo Gnarlin / Bomba de fumaça
 			_spawn_goblin_bomb_fx(global_position)
-		43: # Demi-Humano Escorpião: Aguilhão de Toxina Vorpal
+		43: # Escarion: Aguilhão de Toxina Vorpal
 			_spawn_scorpion_sting_fx(global_position, _get_aim_direction())
-		44: # Demi-Humano Tartaruga: Lar Doce Casca / Carapaça protetora
+		44: # Testudar: Lar Doce Casca / Carapaça protetora
 			_spawn_turtle_shell_fx(global_position)
-		45: # Meio-Demônio: Drenar Força Vital
+		45: # Lilitara: Drenar Força Vital
 			_spawn_succubus_drain_fx(global_position)
-		46: # Demi-Humano Lobo: Despertar Forma Bestial
+		46: # Ulvar: Despertar Forma Bestial
 			_spawn_wolf_awaken_fx(global_position)
 		47: # Manamante: Coração de Mana
 			_spawn_racial_aura_burst()
@@ -1252,7 +1252,7 @@ func _animate_attack_visual(action_type: int) -> void:
 		return
 
 	match current_class_id:
-		3, 14: # Arqueiro / Caçador de Vampiros: Puxada da corda do Arco e disparo veloz
+		3, 14: # Sentinela dos Ventos / Inquisidor de Prata: Puxada da corda do Arco e disparo veloz
 			var tw := create_tween().set_parallel(false)
 			if action_type == 3 or action_type == 4 or action_type == 5: # Skills
 				tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-15.0), deg_to_rad(-55.0), deg_to_rad(20.0)), 0.16)
@@ -1268,7 +1268,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "position", default_weapon_pos, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		2: # Mago: Canalização arcana / Impulso frontal do Cajado
+		2: # Arcanista: Canalização arcana / Impulso frontal do Cajado
 			var tw := create_tween().set_parallel(false)
 			if action_type == 3 or action_type == 4 or action_type == 5: # Skills Q/R/F
 				tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-85.0), deg_to_rad(20.0), deg_to_rad(-25.0)), 0.15)
@@ -1281,7 +1281,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "position", default_weapon_pos, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		6, 15: # Escudeiro / Valquíria: Golpe descendente de Maça atrás do escudo
+		6, 15: # Guardião do Bastião / Valquíria: Golpe descendente de Maça atrás do escudo
 			var tw := create_tween().set_parallel(false)
 			if action_type == 3 or action_type == 4 or action_type == 5: # Skills
 				tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-80.0), 0.0, deg_to_rad(30.0)), 0.18)
@@ -1296,28 +1296,28 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		7, 17, 35: # Ferreiro / Forjador / Artífice Rúnico: Pancada de Martelo de Forja
+		7, 17, 35: # Forjador de Estrelas / Forjador / Engenheiro Rúnico: Pancada de Martelo de Forja
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-85.0), deg_to_rad(20.0), 0.0), 0.12)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(75.0), 0.0, 0.0), 0.16)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		8, 18, 36: # Alquimista / Médico da Peste / Homúnculo: Lançamento de Frascos
+		8, 18, 36: # Transmutador / Doutor Corvo / Homúnculo: Lançamento de Frascos
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-45.0), deg_to_rad(-35.0), 0.0), 0.1)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(45.0), deg_to_rad(25.0), 0.0), 0.12)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		27: # Ceifador do Eclipse: Golpe Giratório de Foice Colossal
+		27: # Ceifador da Lua Negra: Golpe Giratório de Foice Colossal
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-40.0), deg_to_rad(-80.0), deg_to_rad(70.0)), 0.08)
 			tw.tween_property(weapon_pivot, "rotation:y", weapon_pivot.rotation.y + deg_to_rad(360.0), 0.28)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		4, 28: # Assassino / Dançarino Astral: Sequência acrobática com lâminas estelares duplas
+		4, 28: # Lâmina Silente / Bailarino das Estrelas: Sequência acrobática com lâminas estelares duplas
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-45.0), deg_to_rad(-80.0), deg_to_rad(60.0)), 0.08)
 			if offhand_pivot:
@@ -1329,14 +1329,14 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		10, 29: # Domador (chicote) / Inquisidor das Cinzas: Chicoteada / arremesso do mangual em chamas
+		10, 29: # Senhor das Feras (chicote) / Inquisidor da Chama Branca: Chicoteada / arremesso do mangual em chamas
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-80.0), deg_to_rad(15.0), deg_to_rad(-10.0)), 0.11)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(85.0), deg_to_rad(-25.0), 0.0), 0.13)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.13)
 			tw.finished.connect(func(): is_attacking = false)
 
-		30: # Necromante de Ossos: Erguimento do Cajado com pulso necromântico
+		30: # Arauto do Ossuário: Erguimento do Cajado com pulso necromântico
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-75.0), deg_to_rad(20.0), deg_to_rad(-20.0)), 0.14)
 			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z - 0.3, 0.12)
@@ -1344,7 +1344,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "position", default_weapon_pos, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		37: # Domador Primordial: Estocada feroz de lança
+		37: # Senhor da Selva Primordial: Estocada feroz de lança
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-85.0), 0.0, deg_to_rad(10.0)), 0.1)
 			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z - 0.45, 0.1)
@@ -1352,7 +1352,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		38: # Cavaleiro da Ruptura: Golpe com Espada Colossal e avanço de Escudo
+		38: # Cavaleiro do Vazio: Golpe com Espada Colossal e avanço de Escudo
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-90.0), deg_to_rad(15.0), deg_to_rad(-10.0)), 0.14)
 			if offhand_pivot:
@@ -1363,14 +1363,14 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		39: # Arauto da Tempestade: Corte descendente e descarga da Alabarda
+		39: # Arauto do Trovão: Corte descendente e descarga da Alabarda
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-70.0), deg_to_rad(-60.0), deg_to_rad(45.0)), 0.1)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(75.0), deg_to_rad(40.0), deg_to_rad(-30.0)), 0.14)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		_: # Guerreiro e demais (Lutador, Escultor, Alfaiate, Chef): Corte em arco e giro de 360
+		_: # Espadachim da Aurora e demais (Punho Celeste, Escultor de Almas, Alfaiate, Chef): Corte em arco e giro de 360
 			var tw := create_tween().set_parallel(false)
 			if action_type == 3 or action_type == 4 or action_type == 5:
 				tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-35.0), deg_to_rad(-80.0), deg_to_rad(75.0)), 0.08)
@@ -1459,16 +1459,16 @@ func _change_race(race_id: int) -> void:
 
 func _get_race_scale() -> float:
 	match current_race_id:
-		31: return 1.45 # Gigante de Gelo (1.45x)
-		37: return 0.82 # Anão (0.82x)
-		41: return 0.55 # Fadinha (0.55x)
-		42: return 0.75 # Goblin (0.75x)
-		44: return 1.35 # Demi-Humano Tartaruga (1.35x)
+		31: return 1.45 # Jotunar (1.45x)
+		37: return 0.82 # Dvergar (0.82x)
+		41: return 0.55 # Faelith (0.55x)
+		42: return 0.75 # Gnarlin (0.75x)
+		44: return 1.35 # Testudar (1.35x)
 		_: return 1.0
 
 func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 	match race_id:
-		29: # Meio-Celestial: Asas solares douradas luminosas
+		29: # Aurelith: Asas solares douradas luminosas
 			for side in [-1, 1]:
 				var wing := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1487,7 +1487,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				wing.rotation = Vector3(deg_to_rad(15.0), deg_to_rad(side * 35.0), deg_to_rad(side * -55.0))
 				parent.add_child(wing)
 
-		30: # Pyromante: Chamas e aura incandescente ao redor do peitoral/cabeça
+		30: # Pyrael: Chamas e aura incandescente ao redor do peitoral/cabeça
 			var flame_torus := MeshInstance3D.new()
 			var tor := TorusMesh.new()
 			tor.inner_radius = 0.32
@@ -1502,7 +1502,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			flame_torus.position = Vector3(0, 0.85, 0)
 			parent.add_child(flame_torus)
 
-		31: # Gigante de Gelo: Ombreiras pontiagudas de gelo
+		31: # Jotunar: Ombreiras pontiagudas de gelo
 			for side in [-1, 1]:
 				var ice_spike := MeshInstance3D.new()
 				var prism := PrismMesh.new()
@@ -1520,7 +1520,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				ice_spike.rotation = Vector3(0, 0, deg_to_rad(side * -30.0))
 				parent.add_child(ice_spike)
 
-		32: # Drago (Terra): Carapaça rochosa e placas
+		32: # Terravyrn: Carapaça rochosa e placas
 			var shell := MeshInstance3D.new()
 			var box := BoxMesh.new()
 			box.size = Vector3(0.55, 0.7, 0.2)
@@ -1532,7 +1532,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			shell.position = Vector3(0, 0.3, 0.22)
 			parent.add_child(shell)
 
-		33: # Drago (Água): Cristas aquáticas dorsais
+		33: # Hydravyrn: Cristas aquáticas dorsais
 			var fin := MeshInstance3D.new()
 			var prism := PrismMesh.new()
 			prism.size = Vector3(0.08, 0.8, 0.35)
@@ -1548,7 +1548,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			fin.rotation = Vector3(deg_to_rad(90), 0, 0)
 			parent.add_child(fin)
 
-		34: # Drago (Raio): Espinhos condutores elétricos nas costas
+		34: # Fulgravyrn: Espinhos condutores elétricos nas costas
 			for i in range(3):
 				var spk := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1566,7 +1566,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				spk.rotation = Vector3(deg_to_rad(45), 0, 0)
 				parent.add_child(spk)
 
-		35: # Drago (Místico): Chifres arcanos espirais
+		35: # Arcavyrn: Chifres arcanos espirais
 			for side in [-1, 1]:
 				var horn := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1584,7 +1584,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				horn.rotation = Vector3(deg_to_rad(-25), 0, deg_to_rad(side * 35))
 				parent.add_child(horn)
 
-		36: # Orc: Presas inferiores proeminentes
+		36: # Orkhan: Presas inferiores proeminentes
 			for side in [-1, 1]:
 				var tusk := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1600,7 +1600,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				tusk.rotation = Vector3(deg_to_rad(-20), 0, deg_to_rad(side * -15))
 				parent.add_child(tusk)
 
-		37: # Anão: Barba trançada densa à frente do queixo
+		37: # Dvergar: Barba trançada densa à frente do queixo
 			var beard := MeshInstance3D.new()
 			var b_mesh := BoxMesh.new()
 			b_mesh.size = Vector3(0.32, 0.45, 0.18)
@@ -1612,7 +1612,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			beard.position = Vector3(0, 0.42, -0.22)
 			parent.add_child(beard)
 
-		38: # Elfo: Orelhas pontiagudas esguias
+		38: # Elarin: Orelhas pontiagudas esguias
 			for side in [-1, 1]:
 				var ear := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1627,7 +1627,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				ear.rotation = Vector3(deg_to_rad(15), 0, deg_to_rad(side * 65))
 				parent.add_child(ear)
 
-		39: # Elfo Solar (Azgher): Orelhas pontiagudas com diadema solar dourado
+		39: # Solarin (Azgher): Orelhas pontiagudas com diadema solar dourado
 			for side in [-1, 1]:
 				var ear := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1655,7 +1655,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			circlet.position = Vector3(0, 0.82, 0)
 			parent.add_child(circlet)
 
-		40: # Elfo Lunar (Tenebra): Orelhas com diadema de lua prateada
+		40: # Lunarin (Tenebra): Orelhas com diadema de lua prateada
 			for side in [-1, 1]:
 				var ear := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1682,7 +1682,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			crescent.position = Vector3(0, 0.88, -0.28)
 			parent.add_child(crescent)
 
-		41: # Fadinha: Par de asas de borboleta reluzentes
+		41: # Faelith: Par de asas de borboleta reluzentes
 			for side in [-1, 1]:
 				var wing := MeshInstance3D.new()
 				var quad := BoxMesh.new()
@@ -1699,7 +1699,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				wing.rotation = Vector3(deg_to_rad(10), deg_to_rad(side * 30), deg_to_rad(side * -25))
 				parent.add_child(wing)
 
-		42: # Goblin: Orelhas compridas caídas e nariz pontiagudo
+		42: # Gnarlin: Orelhas compridas caídas e nariz pontiagudo
 			for side in [-1, 1]:
 				var ear := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1724,7 +1724,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			nose.rotation = Vector3(deg_to_rad(-90), 0, 0)
 			parent.add_child(nose)
 
-		43: # Demi-Humano Escorpião: Cauda articulada nas costas com ferrão
+		43: # Escarion: Cauda articulada nas costas com ferrão
 			var tail_base := Node3D.new()
 			tail_base.position = Vector3(0, 0.1, 0.22)
 			parent.add_child(tail_base)
@@ -1763,7 +1763,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			stinger.rotation = Vector3(deg_to_rad(-45), 0, 0)
 			tail_base.add_child(stinger)
 
-		44: # Demi-Humano Tartaruga: Casco pesado nas costas
+		44: # Testudar: Casco pesado nas costas
 			var shell := MeshInstance3D.new()
 			var sph := SphereMesh.new()
 			sph.radius = 0.42
@@ -1777,7 +1777,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 			shell.position = Vector3(0, 0.35, 0.28)
 			parent.add_child(shell)
 
-		45: # Meio-Demônio (Succubus): Chifres elegantes e asas de morcego
+		45: # Lilitara: Chifres elegantes e asas de morcego
 			for side in [-1, 1]:
 				var horn := MeshInstance3D.new()
 				var cyl := CylinderMesh.new()
@@ -1805,7 +1805,7 @@ func _build_race_accessories(parent: Node3D, race_id: int) -> void:
 				wing.rotation = Vector3(deg_to_rad(15), deg_to_rad(side * 25), deg_to_rad(side * -15))
 				parent.add_child(wing)
 
-		46: # Demi-Humano Lobo: Orelhas lupinas e cauda lupina
+		46: # Ulvar: Orelhas lupinas e cauda lupina
 			for side in [-1, 1]:
 				var ear := MeshInstance3D.new()
 				var prism := PrismMesh.new()
@@ -1867,70 +1867,70 @@ func _apply_race_visuals() -> void:
 			mat.albedo_color = Color("#b71c1c")
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff5252"), 2.2)
-		5: # Dhampir - Carmesim sombrio
+		5: # Sangrael - Carmesim sombrio
 			mat.albedo_color = Color("#210408")
 			mat.metallic = 0.4
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff1744"), 3.0)
-		6: # Licantropo Primordial - Cinza feral
+		6: # Lupharion - Cinza feral
 			mat.albedo_color = Color("#3e2723")
 			mat.roughness = 0.8
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffb74d"), 2.5)
-		7: # Revenant - Ectoplasma sombrio
+		7: # Cinerion - Ectoplasma sombrio
 			mat.albedo_color = Color("#263238")
 			mat.metallic = 0.1
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#69f0ae"), 2.5)
-		8: # Celestino - Alvura sagrada
+		8: # Seraphel - Alvura sagrada
 			mat.albedo_color = Color("#fff9c4")
 			mat.metallic = 0.5
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd700"), 3.0)
-		9: # Abissal - Profundeza insondável
+		9: # Umbryss - Profundeza insondável
 			mat.albedo_color = Color("#0d47a1")
 			mat.metallic = 0.6
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#18ffff"), 2.8)
-		10: # Autômato Rúnico - Placas de bronze e runas
+		10: # Runaric - Placas de bronze e runas
 			mat.albedo_color = Color("#3e2723")
 			mat.metallic = 0.95
 			mat.roughness = 0.2
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#00e5ff"), 3.2)
-		11: # Alto Valeriano
+		11: # Solvaren
 			mat.albedo_color = Color("#ffd700")
 			mat.metallic = 0.8
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffea00"), 3.0)
-		12: # Andarilho do Éter
+		12: # Aetheris
 			mat.albedo_color = Color("#4a148c")
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ba68c8"), 2.5)
-		13: # Arconte Lunar
+		13: # Selenarca
 			mat.albedo_color = Color("#006064")
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#00e5ff"), 2.8)
-		14: # Espectro Umbral
+		14: # Nyxara
 			mat.albedo_color = Color("#12005e")
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#7c4dff"), 2.8)
-		15: # Guardião Rúnico
+		15: # Runakhar
 			mat.albedo_color = Color("#4e342e")
 			mat.metallic = 0.85
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff9800"), 2.5)
-		16: # Titã de Obsidiana
+		16: # Pyrokhar
 			mat.albedo_color = Color("#212121")
 			mat.metallic = 0.9
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff3d00"), 3.0)
-		17: # Soberano Dracônico
+		17: # Dravarkai
 			mat.albedo_color = Color("#880e4f")
 			mat.metallic = 0.6
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd700"), 2.6)
-		18: # Fera do Frenesi
+		18: # Ferovar
 			mat.albedo_color = Color("#4a0007")
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff1744"), 3.0)
@@ -1939,7 +1939,7 @@ func _apply_race_visuals() -> void:
 			mat.roughness = 0.7
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#4caf50"), 2.2)
-		20: # Esporiano - Bioluminescente violeta/ciano
+		20: # Myconid - Bioluminescente violeta/ciano
 			mat.albedo_color = Color("#4a148c")
 			mat.roughness = 0.6
 			if visor_mesh:
@@ -1950,18 +1950,18 @@ func _apply_race_visuals() -> void:
 			mat.roughness = 0.2
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#b71c1c"), 3.0)
-		22: # Draconato de Cinzas - Escamas negras com veias de magma
+		22: # Ignivarn - Escamas negras com veias de magma
 			mat.albedo_color = Color("#212121")
 			mat.metallic = 0.8
 			mat.roughness = 0.4
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff6d00"), 3.2)
-		23: # Quimera - Mutante verde-ácido
+		23: # Chimeryth - Mutante verde-ácido
 			mat.albedo_color = Color("#33691e")
 			mat.roughness = 0.5
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#76ff03"), 3.0)
-		24: # Boreal - Cristal azul-gelo
+		24: # Borealin - Cristal azul-gelo
 			mat.albedo_color = Color("#80d8ff")
 			mat.metallic = 0.7
 			mat.roughness = 0.1
@@ -1983,102 +1983,102 @@ func _apply_race_visuals() -> void:
 			mat.metallic = 0.7
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd700"), 3.2)
-		28: # Errante Temporal - Areia dourada cronológica
+		28: # Cronari - Areia dourada cronológica
 			mat.albedo_color = Color("#b28704")
 			mat.metallic = 0.85
 			mat.roughness = 0.3
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd54f"), 3.0)
 		# Quadrante 5: 18 Novas Raças (29 a 46)
-		29: # Meio-Celestial - Luz Divina
+		29: # Aurelith - Luz Divina
 			mat.albedo_color = Color("#fff9c4")
 			mat.metallic = 0.7
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd700"), 3.5)
-		30: # Pyromante - Chamas e cinzas
+		30: # Pyrael - Chamas e cinzas
 			mat.albedo_color = Color("#ff3d00")
 			mat.metallic = 0.4
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ff6d00"), 3.5)
-		31: # Gigante de Gelo - Cristal Glacial (1.45x)
+		31: # Jotunar - Cristal Glacial (1.45x)
 			mat.albedo_color = Color("#80deea")
 			mat.metallic = 0.75
 			mat.roughness = 0.1
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#00e5ff"), 3.5)
-		32: # Drago (Terra) - Rocha e Carapaça
+		32: # Terravyrn - Rocha e Carapaça
 			mat.albedo_color = Color("#6d4c41")
 			mat.roughness = 0.85
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#8d6e63"), 2.5)
-		33: # Drago (Água) - Maré Cristalina
+		33: # Hydravyrn - Maré Cristalina
 			mat.albedo_color = Color("#0277bd")
 			mat.metallic = 0.6
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#4fc3f7"), 3.0)
-		34: # Drago (Raio) - Elétrico Dourado
+		34: # Fulgravyrn - Elétrico Dourado
 			mat.albedo_color = Color("#fbc02d")
 			mat.metallic = 0.8
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffff00"), 3.5)
-		35: # Drago (Místico) - Rúnico Violeta
+		35: # Arcavyrn - Rúnico Violeta
 			mat.albedo_color = Color("#7b1fa2")
 			mat.metallic = 0.7
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#e1bee7"), 3.2)
-		36: # Orc - Verde de Guerra
+		36: # Orkhan - Verde de Guerra
 			mat.albedo_color = Color("#33691e")
 			mat.roughness = 0.7
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#76ff03"), 2.8)
-		37: # Anão - Bronze da Forja (0.82x)
+		37: # Dvergar - Bronze da Forja (0.82x)
 			mat.albedo_color = Color("#4e342e")
 			mat.metallic = 0.8
 			mat.roughness = 0.4
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#d7ccc8"), 2.2)
-		38: # Elfo - Silvestre Esguio
+		38: # Elarin - Silvestre Esguio
 			mat.albedo_color = Color("#558b2f")
 			mat.roughness = 0.5
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#aed581"), 2.6)
-		39: # Elfo Solar - Azgher Ouro
+		39: # Solarin - Azgher Ouro
 			mat.albedo_color = Color("#ff8f00")
 			mat.metallic = 0.8
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ffd54f"), 3.5)
-		40: # Elfo Lunar - Tenebra Sombra
+		40: # Lunarin - Tenebra Sombra
 			mat.albedo_color = Color("#283593")
 			mat.metallic = 0.5
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#9fa8da"), 3.0)
-		41: # Fadinha - Rosa Fada Borboleta (0.55x)
+		41: # Faelith - Rosa Fada Borboleta (0.55x)
 			mat.albedo_color = Color("#f06292")
 			mat.metallic = 0.3
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#f8bbd0"), 3.5)
-		42: # Goblin - Verde Astuto (0.75x)
+		42: # Gnarlin - Verde Astuto (0.75x)
 			mat.albedo_color = Color("#689f38")
 			mat.roughness = 0.6
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#cddc39"), 2.5)
-		43: # Demi-Humano Escorpião - Quitina Roxa
+		43: # Escarion - Quitina Roxa
 			mat.albedo_color = Color("#311b92")
 			mat.metallic = 0.85
 			mat.roughness = 0.2
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#ba68c8"), 3.2)
-		44: # Demi-Humano Tartaruga - Carapaça (1.35x)
+		44: # Testudar - Carapaça (1.35x)
 			mat.albedo_color = Color("#1b5e20")
 			mat.roughness = 0.85
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#81c784"), 2.5)
-		45: # Meio-Demônio - Succubus Carmesim
+		45: # Lilitara - Carmesim
 			mat.albedo_color = Color("#880e4f")
 			mat.metallic = 0.6
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#f06292"), 3.2)
-		46: # Demi-Humano Lobo - Cinza Feral Lupino
+		46: # Ulvar - Cinza Feral Lupino
 			mat.albedo_color = Color("#37474f")
 			mat.roughness = 0.75
 			if visor_mesh:
@@ -2121,7 +2121,7 @@ func _update_race_model() -> void:
 func _update_class_weapon() -> void:
 	_apply_class_visuals()
 
-## Aura exclusiva das Classes Lendárias (31 a 34): dourada, ou abissal no Imperador do Sol Negro.
+## Aura exclusiva das Classes Lendárias (31 a 34): dourada, ou abissal no Soberano do Sol Negro.
 func _update_legendary_aura() -> void:
 	var old_aura := get_node_or_null("LegendaryAura")
 	if old_aura:
@@ -2182,83 +2182,83 @@ func _apply_class_visuals() -> void:
 		return
 
 	match current_class_id:
-		19: # Carrasco do Veneno Vorpal: ferrões duplos
+		19: # Algoz Vorpal: ferrões duplos
 			_build_dual_daggers()
-		20: # Soberano da Teia Carmesim: fios de seda
+		20: # Senhor da Teia Escarlate: fios de seda
 			_build_war_tailor_needles()
 		21: # Rei-Fera da Alcateia: garras + lobos
 			_build_tamer_whip_and_beast()
 		22: # Runomante da Montanha: martelo rúnico
 			_build_blacksmith_hammer()
-		23: # Bastião do Mundo: casco-escudo
+		23: # Colosso Abissal: casco-escudo
 			_build_shield_and_mace()
 		24: # Arquifada: varinha da Árvore do Mundo
 			_build_staff()
-		25: # Aristocrata Carmesim: lâminas de sangue
+		25: # Conde Escarlate: lâminas de sangue
 			_build_astral_blades()
-		26: # Barão da Sucata: canhão do mecha
+		26: # Barão Engrenagem: canhão do mecha
 			_build_hammer_cannon()
-		31: # Descendente de Pagma: espada do Deus da Forja
+		31: # Herdeiro da Forja Divina: espada do Deus da Forja
 			_build_sword_long()
-		32: # Escultor do Luar Lendário
+		32: # Mestre Escultor do Luar
 			_build_sculptor_chisel_and_statue()
-		33: # Monarca dos Dragões
+		33: # Imperador Dracônico
 			_build_tamer_whip_and_beast()
-		34: # Imperador do Sol Negro
+		34: # Soberano do Sol Negro
 			_build_void_greatsword_and_shield()
-		1: # Guerreiro: Espada Longa
+		1: # Espadachim da Aurora: Espada Longa
 			_build_sword_long()
-		2: # Mago: Cajado Arcano
+		2: # Arcanista: Cajado Arcano
 			_build_staff()
-		3: # Arqueiro: Arco Longo
+		3: # Sentinela dos Ventos: Arco Longo
 			_build_bow()
-		4: # Assassino: Duas Adagas (nas duas mãos)
+		4: # Lâmina Silente: Duas Adagas (nas duas mãos)
 			_build_dual_daggers()
-		5: # Lutador: Duas Manoplas Pesadas (nos dois punhos)
+		5: # Punho Celeste: Duas Manoplas Pesadas (nos dois punhos)
 			_build_heavy_gauntlets()
-		6: # Escudeiro: Grande Escudo + Maça Curta
+		6: # Guardião do Bastião: Grande Escudo + Maça Curta
 			_build_shield_and_mace()
-		7: # Ferreiro: Martelo de Forja
+		7: # Forjador de Estrelas: Martelo de Forja
 			_build_blacksmith_hammer()
-		8: # Alquimista: Frasco Químico + Catalisador
+		8: # Transmutador: Frasco Químico + Catalisador
 			_build_alchemist_flasks()
-		9: # Escultor: Adaga de Cinzel Prateada + Pequena Estátua Orbitando
+		9: # Escultor de Almas: Adaga de Cinzel Prateada + Pequena Estátua Orbitando
 			_build_sculptor_chisel_and_statue()
-		10: # Domador: Chicote Enrolado + Fera Domada ao lado
+		10: # Senhor das Feras: Chicote Enrolado + Fera Domada ao lado
 			_build_tamer_whip_and_beast()
-		11: # Alfaiate de Guerra: Agulhas Longas Douradas + Fios brilhantes nas mãos
+		11: # Tecelão Carmesim: Agulhas Longas Douradas + Fios brilhantes nas mãos
 			_build_war_tailor_needles()
-		12: # Chef de Caça: Cutelo de Açougueiro Gigante na mão direita + Wok de Ferro
+		12: # Mestre do Banquete: Cutelo de Açougueiro Gigante na mão direita + Wok de Ferro
 			_build_hunting_chef_cleaver_and_wok()
-		13: # Espadachim Rúnico (variante do Guerreiro)
+		13: # Lâmina Rúnica (variante do Guerreiro)
 			_build_sword_long()
-		14: # Caçador de Vampiros (variante do Arqueiro)
+		14: # Inquisidor de Prata (variante do Sentinela dos Ventos)
 			_build_bow()
-		15: # Valquíria da Égide (variante do Escudeiro)
+		15: # Valquíria Celeste (variante do Guardião do Bastião)
 			_build_shield_and_mace()
-		16: # Monge das Sombras (variante do Lutador)
+		16: # Punho Fantasma (variante do Punho Celeste)
 			_build_heavy_gauntlets()
-		17: # Forjador de Armas Amaldiçoadas (variante do Ferreiro)
+		17: # Forjador Carmesim (variante do Ferreiro)
 			_build_blacksmith_hammer()
-		18: # Médico da Peste (variante do Alquimista)
+		18: # Doutor Corvo (variante do Transmutador)
 			_build_alchemist_flasks()
-		27: # Ceifador do Eclipse
+		27: # Ceifador da Lua Negra
 			_build_scythe()
-		35: # Artífice Rúnico
+		35: # Engenheiro Rúnico
 			_build_hammer_cannon()
-		36: # Criador de Homúnculos
+		36: # Demiurgo Alquímico
 			_build_homunculus_orb()
-		28: # Dançarino Astral
+		28: # Bailarino das Estrelas
 			_build_astral_blades()
-		29: # Inquisidor das Cinzas
+		29: # Inquisidor da Chama Branca
 			_build_ash_flail_and_chains()
-		30: # Necromante de Ossos
+		30: # Arauto do Ossuário
 			_build_bone_staff()
-		37: # Domador Primordial
+		37: # Senhor da Selva Primordial
 			_build_primordial_spear_and_wolf()
-		38: # Cavaleiro da Ruptura
+		38: # Cavaleiro do Vazio
 			_build_void_greatsword_and_shield()
-		39: # Arauto da Tempestade
+		39: # Arauto do Trovão
 			_build_storm_halberd()
 
 func _build_sword_long() -> void:

@@ -85,7 +85,7 @@ def sylvari():
 # 20 — Myconid
 # ---------------------------------------------------------------------------
 def myconid():
-    m = Model(20, "myconid", "Myconid", "Esporiano do Véu Fúngico",
+    m = Model(20, "myconid", "Myconid", "Myconid do Véu Fúngico",
               "Nas galerias subterrâneas e úmidas dos Esgotos Antigos da Vila, colônias de fungos "
               "bioluminescentes cresceram sobre os corpos de antigos alquimistas e guerreiros esquecidos. "
               "Ao longo de séculos, o micélio absorveu as memórias e almas dos mortos, erguendo-se em corpos "
@@ -225,10 +225,10 @@ def aracne():
 
 
 # ---------------------------------------------------------------------------
-# 22 — Draconato de Cinzas (Escama-Negra)
+# 22 — Ignivarn (Escama-Negra)
 # ---------------------------------------------------------------------------
 def draconato():
-    m = Model(22, "draconato", "Draconato de Cinzas", "Escama-Negra",
+    m = Model(22, "draconato", "Ignivarn", "Escama-Negra",
               "Enquanto os Varkai são descendentes de humanos que beberam sangue de feras e dragões, os "
               "Escama-Negra são a prole pura dos Dragões Primordiais que dormiam sob os vulcões de Lunaria. "
               "Com chifres de obsidiana, cauda pesada, placas de escamas negras nos ombros e olhos de ouro "
@@ -302,10 +302,10 @@ def draconato():
 
 
 # ---------------------------------------------------------------------------
-# 23 — Quimera
+# 23 — Chimeryth
 # ---------------------------------------------------------------------------
 def quimera():
-    m = Model(23, "quimera", "Quimera", "Obra-Prima Proibida",
+    m = Model(23, "quimera", "Chimeryth", "Obra-Prima Proibida",
               "A obra-prima proibida do antigo Mestre Alquimista que foi traído pelos guardas e jogado nos "
               "esgotos da vila. Em sua loucura subterrânea às três da manhã, ele descobriu como fundir carne "
               "mortal com órgãos perfeitos das feras de Lunaria, criando um ser mutante capaz de remodelar a "
@@ -408,10 +408,10 @@ def quimera():
 
 
 # ---------------------------------------------------------------------------
-# 24 — Boreal
+# 24 — Borealin
 # ---------------------------------------------------------------------------
 def boreal():
-    m = Model(24, "boreal", "Boreal", "Guardião da Nevasca Eterna",
+    m = Model(24, "boreal", "Borealin", "Guardião da Nevasca Eterna",
               "Ao norte distante das Ruínas da Vigília, além das muralhas geladas onde o sol nunca derrete a "
               "neve eterna, vivem os Boreais. Seus cabelos são brancos como nevasca, sua pele é azul-pálida e "
               "fria ao toque, e sua respiração condensa em cristais de gelo mesmo ao meio-dia. Dizem que eles "
@@ -724,7 +724,7 @@ def nephilim():
 
 
 # ---------------------------------------------------------------------------
-# 28 — Cronomante / Errante Temporal
+# 28 — Cronari / Cronari
 # ---------------------------------------------------------------------------
 def _roman(m, text, center, angle, mat, group):
     """Escreve um numeral romano com traços (I, V, X) girado tangente ao anel."""
@@ -749,7 +749,7 @@ def _roman(m, text, center, angle, mat, group):
 
 
 def cronomante():
-    m = Model(28, "cronomante", "Cronomante", "Errante Temporal — O Eco do Relógio Quebrado",
+    m = Model(28, "cronomante", "Cronari", "Cronari — O Eco do Relógio Quebrado",
               "Você já se perguntou por que o Dia em Lunaria dura 80 minutos e a Noite dura 40 minutos? Na Guerra "
               "Antiga, o Grande Relógio Astral que regia o tempo do mundo foi despedaçado para impedir que a Noite "
               "Eterna durasse para sempre. Alguns raros mortais caíram dentro das engrenagens quebradas do tempo e "

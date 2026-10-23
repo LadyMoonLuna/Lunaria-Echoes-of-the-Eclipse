@@ -16,7 +16,7 @@ end
 
 -- OnPlayerApproach é disparado quando o jogador chega a menos de 4.0m
 function OnPlayerApproach(player_id, distance, player_race, is_armed)
-    -- Se o jogador se aproximar portando arma em riste ou se for da raça Varkai (4), Dhampir (5) ou Licantropo (6)
+    -- Se o jogador se aproximar portando arma em riste ou se for da raça Varkai (4), Sangrael (5) ou Lupharion (6)
     if is_armed or player_race == 4 or player_race == 5 or player_race == 6 then
         npc_say("Mantenha a linha, viajante. Sem problemas na nossa vila.")
         return

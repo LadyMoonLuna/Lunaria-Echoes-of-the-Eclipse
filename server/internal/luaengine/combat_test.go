@@ -88,7 +88,7 @@ func TestCombatLuaCalculations(t *testing.T) {
 		t.Fatalf("esperava pelo menos 67 de dano na Skill F do Espadachim (28 * 2.40), obteve %d", dmgSkillF)
 	}
 
-	// 5. Novas Classes: Ferreiro (5: 32 base) e Alquimista (6: 26 base)
+	// 5. Novas Classes: Forjador de Estrelas (5: 32 base) e Transmutador (6: 26 base)
 	dmgBlacksmith, _ := engine.CallCalculateDamage(
 		protocol.RaceValerian,
 		protocol.ClassBlacksmith,
@@ -102,10 +102,10 @@ func TestCombatLuaCalculations(t *testing.T) {
 		0,
 	)
 	if dmgBlacksmith < 32 {
-		t.Fatalf("esperava pelo menos 32 de dano para Ferreiro, obteve %d", dmgBlacksmith)
+		t.Fatalf("esperava pelo menos 32 de dano para Forjador de Estrelas, obteve %d", dmgBlacksmith)
 	}
 
-	// Ferreiro com Buff de Afiação de Combate (+25% dano): 32 * 1.25 = 40
+	// Forjador de Estrelas com Buff de Afiação de Combate (+25% dano): 32 * 1.25 = 40
 	dmgBuffed, _ := engine.CallCalculateDamage(
 		protocol.RaceValerian,
 		protocol.ClassBlacksmith,
@@ -140,8 +140,8 @@ func TestCombatLuaCalculations(t *testing.T) {
 		t.Fatalf("esperava pelo menos 90 de dano para Ceifador no Tier 5 (42 * 2.15), obteve %d", dmgReaper)
 	}
 
-	// 7. Lua de Sangue (fase 8) à noite (22h) com Dhampir (5):
-	// Espadachim = 28. +25% global e +40% Dhampir = 28 * (1 + 0.25 + 0.40) = 28 * 1.65 = 46.2 (~46)
+	// 7. Lua de Sangue (fase 8) à noite (22h) com Sangrael (5):
+	// Espadachim = 28. +25% global e +40% Sangrael = 28 * (1 + 0.25 + 0.40) = 28 * 1.65 = 46.2 (~46)
 	dmgBlood, _ := engine.CallCalculateDamage(
 		protocol.RaceDhampir,
 		protocol.ClassSwordsman,
@@ -155,7 +155,7 @@ func TestCombatLuaCalculations(t *testing.T) {
 		0,
 	)
 	if dmgBlood < 46 {
-		t.Fatalf("esperava dano amplificado para Dhampir sob Lua de Sangue (>= 46), obteve %d", dmgBlood)
+		t.Fatalf("esperava dano amplificado para Sangrael sob Lua de Sangue (>= 46), obteve %d", dmgBlood)
 	}
 
 	// 8. Escala de Atributos: STR=15 (+10 acima de 5 -> +30% de dano melee para Espadachim)
@@ -177,7 +177,7 @@ func TestCombatLuaCalculations(t *testing.T) {
 		t.Fatalf("esperava pelo menos 36 de dano para Espadachim com STR=15, obteve %d", dmgSTR)
 	}
 
-	// 9. Licantropo Primordial (RaceID = 6): +30% de dano físico permanente
+	// 9. Lupharion (RaceID = 6): +30% de dano físico permanente
 	// Base 28 * 1.30 = 36.4 -> 36
 	dmgLycan, _ := engine.CallCalculateDamage(
 		protocol.RacePrimordialLycanthrope,
@@ -192,7 +192,7 @@ func TestCombatLuaCalculations(t *testing.T) {
 		0,
 	)
 	if dmgLycan < 36 {
-		t.Fatalf("esperava pelo menos 36 de dano permanente para Licantropo Primordial, obteve %d", dmgLycan)
+		t.Fatalf("esperava pelo menos 36 de dano permanente para Lupharion, obteve %d", dmgLycan)
 	}
 }
 
@@ -252,7 +252,7 @@ func TestSecretClasses10to15CombatMultipliers(t *testing.T) {
 		t.Fatalf("falha ao carregar combat.lua: %v", err)
 	}
 
-	// 1. Testa os 6 Tiers de Raridade no Dançarino Astral (Base 40)
+	// 1. Testa os 6 Tiers de Raridade no Bailarino das Estrelas (Base 40)
 	tierMults := map[uint8]float64{
 		protocol.TierCommon:    1.0,
 		protocol.TierUncommon:  1.20,
@@ -280,29 +280,29 @@ func TestSecretClasses10to15CombatMultipliers(t *testing.T) {
 			expected = int(float64(expected) * 1.50)
 		}
 		if int(dmg) < expected-3 || int(dmg) > expected+3 {
-			t.Fatalf("Dançarino Astral no Tier %d deveria causar ~%d de dano (crit: %d), obteve %d", tier, expected, isCrit, dmg)
+			t.Fatalf("Bailarino das Estrelas no Tier %d deveria causar ~%d de dano (crit: %d), obteve %d", tier, expected, isCrit, dmg)
 		}
 	}
 
 	// 2. Testa Multiplicadores de Skills Q, R, F para as Classes 10 a 15 no Tier 1
-	// Classe 10 (Dançarino Astral, Base 40): Q=2.0x (80), R=1.8x (72), F=3.0x (120)
+	// Classe 10 (Bailarino das Estrelas, Base 40): Q=2.0x (80), R=1.8x (72), F=3.0x (120)
 	dmg10Q, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassAstralDancer, protocol.ActionSkillQ, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg10Q < 80 {
-		t.Fatalf("Dançarino Astral Q deveria causar >= 80, obteve %d", dmg10Q)
+		t.Fatalf("Bailarino das Estrelas Q deveria causar >= 80, obteve %d", dmg10Q)
 	}
 	dmg10F, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassAstralDancer, protocol.ActionSkillF, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg10F < 120 {
-		t.Fatalf("Dançarino Astral F deveria causar >= 120, obteve %d", dmg10F)
+		t.Fatalf("Bailarino das Estrelas F deveria causar >= 120, obteve %d", dmg10F)
 	}
 
-	// Classe 11 (Inquisidor das Cinzas, Base 38): Q=2.2x (~83.6), F=3.2x (~121.6)
+	// Classe 11 (Inquisidor da Chama Branca, Base 38): Q=2.2x (~83.6), F=3.2x (~121.6)
 	dmg11Q, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassAshInquisitor, protocol.ActionSkillQ, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg11Q < 83 {
-		t.Fatalf("Inquisidor das Cinzas Q deveria causar >= 83, obteve %d", dmg11Q)
+		t.Fatalf("Inquisidor da Chama Branca Q deveria causar >= 83, obteve %d", dmg11Q)
 	}
 	dmg11F, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassAshInquisitor, protocol.ActionSkillF, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg11F < 121 {
-		t.Fatalf("Inquisidor das Cinzas F deveria causar >= 121, obteve %d", dmg11F)
+		t.Fatalf("Inquisidor da Chama Branca F deveria causar >= 121, obteve %d", dmg11F)
 	}
 
 	// Passiva Inquisidor com 20% de HP (faltando 80% HP -> +48% dano bônus)
@@ -317,40 +317,40 @@ func TestSecretClasses10to15CombatMultipliers(t *testing.T) {
 		baseFull /= 1.5
 	}
 	if baseLow <= baseFull {
-		t.Fatalf("Inquisidor das Cinzas com 20%% HP deveria causar mais dano base que com 100%% HP (LowBase: %.1f, FullBase: %.1f)", baseLow, baseFull)
+		t.Fatalf("Inquisidor da Chama Branca com 20%% HP deveria causar mais dano base que com 100%% HP (LowBase: %.1f, FullBase: %.1f)", baseLow, baseFull)
 	}
 
-	// Classe 12 (Necromante de Ossos, Base 34): Q=2.0x (68), F=3.0x (102)
+	// Classe 12 (Arauto do Ossuário, Base 34): Q=2.0x (68), F=3.0x (102)
 	dmg12Q, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassBoneNecromancer, protocol.ActionSkillQ, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg12Q < 68 {
-		t.Fatalf("Necromante de Ossos Q deveria causar >= 68, obteve %d", dmg12Q)
+		t.Fatalf("Arauto do Ossuário Q deveria causar >= 68, obteve %d", dmg12Q)
 	}
 	dmg12F, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassBoneNecromancer, protocol.ActionSkillF, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg12F < 102 {
-		t.Fatalf("Necromante de Ossos F deveria causar >= 102, obteve %d", dmg12F)
+		t.Fatalf("Arauto do Ossuário F deveria causar >= 102, obteve %d", dmg12F)
 	}
 
-	// Classe 13 (Domador Primordial, Base 39): Passiva Espírito Alfa (+25% dano base: 39 * 1.25 = 48.75)
+	// Classe 13 (Senhor da Selva Primordial, Base 39): Passiva Espírito Alfa (+25% dano base: 39 * 1.25 = 48.75)
 	dmg13Basic, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassPrimordialTamer, protocol.ActionBasicAttack, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg13Basic < 48 {
-		t.Fatalf("Domador Primordial básico com Espírito Alfa deveria causar >= 48, obteve %d", dmg13Basic)
+		t.Fatalf("Senhor da Selva Primordial básico com Espírito Alfa deveria causar >= 48, obteve %d", dmg13Basic)
 	}
 
-	// Classe 14 (Cavaleiro da Ruptura, Base 44): Q=1.9x (~83.6), F=2.8x (~123.2)
+	// Classe 14 (Cavaleiro do Vazio, Base 44): Q=1.9x (~83.6), F=2.8x (~123.2)
 	dmg14Q, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassRiftKnight, protocol.ActionSkillQ, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg14Q < 83 {
-		t.Fatalf("Cavaleiro da Ruptura Q deveria causar >= 83, obteve %d", dmg14Q)
+		t.Fatalf("Cavaleiro do Vazio Q deveria causar >= 83, obteve %d", dmg14Q)
 	}
 	dmg14F, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassRiftKnight, protocol.ActionSkillF, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	if dmg14F < 123 {
-		t.Fatalf("Cavaleiro da Ruptura F deveria causar >= 123, obteve %d", dmg14F)
+		t.Fatalf("Cavaleiro do Vazio F deveria causar >= 123, obteve %d", dmg14F)
 	}
 
-	// Classe 15 (Arauto da Tempestade, Base 36): Q=2.1x (~75.6), F=3.1x (~111.6)
+	// Classe 15 (Arauto do Trovão, Base 36): Q=2.1x (~75.6), F=3.1x (~111.6)
 	dmg15Clear, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassStormHerald, protocol.ActionBasicAttack, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
 	dmg15Rain, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassStormHerald, protocol.ActionBasicAttack, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherRain, protocol.TierCommon, 1, 0)
 	if dmg15Rain <= dmg15Clear {
-		t.Fatalf("Arauto da Tempestade na chuva (+35%%) deveria causar mais dano que em clima limpo (Chuva: %d, Limpo: %d)", dmg15Rain, dmg15Clear)
+		t.Fatalf("Arauto do Trovão na chuva (+35%%) deveria causar mais dano que em clima limpo (Chuva: %d, Limpo: %d)", dmg15Rain, dmg15Clear)
 	}
 }
 
@@ -361,7 +361,7 @@ func TestSecretVariantSkillMultipliers(t *testing.T) {
 	if err := engine.LoadCombatScript(filepath.Join(FindCombatScriptsDir(), "combat.lua")); err != nil {
 		t.Fatalf("falha ao carregar combat.lua: %v", err)
 	}
-	// Espadachim Rúnico (base 34, +15% Lâmina Elemental): F = 2.8x. Compara só resultados sem crítico.
+	// Lâmina Rúnica (base 34, +15% Lâmina Elemental): F = 2.8x. Compara só resultados sem crítico.
 	nonCrit := func(action uint8) uint16 {
 		for i := 0; i < 200; i++ {
 			dmg, crit := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassRunicSpellblade, action,

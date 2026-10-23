@@ -98,7 +98,7 @@ func _setup_collision() -> void:
 		cap.radius = 1.8
 		cap.height = 3.2
 		collision_shape.position = Vector3(0, 1.6, 0)
-	elif mob_type == 22: # Ymir, Patriarca Gigante de Gelo (Colossal 3.0x)
+	elif mob_type == 22: # Ymir, Patriarca Jotunar (Colossal 3.0x)
 		cap.radius = 1.9
 		cap.height = 4.4
 		collision_shape.position = Vector3(0, 2.2, 0)
@@ -1199,7 +1199,7 @@ func _build_visuals() -> void:
 			tail.material_override = main_mat
 			body_pivot.add_child(tail)
 
-		22: # Ymir, o Patriarca Gigante de Gelo (Boss Colossal 3.0x, Barba de Estalactites e Clava Glacial)
+		22: # Ymir, o Patriarca Jotunar (Boss Colossal 3.0x, Barba de Estalactites e Clava Glacial)
 			body_pivot.scale = Vector3(3.0, 3.0, 3.0)
 			var c_mesh := CapsuleMesh.new()
 			c_mesh.radius = 0.65

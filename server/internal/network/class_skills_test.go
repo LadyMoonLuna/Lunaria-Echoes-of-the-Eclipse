@@ -21,7 +21,7 @@ func TestBasicClassSkillAreaHitsEveryTargetInRange(t *testing.T) {
 	edge := addTestMob(s, 2, 0, -4.4, 1000)
 	far := addTestMob(s, 3, 6, 0, 1000)
 
-	// Guerreiro F (Julgamento da Espada): círculo de 4.5m
+	// Espadachim da Aurora F (Julgamento da Espada): círculo de 4.5m
 	shape, ok := classSkillShape(protocol.ClassWarrior, protocol.ActionSkillF)
 	if !ok {
 		t.Fatal("Julgamento da Espada deveria ter área")
@@ -62,7 +62,7 @@ func TestBasicClassSkillConeAndSingleTarget(t *testing.T) {
 		t.Fatalf("cone deveria atingir só os da frente: HP %d, %d, %d", front.HP, front2.HP, behind.HP)
 	}
 
-	// Domador Q (Estalo do Chicote): só o alvo mais próximo, a até 9m
+	// Senhor das Feras Q (Estalo do Chicote): só o alvo mais próximo, a até 9m
 	shape, _ = classSkillShape(protocol.ClassTamer, protocol.ActionSkillQ)
 	s.applyBasicClassSkill(player, protocol.ClassTamer, protocol.ActionSkillQ, 0, 0, 0, 0, 0, -1, shape, 50, 0)
 	if front.HP != 900 || front2.HP != 950 {
@@ -105,14 +105,14 @@ func TestVampireHunterAndCursedSmithPassives(t *testing.T) {
 	wolf := addTestMob(s, 2, 0, -3.5, 1000)
 	wolf.MobType = protocol.MobTypeMistWolf
 
-	// Caçador de Vampiros F (Julgamento da Cruz Solar): +40% só em criaturas sombrias
+	// Inquisidor de Prata F (Julgamento da Cruz Solar): +40% só em criaturas sombrias
 	shape, _ := classSkillShape(protocol.ClassVampireHunter, protocol.ActionSkillF)
 	s.applyBasicClassSkill(player, protocol.ClassVampireHunter, protocol.ActionSkillF, 0, 0, 0, 0, 0, -1, shape, 100, 0)
 	if vampire.HP != 860 || wolf.HP != 900 {
 		t.Fatalf("esperava 140 no vampiro e 100 no lobo: HP %d, %d", vampire.HP, wolf.HP)
 	}
 
-	// Forjador Amaldiçoado: 25% do dano volta como vida
+	// Forjador Carmesim: 25% do dano volta como vida
 	player.Mu.Lock()
 	player.HP = 50
 	player.Mu.Unlock()
@@ -137,7 +137,7 @@ func TestVorpalExecutionAndLegendaryCompanions(t *testing.T) {
 		t.Fatalf("esperava 100 no envenenado e 60 no limpo: HP %d, %d", poisoned.HP, clean.HP)
 	}
 
-	// Descendente de Pagma: 6 espadas golpeiam junto (+30% do dano)
+	// Herdeiro da Forja Divina: 6 espadas golpeiam junto (+30% do dano)
 	target := addTestMob(s, 3, 0, -3, 1000)
 	shape, _ = classSkillShape(protocol.ClassPagmaDescendant, protocol.ActionSkillQ)
 	s.applyBasicClassSkill(player, protocol.ClassPagmaDescendant, protocol.ActionSkillQ, 0, 0, 0, 0, 0, -1, shape, 100, 0)

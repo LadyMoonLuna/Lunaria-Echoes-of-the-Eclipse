@@ -151,14 +151,14 @@ function OnPlayerInteract(player_id, world_hour, player_race, player_class, play
         return
     end
 
-    -- Reatividade: Alquimista (Classe 6) ou Alta Perícia (MAS >= 12)
+    -- Reatividade: Transmutador (Classe 6) ou Alta Perícia (MAS >= 12)
     local mas_val = player_mas or 5
     if player_class == 6 or mas_val >= 12 then
         npc_say("Impressionante! Reconheço o olhar apurado de quem domina a transmutação. Se você tiver Sangue Lupino Fresco e um Frasco Vazio, ofereço a receita e o preparo da formidável Poção de Sangue Lupino (+20% Velocidade e Crítico por 20s)!")
         return
     end
 
-    -- Ferreiro com Afiança > 2 (Nível 3+) que já ouviu a história ou diálogo neutro
+    -- Forjador de Estrelas com Afiança > 2 (Nível 3+) que já ouviu a história ou diálogo neutro
     if player_class == 5 then
         npc_say("Vejo que mesmo com essas mãos acostumadas à bigorna, você aprendeu a manusear frascos sem trincá-los. Aceito negociar com você!")
         return

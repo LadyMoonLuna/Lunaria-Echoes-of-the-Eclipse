@@ -70,13 +70,13 @@ function OnPlayerInteract(player_id, world_hour, player_race, player_class, play
     elseif player_class == 2 then
         npc_say("Saudações, Batedor da floresta. Que a luz filtre através das copas das árvores e guie com retidão cada uma de suas flechas.")
     elseif player_class == 3 then
-        npc_say("Um Mago do Cosmos... A magia arcana e a luz divina nasceram da mesma centelha primordial da criação.")
+        npc_say("Um Arcanista do Cosmos... A magia arcana e a luz divina nasceram da mesma centelha primordial da criação.")
     elseif player_class == 5 then
-        npc_say("Um nobre Ferreiro! Cada martelada honesta em sua bigorna é uma prece de trabalho e perseverança aos céus.")
+        npc_say("Um nobre Forjador de Estrelas! Cada martelada honesta em sua bigorna é uma prece de trabalho e perseverança aos céus.")
     elseif player_class == 6 then
-        npc_say("Alquimista, a cura dos enfermos através da matéria é uma das mais belas manifestações da misericórdia divina.")
+        npc_say("Transmutador, a cura dos enfermos através da matéria é uma das mais belas manifestações da misericórdia divina.")
     elseif player_class == 7 then
-        npc_say("Um Ceifador do Eclipse... Mesmo aquele que caminha no abismo pode encontrar a redenção se sua alma desejar a luz.")
+        npc_say("Um Ceifador da Lua Negra... Mesmo aquele que caminha no abismo pode encontrar a redenção se sua alma desejar a luz.")
     else
         npc_say("Seja bem-vindo à Casa da Luz Sagrada. Tome um momento de silêncio para purificar seus pensamentos do fardo da batalha.")
     end

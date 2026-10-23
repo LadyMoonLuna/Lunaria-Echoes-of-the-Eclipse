@@ -8,7 +8,7 @@ const (
 	ZoneSanctuary     uint8 = 3 // Santuário do Eclipse (600x600m | [-295, +295])
 	ZoneAshFrontier   uint8 = 4 // Fronteira das Cinzas (Zona Futura) (600x600m | [-295, +295])
 	ZoneChurch        uint8 = 5 // Interior da Igreja da Luz (60x60m | [-28, +28])
-	ZoneMageTower     uint8 = 6 // Interior da Torre do Mago (60x60m | [-28, +28])
+	ZoneMageTower     uint8 = 6 // Interior da Torre do Arcanista (60x60m | [-28, +28])
 	ZoneBlackMarket   uint8 = 7 // Mercado Negro do Beco (80x80m | [-38, +38])
 	ZoneAncientSewers uint8 = 8 // Esgotos Antigos (600x600m | [-295, +295])
 	ZoneSewers        uint8 = 8 // Alias retrocompatível
@@ -83,7 +83,7 @@ func GetZoneName(zoneID uint8) string {
 	case ZoneChurch:
 		return "Interior da Igreja da Luz"
 	case ZoneMageTower:
-		return "Interior da Torre do Mago"
+		return "Interior da Torre do Arcanista"
 	case ZoneBlackMarket:
 		return "Mercado Negro do Beco"
 	case ZoneAncientSewers:
