@@ -2,7 +2,6 @@ package network
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 
@@ -72,10 +71,14 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 			ev.died = true
 			return
 		}
+		// Em combate, caçada ou a serviço de um contratante: só as necessidades correm
+		if n.Life.Aggressor != 0 || n.Life.HuntTarget != 0 || n.Life.Following != 0 {
+			return
+		}
 		if len(n.Life.Plan) == 0 {
 			planNeeds(n, tavern, villageNodes, &ev)
 		}
-		if len(n.Life.Plan) == 0 {
+		if len(n.Life.Plan) == 0 && n.Profession != 0 {
 			produceAndOrder(n, now, villageNodes, forestNodes, &ev)
 		}
 		if len(n.Life.Plan) > 0 {
@@ -89,6 +92,8 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 				n.Life.WasPatrolling = false
 				n.CurrentActivity = world.ActivityWorking
 			}
+		} else if n.CurrentActivity == world.ActivityStudying {
+			// o aprendiz segue estudando (tick de sucessão)
 		} else if hour < 6 {
 			n.CurrentActivity = world.ActivitySleeping
 		} else {
@@ -104,8 +109,7 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 	})
 
 	if ev.died {
-		log.Printf("[MUNDO VIVO] NPC #%d morreu de fome, sede ou frio (morte permanente)\n", npc.ID)
-		s.BroadcastNPCSay(0, fmt.Sprintf("☠️ %s não resistiu à fome, à sede e ao frio... e jamais voltará.", npc.Name))
+		s.handleNPCDeath(npc, "a fome, a sede e o clima")
 		return
 	}
 	if ev.buyMeal {
@@ -161,11 +165,11 @@ func planNeeds(n *world.NPC, tavern bool, villageNodes []world.ResourceNode, ev 
 
 // produceAndOrder fabrica itens com as matérias-primas e abre/cumpre encomendas.
 func produceAndOrder(n *world.NPC, now time.Time, villageNodes, forestNodes []world.ResourceNode, ev *lifeEvents) {
-	prof, ok := world.NPCProfiles[n.ID]
+	prof, ok := world.NPCProfiles[n.Profession]
 	if !ok {
 		return
 	}
-	if now.Sub(n.Life.LastCraft) >= world.CraftInterval {
+	if now.Sub(n.Life.LastCraft) >= world.CraftIntervalFor(n.ProfessionLevel) {
 		for _, r := range prof.Recipes {
 			if n.ShopStock[uint16(r.Output)] >= world.MaxStockPerItem || !world.CanCraft(n.RawMaterials, r) {
 				continue
@@ -174,6 +178,9 @@ func produceAndOrder(n *world.NPC, now time.Time, villageNodes, forestNodes []wo
 			n.ShopStock[uint16(r.Output)]++
 			n.Life.LastCraft = now
 			ev.says = append(ev.says, fmt.Sprintf("🔨 Terminei mais um(a) %s para a loja!", world.ItemName(r.Output)))
+			if n.RegisterCraft() {
+				ev.says = append(ev.says, fmt.Sprintf("⭐ Meu ofício de %s chegou ao nível %d!", n.ProfessionName(), n.ProfessionLevel))
+			}
 			break
 		}
 	}
@@ -397,7 +404,7 @@ func shopStateOf(npc *world.NPC) protocol.ShopState {
 			Temperature: int8(max(min(n.Temperature, 127), -128)), Activity: n.CurrentActivity}
 		mult := world.SellPriceMult(n.Personality)
 		for item, qty := range n.ShopStock {
-			price := world.ShopPrice(n.ID, uint8(item))
+			price := world.ShopPrice(n.Profession, uint8(item))
 			if price == 0 {
 				continue
 			}
@@ -437,7 +444,7 @@ const StockOutMessage = "📦 Estoque esgotado! Traga matérias-primas para o NP
 
 // shopBuy: o jogador compra do estoque real; o ouro vai para o NPC.
 func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item, qty uint8) string {
-	base := world.ShopPrice(npc.ID, item)
+	base := world.ShopPrice(npc.Profession, item)
 	if base == 0 {
 		return "Isso eu não vendo."
 	}
@@ -484,7 +491,7 @@ func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item, qty uint8) strin
 
 // shopSell: o jogador vende matérias-primas; o NPC paga com o próprio ouro e volta a produzir.
 func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty uint8) string {
-	prof, ok := world.NPCProfiles[npc.ID]
+	prof, ok := world.NPCProfiles[npc.Profession]
 	if !ok {
 		return "Não preciso disso."
 	}

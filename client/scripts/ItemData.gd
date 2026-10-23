@@ -77,6 +77,7 @@ const ITEMS := {
 	78: {"name": "Sucata Metálica", "weight": 1.0, "slot": -1, "bonus": {}},
 	79: {"name": "Poção de Cura", "weight": 0.5, "slot": -1, "bonus": {}},
 	80: {"name": "Poção de Mana", "weight": 0.5, "slot": -1, "bonus": {}},
+	81: {"name": "Pergaminho de Blueprint", "weight": 0.2, "slot": -1, "bonus": {}},
 	76: {"name": "Placa de Chumbo", "weight": 25.0, "slot": -1, "bonus": {}},
 	75: {"name": "Manopla Secundária", "weight": 2.2, "slot": 13, "bonus": {"str": 1, "atk": 5, "def": 1}},
 	160: {"name": "Machado Velho", "weight": 3.0, "slot": -1, "bonus": {}, "tool": "axe", "tool_tier": 1},

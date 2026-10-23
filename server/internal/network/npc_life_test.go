@@ -11,7 +11,7 @@ import (
 
 func lifeTestServer() *Server {
 	return &Server{players: map[uint32]*world.Player{}, npcs: map[uint32]*world.NPC{},
-		clock: world.NewWorldClock(12), resourceNodes: world.NewResourceNodeManager()}
+		clock: world.NewWorldClock(12), resourceNodes: world.NewResourceNodeManager(), groundItems: world.NewGroundItemManager()}
 }
 
 func addLifeNPC(s *Server, id uint32, x, z float32) *world.NPC {

@@ -40,6 +40,7 @@ type Server struct {
 	corpseManager *world.CorpseManager
 	groundItems   *world.GroundItemManager
 	resourceNodes *world.ResourceNodeManager
+	conflict      conflictState // Mundo Vivo Parte 2: túmulos, tesouro, crimes
 	nextPlayerID  uint32
 	serverTick    uint32
 
@@ -315,6 +316,7 @@ func (s *Server) Start() error {
 
 	allLivingNPCs := []*world.NPC{garrick, lyra, varis, guard1, guard2, seraphina, aurelius, kaelen, ghostAlchemist}
 	allLivingNPCs = append(allLivingNPCs, s.spawnClassMasters(scriptsDir, currentH)...)
+	allLivingNPCs = append(allLivingNPCs, spawnApprentices(s.clock, s.BroadcastNPCSay)...)
 	for _, npc := range allLivingNPCs {
 		if err := s.luaEngine.BindNPC(npc); err != nil {
 			log.Printf("[AVISO] Nao foi possivel vincular script do NPC '%s' (ID %d): %v\n", npc.Name, npc.ID, err)
@@ -857,6 +859,23 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 					}
 					s.handleSubmitAutopsyResult(submitPkt)
 				}
+
+			case protocol.PacketTypeSetPKMode, protocol.PacketTypeNPCContract, protocol.PacketTypeTombstoneRequest:
+				// Pacotes 0x4B / 0x4C / 0x4D: Postura Hostil, contratos de NPC e túmulos (Mundo Vivo, Parte 2)
+				size := protocol.SetPKModePacketSize
+				switch header[0] {
+				case protocol.PacketTypeNPCContract:
+					size = protocol.NPCContractPacketSize
+				case protocol.PacketTypeTombstoneRequest:
+					size = protocol.TombstoneRequestSize
+				}
+				full := make([]byte, size)
+				full[0] = header[0]
+				if _, err := io.ReadFull(conn, full[1:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				s.handleConflictPacket(playerID, full)
 
 			case protocol.PacketTypeShopRequest, protocol.PacketTypeShopTrade:
 				// Pacotes 0x48 / 0x49: loja viva dos NPCs (Mundo Vivo)
@@ -1707,6 +1726,11 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		return
 	}
 
+	// 0. Preso pela Guarda: não age até cumprir a pena
+	if player.IsJailed() {
+		return
+	}
+
 	// 0. Validação de Cooldown autoritativo
 	if !player.CanPerformAction(pkt.ActionType) {
 		return
@@ -2501,6 +2525,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 	// Detecção de Alvos em Cone ou Área
 	var targetDummy *world.TrainingDummy
 	var targetMob *world.Mob
+	var targetNPC *world.NPC
 	minDist := attackRange + 1.0
 
 	s.mu.RLock()
@@ -2551,6 +2576,23 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 					minDist = dist
 					targetMob = mob
 					targetDummy = nil
+				}
+			}
+		}
+	}
+	// Postura Hostil (PKMode): NPCs vivos também podem ser atingidos
+	if player.IsPKMode() {
+		for _, npc := range s.npcs {
+			if !npc.Targetable() || npc.GetZone() != playerZone {
+				continue
+			}
+			nx, _, nz := npc.GetPos()
+			distX, distZ := nx-px, nz-pz
+			dist := float32(math.Sqrt(float64(distX*distX + distZ*distZ)))
+			if dist <= attackRange && dist > 0.01 && dist < minDist {
+				if (distX/dist)*aimX+(distZ/dist)*aimZ >= 0.25 || pkt.ActionType == protocol.ActionSkillF {
+					minDist = dist
+					targetNPC, targetMob, targetDummy = npc, nil, nil
 				}
 			}
 		}
@@ -2684,6 +2726,12 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		}
 		s.sendPlayerStats(player)
 
+	} else if targetNPC != nil {
+		damage, isCrit := s.luaEngine.CallCalculateDamage(raceID, classID, pkt.ActionType, hpPct, int(h), moon, weather,
+			classTier, level, buffVal, pSTR, pDEX, pINT, pSPI, pMAS, pLCK)
+		damage = applyPathDamage(damage, player)
+		s.playerHitNPC(player, targetNPC, damage, isCrit, pkt.ActionType)
+
 	} else {
 		// Golpe desferido sem acertar alvo (Swing no ar)
 		s.BroadcastCombatEvent(player.ID, 0, pkt.ActionType, 0, 0, 0, 0)
@@ -2784,7 +2832,7 @@ func (s *Server) handleNPCAttackMob(npcID, mobID uint32, damage uint16) {
 	s.mu.RLock()
 	npc, exists := s.npcs[npcID]
 	s.mu.RUnlock()
-	if !exists {
+	if !exists || !npc.GetActive() {
 		return
 	}
 
@@ -4575,6 +4623,7 @@ func (s *Server) runGameLoop() {
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
 				s.updateNPCLife(1.0)
+				s.updateNPCConflict(1.0)
 				if s.serverTick%(GameTickRate*10) < GameTickRate {
 					s.updateWaterEvaporation(int(h))
 				}

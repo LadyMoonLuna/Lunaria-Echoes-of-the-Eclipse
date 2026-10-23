@@ -80,6 +80,15 @@ type NPCLifeState struct {
 	BuyOrders     map[uint16]BuyOrder  // encomendas abertas (pagas com o ouro do NPC)
 	WasPatrolling bool
 	LastSpeech    time.Time
+
+	// Parte 2: conflito, caçada, contratação e sucessão
+	Aggressor      uint32 // jogador ou mob que o atacou (revide/fuga)
+	AggressorIsMob bool
+	HuntTarget     uint32 // guarda caçando este jogador procurado
+	LastStrike     time.Time
+	Following      uint32 // jogador que contratou o NPC
+	StudyingFor    uint32 // aprendiz: ID do mestre caído cuja oficina estuda
+	StudyProgress  float32
 }
 
 // BuyOrder: o NPC compra Wanted unidades do material por Price cada.
@@ -188,6 +197,10 @@ func (npc *NPC) InitLife(home [2]float32) {
 	for k, v := range st.Stock {
 		npc.ShopStock[k] = v
 	}
+	if _, ok := NPCProfiles[npc.ID]; ok {
+		npc.Profession = npc.ID
+		npc.ProfessionLevel = 10
+	}
 	npc.Life = NPCLifeState{Enabled: true, Home: home, HomeZone: npc.ZoneID,
 		OrderSince: map[uint16]time.Time{}, BuyOrders: map[uint16]BuyOrder{}, LastCraft: time.Now()}
 }
@@ -196,7 +209,7 @@ func (npc *NPC) InitLife(home [2]float32) {
 func (npc *NPC) LifeBusy() bool {
 	npc.mu.RLock()
 	defer npc.mu.RUnlock()
-	return npc.IsDead || len(npc.Life.Plan) > 0
+	return npc.IsDead || len(npc.Life.Plan) > 0 || npc.Life.Following != 0 || npc.Life.Aggressor != 0 || npc.Life.HuntTarget != 0
 }
 
 // SellPriceMult / BuyPriceMult aplicam a personalidade aos preços.
@@ -260,8 +273,8 @@ func (npc *NPC) WithLife(fn func(n *NPC)) {
 }
 
 // ShopPrice: preço base de venda de um item no NPC (receita ou extra); 0 = não vende.
-func ShopPrice(npcID uint32, item uint8) uint32 {
-	prof, ok := NPCProfiles[npcID]
+func ShopPrice(profession uint32, item uint8) uint32 {
+	prof, ok := NPCProfiles[profession]
 	if !ok {
 		return 0
 	}
@@ -337,12 +350,7 @@ func (npc *NPC) TickNeeds(dt float32, ambient float32) bool {
 		npc.HP -= dmg
 	}
 	if npc.HP <= 0 && !npc.IsDead {
-		npc.HP = 0
-		npc.IsDead = true
-		npc.IsActive = false
-		npc.MoveSpeed = 0
-		npc.Life.Plan = nil
-		npc.CurrentActivity = ActivityDead
+		npc.markDeadLocked()
 		return true
 	}
 	return false
@@ -375,6 +383,8 @@ func ActivityFor(action string) string {
 		return ActivityWarming
 	case "cool":
 		return ActivityCooling
+	case "flee":
+		return ActivityFleeing
 	}
 	return ActivityGathering
 }

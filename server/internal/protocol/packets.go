@@ -76,6 +76,10 @@ const (
 	PacketTypeShopRequest         uint8 = 0x48 // [Client -> Server] Abrir loja viva de um NPC (9 bytes)
 	PacketTypeShopTrade           uint8 = 0x49 // [Client -> Server] Comprar/vender com o NPC (13 bytes)
 	PacketTypeShopState           uint8 = 0x4A // [Server -> Client] Estado da loja viva (tamanho variável)
+	PacketTypeSetPKMode           uint8 = 0x4B // [Client -> Server] Postura Hostil liga/desliga (2 bytes)
+	PacketTypeNPCContract         uint8 = 0x4C // [Client -> Server] Contratar/treinar/assentar/dispensar NPC (6 bytes)
+	PacketTypeTombstoneRequest    uint8 = 0x4D // [Client -> Server] Pedir lista de túmulos (1 byte)
+	PacketTypeTombstoneState      uint8 = 0x4E // [Server -> Client] Túmulos permanentes (tamanho variável)
 )
 
 // Tipos de Projéteis 3D
@@ -324,6 +328,7 @@ const (
 	ItemMetalScrap      uint8 = 78 // Sucata Metálica (resultado de extração/criação metálica de baixa qualidade)
 	ItemHealingPotion   uint8 = 79 // Poção de Cura (Lyra: Ervas + Água) — +90 HP
 	ItemManaPotion      uint8 = 80 // Poção de Mana (Lyra: Cogumelo + Ervas + Água) — +80 Mana
+	ItemBlueprintScroll uint8 = 81 // Pergaminho de Blueprint (forma um aprendiz no ofício do mestre caído)
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -2337,6 +2342,68 @@ func SerializeShopState(st ShopState) []byte {
 		b = binary.LittleEndian.AppendUint16(b, o.Material)
 		b = append(b, o.Wanted)
 		b = binary.LittleEndian.AppendUint32(b, o.Price)
+	}
+	binary.LittleEndian.PutUint16(b[1:3], uint16(len(b)))
+	return b
+}
+
+// --- 0x4B: SET_PK_MODE / 0x4C: NPC_CONTRACT / 0x4D-0x4E: TÚMULOS (Mundo Vivo, Parte 2) ---
+
+const (
+	SetPKModePacketSize   = 2 // op | 0 = pacífico, 1 = hostil
+	NPCContractPacketSize = 6 // op | npcID u32 | ação
+	TombstoneRequestSize  = 1
+
+	ContractHire    uint8 = 0 // contratar (500 Sollares + 3 corações): passa a seguir o jogador
+	ContractTrain   uint8 = 1 // treinar aprendiz (300 Sollares ou Pergaminho de Blueprint)
+	ContractSettle  uint8 = 2 // assentar o contratado aqui (nova casa e território)
+	ContractDismiss uint8 = 3 // dispensar (volta para a casa que tinha)
+)
+
+type NPCContractPacket struct {
+	NPCID  uint32
+	Action uint8
+}
+
+func DeserializeNPCContract(data []byte, pkt *NPCContractPacket) error {
+	if len(data) < NPCContractPacketSize || data[0] != PacketTypeNPCContract {
+		return ErrInvalidPacketSize
+	}
+	pkt.NPCID = binary.LittleEndian.Uint32(data[1:5])
+	pkt.Action = data[5]
+	return nil
+}
+
+type TombstoneEntry struct {
+	NPCID                    uint32
+	Zone                     uint8
+	X, Z                     float32
+	Name, Profession, Killer string
+}
+
+func appendShortString(b []byte, s string) []byte {
+	if len(s) > 255 {
+		s = s[:255]
+	}
+	b = append(b, uint8(len(s)))
+	return append(b, s...)
+}
+
+// SerializeTombstones: op | tamanho u16 | n u8 | (npc u32, zona u8, x f32, z f32, nome, ofício, assassino)*
+// (textos: len u8 + bytes)
+func SerializeTombstones(list []TombstoneEntry) []byte {
+	if len(list) > 255 {
+		list = list[len(list)-255:]
+	}
+	b := []byte{PacketTypeTombstoneState, 0, 0, uint8(len(list))}
+	for _, t := range list {
+		b = binary.LittleEndian.AppendUint32(b, t.NPCID)
+		b = append(b, t.Zone)
+		b = binary.LittleEndian.AppendUint32(b, math.Float32bits(t.X))
+		b = binary.LittleEndian.AppendUint32(b, math.Float32bits(t.Z))
+		b = appendShortString(b, t.Name)
+		b = appendShortString(b, t.Profession)
+		b = appendShortString(b, t.Killer)
 	}
 	binary.LittleEndian.PutUint16(b[1:3], uint16(len(b)))
 	return b

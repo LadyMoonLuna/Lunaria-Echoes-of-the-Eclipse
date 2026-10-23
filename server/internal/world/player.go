@@ -86,6 +86,10 @@ type Player struct {
 	EquippedQualitySet  [protocol.EquipSlotCount]bool  // slot com Condição registrada (senão vale a padrão do item)
 	newDiscoveries      []uint16                       // Descobertas ainda não avisadas ao cliente
 	Gold                uint32                         // Sollares de Ouro
+	PKMode              bool                           // Postura Hostil: trava de segurança desligada (pode ferir NPCs)
+	WantedTimer         float32                        // segundos restantes como PROCURADO pela Guarda
+	BountyGold          uint32                         // recompensa pela cabeça do jogador
+	JailUntil           time.Time                      // preso: não age até esta hora
 	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
 	EquippedArmorID     uint8                          // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
 	EquippedAccessoryID uint8                          // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade

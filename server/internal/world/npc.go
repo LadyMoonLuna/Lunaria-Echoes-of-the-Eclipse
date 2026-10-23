@@ -63,6 +63,9 @@ type NPC struct {
 	ShopStock       map[uint16]int // itens prontos à venda (estoque real, nada infinito)
 	CurrentActivity string
 	Life            NPCLifeState
+	Profession      uint32 // chave em NPCProfiles do ofício que exerce (0 = nenhum)
+	ProfessionLevel int    // nível no ofício (aprendizes formados começam no 1)
+	CraftCount      int
 
 	approachCooldowns map[uint32]time.Time
 	broadcastSay      SayCallback
@@ -259,6 +262,9 @@ func (npc *NPC) Teleport(x, y, z float32) {
 func (npc *NPC) SetActive(active bool) {
 	npc.mu.Lock()
 	defer npc.mu.Unlock()
+	if npc.IsDead && active {
+		return // morte permanente: nenhuma rotina traz o NPC de volta
+	}
 	npc.IsActive = active
 }
 
