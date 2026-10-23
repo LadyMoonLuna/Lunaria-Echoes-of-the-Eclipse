@@ -1,51 +1,72 @@
 extends CanvasLayer
+## Inventário em estilo Livro Aberto: páginas de pergaminho numa moldura de madeira.
+## Página esquerda: 14 slots em silhueta humanoide. Página direita: atributos sublinhados
+## com a caixa preta de detalhamento. Coluna escura: inspetor do item selecionado.
+## Rodapé: grade da mochila, carteira, barra de peso e lixeira.
+
+const ItemData = preload("res://scripts/ItemData.gd")
+
+# Paleta: pergaminho, madeira e tinta
+const COL_PARCHMENT := Color(0.85, 0.78, 0.65)
+const COL_PARCHMENT_DARK := Color(0.76, 0.68, 0.53)
+const COL_WOOD := Color(0.32, 0.22, 0.14)
+const COL_WOOD_LIGHT := Color(0.45, 0.32, 0.2)
+const COL_INK := Color(0.2, 0.13, 0.08)
+const COL_INK_SOFT := Color(0.38, 0.28, 0.18)
+const COL_DARK_PANEL := Color(0.07, 0.06, 0.06, 0.97)
+const COL_BONUS := Color(0.45, 0.9, 0.45)
 
 var is_open: bool = false
 var equipped_slots: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var equipped_armor_id: int = 0
 var equipped_acc_id: int = 0
-var inventory_items: Array = [] # Array of {"id": int, "quantity": int}
+var inventory_items: Array = [] # Array de {"id": int, "quantity": int} na ordem do servidor
 
-var slot_nodes: Array = [] # Array of Dictionary {"name_label": Label, "item_label": Label, "icon": ColorRect}
-var stats_bonus_label: Label = null
-var items_container: VBoxContainer = null
-var empty_label: Label = null
+# Carteira e peso (0x38)
+var gold: int = 0
+var eclipse_coins: int = 0
+var current_weight: float = 0.0
+var max_weight: float = 1.0
+var speed_mult: float = 1.0
+
+# Atributos totais vindos do servidor (já com equipamentos)
+var stat_totals := {"str": 0, "dex": 0, "con": 0, "agi": 0, "int": 0, "spi": 0, "mas": 0, "lck": 0}
+
+# Seleção atual no inspetor: {"source": "equip"/"bag", "index": int, "id": int, "qty": int}
+var selected: Dictionary = {}
 
 const SLOT_COUNT := 14
 
 const SLOT_NAMES := [
-	"Elmo",
-	"Peitoral",
-	"Calças",
-	"Botas",
-	"Luvas",
-	"Capa / Túnica",
-	"Colar",
-	"Brinco / Amuleto",
-	"Anel 1",
-	"Anel 2",
-	"Anel 3",
-	"Anel 4",
-	"Mão Principal",
-	"Mão Secundária"
+	"Elmo", "Peitoral", "Calças", "Botas", "Luvas", "Capa / Túnica", "Colar", "Brinco / Amuleto",
+	"Anel 1", "Anel 2", "Anel 3", "Anel 4", "Mão Principal", "Mão Secundária"
 ]
 
-const SLOT_ICONS := [
-	"🪖",
-	"🛡️",
-	"👖",
-	"👢",
-	"🧤",
-	"🧥",
-	"📿",
-	"💎",
-	"💍",
-	"💍",
-	"💍",
-	"💍",
-	"⚔️",
-	"🔰"
+const SLOT_ICONS := ["🪖", "🛡️", "👖", "👢", "🧤", "🧥", "📿", "💎", "💍", "💍", "💍", "💍", "⚔️", "🔰"]
+# Rótulos curtos desenhados dentro dos slots (não dependem de fonte de emoji)
+const SLOT_SHORT := ["ELMO", "PEITO", "CALÇA", "BOTAS", "LUVAS", "CAPA", "COLAR", "BRINCO", "ANEL", "ANEL", "ANEL", "ANEL", "ARMA", "ESCUDO"]
+const SLOT_CAPTIONS := ["Elmo", "Peitoral", "Calças", "Botas", "Luvas", "Capa", "Colar", "Brinco", "Anel 1", "Anel 2", "Anel 3", "Anel 4", "Mão Princ.", "Mão Sec."]
+
+# Silhueta humanoide: linhas de slots (índices do servidor)
+const EQUIP_LAYOUT := [
+	[6, 7, 0],
+	[5, 1, 4],
+	[12, 2, 13],
+	[8, 9, 3, 10, 11],
 ]
+
+# Linhas da página de status: [chave, rótulo]
+const STATUS_ROWS := [
+	["con", "Vitalidade (CON)"], ["str", "Força (FOR)"], ["agi", "Agilidade (AGI)"], ["dex", "Destreza (DES)"],
+	["int", "Inteligência (INT)"], ["spi", "Espírito (ESP)"], ["mas", "Maestria (MAS)"], ["lck", "Sorte (LCK)"],
+	["def", "Defesa Física"], ["mdef", "Resistência Mágica"],
+]
+
+const BONUS_LABELS := {
+	"atk": "Ataque Físico", "def": "Defesa Física", "mdef": "Resistência Mágica", "hp": "Vida Máxima",
+	"str": "Força", "dex": "Destreza", "con": "Vitalidade", "agi": "Agilidade",
+	"int": "Inteligência", "spi": "Espírito", "mas": "Maestria", "lck": "Sorte",
+}
 
 const ITEM_CATALOG := {
 	1: {
@@ -351,27 +372,44 @@ const ITEM_CATALOG := {
 		"color": Color("#ffd600"),
 		"usable": false,
 		"btn_text": ""
-	}
+	},
+	59: {"name": "Espada Longa de Aço", "category": "Arma — Mão Principal", "desc": "Lâmina equilibrada de aço temperado para uma mão. Golpes rápidos e firmes.", "color": Color("#b0bec5"), "usable": true, "btn_text": "[Equipar Arma]"},
+	60: {"name": "Cajado Arcano", "category": "Arma — Mão Principal", "desc": "Cajado de carvalho com um cristal que canaliza a Mana do portador.", "color": Color("#9575cd"), "usable": true, "btn_text": "[Equipar Arma]"},
+	61: {"name": "Arco de Caça", "category": "Arma — Mão Principal", "desc": "Arco recurvo de madeira flexível e corda de tripa trançada.", "color": Color("#a1887f"), "usable": true, "btn_text": "[Equipar Arma]"},
+	62: {"name": "Adagas Gêmeas", "category": "Arma — Mão Principal", "desc": "Par de adagas leves para cortes rápidos e golpes críticos.", "color": Color("#90a4ae"), "usable": true, "btn_text": "[Equipar Arma]"},
+	63: {"name": "Manoplas de Ferro", "category": "Arma — Mão Principal", "desc": "Manoplas reforçadas com nós de ferro para os punhos.", "color": Color("#78909c"), "usable": true, "btn_text": "[Equipar Arma]"},
+	64: {"name": "Martelo de Forja", "category": "Arma — Mão Principal", "desc": "Pesado martelo de bigorna que esmaga armaduras.", "color": Color("#8d6e63"), "usable": true, "btn_text": "[Equipar Arma]"},
+	65: {"name": "Cutelo Gourmet", "category": "Arma — Mão Principal", "desc": "Cutelo gigante de chef, afiado o bastante para desossar um javali num golpe.", "color": Color("#cfd8dc"), "usable": true, "btn_text": "[Equipar Arma]"},
+	66: {"name": "Chicote Bestial", "category": "Arma — Mão Principal", "desc": "Couro trançado que estala como trovão e comanda feras.", "color": Color("#6d4c41"), "usable": true, "btn_text": "[Equipar Arma]"},
+	67: {"name": "Agulhas de Aço Rúnicas", "category": "Arma — Mão Principal", "desc": "Agulhas finas com runas que guiam fios cortantes.", "color": Color("#e0e0e0"), "usable": true, "btn_text": "[Equipar Arma]"},
+	68: {"name": "Espada Colossal", "category": "Arma — Mão Principal", "desc": "Lâmina gigantesca de duas mãos. Muito pesada, mas devastadora.", "color": Color("#607d8b"), "usable": true, "btn_text": "[Equipar Arma]"},
+	69: {"name": "Escudo Bastião", "category": "Mão Secundária", "desc": "Escudo de torre de aço reforçado. Bloqueia quase tudo.", "color": Color("#546e7a"), "usable": true, "btn_text": "[Equipar Escudo]"},
+	70: {"name": "Adaga Secundária", "category": "Mão Secundária", "desc": "Uma segunda adaga para a mão esquerda.", "color": Color("#90a4ae"), "usable": true, "btn_text": "[Equipar]"},
+	71: {"name": "Orbe Arcano", "category": "Mão Secundária", "desc": "Esfera de cristal que amplifica feitiços e protege contra magia.", "color": Color("#7e57c2"), "usable": true, "btn_text": "[Equipar]"},
+	72: {"name": "Catalisador Alquímico", "category": "Mão Secundária", "desc": "Aparelho de vidro e cobre que acelera reações químicas.", "color": Color("#4db6ac"), "usable": true, "btn_text": "[Equipar]"},
+	73: {"name": "Wok de Ferro", "category": "Mão Secundária", "desc": "Frigideira de ferro preto que também serve de escudo.", "color": Color("#424242"), "usable": true, "btn_text": "[Equipar]"},
+	74: {"name": "Aljava de Caçador", "category": "Mão Secundária", "desc": "Aljava de couro com flechas emplumadas.", "color": Color("#8d6e63"), "usable": true, "btn_text": "[Equipar]"},
+	75: {"name": "Manopla Secundária", "category": "Mão Secundária", "desc": "Segunda manopla de ferro para combos com as duas mãos.", "color": Color("#78909c"), "usable": true, "btn_text": "[Equipar]"}
 }
 
-const ITEM_BONUSES := {
-	31: {"hp": 25, "con": 2},
-	32: {"hp": 60, "con": 5},
-	9:  {"hp": 35, "str": 3},
-	12: {"hp": 50, "con": 4},
-	33: {"hp": 30, "agi": 3},
-	34: {"hp": 25, "agi": 4, "dex": 2},
-	35: {"str": 4, "mas": 3},
-	27: {"str": 8, "con": 6, "mas": 4},
-	36: {"int": 3, "spi": 3},
-	37: {"int": 4, "spi": 4, "lck": 3},
-	15: {"str": 5, "dex": 5, "con": 5, "agi": 5, "int": 5, "spi": 5, "mas": 5, "lck": 5, "lifesteal": 15},
-	13: {"dex": 3, "agi": 3},
-	38: {"str": 4, "con": 3},
-	39: {"con": 4, "mas": 3},
-	40: {"int": 3, "lck": 4},
-	41: {"hp": 35, "str": 3, "agi": 3}
-}
+# Nós da interface
+var equip_buttons: Dictionary = {} # slot -> Button
+var status_value_labels: Dictionary = {} # chave -> Label
+var breakdown_title: Label = null
+var breakdown_body: RichTextLabel = null
+var inspector_name: Label = null
+var inspector_rarity: Label = null
+var inspector_body: RichTextLabel = null
+var unequip_btn: Button = null
+var use_btn: Button = null
+var drop_btn: Button = null
+var drop_qty: SpinBox = null
+var bag_grid: GridContainer = null
+var gold_label: Label = null
+var eclipse_label: Label = null
+var weight_bar: ProgressBar = null
+var weight_label: Label = null
+var _blink_time: float = 0.0
 
 func _ready() -> void:
 	layer = 15
@@ -381,6 +419,25 @@ func _ready() -> void:
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
 		nm.inventory_updated.connect(_on_inventory_updated)
+		if nm.has_signal("wallet_weight_updated"):
+			nm.wallet_weight_updated.connect(_on_wallet_weight_updated)
+		if nm.has_signal("player_attributes_received"):
+			nm.player_attributes_received.connect(_on_player_attributes_received)
+
+func _process(delta: float) -> void:
+	if not is_open or weight_bar == null:
+		return
+	# Sobrecarregado: barra vermelha piscando
+	if max_weight > 0.0 and current_weight / max_weight >= 1.3:
+		_blink_time += delta * 6.0
+		weight_bar.modulate.a = 0.55 + 0.45 * absf(sin(_blink_time))
+	else:
+		weight_bar.modulate.a = 1.0
+
+func _unhandled_input(event: InputEvent) -> void:
+	if is_open and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		close_menu()
+		get_viewport().set_input_as_handled()
 
 func open_menu() -> void:
 	is_open = true
@@ -401,8 +458,6 @@ func close_menu() -> void:
 		if world.get("attributes_ui") and world.attributes_ui.get("is_open"): any_other_open = true
 		if world.get("skills_ui") and world.skills_ui.get("is_open"): any_other_open = true
 		if world.get("dev_drop_rates_ui") and world.dev_drop_rates_ui.get("is_open"): any_other_open = true
-		if world.get("dev_manager_ui") and world.dev_manager_ui.get("is_open"): any_other_open = true
-		if world.get("dev_race_menu_ui") and world.dev_race_menu_ui.get("is_open"): any_other_open = true
 	if not any_other_open:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		if world and world.get("local_player") and is_instance_valid(world.local_player):
@@ -413,6 +468,10 @@ func toggle_menu() -> void:
 		close_menu()
 	else:
 		open_menu()
+
+# ---------------------------------------------------------------------------
+# Rede
+# ---------------------------------------------------------------------------
 
 func _on_inventory_updated(arg1, arg2 = null, arg3 = null) -> void:
 	if arg1 is Array:
@@ -427,337 +486,604 @@ func _on_inventory_updated(arg1, arg2 = null, arg3 = null) -> void:
 		equipped_slots = [0, equipped_armor_id, 0, 0, 0, 0, 0, 0, equipped_acc_id, 0, 0, 0, 0, 0]
 		if arg3 is Array:
 			inventory_items = arg3
+	_refresh_selection()
 	_update_display()
+
+func _on_wallet_weight_updated(p_gold: int, p_eclipse: int, p_cur: float, p_max: float, p_speed: float) -> void:
+	gold = p_gold
+	eclipse_coins = p_eclipse
+	current_weight = p_cur
+	max_weight = maxf(p_max, 0.01)
+	speed_mult = p_speed
+	_update_footer()
+
+func _on_player_attributes_received(_pid: int, _xp: int, _next_xp: int, _pts: int, str_val: int, dex_val: int, con_val: int, agi_val: int, int_val: int, spi_val: int, mas_val: int, lck_val: int) -> void:
+	stat_totals = {"str": str_val, "dex": dex_val, "con": con_val, "agi": agi_val, "int": int_val, "spi": spi_val, "mas": mas_val, "lck": lck_val}
+	_update_status()
+
+# A seleção acompanha o item depois de um sync (pilha mudou de posição ou sumiu)
+func _refresh_selection() -> void:
+	if selected.is_empty():
+		return
+	if selected["source"] == "equip":
+		var sid: int = selected["index"]
+		if int(equipped_slots[sid]) != int(selected["id"]):
+			selected = {}
+		return
+	for i in range(inventory_items.size()):
+		if int(inventory_items[i]["id"]) == int(selected["id"]):
+			selected = {"source": "bag", "index": i, "id": int(inventory_items[i]["id"]), "qty": int(inventory_items[i]["quantity"])}
+			return
+	selected = {}
+
+# ---------------------------------------------------------------------------
+# Estilos
+# ---------------------------------------------------------------------------
+
+func _box(bg: Color, border: Color, width: int = 2, radius: int = 6, pad: int = 10) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(width)
+	sb.set_corner_radius_all(radius)
+	sb.content_margin_left = pad
+	sb.content_margin_right = pad
+	sb.content_margin_top = pad
+	sb.content_margin_bottom = pad
+	return sb
+
+# Caixa preta chanfrada: cantos cortados (corner_detail = 1) e borda dourada
+func _chamfer_box(accent: Color) -> StyleBoxFlat:
+	var sb := _box(Color(0.03, 0.03, 0.04, 0.97), accent, 2, 10, 12)
+	sb.corner_detail = 1
+	return sb
+
+func _label(text: String, size: int, col: Color) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", col)
+	return l
+
+func _page_title(text: String) -> Label:
+	var l := _label(text, 15, COL_INK)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	return l
+
+func _item_icon(item_id: int) -> String:
+	var slot: int = ItemData.slot_of(item_id)
+	if slot >= 0:
+		return SLOT_ICONS[slot]
+	var cat: String = ITEM_CATALOG.get(item_id, {}).get("category", "")
+	if "Consum" in cat:
+		return "🍖"
+	if "Relíquia" in cat or "Desperta" in cat:
+		return "✨"
+	if "Utilit" in cat:
+		return "🧪"
+	return "📦"
+
+# Monograma do item (iniciais das duas primeiras palavras significativas)
+func _monogram(item_id: int) -> String:
+	var words: PackedStringArray = _item_name(item_id).split(" ", false)
+	var letters := ""
+	for w in words:
+		if w.length() > 2 and letters.length() < 2:
+			letters += w.substr(0, 1).to_upper()
+	return letters if letters != "" else "?"
+
+func _item_color(item_id: int) -> Color:
+	return ITEM_CATALOG.get(item_id, {}).get("color", Color(0.6, 0.6, 0.6))
+
+func _item_name(item_id: int) -> String:
+	if ITEM_CATALOG.has(item_id):
+		return ITEM_CATALOG[item_id]["name"]
+	return ItemData.info(item_id)["name"]
+
+# ---------------------------------------------------------------------------
+# Construção da interface
+# ---------------------------------------------------------------------------
 
 func _build_ui() -> void:
 	var scrim := ColorRect.new()
-	scrim.color = Color(0.02, 0.03, 0.05, 0.65)
+	scrim.color = Color(0.02, 0.02, 0.03, 0.72)
 	scrim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	scrim.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(scrim)
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scrim.add_child(center)
 
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(960, 680)
-	var p_style := StyleBoxFlat.new()
-	p_style.bg_color = Color(0.06, 0.08, 0.12, 0.98)
-	p_style.border_color = Color(0.85, 0.72, 0.28, 0.95)
-	p_style.set_border_width_all(2)
-	p_style.set_corner_radius_all(10)
-	p_style.shadow_color = Color(0, 0, 0, 0.8)
-	p_style.shadow_size = 18
-	p_style.content_margin_left = 20
-	p_style.content_margin_right = 20
-	p_style.content_margin_top = 16
-	p_style.content_margin_bottom = 16
-	panel.add_theme_stylebox_override("panel", p_style)
-	center.add_child(panel)
+	# Moldura de madeira
+	var frame := PanelContainer.new()
+	var frame_style := _box(COL_WOOD, Color(0.18, 0.12, 0.07), 6, 12, 14)
+	frame_style.shadow_color = Color(0, 0, 0, 0.8)
+	frame_style.shadow_size = 18
+	frame.add_theme_stylebox_override("panel", frame_style)
+	center.add_child(frame)
 
-	var root_vbox := VBoxContainer.new()
-	root_vbox.add_theme_constant_override("separation", 10)
-	panel.add_child(root_vbox)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 10)
+	frame.add_child(root)
 
-	# Cabeçalho com Título e Botão Fechar
-	var top_bar := HBoxContainer.new()
-	root_vbox.add_child(top_bar)
-
-	var title_lbl := Label.new()
-	title_lbl.text = "✦  PAINEL DE PERSONAGEM & INVENTÁRIO (12 SLOTS) [I]  ✦"
-	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_lbl.add_theme_font_size_override("font_size", 17)
-	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
-	top_bar.add_child(title_lbl)
-
+	# Cabeçalho com título entalhado e botão de fechar
+	var header := HBoxContainer.new()
+	root.add_child(header)
+	var title := _label("📖  Grimório de Viagem — Inventário", 20, Color(0.98, 0.86, 0.55))
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(title)
 	var close_btn := Button.new()
-	close_btn.text = " [X] Fechar (I) "
-	close_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	var c_style := StyleBoxFlat.new()
-	c_style.bg_color = Color(0.35, 0.12, 0.12, 0.85)
-	c_style.border_color = Color(0.75, 0.25, 0.25)
-	c_style.set_border_width_all(1)
-	c_style.set_corner_radius_all(6)
-	close_btn.add_theme_stylebox_override("normal", c_style)
+	close_btn.text = "✖"
+	close_btn.focus_mode = Control.FOCUS_NONE
 	close_btn.pressed.connect(close_menu)
-	top_bar.add_child(close_btn)
+	header.add_child(close_btn)
 
-	# SEÇÃO 1: Grade dos 12 Slots de Equipamento
-	var eq_title := Label.new()
-	eq_title.text = "EQUIPAMENTOS DO PERSONAGEM (12 SLOTS ATIVOS)"
-	eq_title.add_theme_font_size_override("font_size", 12)
-	eq_title.add_theme_color_override("font_color", Color(0.95, 0.8, 0.35))
-	root_vbox.add_child(eq_title)
+	# Livro aberto: página esquerda | lombada | página direita | inspetor
+	var book := HBoxContainer.new()
+	book.add_theme_constant_override("separation", 0)
+	root.add_child(book)
 
-	var grid := GridContainer.new()
-	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 6)
-	root_vbox.add_child(grid)
+	book.add_child(_build_equipment_page())
+	var spine := ColorRect.new()
+	spine.color = COL_WOOD_LIGHT
+	spine.custom_minimum_size = Vector2(8, 0)
+	book.add_child(spine)
+	book.add_child(_build_status_page())
 
-	slot_nodes.clear()
-	for i in range(SLOT_COUNT):
-		var slot_card := _create_slot_card(i)
-		grid.add_child(slot_card["panel"])
-		slot_nodes.append(slot_card)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(10, 0)
+	book.add_child(gap)
+	book.add_child(_build_inspector())
 
-	# BÔNUS SOMADOS DE EQUIPAMENTO
-	var bonus_panel := PanelContainer.new()
-	var b_style := StyleBoxFlat.new()
-	b_style.bg_color = Color(0.10, 0.14, 0.20, 0.85)
-	b_style.border_color = Color(0.3, 0.5, 0.8, 0.5)
-	b_style.set_border_width_all(1)
-	b_style.set_corner_radius_all(6)
-	b_style.content_margin_left = 12
-	b_style.content_margin_right = 12
-	b_style.content_margin_top = 6
-	b_style.content_margin_bottom = 6
-	bonus_panel.add_theme_stylebox_override("panel", b_style)
-	root_vbox.add_child(bonus_panel)
+	root.add_child(_build_bag_section())
+	root.add_child(_build_footer())
 
-	stats_bonus_label = Label.new()
-	stats_bonus_label.text = "✦ BÔNUS SOMADOS DOS EQUIPAMENTOS: Nenhum bônus ativo."
-	stats_bonus_label.add_theme_font_size_override("font_size", 12)
-	stats_bonus_label.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
-	stats_bonus_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	bonus_panel.add_child(stats_bonus_label)
+func _build_equipment_page() -> Control:
+	var page := PanelContainer.new()
+	page.custom_minimum_size = Vector2(330, 340)
+	page.add_theme_stylebox_override("panel", _box(COL_PARCHMENT, COL_PARCHMENT_DARK, 2, 4, 14))
 
-	# Divisor visual
-	var sep := HSeparator.new()
-	var sep_style := StyleBoxLine.new()
-	sep_style.color = Color(0.3, 0.4, 0.55, 0.4)
-	sep.add_theme_stylebox_override("separator", sep_style)
-	root_vbox.add_child(sep)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 4)
+	page.add_child(vb)
+	vb.add_child(_page_title("⚜ Equipamentos ⚜"))
 
-	# SEÇÃO 2: Mochila e Drops Anatômicos
-	var bag_title := Label.new()
-	bag_title.text = "MOCHILA & RECURSOS ANATÔMICOS"
-	bag_title.add_theme_font_size_override("font_size", 12)
-	bag_title.add_theme_color_override("font_color", Color(0.95, 0.8, 0.35))
-	root_vbox.add_child(bag_title)
+	for row in EQUIP_LAYOUT:
+		var hb := HBoxContainer.new()
+		hb.alignment = BoxContainer.ALIGNMENT_CENTER
+		hb.add_theme_constant_override("separation", 10)
+		vb.add_child(hb)
+		for slot_idx in row:
+			hb.add_child(_create_equip_slot(slot_idx))
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	root_vbox.add_child(scroll)
+	var hint := _label("Clique num slot para inspecionar e desequipar.", 11, COL_INK_SOFT)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vb.add_child(hint)
+	return page
 
-	items_container = VBoxContainer.new()
-	items_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	items_container.add_theme_constant_override("separation", 6)
-	scroll.add_child(items_container)
+func _create_equip_slot(slot_idx: int) -> Control:
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 1)
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(52, 52)
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.tooltip_text = SLOT_NAMES[slot_idx]
+	btn.pressed.connect(func(): _select_equipped(slot_idx))
+	vb.add_child(btn)
+	var cap := _label(SLOT_CAPTIONS[slot_idx], 9, COL_INK_SOFT)
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cap.custom_minimum_size = Vector2(56, 0)
+	vb.add_child(cap)
+	equip_buttons[slot_idx] = btn
+	return vb
 
-	empty_label = Label.new()
-	empty_label.text = "Sua mochila está vazia. Abata monstros no mapa para coletar itens e equipamentos."
-	empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	empty_label.add_theme_font_size_override("font_size", 12)
-	empty_label.add_theme_color_override("font_color", Color(0.65, 0.72, 0.8))
-	items_container.add_child(empty_label)
+func _build_status_page() -> Control:
+	var page := PanelContainer.new()
+	page.custom_minimum_size = Vector2(300, 340)
+	page.add_theme_stylebox_override("panel", _box(COL_PARCHMENT, COL_PARCHMENT_DARK, 2, 4, 14))
 
-func _create_slot_card(idx: int) -> Dictionary:
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 2)
+	page.add_child(vb)
+	vb.add_child(_page_title("✒ Atributos ✒"))
+
+	for row in STATUS_ROWS:
+		var key: String = row[0]
+		var btn := Button.new()
+		btn.flat = true
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.custom_minimum_size = Vector2(0, 20)
+		btn.mouse_entered.connect(func(): _show_breakdown(key))
+		btn.pressed.connect(func(): _show_breakdown(key))
+		var hb := HBoxContainer.new()
+		hb.set_anchors_preset(Control.PRESET_FULL_RECT)
+		hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		btn.add_child(hb)
+		var name_l := _label(row[1], 13, COL_INK)
+		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hb.add_child(name_l)
+		var val_l := _label("0", 13, COL_INK)
+		val_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hb.add_child(val_l)
+		status_value_labels[key] = val_l
+		vb.add_child(btn)
+		# Linha sublinhada estilo livro
+		var line := ColorRect.new()
+		line.color = Color(COL_INK_SOFT.r, COL_INK_SOFT.g, COL_INK_SOFT.b, 0.45)
+		line.custom_minimum_size = Vector2(0, 1)
+		vb.add_child(line)
+
+	# Caixa preta chanfrada de detalhamento
+	var box := PanelContainer.new()
+	box.add_theme_stylebox_override("panel", _chamfer_box(Color(0.95, 0.75, 0.3)))
+	box.custom_minimum_size = Vector2(0, 92)
+	vb.add_child(box)
+	var bvb := VBoxContainer.new()
+	box.add_child(bvb)
+	breakdown_title = _label("Passe o mouse num atributo", 13, Color(1.0, 0.85, 0.45))
+	bvb.add_child(breakdown_title)
+	breakdown_body = RichTextLabel.new()
+	breakdown_body.bbcode_enabled = true
+	breakdown_body.fit_content = true
+	breakdown_body.scroll_active = false
+	breakdown_body.add_theme_font_size_override("normal_font_size", 12)
+	bvb.add_child(breakdown_body)
+	return page
+
+func _build_inspector() -> Control:
 	var panel := PanelContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var p_style := StyleBoxFlat.new()
-	p_style.bg_color = Color(0.08, 0.11, 0.16, 0.95)
-	p_style.border_color = Color(0.25, 0.38, 0.55, 0.6)
-	p_style.set_border_width_all(1)
-	p_style.set_corner_radius_all(6)
-	p_style.content_margin_left = 8
-	p_style.content_margin_right = 8
-	p_style.content_margin_top = 6
-	p_style.content_margin_bottom = 6
-	panel.add_theme_stylebox_override("panel", p_style)
+	panel.custom_minimum_size = Vector2(260, 340)
+	panel.add_theme_stylebox_override("panel", _box(COL_DARK_PANEL, Color(0.55, 0.42, 0.25), 2, 8, 12))
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 2)
-	panel.add_child(vbox)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 6)
+	panel.add_child(vb)
+	vb.add_child(_label("🔍 Inspetor de Item", 13, Color(0.8, 0.72, 0.55)))
 
-	var header_hbox := HBoxContainer.new()
-	header_hbox.add_theme_constant_override("separation", 6)
-	vbox.add_child(header_hbox)
+	inspector_name = _label("Nenhum item selecionado", 16, Color(1, 1, 1))
+	inspector_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vb.add_child(inspector_name)
+	inspector_rarity = _label("", 12, Color(0.7, 0.7, 0.7))
+	vb.add_child(inspector_rarity)
 
-	var icon_box := ColorRect.new()
-	icon_box.custom_minimum_size = Vector2(20, 20)
-	icon_box.color = Color(0.2, 0.25, 0.35, 0.8)
-	header_hbox.add_child(icon_box)
+	inspector_body = RichTextLabel.new()
+	inspector_body.bbcode_enabled = true
+	inspector_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	inspector_body.add_theme_font_size_override("normal_font_size", 12)
+	inspector_body.text = "Clique num item equipado ou da mochila para ver os detalhes."
+	vb.add_child(inspector_body)
 
-	var slot_title := Label.new()
-	slot_title.text = "%s %d. %s" % [SLOT_ICONS[idx], idx + 1, SLOT_NAMES[idx]]
-	slot_title.add_theme_font_size_override("font_size", 11)
-	slot_title.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
-	slot_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header_hbox.add_child(slot_title)
+	unequip_btn = Button.new()
+	unequip_btn.text = "⬇️ Desequipar Item"
+	unequip_btn.custom_minimum_size = Vector2(0, 40)
+	unequip_btn.focus_mode = Control.FOCUS_NONE
+	unequip_btn.add_theme_stylebox_override("normal", _box(Color(0.35, 0.18, 0.12), Color(0.9, 0.55, 0.3), 1, 6, 6))
+	unequip_btn.pressed.connect(_on_unequip_pressed)
+	vb.add_child(unequip_btn)
 
-	var item_lbl := Label.new()
-	item_lbl.text = "[Vazio]"
-	item_lbl.add_theme_font_size_override("font_size", 11)
-	item_lbl.add_theme_color_override("font_color", Color(0.55, 0.6, 0.68))
-	item_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(item_lbl)
+	use_btn = Button.new()
+	use_btn.text = "⬆️ Equipar / Usar"
+	use_btn.custom_minimum_size = Vector2(0, 36)
+	use_btn.focus_mode = Control.FOCUS_NONE
+	use_btn.add_theme_stylebox_override("normal", _box(Color(0.14, 0.3, 0.16), Color(0.45, 0.85, 0.45), 1, 6, 6))
+	use_btn.pressed.connect(_on_use_pressed)
+	vb.add_child(use_btn)
 
-	return {
-		"panel": panel,
-		"title_label": slot_title,
-		"item_label": item_lbl,
-		"icon": icon_box
-	}
+	var drop_row := HBoxContainer.new()
+	vb.add_child(drop_row)
+	drop_qty = SpinBox.new()
+	drop_qty.min_value = 1
+	drop_qty.max_value = 1
+	drop_qty.value = 1
+	drop_qty.custom_minimum_size = Vector2(80, 0)
+	drop_row.add_child(drop_qty)
+	drop_btn = Button.new()
+	drop_btn.text = "🗑️ Descartar no Chão"
+	drop_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	drop_btn.focus_mode = Control.FOCUS_NONE
+	drop_btn.add_theme_stylebox_override("normal", _box(Color(0.3, 0.1, 0.1), Color(0.85, 0.35, 0.35), 1, 6, 6))
+	drop_btn.pressed.connect(_on_drop_pressed)
+	drop_row.add_child(drop_btn)
+	return panel
+
+func _build_bag_section() -> Control:
+	var page := PanelContainer.new()
+	page.add_theme_stylebox_override("panel", _box(COL_PARCHMENT, COL_PARCHMENT_DARK, 2, 4, 10))
+	var vb := VBoxContainer.new()
+	page.add_child(vb)
+	vb.add_child(_label("🎒 Mochila", 14, COL_INK))
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 114)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vb.add_child(scroll)
+	bag_grid = GridContainer.new()
+	bag_grid.columns = 14
+	bag_grid.add_theme_constant_override("h_separation", 6)
+	bag_grid.add_theme_constant_override("v_separation", 6)
+	scroll.add_child(bag_grid)
+	return page
+
+func _build_footer() -> Control:
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 16)
+
+	gold_label = _label("🪙 Sollares: 0", 14, Color(1.0, 0.85, 0.35))
+	hb.add_child(gold_label)
+	eclipse_label = _label("🌑 Moedas do Eclipse: 0", 14, Color(0.78, 0.6, 1.0))
+	hb.add_child(eclipse_label)
+
+	var wvb := VBoxContainer.new()
+	wvb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(wvb)
+	weight_label = _label("⚖️ Peso: 0.0 / 0.0 kg", 13, Color(0.95, 0.9, 0.8))
+	wvb.add_child(weight_label)
+	weight_bar = ProgressBar.new()
+	weight_bar.custom_minimum_size = Vector2(0, 14)
+	weight_bar.show_percentage = false
+	weight_bar.max_value = 130.0
+	wvb.add_child(weight_bar)
+
+	# Lixeira no canto inferior direito: descarta o item selecionado da mochila
+	var trash := Button.new()
+	trash.text = "🗑️"
+	trash.tooltip_text = "Descartar o item selecionado da mochila no chão"
+	trash.custom_minimum_size = Vector2(46, 40)
+	trash.focus_mode = Control.FOCUS_NONE
+	trash.add_theme_font_size_override("font_size", 20)
+	trash.add_theme_stylebox_override("normal", _box(Color(0.3, 0.1, 0.1), Color(0.85, 0.35, 0.35), 2, 6, 4))
+	trash.pressed.connect(_on_drop_pressed)
+	hb.add_child(trash)
+	return hb
+
+# ---------------------------------------------------------------------------
+# Atualização
+# ---------------------------------------------------------------------------
 
 func _update_display() -> void:
-	# 1. Atualiza os 12 slots visuais de equipamentos
-	for i in range(SLOT_COUNT):
-		if i >= slot_nodes.size():
-			break
-		var node_data: Dictionary = slot_nodes[i]
-		var item_id: int = equipped_slots[i] if i < equipped_slots.size() else 0
-		var item_lbl: Label = node_data["item_label"]
-		var icon_rect: ColorRect = node_data["icon"]
+	_update_equipment()
+	_update_bag()
+	_update_status()
+	_update_inspector()
+	_update_footer()
 
-		if item_id > 0 and ITEM_CATALOG.has(item_id):
-			var data: Dictionary = ITEM_CATALOG[item_id]
-			item_lbl.text = "%s" % data["name"]
-			item_lbl.add_theme_color_override("font_color", data["color"])
-			icon_rect.color = data["color"]
-		else:
-			item_lbl.text = "[Vazio]"
-			item_lbl.add_theme_color_override("font_color", Color(0.45, 0.5, 0.58))
-			icon_rect.color = Color(0.18, 0.22, 0.28, 0.7)
+func _slot_style(item_id: int, is_selected: bool) -> StyleBoxFlat:
+	var border := COL_WOOD
+	var bg := COL_PARCHMENT_DARK
+	if item_id > 0:
+		var rar: Array = ItemData.rarity(item_id)
+		border = rar[1]
+		bg = _item_color(item_id).darkened(0.55)
+	if is_selected:
+		border = Color(1.0, 0.95, 0.4)
+	return _box(bg, border, 3 if is_selected else 2, 4, 2)
 
-	# 2. Calcula bônus somados concedidos pelos 12 equipamentos
-	var sum_hp: int = 0
-	var sum_str: int = 0
-	var sum_dex: int = 0
-	var sum_con: int = 0
-	var sum_agi: int = 0
-	var sum_int: int = 0
-	var sum_spi: int = 0
-	var sum_mas: int = 0
-	var sum_lck: int = 0
-	var sum_ls: int = 0
+func _update_equipment() -> void:
+	for slot_idx in equip_buttons.keys():
+		var btn: Button = equip_buttons[slot_idx]
+		var item_id: int = int(equipped_slots[slot_idx]) if slot_idx < equipped_slots.size() else 0
+		var is_sel: bool = not selected.is_empty() and selected["source"] == "equip" and selected["index"] == slot_idx
+		btn.text = _monogram(item_id) if item_id > 0 else SLOT_SHORT[slot_idx]
+		btn.add_theme_font_size_override("font_size", 18 if item_id > 0 else 9)
+		btn.add_theme_color_override("font_color", Color(1, 0.97, 0.88) if item_id > 0 else Color(COL_INK_SOFT.r, COL_INK_SOFT.g, COL_INK_SOFT.b, 0.6)) # silhueta apagada
+		btn.tooltip_text = "%s: %s" % [SLOT_NAMES[slot_idx], _item_name(item_id) if item_id > 0 else "(vazio)"]
+		var st := _slot_style(item_id, is_sel)
+		btn.add_theme_stylebox_override("normal", st)
+		btn.add_theme_stylebox_override("hover", st)
+		btn.add_theme_stylebox_override("pressed", st)
 
-	for id in equipped_slots:
-		if id > 0 and ITEM_BONUSES.has(id):
-			var b: Dictionary = ITEM_BONUSES[id]
-			sum_hp += b.get("hp", 0)
-			sum_str += b.get("str", 0)
-			sum_dex += b.get("dex", 0)
-			sum_con += b.get("con", 0)
-			sum_agi += b.get("agi", 0)
-			sum_int += b.get("int", 0)
-			sum_spi += b.get("spi", 0)
-			sum_mas += b.get("mas", 0)
-			sum_lck += b.get("lck", 0)
-			sum_ls += b.get("lifesteal", 0)
-
-	var bonus_parts: Array = []
-	if sum_hp > 0: bonus_parts.append("+%d HP" % sum_hp)
-	if sum_str > 0: bonus_parts.append("+%d FOR" % sum_str)
-	if sum_dex > 0: bonus_parts.append("+%d DES" % sum_dex)
-	if sum_con > 0: bonus_parts.append("+%d CON" % sum_con)
-	if sum_agi > 0: bonus_parts.append("+%d AGI" % sum_agi)
-	if sum_int > 0: bonus_parts.append("+%d INT" % sum_int)
-	if sum_spi > 0: bonus_parts.append("+%d ESP" % sum_spi)
-	if sum_mas > 0: bonus_parts.append("+%d PER" % sum_mas)
-	if sum_lck > 0: bonus_parts.append("+%d SOR" % sum_lck)
-	if sum_ls > 0: bonus_parts.append("+%d%% Roubo de Vida" % sum_ls)
-
-	if stats_bonus_label:
-		if bonus_parts.is_empty():
-			stats_bonus_label.text = "✦ BÔNUS SOMADOS DE EQUIPAMENTO: Nenhum bônus ativo (Equipe itens da mochila abaixo)."
-			stats_bonus_label.add_theme_color_override("font_color", Color(0.65, 0.72, 0.8))
-		else:
-			stats_bonus_label.text = "✦ BÔNUS SOMADOS DE EQUIPAMENTO: " + " | ".join(bonus_parts)
-			stats_bonus_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.6))
-
-	# 3. Atualiza itens da mochila
-	if not items_container:
+func _update_bag() -> void:
+	if bag_grid == null:
 		return
+	for c in bag_grid.get_children():
+		c.queue_free()
+	for i in range(inventory_items.size()):
+		var entry: Dictionary = inventory_items[i]
+		bag_grid.add_child(_create_bag_slot(i, int(entry["id"]), int(entry["quantity"])))
+	# Completa a grade com espaços vazios para manter o visual de pergaminho
+	var empty_count: int = max(0, 28 - inventory_items.size())
+	for _i in range(empty_count):
+		var blank := Panel.new()
+		blank.custom_minimum_size = Vector2(52, 52)
+		blank.add_theme_stylebox_override("panel", _box(COL_PARCHMENT_DARK, Color(COL_WOOD.r, COL_WOOD.g, COL_WOOD.b, 0.4), 1, 4, 0))
+		bag_grid.add_child(blank)
 
-	for child in items_container.get_children():
-		if child != empty_label:
-			child.queue_free()
+func _create_bag_slot(bag_index: int, item_id: int, qty: int) -> Control:
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(52, 52)
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.text = _monogram(item_id)
+	btn.add_theme_font_size_override("font_size", 17)
+	btn.add_theme_color_override("font_color", Color(1, 0.97, 0.88))
+	btn.tooltip_text = "%s x%d (%.1f kg)" % [_item_name(item_id), qty, ItemData.weight(item_id) * qty]
+	var is_sel: bool = not selected.is_empty() and selected["source"] == "bag" and selected["index"] == bag_index
+	var st := _slot_style(item_id, is_sel)
+	btn.add_theme_stylebox_override("normal", st)
+	btn.add_theme_stylebox_override("hover", st)
+	btn.add_theme_stylebox_override("pressed", st)
+	btn.pressed.connect(func(): _select_bag(bag_index))
+	# Quantidade no canto inferior direito
+	var q := _label(str(qty), 11, Color(1, 1, 1))
+	q.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	q.add_theme_constant_override("outline_size", 4)
+	q.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	q.position = Vector2(-18, -16)
+	q.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(q)
+	return btn
 
-	if inventory_items.is_empty():
-		if empty_label:
-			empty_label.visible = true
-		return
-
-	if empty_label:
-		empty_label.visible = false
-
-	for slot_data in inventory_items:
-		var item_id: int = slot_data.get("id", 0)
-		var qty: int = slot_data.get("quantity", 0)
-		if qty <= 0:
+# Soma dos bônus de equipamento por atributo e a lista de itens que o concedem
+func _equip_bonus(key: String) -> Array:
+	var total := 0
+	var sources: Array = []
+	for slot_idx in range(min(SLOT_COUNT, equipped_slots.size())):
+		var item_id: int = int(equipped_slots[slot_idx])
+		if item_id <= 0:
 			continue
+		var v: int = int(ItemData.bonus(item_id).get(key, 0))
+		if v > 0:
+			total += v
+			sources.append([_item_name(item_id), v])
+	return [total, sources]
 
-		var item_entry := _create_item_row(item_id, qty)
-		items_container.add_child(item_entry)
+func _update_status() -> void:
+	for row in STATUS_ROWS:
+		var key: String = row[0]
+		var lbl: Label = status_value_labels.get(key)
+		if lbl == null:
+			continue
+		if key == "def" or key == "mdef":
+			lbl.text = str(_equip_bonus(key)[0])
+		else:
+			lbl.text = str(stat_totals.get(key, 0))
 
-func _create_item_row(item_id: int, qty: int) -> PanelContainer:
-	var item_data: Dictionary = ITEM_CATALOG.get(item_id, {
-		"name": "Item Desconhecido (#%d)" % item_id,
-		"category": "Desconhecido",
-		"desc": "Artefato não identificado dos ermos.",
-		"color": Color("#ffffff"),
-		"usable": false,
-		"btn_text": ""
-	})
+func _show_breakdown(key: String) -> void:
+	var label_text: String = ""
+	for row in STATUS_ROWS:
+		if row[0] == key:
+			label_text = row[1]
+	var eb: Array = _equip_bonus(key)
+	var equip_total: int = eb[0]
+	var sources: Array = eb[1]
+	if key == "def" or key == "mdef":
+		breakdown_title.text = "%s: %d (Equipamentos)" % [label_text, equip_total]
+	else:
+		var total: int = int(stat_totals.get(key, 0))
+		breakdown_title.text = "%s: %d (%d Base + %d Equipamentos)" % [label_text.split(" (")[0], total, total - equip_total, equip_total]
+	var lines: Array = []
+	for src in sources:
+		lines.append("[color=#73e673]+%d %s[/color]" % [src[1], src[0]])
+	if lines.is_empty():
+		lines.append("[color=#9e9e9e]Nenhum item equipado concede este atributo.[/color]")
+	breakdown_body.text = "\n".join(lines)
 
-	var row := PanelContainer.new()
-	var r_style := StyleBoxFlat.new()
-	r_style.bg_color = Color(0.08, 0.10, 0.15, 0.88)
-	var col: Color = item_data["color"]
-	r_style.border_color = Color(col.r, col.g, col.b, 0.35)
-	r_style.set_border_width_all(1)
-	r_style.set_corner_radius_all(6)
-	r_style.content_margin_left = 10
-	r_style.content_margin_right = 10
-	r_style.content_margin_top = 6
-	r_style.content_margin_bottom = 6
-	row.add_theme_stylebox_override("panel", r_style)
+func _select_equipped(slot_idx: int) -> void:
+	var item_id: int = int(equipped_slots[slot_idx])
+	if item_id <= 0:
+		selected = {}
+	else:
+		selected = {"source": "equip", "index": slot_idx, "id": item_id, "qty": 1}
+	_update_display()
 
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 10)
-	row.add_child(hbox)
+func _select_bag(bag_index: int) -> void:
+	var entry: Dictionary = inventory_items[bag_index]
+	selected = {"source": "bag", "index": bag_index, "id": int(entry["id"]), "qty": int(entry["quantity"])}
+	_update_display()
 
-	var icon_box := ColorRect.new()
-	icon_box.custom_minimum_size = Vector2(32, 32)
-	icon_box.color = item_data["color"]
-	hbox.add_child(icon_box)
+func _update_inspector() -> void:
+	if inspector_name == null:
+		return
+	if selected.is_empty():
+		inspector_name.text = "Nenhum item selecionado"
+		inspector_rarity.text = ""
+		inspector_body.text = "Clique num item equipado ou da mochila para ver os detalhes."
+		unequip_btn.visible = false
+		use_btn.visible = false
+		drop_btn.get_parent().visible = false
+		return
 
-	var info_vbox := VBoxContainer.new()
-	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_vbox.add_theme_constant_override("separation", 2)
-	hbox.add_child(info_vbox)
+	var item_id: int = selected["id"]
+	var qty: int = selected["qty"]
+	var data: Dictionary = ITEM_CATALOG.get(item_id, {})
+	var rar: Array = ItemData.rarity(item_id)
+	inspector_name.text = _item_name(item_id)
+	inspector_name.add_theme_color_override("font_color", data.get("color", Color(1, 1, 1)))
+	inspector_rarity.text = "%s  •  %s" % [rar[0], data.get("category", "Item")]
+	inspector_rarity.add_theme_color_override("font_color", rar[1])
 
-	var title_lbl := Label.new()
-	title_lbl.text = "%s  (Qtd: %d)" % [item_data["name"], qty]
-	title_lbl.add_theme_font_size_override("font_size", 13)
-	title_lbl.add_theme_color_override("font_color", item_data["color"])
-	info_vbox.add_child(title_lbl)
+	var lines: Array = []
+	var b: Dictionary = ItemData.bonus(item_id)
+	for key in ["atk", "def", "mdef", "hp", "str", "dex", "con", "agi", "int", "spi", "mas", "lck"]:
+		if b.has(key):
+			lines.append("[color=#73e673]+%d %s[/color]" % [int(b[key]), BONUS_LABELS[key]])
+	if item_id == 15:
+		lines.append("[color=#73e673]+15% Roubo de Vida[/color]")
+	if not lines.is_empty():
+		lines.append("")
+	var desc: String = data.get("desc", "")
+	if desc != "":
+		lines.append("[i]%s[/i]" % desc)
+		lines.append("")
+	var unit_w: float = ItemData.weight(item_id)
+	if qty > 1:
+		lines.append("⚖️ Peso: %.1f kg cada  •  %.1f kg na pilha (x%d)" % [unit_w, unit_w * qty, qty])
+	else:
+		lines.append("⚖️ Peso: %.1f kg" % unit_w)
+	if ItemData.slot_of(item_id) >= 0:
+		lines.append("🛠 Durabilidade: 100/100")
+		lines.append("📍 Slot: %s" % SLOT_NAMES[ItemData.slot_of(item_id)])
+	inspector_body.text = "\n".join(lines)
 
-	var desc_lbl := Label.new()
-	desc_lbl.text = "[%s] %s" % [item_data["category"], item_data["desc"]]
-	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_lbl.add_theme_font_size_override("font_size", 11)
-	desc_lbl.add_theme_color_override("font_color", Color(0.8, 0.85, 0.92))
-	info_vbox.add_child(desc_lbl)
+	var is_equipped: bool = selected["source"] == "equip"
+	unequip_btn.visible = is_equipped
+	use_btn.visible = not is_equipped and (data.get("usable", false) or ItemData.slot_of(item_id) >= 0)
+	use_btn.text = "⬆️ Equipar" if ItemData.slot_of(item_id) >= 0 else "⬆️ Usar"
+	drop_btn.get_parent().visible = not is_equipped
+	drop_qty.max_value = max(1, qty)
+	drop_qty.value = clampi(int(drop_qty.value), 1, max(1, qty))
+	drop_qty.editable = qty > 1
 
-	if item_data.get("usable", false):
-		var btn := Button.new()
-		btn.text = " " + item_data.get("btn_text", "[Usar / Equipar]") + " "
-		btn.custom_minimum_size = Vector2(165, 32)
-		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		var b_style := StyleBoxFlat.new()
-		b_style.bg_color = Color(0.18, 0.28, 0.42, 0.95)
-		b_style.border_color = Color(0.45, 0.65, 0.95, 0.85)
-		b_style.set_border_width_all(1)
-		b_style.set_corner_radius_all(5)
-		btn.add_theme_stylebox_override("normal", b_style)
-		btn.pressed.connect(func(): _on_item_used(item_id))
-		hbox.add_child(btn)
+func _update_footer() -> void:
+	if gold_label == null:
+		return
+	gold_label.text = "🪙 Sollares: %d" % gold
+	eclipse_label.text = "🌑 Moedas do Eclipse: %d" % eclipse_coins
+	var ratio: float = current_weight / max_weight if max_weight > 0.0 else 0.0
+	var pct: int = int(round(ratio * 100.0))
+	var status_text := "Normal"
+	var col := Color(0.35, 0.8, 0.35)
+	if ratio >= 1.3:
+		status_text = "🛑 SOBRECARREGADO — IMÓVEL!"
+		col = Color(0.95, 0.15, 0.15)
+	elif ratio >= 1.0:
+		status_text = "Muito Pesado — Lento"
+		col = Color(1.0, 0.55, 0.15)
+	elif ratio >= 0.7:
+		status_text = "Pesado"
+		col = Color(0.95, 0.85, 0.2)
+	weight_label.text = "⚖️ Peso: %.1f / %.1f kg (%d%% - %s)" % [current_weight, max_weight, pct, status_text]
+	weight_label.add_theme_color_override("font_color", col.lightened(0.3))
+	weight_bar.value = minf(ratio * 100.0, 130.0)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = col
+	fill.set_corner_radius_all(3)
+	weight_bar.add_theme_stylebox_override("fill", fill)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.12, 0.08, 0.05)
+	bg.set_corner_radius_all(3)
+	weight_bar.add_theme_stylebox_override("background", bg)
 
-	return row
+# ---------------------------------------------------------------------------
+# Ações
+# ---------------------------------------------------------------------------
+
+func _on_unequip_pressed() -> void:
+	if selected.is_empty() or selected["source"] != "equip":
+		return
+	var nm := get_node_or_null("/root/NetworkManager")
+	if nm and nm.has_method("send_unequip_slot"):
+		nm.send_unequip_slot(int(selected["index"]))
+	selected = {}
+	_update_display()
+
+func _on_use_pressed() -> void:
+	if selected.is_empty() or selected["source"] != "bag":
+		return
+	_on_item_used(int(selected["id"]))
+
+func _on_drop_pressed() -> void:
+	if selected.is_empty() or selected["source"] != "bag":
+		var world := get_parent()
+		if world and world.has_method("show_loot_toast"):
+			world.show_loot_toast("Selecione um item da mochila para descartar.")
+		return
+	var amount: int = clampi(int(drop_qty.value), 1, int(selected["qty"]))
+	var nm := get_node_or_null("/root/NetworkManager")
+	if nm and nm.has_method("send_drop_item_ground"):
+		nm.send_drop_item_ground(int(selected["index"]), amount)
+	var w := get_parent()
+	if w and w.has_method("show_loot_toast"):
+		w.show_loot_toast("🗑️ %dx %s descartado(s) no chão." % [amount, _item_name(int(selected["id"]))])
 
 func _on_item_used(item_id: int) -> void:
 	print("[InventoryUI] Utilizando/equipando Item ID %d..." % item_id)

@@ -95,19 +95,19 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemMechaBlueprint:         {Name: "Diagrama do Mecha Gnarlin", Weight: 0.2, Slot: NoSlot},
 
 	// Mão Principal (12)
-	protocol.ItemIronLongsword: {Name: "Espada Longa de Ferro", Weight: 4.2, Slot: protocol.SlotMainHand, BonusSTR: 2, BonusATK: 12},
-	protocol.ItemOakStaff:      {Name: "Cajado de Carvalho Arcano", Weight: 2.2, Slot: protocol.SlotMainHand, BonusINT: 4, BonusATK: 8, BonusMDEF: 2},
-	protocol.ItemRecurveBow:    {Name: "Arco Recurvo de Caça", Weight: 3.6, Slot: protocol.SlotMainHand, BonusDEX: 3, BonusATK: 11},
-	protocol.ItemSteelDagger:   {Name: "Adaga de Aço", Weight: 1.3, Slot: protocol.SlotMainHand, BonusDEX: 2, BonusLCK: 1, BonusATK: 8},
+	protocol.ItemIronLongsword: {Name: "Espada Longa de Aço", Weight: 4.2, Slot: protocol.SlotMainHand, BonusSTR: 2, BonusATK: 12},
+	protocol.ItemOakStaff:      {Name: "Cajado Arcano", Weight: 2.2, Slot: protocol.SlotMainHand, BonusINT: 4, BonusATK: 8, BonusMDEF: 2},
+	protocol.ItemRecurveBow:    {Name: "Arco de Caça", Weight: 3.6, Slot: protocol.SlotMainHand, BonusDEX: 3, BonusATK: 11},
+	protocol.ItemSteelDagger:   {Name: "Adagas Gêmeas", Weight: 1.3, Slot: protocol.SlotMainHand, BonusDEX: 2, BonusLCK: 1, BonusATK: 8},
 	protocol.ItemIronKnuckles:  {Name: "Manoplas de Ferro", Weight: 2.4, Slot: protocol.SlotMainHand, BonusSTR: 2, BonusATK: 9, BonusDEF: 1},
 	protocol.ItemForgeHammer:   {Name: "Martelo de Forja", Weight: 14.0, Slot: protocol.SlotMainHand, BonusSTR: 4, BonusMAS: 2, BonusATK: 18},
-	protocol.ItemGiantCleaver:  {Name: "Cutelo Gigante", Weight: 12.5, Slot: protocol.SlotMainHand, BonusSTR: 3, BonusMAS: 2, BonusATK: 17},
+	protocol.ItemGiantCleaver:  {Name: "Cutelo Gourmet", Weight: 12.5, Slot: protocol.SlotMainHand, BonusSTR: 3, BonusMAS: 2, BonusATK: 17},
 	protocol.ItemBeastWhip:     {Name: "Chicote Bestial", Weight: 3.8, Slot: protocol.SlotMainHand, BonusDEX: 2, BonusESP: 1, BonusATK: 10},
 	protocol.ItemSteelNeedles:  {Name: "Agulhas de Aço Rúnicas", Weight: 1.2, Slot: protocol.SlotMainHand, BonusDEX: 2, BonusINT: 2, BonusATK: 9},
 	protocol.ItemColossalSword: {Name: "Espada Colossal", Weight: 20.0, Slot: protocol.SlotMainHand, BonusSTR: 6, BonusATK: 26},
 
 	// Mão Secundária (13)
-	protocol.ItemTowerShield:     {Name: "Escudo de Torre", Weight: 16.0, Slot: protocol.SlotOffHand, BonusCON: 4, BonusHP: 40, BonusDEF: 12},
+	protocol.ItemTowerShield:     {Name: "Escudo Bastião", Weight: 16.0, Slot: protocol.SlotOffHand, BonusCON: 4, BonusHP: 40, BonusDEF: 12},
 	protocol.ItemOffhandDagger:   {Name: "Adaga Secundária", Weight: 1.2, Slot: protocol.SlotOffHand, BonusDEX: 1, BonusATK: 5},
 	protocol.ItemArcaneOrb:       {Name: "Orbe Arcano", Weight: 1.4, Slot: protocol.SlotOffHand, BonusINT: 3, BonusESP: 2, BonusMDEF: 4},
 	protocol.ItemAlchemyCatalyst: {Name: "Catalisador Alquímico", Weight: 1.6, Slot: protocol.SlotOffHand, BonusINT: 2, BonusMAS: 2, BonusATK: 4},
