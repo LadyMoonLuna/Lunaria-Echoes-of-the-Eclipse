@@ -78,7 +78,7 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 
 	// Evoluir Classe (ActionMode 1): Tier 1 -> Tier 2 (Incomum: 1.20x)
 	// Level DEVE SER MANTIDO em 6!
-	// 175 * 1.20 = 210 HP, 120 * 1.20 = 144 Stam
+	// 175 * 1.20 = 210 HP, 120 * 1.20 = 144 Stam; a partir do Tier 2 o Caminho padrão (Gladiador) aplica +10% de HP -> 231
 	p.SetIdentityMode(0, 0, protocol.IdentityModeEvolveClass)
 	if p.ClassTier != protocol.TierUncommon {
 		t.Fatalf("Esperava Tier 2 Incomum, obteve %d", p.ClassTier)
@@ -86,8 +86,8 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 	if p.Level != 6 {
 		t.Fatalf("Evolução de classe base deve MANTER o nível! Esperava 6, obteve %d", p.Level)
 	}
-	if p.MaxHP != 210 || p.MaxStamina != 144 {
-		t.Fatalf("Esperava (210, 144) no Tier 2 Level 6, obteve (%d, %d)", p.MaxHP, p.MaxStamina)
+	if p.MaxHP != 231 || p.MaxStamina != 144 {
+		t.Fatalf("Esperava (231, 144) no Tier 2 Level 6, obteve (%d, %d)", p.MaxHP, p.MaxStamina)
 	}
 
 	// Evoluir para Tier 3 (Rara: 1.45x)
@@ -618,6 +618,7 @@ func TestAll46RacesBaseAttributes(t *testing.T) {
 		{protocol.RaceTurtleDemi, 9, 4, 16, 3, 6, 8, 9, 5},
 		{protocol.RaceHalfDemon, 8, 10, 7, 10, 11, 4, 8, 8},
 		{protocol.RaceWolfDemi, 12, 9, 10, 11, 3, 4, 8, 7},
+		{protocol.RaceManamancer, 3, 6, 8, 6, 13, 11, 7, 4},
 	}
 
 	for _, tc := range testCases {

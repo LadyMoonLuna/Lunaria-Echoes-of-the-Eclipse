@@ -29,6 +29,9 @@ const SERVER_HOST: String = "127.0.0.1"
 const TCP_PORT: int = 7000
 const UDP_PORT: int = 7001
 
+## Caminho (SubPath 1 a 4) de cada jogador, vindo do PLAYER_STATS
+var player_sub_paths: Dictionary = {}
+
 var tcp: StreamPeerTCP = StreamPeerTCP.new()
 var udp: PacketPeerUDP = PacketPeerUDP.new()
 
@@ -121,15 +124,11 @@ func _process_tcp() -> void:
 				npc_spoke.emit(npc_id, text)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
 
-			elif opcode == 0x33: # PLAYER_STATS (31 bytes, 18 bytes ou 15 bytes)
-				var expected_len: int = 31
-				if tcp_rx_buffer.size() < 31:
-					if tcp_rx_buffer.size() >= 18:
-						expected_len = 18
-					elif tcp_rx_buffer.size() >= 15:
-						expected_len = 15
-					else:
-						break
+			elif opcode == 0x33: # PLAYER_STATS (32 bytes = PlayerStatsPacketSize no servidor)
+				# Espera o pacote inteiro: adivinhar o tamanho pelo que já chegou quebra o enquadramento do TCP
+				var expected_len: int = 32
+				if tcp_rx_buffer.size() < expected_len:
+					break
 				var b := StreamPeerBuffer.new()
 				b.big_endian = false
 				b.data_array = tcp_rx_buffer.slice(1, expected_len)
@@ -179,6 +178,7 @@ func _process_tcp() -> void:
 					spi_stat = b.get_u8()
 					mas_stat = b.get_u8()
 					lck_stat = b.get_u8()
+				player_sub_paths[pid] = b.get_u8() # Caminho da classe (1 a 4)
 				player_stats_received.emit(pid, race, cls, hp, max_hp, stam, max_stam)
 				player_stats_updated.emit(pid, race, cls, hp, max_hp, stam, max_stam)
 				player_stats_full_received.emit(pid, race, cls, tier, lvl, hp, max_hp, stam, max_stam, buff)
@@ -646,17 +646,18 @@ func send_dev_teleport(dest_id: int) -> void:
 	send_world_control(9, dest_id)
 
 # send_select_identity envia o pacote TCP 0x30 para definir Raça, Classe e Modo de Ação
-func send_select_identity(race_id: int, class_id: int, action_mode: int = 0) -> void:
+func send_select_identity(race_id: int, class_id: int, action_mode: int = 0, sub_path: int = 0) -> void:
 	if my_player_id == 0:
 		return
 
 	var buffer := StreamPeerBuffer.new()
 	buffer.big_endian = false
-	buffer.put_u8(0x30) # SELECT_IDENTITY (8 bytes)
+	buffer.put_u8(0x30) # SELECT_IDENTITY (9 bytes, igual a SelectIdentityPacketSize no servidor)
 	buffer.put_u32(my_player_id)
 	buffer.put_u8(race_id)
 	buffer.put_u8(class_id)
 	buffer.put_u8(action_mode)
+	buffer.put_u8(sub_path) # 0 = manter o Caminho atual
 
 	tcp.put_data(buffer.data_array)
 

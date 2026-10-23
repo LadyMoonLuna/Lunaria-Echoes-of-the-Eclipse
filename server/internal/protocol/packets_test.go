@@ -235,6 +235,7 @@ func TestSelectIdentityPacket(t *testing.T) {
 	playerID := uint32(99)
 	raceID := RaceNoctari
 	classID := ClassScout
+	actionMode := IdentityModeEvolveClass
 	subPath := uint8(2)
 
 	data := SerializeSelectIdentity(playerID, raceID, classID, actionMode, subPath)

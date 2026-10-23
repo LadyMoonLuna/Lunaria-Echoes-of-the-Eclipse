@@ -176,6 +176,10 @@ const (
 	RaceTurtleDemi      uint8 = 44 // Demi-Humano Tartaruga (Armadura Orgânica - 1.35x)
 	RaceHalfDemon       uint8 = 45 // Meio-Demônio / Succubus (Aparência Inofensiva)
 	RaceWolfDemi        uint8 = 46 // Demi-Humano Lobo (Olfato & Instinto)
+	RaceManamancer      uint8 = 47 // Manamante (Coração de Mana — conjura com a própria Vida)
+
+	// RaceMaxID é o maior ID de raça válido.
+	RaceMaxID uint8 = 47
 )
 
 // Slots de Equipamento (Array fixo de 12 slots)
@@ -911,13 +915,11 @@ func DeserializeSelectIdentity(data []byte, out *SelectIdentityPacket) error {
 	} else {
 		out.ActionMode = IdentityModeInitialChange
 	}
+	// SubPath 0 = manter o Caminho atual (SetIdentityMode só troca com valores de 1 a 4)
 	if len(data) >= SelectIdentityPacketSize {
 		out.SubPath = data[8]
-		if out.SubPath == 0 {
-			out.SubPath = 1
-		}
 	} else {
-		out.SubPath = 1
+		out.SubPath = 0
 	}
 	return nil
 }
