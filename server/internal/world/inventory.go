@@ -112,13 +112,13 @@ func (p *Player) RemoveHeavyItems() int {
 
 // equipDEFLocked soma a defesa física dos itens equipados.
 func (p *Player) equipDEFLocked() uint16 {
-	var def uint16
+	var def float32
 	for _, id := range p.EquippedSlots {
 		if id > 0 {
-			def += GetItemInfo(id).BonusDEF
+			def += float32(GetItemInfo(id).BonusDEF) * qualityStatMult(p.itemQualityLocked(id))
 		}
 	}
-	return def
+	return uint16(def + 0.5)
 }
 
 // EquipBonuses retorna ATK, DEF e MDEF somados dos itens equipados.
@@ -128,9 +128,10 @@ func (p *Player) EquipBonuses() (atk, def, mdef uint16) {
 	for _, id := range p.EquippedSlots {
 		if id > 0 {
 			info := GetItemInfo(id)
-			atk += info.BonusATK
-			def += info.BonusDEF
-			mdef += info.BonusMDEF
+			m := qualityStatMult(p.itemQualityLocked(id))
+			atk += uint16(float32(info.BonusATK)*m + 0.5)
+			def += uint16(float32(info.BonusDEF)*m + 0.5)
+			mdef += uint16(float32(info.BonusMDEF)*m + 0.5)
 		}
 	}
 	return atk, def, mdef

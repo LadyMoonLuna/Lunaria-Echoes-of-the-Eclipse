@@ -3661,6 +3661,19 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		return
 	}
 
+	// A Qualidade do minigame decide o resultado (o tier enviado é só informativo)
+	if pkt.Quality > 100 {
+		pkt.Quality = 100
+	}
+	switch {
+	case pkt.Quality >= world.PerfectQuality:
+		pkt.ResultTier = protocol.QualityPerfect
+	case pkt.Quality >= world.JunkQuality:
+		pkt.ResultTier = protocol.QualityCommon
+	default:
+		pkt.ResultTier = protocol.QualityDestroyed
+	}
+
 	// Atualiza o estado do órgão no cadáver
 	organ, ok := corpse.MarkOrganExtracted(pkt.OrganIndex, pkt.ResultTier)
 	if !ok {
@@ -3685,7 +3698,7 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		if qty == 0 {
 			qty = 1
 		}
-		resultMsg = fmt.Sprintf("[AUTÓPSIA PERFEITA] Corte de precisão máxima na Zona Verde! Você extraiu: %s (Qualidade Perfeita x%d).", organ.Name, qty)
+		resultMsg = fmt.Sprintf("[AUTÓPSIA EXCELENTE] Você extraiu: %s x%d (Qualidade %d/100).", organ.Name, qty, pkt.Quality)
 
 	case protocol.QualityCommon: // 2: Comum (Zona Amarela)
 		player.Mu.Lock()
@@ -3697,16 +3710,16 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		if qty == 0 {
 			qty = 1
 		}
-		resultMsg = fmt.Sprintf("[AUTÓPSIA COMUM] Corte na Zona Amarela. Você extraiu: %s (Qualidade Comum x%d).", organ.Name, qty)
+		resultMsg = fmt.Sprintf("[AUTÓPSIA COMUM] Você extraiu: %s x%d (Qualidade %d/100).", organ.Name, qty, pkt.Quality)
 
 	default: // 3: Destruído / Zona Vermelha ou Tempo Expirado
 		player.Mu.Lock()
 		player.PerfectAutopsiesStreak = 0
 		player.Mu.Unlock()
 
-		itemToGive = protocol.ItemOrganicTrash // Item 28: Lixo Orgânico
+		itemToGive = world.JunkFor(organ.ItemReward) // Lixo Orgânico ou Sucata Metálica
 		qty = 1
-		resultMsg = fmt.Sprintf("[AUTÓPSIA FALHA] O bisturi atingiu a Zona Vermelha! O órgão foi dilacerado e virou Lixo Orgânico.")
+		resultMsg = fmt.Sprintf("[AUTÓPSIA FALHA] Qualidade %d/100 (abaixo de %d): %s virou %s.", pkt.Quality, world.JunkQuality, organ.Name, world.GetItemInfo(itemToGive).Name)
 	}
 
 	// Consome o Frasco Vazio quando o fluido é drenado com sucesso
@@ -3730,9 +3743,9 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 			player.ID, itemToGive, organ.Name, pkt.CorpseID)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[MOCHILA CHEIA] Sua mochila está lotada! O item (%s) ficou no chão junto ao cadáver.", organ.Name))
 	} else {
-		player.AddItem(itemToGive, qty)
+		player.AddItemWithQuality(itemToGive, qty, pkt.Quality)
 		s.sendInventorySync(player)
-		s.BroadcastNPCSay(0, resultMsg)
+		s.sendPlayerNPCSay(player, 0, resultMsg)
 		log.Printf("[AUTOPSIA] Jogador #%d extraiu órgão #%d do cadáver #%d (Tier %d) -> Item %d (x%d)\n",
 			player.ID, pkt.OrganIndex, pkt.CorpseID, pkt.ResultTier, itemToGive, qty)
 	}

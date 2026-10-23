@@ -1,6 +1,13 @@
 extends CanvasLayer
 
 const ItemData = preload("res://scripts/ItemData.gd")
+const AutopsyMinigameScript = preload("res://scripts/AutopsyMinigame.gd")
+
+# Qualidade (0-100): menos erros no minigame = mais qualidade. Abaixo do limite o item vira lixo.
+const JUNK_QUALITY := 35
+const PERFECT_QUALITY := 80
+var minigame = null # AutopsyMinigame (um minigame por tipo de órgão)
+var legend_box: HBoxContainer = null
 
 # Menu Seletor de Anatomia Visceral (+18): o jogador escolhe o que extrair; nada é automático.
 # Drenar sangue é opcional (precisa ligar o seletor e ter um Frasco Vazio).
@@ -155,6 +162,8 @@ func close_menu() -> void:
 	visible = false
 	is_minigame_active = false
 	selected_organ_index = -1
+	if minigame:
+		minigame.stop()
 
 	var world := get_parent()
 	var any_other_open := false
@@ -239,47 +248,66 @@ func _execute_cut() -> void:
 	var dist_from_center: float = abs(needle_ratio - 0.5) * 2.0
 	var accuracy: float = 1.0 - dist_from_center
 
-	var tier: int = 3
+	# Pêndulo: Qualidade pela distância do centro (a zona verde vale 80+, a vermelha vira lixo)
+	var quality: float
 	if accuracy >= green_threshold:
-		tier = 1 # Perfeito
+		quality = lerpf(80.0, 100.0, (accuracy - green_threshold) / max(0.01, 1.0 - green_threshold))
 	elif accuracy >= yellow_threshold:
-		# Sorte (LCK): Concede chance passiva de elevar comum para perfeito (+1.5%/ponto)
-		var luck_chance: float = min(0.40, float(player_luck_stat) * 0.015)
-		if randf() < luck_chance:
-			tier = 1 # Elevado pela Sorte!
-		else:
-			tier = 2 # Comum
+		quality = lerpf(35.0, 79.0, (accuracy - yellow_threshold) / max(0.01, green_threshold - yellow_threshold))
 	else:
-		tier = 3 # Destruído / Zona Vermelha
+		quality = lerpf(0.0, 34.0, accuracy / max(0.01, yellow_threshold))
+	_finish_extraction(int(quality))
 
-	# Feedback visual imediato
-	var item_name: String = _item_name(organ.get("item_reward", 0))
+func _on_minigame_finished(quality: int) -> void:
+	_finish_extraction(quality)
+
+# Conclui a extração do órgão selecionado com a Qualidade obtida no minigame
+func _finish_extraction(raw_quality: int) -> void:
+	if selected_organ_index < 0:
+		return
+	var organ: Dictionary = _get_organ_by_index(selected_organ_index)
+	if organ.is_empty():
+		return
+	# Perícia (MAS) e a passiva Células Gourmet refinam o corte; a Sorte pode salvar um corte quase bom
+	var q: float = float(raw_quality)
+	if q > 0.0:
+		q += float(player_mas_stat) * 0.6
+		var world := get_parent()
+		if world and world.get("my_class_id") != null and (world.my_class_id == 12 or world.my_class_id == 18):
+			q += 8.0
+		if q < JUNK_QUALITY and q >= JUNK_QUALITY - 8 and randf() < min(0.4, float(player_luck_stat) * 0.015):
+			q = JUNK_QUALITY
+	var quality: int = clampi(int(round(q)), 0, 100)
+	var tier: int = 1 if quality >= PERFECT_QUALITY else (2 if quality >= JUNK_QUALITY else 3)
+
+	var item_id: int = organ.get("item_reward", 0)
+	var item_name: String = _item_name(item_id)
+	var aspect: String = ItemData.quality_aspect(item_id)
 	match tier:
 		1:
-			feedback_text = "★ [PERFEITO] Corte Impecável na Zona Verde!\nVocê obteve: %s (Qualidade Máxima)!%s" % [item_name, _forge_props(organ.get("item_reward", 0))]
+			feedback_text = "★ [EXCELENTE] %s: %d/100\nVocê obteve: %s%s" % [aspect, quality, item_name, _forge_props(item_id)]
 			feedback_color = Color("#00e676")
 		2:
-			feedback_text = "[COMUM] Corte Aceitável na Zona Amarela.\nMaterial com leves rasgos: %s%s" % [item_name, _forge_props(organ.get("item_reward", 0))]
+			feedback_text = "[COMUM] %s: %d/100\nVocê obteve: %s%s" % [aspect, quality, item_name, _forge_props(item_id)]
 			feedback_color = Color("#ffb300")
 		3:
-			feedback_text = "✗ [DESTRUÍDO] O bisturi errou na Zona Vermelha!\nO tecido foi dilacerado e virou Lixo Orgânico!"
+			feedback_text = "✗ [ARRUINADO] %s: %d/100 — abaixo de %d!\nO material virou %s." % [aspect, quality, JUNK_QUALITY, ItemData.junk_name(item_id)]
 			feedback_color = Color("#ef5350")
-
-	feedback_timer = 4.0
+	feedback_timer = 5.0
 	if feedback_label:
 		feedback_label.text = feedback_text
 		feedback_label.modulate = feedback_color
 
-	# Envia resultado autoritativo ao servidor (0x3D)
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
-		nm.send_submit_autopsy_result(current_corpse_id, selected_organ_index, tier)
+		nm.send_submit_autopsy_result(current_corpse_id, selected_organ_index, tier, quality)
 
-	# Atualiza o órgão localmente
 	organ["quality_tier"] = tier
+	is_minigame_active = false
+	if minigame:
+		minigame.stop()
+	selected_organ_index = -1
 	_refresh_display()
-
-	# Verifica se todos os órgãos foram processados
 	_check_all_organs_extracted()
 
 func _claim_legendary_direct(organ_index: int) -> void:
@@ -298,7 +326,7 @@ func _claim_legendary_direct(organ_index: int) -> void:
 	# Envia diretamente ao servidor com Tier 1 (sem mini-game)
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
-		nm.send_submit_autopsy_result(current_corpse_id, organ_index, 1)
+		nm.send_submit_autopsy_result(current_corpse_id, organ_index, 1, 100)
 
 	organ["quality_tier"] = 1
 	_refresh_display()
@@ -340,6 +368,18 @@ func _select_organ(idx: int) -> void:
 	# Ajusta velocidade com base na dificuldade do órgão
 	var diff: int = organ.get("difficulty", 3)
 	needle_speed = 1.8 + float(diff) * 0.15
+
+	# Cada tipo de órgão tem o seu minigame; o Fígado (e pontos genéricos) usa o pêndulo clássico
+	var uses_custom: bool = false
+	if minigame:
+		uses_custom = minigame.start(int(organ.get("type", 1)), diff)
+		minigame.visible = uses_custom
+	if precision_bar_control:
+		precision_bar_control.visible = not uses_custom
+	if legend_box:
+		legend_box.visible = not uses_custom
+	if cut_action_btn:
+		cut_action_btn.visible = not uses_custom
 
 	_update_minigame_panel()
 	_refresh_display()
@@ -519,10 +559,17 @@ func _build_ui() -> void:
 	precision_bar_control.draw.connect(_on_draw_precision_bar)
 	mg_vbox.add_child(precision_bar_control)
 
+	# Minigames específicos de cada órgão (a barra acima fica para o Fígado e pontos genéricos)
+	minigame = AutopsyMinigameScript.new()
+	minigame.visible = false
+	minigame.finished.connect(_on_minigame_finished)
+	mg_vbox.add_child(minigame)
+
 	# Legenda das Zonas
 	var legend_hbox := HBoxContainer.new()
 	legend_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mg_vbox.add_child(legend_hbox)
+	legend_box = legend_hbox
 
 	var l_red := Label.new()
 	l_red.text = "Vermelha (Erro/Lixo)"

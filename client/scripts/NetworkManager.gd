@@ -194,11 +194,11 @@ func _process_tcp() -> void:
 				player_attributes_received.emit(pid, xp, next_xp, stat_pts, str_stat, dex_stat, con_stat, agi_stat, int_stat, spi_stat, mas_stat, lck_stat)
 				tcp_rx_buffer = tcp_rx_buffer.slice(expected_len)
 
-			elif opcode == 0x38: # INVENTORY_SYNC: op | 14 slots | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count | count × 2
+			elif opcode == 0x38: # INVENTORY_SYNC: op | 14 slots | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count | count × (item, qtd, Qualidade)
 				if tcp_rx_buffer.size() < 33:
 					break
 				var slot_count: int = tcp_rx_buffer[32]
-				var total_size: int = 33 + slot_count * 2
+				var total_size: int = 33 + slot_count * 3
 				if tcp_rx_buffer.size() < total_size:
 					break
 				var inv_buf := StreamPeerBuffer.new()
@@ -216,8 +216,8 @@ func _process_tcp() -> void:
 				var items_array: Array = []
 				var offset: int = 33
 				for i in range(slot_count):
-					items_array.append({"id": tcp_rx_buffer[offset], "quantity": tcp_rx_buffer[offset + 1]})
-					offset += 2
+					items_array.append({"id": tcp_rx_buffer[offset], "quantity": tcp_rx_buffer[offset + 1], "quality": tcp_rx_buffer[offset + 2]})
+					offset += 3
 				inventory_updated.emit(equipped_slots, items_array)
 				wallet_weight_updated.emit(gold, eclipse_coins, cur_weight, max_weight, speed_mult)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
@@ -880,17 +880,20 @@ func send_interact_corpse(corpse_id: int) -> void:
 	print("[NetworkManager] 0x3B INTERACT_CORPSE enviado para cadáver #%d" % corpse_id)
 
 # send_submit_autopsy_result envia o pacote TCP 0x3D com o resultado do mini-game (11 bytes)
-func send_submit_autopsy_result(corpse_id: int, organ_index: int, result_tier: int) -> void:
+func send_submit_autopsy_result(corpse_id: int, organ_index: int, result_tier: int, quality: int = -1) -> void:
 	if my_player_id == 0:
 		return
+	if quality < 0:
+		quality = [0, 90, 60, 10][clampi(result_tier, 0, 3)]
 
 	var buffer := StreamPeerBuffer.new()
 	buffer.big_endian = false
-	buffer.put_u8(0x3D) # SUBMIT_AUTOPSY_RESULT (11 bytes)
+	buffer.put_u8(0x3D) # SUBMIT_AUTOPSY_RESULT (12 bytes): ..., tier, Qualidade 0-100
 	buffer.put_u32(my_player_id)
 	buffer.put_u32(corpse_id)
 	buffer.put_u8(organ_index)
 	buffer.put_u8(result_tier)
+	buffer.put_u8(clampi(quality, 0, 100))
 
 	tcp.put_data(buffer.data_array)
 	print("[NetworkManager] 0x3D SUBMIT_AUTOPSY_RESULT enviado: Corpse #%d, Órgão #%d, Tier %d" % [corpse_id, organ_index, result_tier])

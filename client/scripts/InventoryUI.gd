@@ -475,7 +475,7 @@ func _refresh_selection() -> void:
 		return
 	for i in range(inventory_items.size()):
 		if int(inventory_items[i]["id"]) == int(selected["id"]):
-			selected = {"source": "bag", "index": i, "id": int(inventory_items[i]["id"]), "qty": int(inventory_items[i]["quantity"])}
+			selected = {"source": "bag", "index": i, "id": int(inventory_items[i]["id"]), "qty": int(inventory_items[i]["quantity"]), "quality": int(inventory_items[i].get("quality", 100))}
 			return
 	selected = {}
 
@@ -858,7 +858,7 @@ func _create_bag_slot(bag_index: int, item_id: int, qty: int) -> Control:
 	btn.text = _monogram(item_id)
 	btn.add_theme_font_size_override("font_size", 17)
 	btn.add_theme_color_override("font_color", Color(1, 0.97, 0.88))
-	btn.tooltip_text = "%s x%d (%.1f kg)" % [_item_name(item_id), qty, ItemData.weight(item_id) * qty]
+	btn.tooltip_text = "%s x%d (%.1f kg) — %s %d/100" % [_item_name(item_id), qty, ItemData.weight(item_id) * qty, ItemData.quality_aspect(item_id), int(inventory_items[bag_index].get("quality", 100))]
 	var is_sel: bool = not selected.is_empty() and selected["source"] == "bag" and selected["index"] == bag_index
 	var st := _slot_style(item_id, is_sel)
 	btn.add_theme_stylebox_override("normal", st)
@@ -930,7 +930,7 @@ func _select_equipped(slot_idx: int) -> void:
 
 func _select_bag(bag_index: int) -> void:
 	var entry: Dictionary = inventory_items[bag_index]
-	selected = {"source": "bag", "index": bag_index, "id": int(entry["id"]), "qty": int(entry["quantity"])}
+	selected = {"source": "bag", "index": bag_index, "id": int(entry["id"]), "qty": int(entry["quantity"]), "quality": int(entry.get("quality", 100))}
 	_update_display()
 
 func _update_inspector() -> void:
@@ -979,6 +979,11 @@ func _update_inspector() -> void:
 	if desc != "":
 		lines.append("[i]%s[/i]" % desc)
 		lines.append("")
+	# Qualidade (pseudo-atributo): o aspecto medido muda conforme o tipo de item
+	if selected.has("quality"):
+		var qv: int = int(selected["quality"])
+		var qcol := "#73e673" if qv >= 80 else ("#ffd54f" if qv >= 35 else "#ef5350")
+		lines.append("[color=%s]✦ %s: %d/100[/color]" % [qcol, ItemData.quality_aspect(item_id), qv])
 	var unit_w: float = ItemData.weight(item_id)
 	if qty > 1:
 		lines.append("⚖️ Peso: %.1f kg cada  •  %.1f kg na pilha (x%d)" % [unit_w, unit_w * qty, qty])

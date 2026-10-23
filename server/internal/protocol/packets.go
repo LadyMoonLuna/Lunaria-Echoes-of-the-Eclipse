@@ -454,7 +454,7 @@ const (
 	AllocateStatPacketSize   = 8  // uint8 (1) + uint32 (4) + uint8 (1) + uint16 Amount (2) = 8 bytes
 
 	InventorySyncHeaderSize  = 33 // op (1) + 14 slots (14) + Gold u32 (4) + Eclipses u32 (4) + Peso f32 (4) + PesoMáx f32 (4) + Velocidade% u8 (1) + count (1)
-	InventorySlotEntrySize   = 2  // uint8 (1) + uint8 (1) = 2 bytes
+	InventorySlotEntrySize   = 3  // item (1) + quantidade (1) + Qualidade 0-100 (1) = 3 bytes
 	UseOrEquipItemPacketSize = 8  // op (1) + playerID u32 (4) + itemID (1) + action (1) + slot (1) = 8 bytes
 
 	DropItemGroundPacketSize   = 7  // op (1) + playerID u32 (4) + slotIndex (1) + quantity (1)
@@ -469,7 +469,7 @@ const (
 	InteractCorpsePacketSize      = 9  // uint8 (1) + uint32 (4) + uint32 (4) = 9 bytes
 	OpenAutopsyUIHeaderSize       = 11 // uint8 (1) + uint32 (4) + uint8 (1) + uint32 (4) + uint8 (1) = 11 bytes
 	AutopsyOrganEntrySize         = 5  // uint8 (1) + uint8 (1) + uint8 (1) + uint8 (1) + uint8 (1) = 5 bytes
-	SubmitAutopsyResultPacketSize = 11 // uint8 (1) + uint32 (4) + uint32 (4) + uint8 (1) + uint8 (1) = 11 bytes
+	SubmitAutopsyResultPacketSize = 12 // op (1) + playerID (4) + corpseID (4) + órgão (1) + tier (1) + Qualidade (1) = 12 bytes
 	CorpseSnapshotHeaderSize      = 2  // uint8 (1) + uint8 (1) = 2 bytes
 	CorpseSnapshotEntrySize       = 28 // uint32 (4) + uint32 (4) + uint8 (1) + 3x float32 (12) + float32 (4) + uint8 (1) + uint16 (2) = 28 bytes
 )
@@ -1444,6 +1444,7 @@ func DeserializeProjectileSpawn(data []byte, pkt *ProjectileSpawnPacket) error {
 type InventorySlot struct {
 	ItemID   uint8
 	Quantity uint8
+	Quality  uint8 // Qualidade média da pilha (0 a 100)
 }
 
 // InventoryStatus traz dinheiro e peso enviados junto com a mochila.
@@ -1491,6 +1492,7 @@ func SerializeInventorySyncInto(buf []byte, equippedSlots [EquipSlotCount]uint8,
 	for i := 0; i < count; i++ {
 		buf[offset] = slots[i].ItemID
 		buf[offset+1] = slots[i].Quantity
+		buf[offset+2] = slots[i].Quality
 		offset += InventorySlotEntrySize
 	}
 	return totalSize
@@ -1548,6 +1550,7 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 	for i := 0; i < int(out.SlotCount); i++ {
 		out.Slots[i].ItemID = data[offset]
 		out.Slots[i].Quantity = data[offset+1]
+		out.Slots[i].Quality = data[offset+2]
 		offset += InventorySlotEntrySize
 	}
 	return nil
@@ -1928,17 +1931,34 @@ type SubmitAutopsyResultPacket struct {
 	CorpseID   uint32
 	OrganIndex uint8
 	ResultTier uint8
+	Quality    uint8 // Qualidade 0-100 medida no minigame
 }
 
 // SerializeSubmitAutopsyResult empacota o pacote 0x3D SUBMIT_AUTOPSY_RESULT.
-func SerializeSubmitAutopsyResult(playerID, corpseID uint32, organIndex, resultTier uint8) [SubmitAutopsyResultPacketSize]byte {
+func SerializeSubmitAutopsyResult(playerID, corpseID uint32, organIndex, resultTier uint8, quality ...uint8) [SubmitAutopsyResultPacketSize]byte {
 	var b [SubmitAutopsyResultPacketSize]byte
 	b[0] = PacketTypeSubmitAutopsyResult
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
 	binary.LittleEndian.PutUint32(b[5:9], corpseID)
 	b[9] = organIndex
 	b[10] = resultTier
+	if len(quality) > 0 {
+		b[11] = quality[0]
+	} else {
+		b[11] = QualityFromTier(resultTier)
+	}
 	return b
+}
+
+// QualityFromTier converte o tier antigo em Qualidade (compatibilidade com clientes sem minigame novo).
+func QualityFromTier(tier uint8) uint8 {
+	switch tier {
+	case QualityPerfect:
+		return 90
+	case QualityCommon:
+		return 60
+	}
+	return 10
 }
 
 // DeserializeSubmitAutopsyResult decodifica o pacote 0x3D SUBMIT_AUTOPSY_RESULT.
@@ -1949,11 +1969,15 @@ func DeserializeSubmitAutopsyResult(data []byte, out *SubmitAutopsyResultPacket)
 	if data[0] != PacketTypeSubmitAutopsyResult {
 		return ErrInvalidPacketType
 	}
-	if len(data) >= SubmitAutopsyResultPacketSize {
+	if len(data) >= 11 {
 		out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
 		out.CorpseID = binary.LittleEndian.Uint32(data[5:9])
 		out.OrganIndex = data[9]
 		out.ResultTier = data[10]
+		out.Quality = QualityFromTier(out.ResultTier)
+		if len(data) >= SubmitAutopsyResultPacketSize {
+			out.Quality = data[11]
+		}
 	} else {
 		// Compatibilidade com payload compacto
 		out.CorpseID = binary.LittleEndian.Uint32(data[1:5])

@@ -81,6 +81,7 @@ type Player struct {
 	Inventory           map[uint8]uint8                // ItemID -> Quantidade
 	EquippedSlots       [protocol.EquipSlotCount]uint8 // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
 	DiscoveredMaterials map[uint16]bool                // Materiais já vistos pelo jogador (Forja)
+	ItemQuality         map[uint8]uint8                // Qualidade média (0-100) de cada item da mochila/equipado
 	newDiscoveries      []uint16                       // Descobertas ainda não avisadas ao cliente
 	Gold                uint32                         // Sollares de Ouro
 	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
@@ -979,7 +980,7 @@ func (p *Player) recalculateStatsLocked() {
 			continue
 		}
 		info := GetItemInfo(itemID)
-		directHPBonus += info.BonusHP
+		directHPBonus += uint16(float32(info.BonusHP)*qualityStatMult(p.itemQualityLocked(itemID)) + 0.5)
 		effCONBonus += info.BonusCON
 		effAGIBonus += info.BonusAGI
 	}
@@ -2009,6 +2010,7 @@ func (p *Player) AddItem(itemID, qty uint8) {
 		p.Inventory = make(map[uint8]uint8)
 	}
 	p.markDiscoveredLocked(itemID) // primeiro contato com um material
+	p.blendQualityLocked(itemID, qty, DefaultQualityFor(itemID))
 	if int(p.Inventory[itemID])+int(qty) > 255 {
 		p.Inventory[itemID] = 255
 		return
@@ -2059,7 +2061,7 @@ func (p *Player) GetInventorySlots() []protocol.InventorySlot {
 	slots := make([]protocol.InventorySlot, 0, len(p.Inventory))
 	for id := uint8(1); id <= 255; id++ {
 		if qty, exists := p.Inventory[id]; exists && qty > 0 {
-			slots = append(slots, protocol.InventorySlot{ItemID: id, Quantity: qty})
+			slots = append(slots, protocol.InventorySlot{ItemID: id, Quantity: qty, Quality: p.itemQualityLocked(id)})
 		}
 		if id == 255 {
 			break

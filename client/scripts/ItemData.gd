@@ -237,6 +237,30 @@ static func slot_of(item_id: int) -> int:
 static func bonus(item_id: int) -> Dictionary:
 	return info(item_id).get("bonus", {})
 
+## Nome do aspecto que a Qualidade mede em cada tipo de item.
+static func quality_aspect(item_id: int) -> String:
+	if MATERIALS.has(item_id):
+		match String(MATERIALS[item_id]["category"]):
+			"Orgao_Sangue":
+				return "Frescor"
+			"Pele_Fio":
+				return "Integridade"
+			"Madeira":
+				return "Veio"
+			"Metal", "Liga", "Pedra", "Cristal":
+				return "Pureza"
+			"Planta_Liquido":
+				return "Potência"
+	if int(info(item_id).get("slot", -1)) >= 0 or info(item_id).has("tool"):
+		return "Condição"
+	return "Qualidade"
+
+## Lixo gerado quando a Qualidade fica abaixo do limite: Sucata para metais/pedras/cristais, Lixo Orgânico no resto.
+static func junk_name(item_id: int) -> String:
+	if MATERIALS.has(item_id) and ["Metal", "Liga", "Pedra", "Cristal"].has(String(MATERIALS[item_id]["category"])):
+		return "Sucata Metálica"
+	return "Lixo Orgânico"
+
 ## Raridade: a do catálogo para materiais; para equipamentos, estimada pela soma dos bônus.
 static func rarity(item_id: int) -> Array:
 	if MATERIALS.has(item_id):

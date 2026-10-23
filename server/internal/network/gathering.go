@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"log"
+	"math/rand"
 
 	"lunaria/server/internal/protocol"
 	"lunaria/server/internal/world"
@@ -120,6 +121,33 @@ func harvestYield(p *world.Player, n world.ResourceNode) (uint8, string) {
 	return 0, "Este recurso não pode ser coletado."
 }
 
+// harvestQuality: Qualidade da coleta — sorte do corte, melhorada por ferramentas acima do tier pedido
+// (e pela Tesoura nas plantas). Coletas não produzem lixo: a pior ainda vale 40.
+func harvestQuality(p *world.Player, n world.ResourceNode) uint8 {
+	q := 55 + rand.Intn(36) // 55..90
+	var tool uint8
+	switch n.Kind {
+	case world.NodeTree:
+		tool = p.BestTool(world.ToolAxe)
+	case world.NodeRock, world.NodeOre, world.NodeCrystal:
+		tool = p.BestTool(world.ToolPickaxe)
+	case world.NodeVine:
+		if p.BestTool(world.ToolShears) > 0 {
+			q += 10
+		}
+	}
+	if tool > n.Tier {
+		q += int(tool-n.Tier) * 4
+	}
+	if q > 100 {
+		q = 100
+	}
+	if q < 40 {
+		q = 40
+	}
+	return uint8(q)
+}
+
 // handleHarvestNode (0x44): coleta um nó de recurso a até 4m.
 func (s *Server) handleHarvestNode(connPlayerID uint32, pkt protocol.HarvestNodePacket) {
 	s.mu.RLock()
@@ -156,10 +184,11 @@ func (s *Server) handleHarvestNode(connPlayerID uint32, pkt protocol.HarvestNode
 		player.RemoveItem(protocol.ItemEmptyFlask, qty)
 	}
 	itemID := uint8(node.MaterialID)
-	player.AddItem(itemID, qty)
+	quality := harvestQuality(player, node)
+	player.AddItemWithQuality(itemID, qty, quality)
 	s.resourceNodes.Deplete(node.ID)
 	mat := world.MaterialsDB[node.MaterialID]
-	s.sendPlayerNPCSay(player, 0, fmt.Sprintf("Você coletou %dx %s (%s).", qty, mat.Name, world.RarityNames[mat.Rarity]))
+	s.sendPlayerNPCSay(player, 0, fmt.Sprintf("Você coletou %dx %s (%s) — Qualidade %d/100.", qty, mat.Name, world.RarityNames[mat.Rarity], quality))
 	log.Printf("[COLETA] Jogador #%d coletou %dx %s do nó #%d\n", player.ID, qty, mat.Name, node.ID)
 	s.sendInventorySync(player)
 	s.broadcastResourceNodes(zone)

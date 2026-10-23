@@ -863,3 +863,14 @@ func TestNewInventoryPackets(t *testing.T) {
 		t.Fatalf("0x42: %+v %v", got, err)
 	}
 }
+
+func TestAutopsyQualityPacket(t *testing.T) {
+	b := SerializeSubmitAutopsyResult(1, 2, 3, QualityCommon, 57)
+	var p SubmitAutopsyResultPacket
+	if err := DeserializeSubmitAutopsyResult(b[:], &p); err != nil || p.Quality != 57 || p.OrganIndex != 3 {
+		t.Fatalf("0x3D com Qualidade: %+v", p)
+	}
+	if err := DeserializeSubmitAutopsyResult(b[:11], &p); err != nil || p.Quality != QualityFromTier(QualityCommon) {
+		t.Fatal("0x3D antigo deveria converter o tier em Qualidade")
+	}
+}
