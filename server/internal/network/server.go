@@ -437,21 +437,17 @@ func (s *Server) sendPlayerNPCSay(p *world.Player, npcID uint32, message string)
 
 // BroadcastWorldTime transmite o pacote 0x13 (WORLD_TIME: 5 bytes) via TCP e UDP para os clientes.
 func (s *Server) BroadcastWorldTime() {
-	h, m, moon, weather := s.clock.GetTime()
-	timePkt := protocol.SerializeWorldTime(h, m, moon, weather)
+	h, m, moon, _ := s.clock.GetTime()
 
 	s.mu.RLock()
-	// Transmissão via TCP
+	// Cada jogador recebe o clima da zona em que está
 	for _, p := range s.players {
+		timePkt := protocol.SerializeWorldTime(h, m, moon, s.clock.GetZoneWeather(p.GetZone()))
 		if p.TCPConn != nil {
 			_ = p.TCPConn.SetWriteDeadline(time.Now().Add(200 * time.Millisecond))
 			_, _ = p.TCPConn.Write(timePkt[:])
 			_ = p.TCPConn.SetWriteDeadline(time.Time{})
 		}
-	}
-
-	// Transmissão via UDP
-	for _, p := range s.players {
 		if addr := p.GetUDPAddr(); addr != nil {
 			_, _ = s.udpConn.WriteToUDP(timePkt[:], addr)
 		}
@@ -1001,11 +997,7 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		newWeather := s.clock.CycleWeather()
 		log.Printf("[DEV] Clima alterado ciclicamente para: %d\n", newWeather)
 		s.BroadcastWorldTime()
-		weatherNames := []string{"Limpo", "Chuva", "Neblina Densa", "Névoa Carmesim"}
-		wName := "Desconhecido"
-		if int(newWeather) < len(weatherNames) {
-			wName = weatherNames[newWeather]
-		}
+		wName := world.WeatherName(newWeather)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Clima ciclado para: %s (%d)!", wName, newWeather))
 
 	case 4:
@@ -1037,11 +1029,7 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		exactWeather := s.clock.SetWeather(val)
 		log.Printf("[DEV] Clima definido diretamente para: %d\n", exactWeather)
 		s.BroadcastWorldTime()
-		weatherNames := []string{"Limpo", "Chuva", "Neblina Densa", "Névoa Carmesim"}
-		wName := "Desconhecido"
-		if int(exactWeather) < len(weatherNames) {
-			wName = weatherNames[exactWeather]
-		}
+		wName := world.WeatherName(exactWeather)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Clima definido diretamente para: %s (%d)!", wName, exactWeather))
 
 	case 7:
@@ -2187,11 +2175,11 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 	// Desafio Secreto: Arauto do Trovão (Classe 15)
 	// Usar a Ultimate (Tecla F) perto da Torre Arcana (20, -18) durante Chuva (Weather == 1)
 	if pkt.ActionType == protocol.ActionSkillF {
-		_, _, _, weather := s.clock.GetTime()
+		weather := s.clock.GetZoneWeather(player.GetZone())
 		dx := px - 20.0
 		dz := pz - (-18.0)
 		distTower := float32(math.Sqrt(float64(dx*dx + dz*dz)))
-		if distTower <= 12.0 && weather == world.WeatherRain {
+		if distTower <= 12.0 && world.IsRainy(weather) {
 			if player.ClassID != protocol.ClassStormHerald {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassStormHerald, protocol.IdentityModeSecretReset)
 				s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 300)
@@ -2339,7 +2327,8 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 
 	// 3.9. Classes Básicas (1 a 12): Q/R/F atingem todos os alvos da área descrita na habilidade
 	if shape, ok := classSkillShape(classID, pkt.ActionType); ok {
-		h, _, moon, weather := s.clock.GetTime()
+		h, _, moon, _ := s.clock.GetTime()
+		weather := s.clock.GetZoneWeather(player.GetZone())
 		hpPct := float32(hp) / float32(maxHP) * 100.0
 		damage, isCrit := s.luaEngine.CallCalculateDamage(raceID, classID, pkt.ActionType, hpPct, int(h), moon, weather,
 			classTier, level, buffVal, pSTR, pDEX, pINT, pSPI, pMAS, pLCK)
@@ -2437,7 +2426,8 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 	s.mu.RUnlock()
 
 	// 5. Aplicação do Dano via Lua se acertou um Alvo
-	h, _, moon, weather := s.clock.GetTime()
+	h, _, moon, _ := s.clock.GetTime()
+	weather := s.clock.GetZoneWeather(player.GetZone())
 	hpPct := float32(hp) / float32(maxHP) * 100.0
 
 	if targetDummy != nil {
@@ -3828,7 +3818,7 @@ func (s *Server) updateProjectiles(dt float32) {
 		return
 	}
 
-	h, _, moon, weather := s.clock.GetTime()
+	h, _, moon, _ := s.clock.GetTime()
 
 	for _, p := range activeProjs {
 		if !p.IsActive {
@@ -3880,6 +3870,7 @@ func (s *Server) updateProjectiles(dt float32) {
 			ownerBuff = 1
 		}
 		ownerZone := owner.GetZone()
+		weather := s.clock.GetZoneWeather(ownerZone)
 		oSTR, oDEX, _, _, oINT, oSPI, oMAS, oLCK := owner.GetAttributes()
 
 		// 1. Colisão contra Bonecos de Treino (raio 1.1m)
@@ -4218,8 +4209,9 @@ func (s *Server) runGameLoop() {
 
 			s.mu.RLock()
 			for _, p := range s.players {
-				p.RegenerateStamina(dt, isNight, currentMoon)
-				p.RegenerateMana(dt, p.OutOfCombat())
+				zw := s.clock.GetZoneWeather(p.GetZone())
+				p.RegenerateStamina(dt*world.WeatherStaminaMult(zw), isNight, currentMoon)
+				p.RegenerateMana(dt*world.WeatherManaMult(zw), p.OutOfCombat())
 			}
 			// Mana: envia o valor atualizado 2x por segundo (a regeneração é contínua)
 			if s.serverTick%15 == 0 {

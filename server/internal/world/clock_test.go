@@ -57,10 +57,10 @@ func TestWorldClockAsymmetryAndPhases(t *testing.T) {
 		}
 	}
 
-	// 6. Testa CycleWeather (0 a 3)
+	// 6. Testa CycleWeather (0 a 23)
 	for i := 0; i < 10; i++ {
 		w := clock.CycleWeather()
-		if w >= 4 {
+		if w >= WeatherCount {
 			t.Fatalf("clima inválido: %d", w)
 		}
 	}

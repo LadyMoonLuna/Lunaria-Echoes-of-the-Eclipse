@@ -45,6 +45,51 @@
 -- 8 = Lua de Sangue (Blood Moon - Evento Especial)
 -- 9 = Eclipse Total (Cataclismo)
 
+-- Climas (0 a 23). Chuva, Tempestade de Raios, Garoa, Chuva Ácida e Monção contam como chuva.
+local WEATHER_RAINY = { [1] = true, [6] = true, [7] = true, [15] = true, [23] = true }
+local WEATHER_COLD = { [4] = true, [5] = true, [8] = true, [22] = true }
+local WEATHER_FOG = { [2] = true, [3] = true, [20] = true }
+
+local function is_rainy(w) return WEATHER_RAINY[w] == true end
+local function is_cold(w) return WEATHER_COLD[w] == true end
+local function is_foggy(w) return WEATHER_FOG[w] == true end
+
+-- Bônus/penalidades de clima por raça e classe (somados ao damage_bonus)
+local function weather_damage_bonus(race_id, class_id, w)
+    local b = 0.0
+    -- Tempestades elétricas: Fulgravyrn e Arauto do Trovão
+    if w == 6 and (race_id == 34 or class_id == 39) then b = b + 0.20 end
+    -- Frio: Borealin e Jotunar prosperam; raças de fogo sofrem
+    if is_cold(w) then
+        if race_id == 24 or race_id == 31 then b = b + 0.20 end
+        if race_id == 16 or race_id == 22 or race_id == 30 then b = b - 0.10 end
+    end
+    -- Calor e cinzas: raças ígneas (Pyrokhar, Ignivarn, Pyrael, Cinerion, Cambion)
+    if w == 10 or w == 11 then
+        if race_id == 16 or race_id == 22 or race_id == 30 or race_id == 7 or race_id == 26 then b = b + 0.20 end
+        if race_id == 24 or race_id == 31 then b = b - 0.10 end
+    end
+    -- Tempestade de Areia: Escarion caça na areia
+    if w == 9 and race_id == 43 then b = b + 0.25 end
+    -- Nevoeiro de Esporos: Myconid
+    if w == 20 and race_id == 20 then b = b + 0.25 end
+    -- Miasma Violeta: Aracne, Umbryss e Lilitara se fortalecem com o veneno
+    if w == 18 and (race_id == 21 or race_id == 9 or race_id == 45) then b = b + 0.20 end
+    -- Tempestade Arcana: magos de raça (Manamante, Arcavyrn, Runaric) e Arcanista
+    if w == 21 and (race_id == 47 or race_id == 35 or race_id == 10 or class_id == 2) then b = b + 0.25 end
+    -- Aurora Boreal e Chuva de Meteoros: bênção celeste para Seraphel, Aetheris, Nephilim e Selenarca
+    if (w == 13 or w == 14) and (race_id == 8 or race_id == 12 or race_id == 27 or race_id == 13) then b = b + 0.15 end
+    -- Pétalas ao Vento / Vaga-lumes: Sylvari, Faelith e Elarin
+    if (w == 16 or w == 17) and (race_id == 19 or race_id == 41 or race_id == 38) then b = b + 0.15 end
+    -- Vendaval: Sentinela dos Ventos e Valquíria Celeste
+    if w == 12 and (class_id == 3 or class_id == 15) then b = b + 0.15 end
+    -- Arco-Íris: pequena bênção a todos
+    if w == 19 then b = b + 0.05 end
+    -- Névoa Carmesim: vampiros (Valeriano, Sangrael, Conde Escarlate)
+    if w == 3 and (race_id == 1 or race_id == 5 or class_id == 25) then b = b + 0.15 end
+    return b
+end
+
 function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moon_phase, weather_type, class_tier, level, buff_active, stat_str, stat_dex, stat_int, stat_spi, stat_mas, stat_lck)
     local tier = tonumber(class_tier) or 1
     local lvl = tonumber(level) or 1
@@ -553,7 +598,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- Arauto do Trovão (ClassID = 39): Passiva +35% de dano elétrico durante chuva (Weather == 1)
-    if class_id == 39 and weather_type == 1 then
+    if class_id == 39 and is_rainy(weather_type) then
         damage_bonus = damage_bonus + 0.35
     end
 
@@ -585,7 +630,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
 
     -- Sylvari (RaceID = 19): +15% de dano de Dia ou na Chuva
     local is_day = (world_hour >= 6 and world_hour < 18)
-    if race_id == 19 and (is_day or weather_type == 1) then
+    if race_id == 19 and (is_day or is_rainy(weather_type)) then
         damage_bonus = damage_bonus + 0.15
     end
 
@@ -595,7 +640,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- Thalassiano (RaceID = 25): +25% de dano total na Chuva (Weather == 1)
-    if race_id == 25 and weather_type == 1 then
+    if race_id == 25 and is_rainy(weather_type) then
         damage_bonus = damage_bonus + 0.25
     end
 
@@ -608,6 +653,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     if race_id == 27 and is_night then
         damage_bonus = damage_bonus + 0.20
     end
+
+    -- Efeitos do Clima da zona
+    damage_bonus = damage_bonus + weather_damage_bonus(race_id, class_id, weather_type)
 
     -- Quadrante 5: Passivas das 18 Novas Raças (29 a 46)
     -- Aurelith (RaceID = 29): Passiva Ser de Luz (+100% dano durante Eclipse, Lua de Sangue ou contra Trevas)
@@ -625,7 +673,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- Jotunar (RaceID = 31): Passiva Pele Gélida (+25% de dano criogênico no frio/neblina)
-    if race_id == 31 and (weather_type == 2 or weather_type == 3) then
+    if race_id == 31 and (is_foggy(weather_type) or is_cold(weather_type)) then
         damage_bonus = damage_bonus + 0.25
     end
 
@@ -635,7 +683,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- Hydravyrn (RaceID = 33): Passiva Lima da Água (+25% dano com armas brancas e na chuva/água)
-    if race_id == 33 and weather_type == 1 then
+    if race_id == 33 and is_rainy(weather_type) then
         damage_bonus = damage_bonus + 0.25
     end
 

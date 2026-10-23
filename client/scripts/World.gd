@@ -86,7 +86,57 @@ const MOON_NAMES := [
 	"LUA DE SANGUE",
 	"ECLIPSE TOTAL"
 ]
-const WEATHER_NAMES := ["Limpo", "Chuva", "Neblina Densa", "Névoa Carmesim"]
+const WEATHER_NAMES := ["Limpo", "Chuva", "Neblina Densa", "Névoa Carmesim", "Neve", "Nevasca",
+	"Tempestade de Raios", "Garoa", "Granizo", "Tempestade de Areia", "Chuva de Cinzas",
+	"Onda de Calor", "Vendaval", "Aurora Boreal", "Chuva de Meteoros", "Chuva Ácida",
+	"Pétalas ao Vento", "Noite de Vaga-lumes", "Miasma Violeta", "Arco-Íris",
+	"Nevoeiro de Esporos", "Tempestade Arcana", "Geada Cristalina", "Monção"]
+const WEATHER_ICONS := ["☀️", "🌧️", "🌫️", "🩸", "❄️", "🌨️", "⛈️", "🌦️", "🧊", "🏜️", "🌋", "🔥",
+	"🌬️", "🌌", "☄️", "☣️", "🌸", "✨", "🟣", "🌈", "🍄", "🔮", "💎", "🌊"]
+# Efeitos visuais por clima: densidade/cor da névoa, multiplicador de luz do dia,
+# tom do ambiente e do horizonte, chuva (intensidade 0..2) e partícula extra.
+const WEATHER_FX := {
+	0: {"fog": 0.0001, "fog_col": Color("#758596"), "light": 1.0},
+	1: {"fog": 0.018, "fog_col": Color("#4a5868"), "light": 0.7, "amb": Color(0.3, 0.35, 0.4), "rain": 1.0},
+	2: {"fog": 0.055, "fog_col": Color("#758596"), "light": 0.6, "amb": Color(0.4, 0.42, 0.46), "horiz": Color(0.45, 0.48, 0.52)},
+	3: {"fog": 0.05, "fog_col": Color("#771515"), "light": 0.9, "amb": Color(0.5, 0.15, 0.15), "horiz": Color(0.8, 0.18, 0.18)},
+	4: {"fog": 0.012, "fog_col": Color("#dfe7f2"), "light": 0.85, "amb": Color(0.75, 0.8, 0.9), "horiz": Color(0.85, 0.88, 0.95), "fx": "snow"},
+	5: {"fog": 0.06, "fog_col": Color("#e8eef7"), "light": 0.55, "amb": Color(0.8, 0.85, 0.95), "horiz": Color(0.9, 0.92, 0.97), "fx": "blizzard"},
+	6: {"fog": 0.025, "fog_col": Color("#2f3644"), "light": 0.4, "amb": Color(0.2, 0.22, 0.3), "horiz": Color(0.2, 0.22, 0.3), "rain": 2.0, "flash": true},
+	7: {"fog": 0.008, "fog_col": Color("#7d8a99"), "light": 0.85, "amb": Color(0.45, 0.5, 0.55), "rain": 0.35},
+	8: {"fog": 0.015, "fog_col": Color("#9aa7b5"), "light": 0.6, "amb": Color(0.5, 0.55, 0.62), "fx": "hail"},
+	9: {"fog": 0.07, "fog_col": Color("#c49a5a"), "light": 0.6, "amb": Color(0.7, 0.55, 0.35), "horiz": Color(0.85, 0.65, 0.4), "fx": "sand"},
+	10: {"fog": 0.035, "fog_col": Color("#4b4040"), "light": 0.5, "amb": Color(0.4, 0.3, 0.28), "horiz": Color(0.55, 0.3, 0.2), "fx": "ash"},
+	11: {"fog": 0.01, "fog_col": Color("#e0b070"), "light": 1.3, "amb": Color(0.9, 0.7, 0.45), "horiz": Color(1.0, 0.75, 0.45)},
+	12: {"fog": 0.006, "fog_col": Color("#9fb0b8"), "light": 0.9, "fx": "leaves"},
+	13: {"fog": 0.002, "fog_col": Color("#2a6a5a"), "light": 1.0, "night_amb": Color(0.1, 0.35, 0.3), "night_horiz": Color(0.15, 0.6, 0.45)},
+	14: {"fog": 0.001, "fog_col": Color("#202040"), "light": 1.0, "night_horiz": Color(0.3, 0.2, 0.45), "fx": "meteors"},
+	15: {"fog": 0.02, "fog_col": Color("#6b7a2a"), "light": 0.65, "amb": Color(0.45, 0.5, 0.2), "horiz": Color(0.55, 0.6, 0.25), "rain": 1.0},
+	16: {"fog": 0.004, "fog_col": Color("#f2c6d8"), "light": 1.05, "amb": Color(0.9, 0.75, 0.8), "fx": "petals"},
+	17: {"fog": 0.004, "fog_col": Color("#1b2a1a"), "light": 1.0, "night_amb": Color(0.12, 0.16, 0.08), "fx": "fireflies"},
+	18: {"fog": 0.04, "fog_col": Color("#5a2a6e"), "light": 0.6, "amb": Color(0.4, 0.2, 0.5), "horiz": Color(0.5, 0.25, 0.6), "fx": "miasma"},
+	19: {"fog": 0.002, "fog_col": Color("#b0d0f0"), "light": 1.2, "amb": Color(0.75, 0.8, 0.9), "horiz": Color(0.7, 0.85, 1.0)},
+	20: {"fog": 0.045, "fog_col": Color("#8a9a5a"), "light": 0.7, "amb": Color(0.5, 0.55, 0.35), "fx": "spores"},
+	21: {"fog": 0.02, "fog_col": Color("#3a2a8a"), "light": 0.55, "amb": Color(0.3, 0.25, 0.7), "horiz": Color(0.45, 0.3, 0.9), "fx": "arcane", "flash": true},
+	22: {"fog": 0.01, "fog_col": Color("#bfe6ff"), "light": 1.1, "amb": Color(0.7, 0.85, 1.0), "horiz": Color(0.75, 0.9, 1.0), "fx": "crystals"},
+	23: {"fog": 0.04, "fog_col": Color("#38485a"), "light": 0.45, "amb": Color(0.25, 0.3, 0.38), "horiz": Color(0.3, 0.35, 0.42), "rain": 2.5},
+}
+# Partículas: cor, quantidade, velocidade de queda, tamanho e deriva horizontal (vento).
+const WEATHER_PARTICLES := {
+	"snow": {"col": Color(1, 1, 1), "amount": 900, "speed": 2.0, "size": 0.12, "drift": Vector3(0.6, 0, 0.2), "life": 6.0},
+	"blizzard": {"col": Color(0.95, 0.97, 1), "amount": 2200, "speed": 6.0, "size": 0.1, "drift": Vector3(9, 0, 3), "life": 3.0},
+	"hail": {"col": Color(0.85, 0.92, 1), "amount": 700, "speed": 20.0, "size": 0.15, "drift": Vector3.ZERO, "life": 1.0},
+	"sand": {"col": Color(0.85, 0.65, 0.4), "amount": 2000, "speed": 0.5, "size": 0.08, "drift": Vector3(14, 0, 4), "life": 3.0, "low": true},
+	"ash": {"col": Color(0.25, 0.22, 0.22), "amount": 1200, "speed": 1.5, "size": 0.1, "drift": Vector3(1, 0, 0.5), "life": 7.0, "glow": Color(1.0, 0.4, 0.1)},
+	"leaves": {"col": Color(0.45, 0.6, 0.25), "amount": 500, "speed": 1.5, "size": 0.18, "drift": Vector3(12, 0, 2), "life": 4.0},
+	"meteors": {"col": Color(1.0, 0.85, 0.5), "amount": 40, "speed": 45.0, "size": 0.35, "drift": Vector3(25, 0, 10), "life": 1.4, "emissive": true, "high": true},
+	"petals": {"col": Color(1.0, 0.7, 0.82), "amount": 500, "speed": 1.0, "size": 0.14, "drift": Vector3(2.5, 0, 1), "life": 8.0},
+	"fireflies": {"col": Color(0.85, 1.0, 0.35), "amount": 350, "speed": 0.0, "size": 0.1, "drift": Vector3.ZERO, "life": 5.0, "emissive": true, "low": true, "wander": true},
+	"miasma": {"col": Color(0.6, 0.3, 0.8), "amount": 500, "speed": -0.3, "size": 0.35, "drift": Vector3(0.3, 0, 0.3), "life": 6.0, "low": true, "emissive": true, "wander": true},
+	"spores": {"col": Color(0.85, 0.9, 0.55), "amount": 900, "speed": -0.2, "size": 0.09, "drift": Vector3(0.4, 0, 0.2), "life": 8.0, "low": true, "emissive": true, "wander": true},
+	"arcane": {"col": Color(0.6, 0.45, 1.0), "amount": 600, "speed": 3.0, "size": 0.12, "drift": Vector3(0, 0, 0), "life": 3.0, "emissive": true, "wander": true},
+	"crystals": {"col": Color(0.8, 0.95, 1.0), "amount": 600, "speed": 0.6, "size": 0.07, "drift": Vector3(0.3, 0, 0.3), "life": 6.0, "emissive": true},
+}
 const RACE_NAMES := [
 	"",
 	"Valeriano",
@@ -458,6 +508,8 @@ var current_world_hour: int = 16
 var current_world_minute: int = 0
 var current_moon_phase: int = 1
 var current_weather_type: int = 0
+var weather_particles: Dictionary = {} # fx -> CPUParticles3D
+var weather_flash_timer: float = 4.0
 
 var current_zone_id: int = 0
 var current_map_root: Node3D = null
@@ -1641,7 +1693,7 @@ func _build_dev_tab_world(tabs: TabContainer) -> void:
 	weather_card.add_child(weather_vb)
 
 	var weather_title := Label.new()
-	weather_title.text = "🌧️ 3. CLIMA (0x22 Cmd 6):"
+	weather_title.text = "🌧️ 3. CLIMA (0x22 Cmd 6) — 24 climas, sorteados por zona a cada 3h:"
 	weather_title.add_theme_font_size_override("font_size", 12)
 	weather_title.add_theme_color_override("font_color", Color(0.3, 0.9, 0.7))
 	weather_vb.add_child(weather_title)
@@ -1650,22 +1702,26 @@ func _build_dev_tab_world(tabs: TabContainer) -> void:
 	weather_hb.add_theme_constant_override("separation", 6)
 	weather_vb.add_child(weather_hb)
 
-	var weathers := [
-		{"name": "☀️ Limpo", "w": 0, "col": Color(0.4, 0.5, 0.3)},
-		{"name": "🌧️ Chuva", "w": 1, "col": Color(0.2, 0.4, 0.6)},
-		{"name": "🌫️ Neblina Densa", "w": 2, "col": Color(0.35, 0.4, 0.45)},
-		{"name": "🩸 Névoa Carmesim", "w": 3, "col": Color(0.6, 0.2, 0.25)}
-	]
-	for w_data in weathers:
-		var w_idx: int = w_data["w"]
-		var w_name: String = w_data["name"]
-		var btn := _dev_create_btn(w_name, w_data["col"], func():
+	var weather_grid := GridContainer.new()
+	weather_grid.columns = 4
+	weather_grid.add_theme_constant_override("h_separation", 6)
+	weather_grid.add_theme_constant_override("v_separation", 6)
+	weather_vb.add_child(weather_grid)
+	for w_idx in range(WEATHER_NAMES.size()):
+		var w_name: String = "%s %s" % [WEATHER_ICONS[w_idx], WEATHER_NAMES[w_idx]]
+		var w_fx: Dictionary = WEATHER_FX[w_idx]
+		var w_col: Color = (w_fx["fog_col"] as Color).darkened(0.35)
+		var btn := _dev_create_btn(w_name, w_col, func():
 			NetworkManager.send_set_weather(w_idx)
 			if dev_status_label: dev_status_label.text = "Clima definido: %s (%d)" % [w_name, w_idx]
 			show_loot_toast("Clima: %s" % w_name)
 		)
-		weather_hb.add_child(btn)
+		weather_grid.add_child(btn)
 
+	weather_hb.add_child(_dev_create_btn("🎲 Clima Automático", Color(0.3, 0.45, 0.3), func():
+		NetworkManager.send_set_weather(255)
+		if dev_status_label: dev_status_label.text = "Clima voltou ao sorteio automático por zona."
+	))
 	weather_hb.add_child(_dev_create_btn("⏭ Ciclar Clima", Color(0.25, 0.5, 0.4), func():
 		NetworkManager.send_cycle_weather()
 		if dev_status_label: dev_status_label.text = "Clima ciclado no servidor!"
@@ -2633,25 +2689,18 @@ func _get_lighting_targets(time_val: float) -> Dictionary:
 	var target_fog_density := 0.0001
 	var target_fog_color := Color("#758596")
 
-	match current_weather_type:
-		0: # Limpo
-			target_fog_density = 0.0001
-		1: # Chuva
-			target_fog_density = 0.018
-			target_fog_color = Color("#4a5868")
-			day_energy *= 0.7
-			day_ambient = day_ambient.lerp(Color(0.3, 0.35, 0.4, 1.0), 0.5)
-		2: # Neblina Cinza-Azulada Densa
-			target_fog_density = 0.055
-			target_fog_color = Color("#758596")
-			day_energy *= 0.6
-			day_ambient = day_ambient.lerp(Color(0.4, 0.42, 0.46, 1.0), 0.7)
-			day_sky_horiz = Color(0.45, 0.48, 0.52, 1.0)
-		3: # Névoa Carmesim Densa
-			target_fog_density = 0.05
-			target_fog_color = Color("#771515")
-			day_ambient = day_ambient.lerp(Color(0.5, 0.15, 0.15, 1.0), 0.6)
-			day_sky_horiz = day_sky_horiz.lerp(Color(0.8, 0.18, 0.18, 1.0), 0.6)
+	var fx: Dictionary = WEATHER_FX.get(current_weather_type, WEATHER_FX[0])
+	target_fog_density = fx.get("fog", 0.0001)
+	target_fog_color = fx.get("fog_col", target_fog_color)
+	day_energy *= float(fx.get("light", 1.0))
+	if fx.has("amb"):
+		day_ambient = day_ambient.lerp(fx["amb"], 0.6)
+	if fx.has("horiz"):
+		day_sky_horiz = day_sky_horiz.lerp(fx["horiz"], 0.6)
+	if fx.has("night_amb"):
+		night_ambient = night_ambient.lerp(fx["night_amb"], 0.7)
+	if fx.has("night_horiz"):
+		night_sky_horiz = night_sky_horiz.lerp(fx["night_horiz"], 0.7)
 
 	var res := {
 		"fog_density": target_fog_density,
@@ -2745,10 +2794,105 @@ func _update_world_environment(delta: float) -> void:
 			sky_mat.sky_top_color = sky_mat.sky_top_color.lerp(targets["sky_top"], 3.0 * delta)
 			sky_mat.sky_horizon_color = sky_mat.sky_horizon_color.lerp(targets["sky_horiz"], 3.0 * delta)
 
+	_update_weather_particles(delta)
+
+# Liga/desliga as partículas de cada clima e as faz seguir o jogador.
+func _update_weather_particles(delta: float) -> void:
+	var fx: Dictionary = WEATHER_FX.get(current_weather_type, WEATHER_FX[0])
 	if rain_particles:
-		var should_rain: bool = (current_weather_type == 1)
+		var rain_level: float = float(fx.get("rain", 0.0))
+		var should_rain: bool = rain_level > 0.0
+		if should_rain:
+			rain_particles.amount_ratio = clampf(rain_level / 2.5, 0.15, 1.0)
+			if current_weather_type == 15:
+				rain_particles.color = Color(0.7, 0.9, 0.3)
+			else:
+				rain_particles.color = Color(1, 1, 1)
 		if rain_particles.emitting != should_rain:
 			rain_particles.emitting = should_rain
+
+	var wanted: String = fx.get("fx", "")
+	if wanted != "" and not weather_particles.has(wanted):
+		weather_particles[wanted] = _create_weather_particles(wanted)
+	for key in weather_particles.keys():
+		var part: CPUParticles3D = weather_particles[key]
+		if not is_instance_valid(part):
+			continue
+		var on: bool = (key == wanted)
+		if part.emitting != on:
+			part.emitting = on
+		if on and local_player:
+			var p_pos: Vector3 = local_player.global_position
+			var conf: Dictionary = WEATHER_PARTICLES[key]
+			var h := 14.0
+			if conf.get("low", false):
+				h = 2.0
+			elif conf.get("high", false):
+				h = 45.0
+			part.global_position = Vector3(p_pos.x, p_pos.y + h, p_pos.z)
+
+	# Relâmpagos (Tempestade de Raios e Tempestade Arcana)
+	if fx.get("flash", false) and sun_light:
+		weather_flash_timer -= delta
+		if weather_flash_timer <= 0.0:
+			weather_flash_timer = randf_range(3.0, 9.0)
+			sun_light.light_energy += 2.5
+			if current_weather_type == 21:
+				sun_light.light_color = Color(0.7, 0.5, 1.0)
+
+func _create_weather_particles(fx_name: String) -> CPUParticles3D:
+	var conf: Dictionary = WEATHER_PARTICLES[fx_name]
+	var part := CPUParticles3D.new()
+	part.name = "Weather_" + fx_name
+	part.emitting = false
+	part.amount = int(conf["amount"])
+	part.lifetime = float(conf["life"])
+	part.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	var low: bool = conf.get("low", false)
+	part.emission_box_extents = Vector3(45, 2.5 if low else 1.0, 45)
+	var speed: float = float(conf["speed"])
+	var drift: Vector3 = conf["drift"]
+	var dir := Vector3(drift.x, -speed, drift.z)
+	if dir.length() < 0.01:
+		dir = Vector3(0, 1, 0)
+	part.direction = dir.normalized()
+	part.spread = 25.0 if conf.get("wander", false) else 6.0
+	part.initial_velocity_min = maxf(dir.length() * 0.8, 0.2)
+	part.initial_velocity_max = maxf(dir.length() * 1.2, 0.5)
+	part.gravity = Vector3.ZERO
+	if conf.get("wander", false):
+		part.orbit_velocity_min = -0.05
+		part.orbit_velocity_max = 0.05
+	var quad := QuadMesh.new()
+	var sz: float = float(conf["size"])
+	quad.size = Vector2(sz, sz)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_color = conf["col"]
+	if conf.get("emissive", false):
+		mat.emission_enabled = true
+		mat.emission = conf["col"]
+		mat.emission_energy_multiplier = 2.0
+	quad.material = mat
+	part.mesh = quad
+	var col: Color = conf["col"]
+	if conf.has("glow"):
+		var grad := Gradient.new()
+		grad.set_color(0, conf["glow"])
+		grad.set_color(1, col)
+		part.color_ramp = grad
+	else:
+		var fade := Gradient.new()
+		fade.set_color(0, Color(col.r, col.g, col.b, 0.0))
+		fade.add_point(0.15, col)
+		fade.add_point(0.85, col)
+		fade.set_color(1, Color(col.r, col.g, col.b, 0.0))
+		part.color_ramp = fade
+	add_child(part)
+	return part
 
 func _on_mob_state_received(mobs_dict: Dictionary) -> void:
 	for mid in mobs_dict.keys():
