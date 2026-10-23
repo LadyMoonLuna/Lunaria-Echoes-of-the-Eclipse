@@ -912,10 +912,34 @@ func (s *Server) handleSelectIdentity(pkt protocol.SelectIdentityPacket) {
 	}
 
 	if pkt.ActionMode == protocol.IdentityModeDevDirect { // 98
+		if ok, reason := player.CheckUniqueRaceRequirement(pkt.ClassID); !ok {
+			s.BroadcastNPCSay(0, fmt.Sprintf("[Dev Mode] Jogador #%d: %s", pkt.PlayerID, reason))
+			return
+		}
 		player.SetIdentityMode(pkt.RaceID, pkt.ClassID, pkt.ActionMode, pkt.SubPath)
 		log.Printf("[DEV DIRECT 98] Jogador #%d definiu Classe %d, Tier %d, Caminho %d!\n", pkt.PlayerID, player.ClassID, player.ClassTier, pkt.SubPath)
 		s.sendPlayerStats(player)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[Dev Mode] Jogador #%d agora é Classe %d (Tier %d)!", pkt.PlayerID, player.ClassID, player.ClassTier))
+		return
+	}
+
+	// Classes Únicas Exclusivas de Raça (19 a 26): raça obrigatória + classe básica e/ou item
+	if req, isRaceUnique := world.UniqueRequirements[pkt.ClassID]; isRaceUnique && pkt.ClassID != player.ClassID {
+		ok, reason, usedItem := player.CanAwakenUnique(pkt.ClassID)
+		if !ok {
+			s.BroadcastNPCSay(0, fmt.Sprintf("[CLASSE ÚNICA] Jogador #%d: %s", pkt.PlayerID, reason))
+			log.Printf("[CLASSE ÚNICA] Jogador #%d não pode despertar a Classe %d: %s\n", pkt.PlayerID, pkt.ClassID, reason)
+			return
+		}
+		if usedItem != 0 {
+			player.RemoveItem(usedItem, 1)
+			s.sendInventorySync(player)
+			log.Printf("[CLASSE ÚNICA] Jogador #%d consumiu o item %s para despertar a Classe %d\n", pkt.PlayerID, req.ItemName, pkt.ClassID)
+		}
+	} else if protocol.IsTranscendentClass(pkt.ClassID) && pkt.ClassID != player.ClassID {
+		// Únicas Gerais e Lendárias só chegam pelo desafio, pelo item ou pela Provação (ofertas do servidor)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[CLASSE SECRETA] Jogador #%d: esta classe só desperta pelo seu desafio secreto ou relíquia.", pkt.PlayerID))
+		log.Printf("[CLASSE SECRETA] Jogador #%d pediu a Classe %d direto (0x30) — recusado\n", pkt.PlayerID, pkt.ClassID)
 		return
 	}
 
@@ -1445,10 +1469,17 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			if currentH >= 6 && currentH < 18 {
 				return // De dia fica inativo/silencioso
 			}
-			// Iniciação do Ceifador do Eclipse com Tomo
+			// Mercado Negro: Goblins compram o Diagrama do Mecha (requisito do Barão da Sucata, Classe Única 26)
+			if player.RaceID == protocol.RaceGoblin && !player.HasItem(protocol.ItemMechaBlueprint) && player.ClassID != protocol.ClassScrapBaron {
+				player.AddItem(protocol.ItemMechaBlueprint, 1)
+				s.sendInventorySync(player)
+				s.BroadcastNPCSay(104, fmt.Sprintf("Pssiu... Um goblin de olho no Mercado Negro! Leve este Diagrama do Mecha, #%d. Com ele, a sucata vira um exoesqueleto de guerra...", pkt.PlayerID))
+				return
+			}
+			// Iniciação do Ceifador do Eclipse com Tomo (o Tomo só é consumido quando o jogador confirma)
 			if player.HasItem(protocol.ItemEclipseScytheTome) && player.ClassID != protocol.ClassEclipseReaper {
-				player.RemoveItem(protocol.ItemEclipseScytheTome, 1)
-				s.offerIdentityChange(player, player.RaceID, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset)
+				player.OfferIdentity(player.RaceID, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset, protocol.ItemEclipseScytheTome)
+				s.sendEvolutionOffer(player, protocol.OfferTypeIdentityChange, protocol.ClassEclipseReaper, player.RaceID)
 				s.BroadcastNPCSay(104, fmt.Sprintf("Pssiu... As sombras o acolhem, novo Ceifador do Eclipse #%d! Sua alma agora ceifará a escuridão!", pkt.PlayerID))
 				log.Printf("[MESTRE] Varis iniciou o jogador #%d como Ceifador do Eclipse (Classe 7)!\n", pkt.PlayerID)
 				return
@@ -2161,6 +2192,14 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		}
 	}
 
+	// 3.7. Únicas Exclusivas de Raça (19 a 26) e Lendárias (31 a 34): efeitos antes do dano
+	if protocol.IsTranscendentClass(classID) {
+		if s.handleTranscendentPreEffects(player, classID, pkt.ActionType, px, pz, aimX, aimZ) {
+			s.sendPlayerStats(player)
+			return
+		}
+	}
+
 	// 3.75. Variantes Secretas (13 a 18): efeitos de R que vêm antes do dano (ou no lugar dele)
 	if classID >= protocol.ClassRunicSpellblade && classID <= protocol.ClassPlagueDoctor {
 		if s.handleVariantPreEffects(player, classID, pkt.ActionType, px, pz, aimX, aimZ) {
@@ -2537,10 +2576,13 @@ func (s *Server) handleMobAttack(mobID, playerID uint32, damage uint16) {
 	s.BroadcastCombatEvent(mobID, playerID, protocol.ActionBasicAttack, damage, 0, newHP, player.MaxHP)
 	s.sendPlayerStats(player)
 
-	// Passiva Escudeiro (Fortaleza Viva): reflete 20% do dano para o monstro atacante
-	if player.ClassID == protocol.ClassShieldBearer && damage > 0 && s.mobManager != nil {
+	// Passivas de reflexo: Escudeiro (Fortaleza Viva, 20%) e Carrasco Vorpal (Sangue Corrosivo, 15%)
+	if (player.ClassID == protocol.ClassShieldBearer || player.ClassID == protocol.ClassVorpalExecutioner) && damage > 0 && s.mobManager != nil {
 		if mob := s.mobManager.GetMob(mobID); mob != nil && mob.IsAlive {
 			reflected := damage / 5
+			if player.ClassID == protocol.ClassVorpalExecutioner {
+				reflected = damage * 15 / 100
+			}
 			if reflected == 0 {
 				reflected = 1
 			}
@@ -3185,6 +3227,10 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				killer.AddItem(protocol.ItemAbyssalScorpionStinger, 1)
 				drops = append(drops, "Ferrão de Escorpião Abissal [SECRETO 0.1% - Desbloqueia Raça Demi-Humano Escorpião!] x1")
 			}
+			if rand.Float64() < 0.02 { // 2%: requisito do Carrasco do Veneno Vorpal (Classe Única 19)
+				killer.AddItem(protocol.ItemRoyalVenomGland, 1)
+				drops = append(drops, "Glândula Real do Escorpião [RARO 2% - Classe Única Carrasco do Veneno Vorpal] x1")
+			}
 
 		case protocol.MobTypeStitchedChimeraZero: // 19: Experimento Nº 0: A Quimera Costurada (Mini-Boss)
 			killer.AddItem(protocol.ItemChimeraFleshPart, 1)
@@ -3227,6 +3273,10 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemProgenitorPureBlood, 1)
 				drops = append(drops, "Sangue Puro do Progenitor [SECRETO 0.1% - Desbloqueia Raça Dhampir/Vampiro!] x1")
+			}
+			if rand.Float64() < 0.25 { // 25%: requisito do Aristocrata Carmesim (Classe Única 25)
+				killer.AddItem(protocol.ItemVesperianPureBlood, 1)
+				drops = append(drops, "Sangue Puro de Vesperian [RARO 25% - Classe Única Aristocrata Carmesim] x1")
 			}
 		}
 
@@ -5283,6 +5333,17 @@ func (s *Server) applyRacialConeDamage(player *world.Player, px, pz, aimX, aimZ,
 }
 
 // sendEvolutionOffer transmite o pacote 0x40 EVOLUTION_OFFER via TCP para o cliente.
+// offerLegendaryClass oferece a Classe Lendária destinada à Classe Única do jogador (Provação concluída).
+// A troca reseta o nível e só acontece quando o jogador confirma no modal.
+func (s *Server) offerLegendaryClass(player *world.Player) {
+	player.Mu.RLock()
+	race, current := player.RaceID, player.ClassID
+	player.Mu.RUnlock()
+	legendary := world.LegendaryOffer(current)
+	s.offerIdentityChange(player, race, legendary, protocol.IdentityModeSecretReset)
+	s.BroadcastNPCSay(0, fmt.Sprintf("[DESPERTAR LENDÁRIO] O Campeão #%d concluiu a Provação Lendária! A Classe Lendária %d o aguarda (Tier 6)!", player.ID, legendary))
+}
+
 // offerIdentityChange oferece uma troca de Classe/Raça ao jogador. Nada muda até ele confirmar no modal
 // do cliente (que responde com EVOLUTION_OFFER tipo 4); cancelar mantém tudo como está.
 func (s *Server) offerIdentityChange(player *world.Player, raceID, classID, mode uint8) {
@@ -5352,8 +5413,8 @@ func (s *Server) checkProgressionMilestones(player *world.Player) {
 		return
 	}
 
-	// 3. Provação Lendária para Classes Únicas (Tier 5 no Nível 45+)
-	if classID >= protocol.ClassEclipseReaper && classID <= protocol.ClassStormHerald && classTier == protocol.TierUnique && lvl >= 45 {
+	// 3. Provação Lendária para Classes Únicas (Tier 5 no Nível 45+): ao concluir, oferece a Classe Lendária
+	if protocol.IsUniqueClass(classID) && lvl >= 45 {
 		if !questActive {
 			player.Mu.Lock()
 			player.LegendaryQuestActive = true
@@ -5361,8 +5422,7 @@ func (s *Server) checkProgressionMilestones(player *world.Player) {
 			player.Mu.Unlock()
 			s.BroadcastNPCSay(0, fmt.Sprintf("[PROVAÇÃO LENDÁRIA] O Campeão Único #%d atingiu o Nível 45! Para ascender ao Tier 6 Lendário, abata 3 Mobs de Elite/Boss sem morrer!", player.ID))
 		} else if questKills >= 3 {
-			s.sendEvolutionOffer(player, protocol.OfferTypeLegendaryTrial, protocol.TierLegendary, 0)
-			s.BroadcastNPCSay(0, fmt.Sprintf("[DESPERTAR LENDÁRIO] O Campeão #%d concluiu a Provação Lendária! Pronto para ascender ao TIER 6 LENDÁRIO!", player.ID))
+			s.offerLegendaryClass(player)
 		}
 	}
 }
@@ -5413,7 +5473,7 @@ func (s *Server) handleEvolutionChoice(playerID uint32, pkt protocol.EvolutionOf
 		log.Printf("[CAMINHO] Jogador #%d escolheu o Caminho %d no Tier %d\n", playerID, chosenPath, player.ClassTier)
 
 	case protocol.OfferTypeIdentityChange: // 4: Troca de Classe/Raça confirmada no modal do cliente
-		if !player.AcceptIdentityOffer(pkt.OptionAID) {
+		if !player.AcceptIdentityOffer(pkt.OptionAID) { // consome o item de custo da oferta, se houver
 			log.Printf("[IDENTIDADE] Jogador #%d confirmou %d sem oferta válida (expirada ou diferente) — ignorado\n", playerID, pkt.OptionAID)
 			return
 		}
@@ -5422,18 +5482,15 @@ func (s *Server) handleEvolutionChoice(playerID uint32, pkt protocol.EvolutionOf
 		s.BroadcastNPCSay(0, fmt.Sprintf("[IDENTIDADE] O jogador #%d confirmou a mudança: agora é Classe %d (Tier %d), Raça %d!", playerID, player.ClassID, player.ClassTier, player.RaceID))
 		log.Printf("[IDENTIDADE] Jogador #%d confirmou a troca: Raça %d, Classe %d, Tier %d, Nível %d\n", playerID, player.RaceID, player.ClassID, player.ClassTier, player.Level)
 
-	case protocol.OfferTypeLegendaryTrial: // 3: Ascensão ao Tier 6 Lendário
-		player.Mu.Lock()
-		if player.ClassTier == protocol.TierUnique {
-			player.ClassTier = protocol.TierLegendary
-			player.LegendaryQuestActive = false
+	case protocol.OfferTypeLegendaryTrial: // 3: pedido de Ascensão Lendária (vale só com a Provação concluída)
+		player.Mu.RLock()
+		eligible := protocol.IsUniqueClass(player.ClassID) && player.Level >= 45 && player.LegendaryQuestActive && player.LegendaryQuestKills >= 3
+		player.Mu.RUnlock()
+		if !eligible {
+			log.Printf("[PROVAÇÃO LENDÁRIA] Jogador #%d pediu a Ascensão sem concluir a Provação — ignorado\n", playerID)
+			return
 		}
-		player.Mu.Unlock()
-		player.RecalculateStats()
-
-		s.sendPlayerStats(player)
-		s.BroadcastNPCSay(0, fmt.Sprintf("[CATACLISMO] TREMEI MORTAIS! O jogador #%d superou a Provação e despertou a CLASSE LENDÁRIA (Tier 6)!", playerID))
-		log.Printf("[PROVAÇÃO LENDÁRIA] Jogador #%d ascendeu ao Tier 6 Lendário!\n", playerID)
+		s.offerLegendaryClass(player)
 	}
 }
 

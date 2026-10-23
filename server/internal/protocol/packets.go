@@ -15,15 +15,15 @@ const (
 	PacketTypeWorldSnapshot      uint8 = 0x11
 
 	// Marco 2
-	PacketTypeNPCSnapshot      uint8 = 0x12
-	PacketTypeWorldTime        uint8 = 0x13
-	PacketTypePlayerInteract   uint8 = 0x20
-	PacketTypeNPCSay           uint8 = 0x21
-	PacketTypeDevWorldControl  uint8 = 0x22
-	PacketTypeDevSkipTime      uint8 = 0x22 // Alias retrocompatível
-	PacketTypePortalTravel     uint8 = 0x23 // Transição de Portal / Mudança de Zona
-	PacketTypeZoneChange       uint8 = 0x23 // Alias retrocompatível
-	PacketTypeFriendshipSync   uint8 = 0x24 // [Server -> Client] Sincronização de Afiança com NPC (8 bytes)
+	PacketTypeNPCSnapshot     uint8 = 0x12
+	PacketTypeWorldTime       uint8 = 0x13
+	PacketTypePlayerInteract  uint8 = 0x20
+	PacketTypeNPCSay          uint8 = 0x21
+	PacketTypeDevWorldControl uint8 = 0x22
+	PacketTypeDevSkipTime     uint8 = 0x22 // Alias retrocompatível
+	PacketTypePortalTravel    uint8 = 0x23 // Transição de Portal / Mudança de Zona
+	PacketTypeZoneChange      uint8 = 0x23 // Alias retrocompatível
+	PacketTypeFriendshipSync  uint8 = 0x24 // [Server -> Client] Sincronização de Afiança com NPC (8 bytes)
 
 	// Marco 3
 	PacketTypeSelectIdentity uint8 = 0x30
@@ -159,7 +159,7 @@ const (
 
 	// Quadrante 5: 18 Novas Raças do RPG (29 a 46)
 	RaceHalfCelestial   uint8 = 29 // Meio-Celestial (Ser de Luz)
-	RacePyromancer       uint8 = 30 // Pyromante (Fulgor & Chama da Vida)
+	RacePyromancer      uint8 = 30 // Pyromante (Fulgor & Chama da Vida)
 	RaceFrostGiant      uint8 = 31 // Gigante de Gelo (Pele Gélida - 1.45x)
 	RaceDragonEarth     uint8 = 32 // Drago (Terra) (Couraça Ancestral)
 	RaceDragonWater     uint8 = 33 // Drago (Água) (Lima da Água)
@@ -271,8 +271,10 @@ const (
 	ItemCrimsonGuardInsignia   uint8 = 53 // Insígnia do Guarda Carmesim
 	ItemProgenitorPureBlood    uint8 = 54 // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Dhampir / Vampiro)
 	ItemVesperianCrimsonRing   uint8 = 55 // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
+	ItemRoyalVenomGland        uint8 = 56 // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Carrasco do Veneno Vorpal)
+	ItemVesperianPureBlood     uint8 = 57 // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Aristocrata Carmesim)
+	ItemMechaBlueprint         uint8 = 58 // Diagrama do Mecha Goblin (Mercado Negro de Varis - requisito do Barão da Sucata)
 )
-
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
 const (
@@ -280,16 +282,16 @@ const (
 	ClassTraveler uint8 = 0 // Alias
 
 	// As 6 Classes Básicas de Combate (IDs 1 a 6)
-	ClassWarrior      uint8 = 1  // Guerreiro (Arma: Espada)
-	ClassSwordsman    uint8 = 1  // Alias retrocompatível
-	ClassMage         uint8 = 2  // Mago (Arma: Cajado / Orbe Arcano)
-	ClassInitiate     uint8 = 2  // Alias retrocompatível
-	ClassArcher       uint8 = 3  // Arqueiro (Arma: Arco)
-	ClassScout        uint8 = 3  // Alias retrocompatível
-	ClassAssassin     uint8 = 4  // Assassino (Arma: Duas Adagas)
-	ClassAcolyte      uint8 = 4  // Alias retrocompatível
-	ClassFighter      uint8 = 5  // Lutador (Arma: Manoplas Pesadas)
-	ClassShieldBearer uint8 = 6  // Escudeiro (Arma: Escudo Colossal + Maça Curta)
+	ClassWarrior      uint8 = 1 // Guerreiro (Arma: Espada)
+	ClassSwordsman    uint8 = 1 // Alias retrocompatível
+	ClassMage         uint8 = 2 // Mago (Arma: Cajado / Orbe Arcano)
+	ClassInitiate     uint8 = 2 // Alias retrocompatível
+	ClassArcher       uint8 = 3 // Arqueiro (Arma: Arco)
+	ClassScout        uint8 = 3 // Alias retrocompatível
+	ClassAssassin     uint8 = 4 // Assassino (Arma: Duas Adagas)
+	ClassAcolyte      uint8 = 4 // Alias retrocompatível
+	ClassFighter      uint8 = 5 // Lutador (Arma: Manoplas Pesadas)
+	ClassShieldBearer uint8 = 6 // Escudeiro (Arma: Escudo Colossal + Maça Curta)
 
 	// As 6 Classes Básicas de Produção Combatentes (IDs 7 a 12)
 	ClassBlacksmith  uint8 = 7  // Ferreiro (Arma: Martelo de Forja)
@@ -307,16 +309,35 @@ const (
 	ClassCursedSmith     uint8 = 17 // Forjador de Armas Amaldiçoadas
 	ClassPlagueDoctor    uint8 = 18 // Médico da Peste (Doutor Corvo)
 
-	// Classes Secretas Únicas / Lendárias (IDs 19 a 27 - Tier 5 a 6, exigem Reset de Nível para 1)
-	ClassEclipseReaper     uint8 = 19 // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
-	ClassRunicArtificer    uint8 = 20 // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
-	ClassHomunculusCreator uint8 = 21 // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
-	ClassAstralDancer      uint8 = 22 // Dançarino Astral (Crítico e Esquiva: HP 135, Stam 140)
-	ClassAshInquisitor     uint8 = 23 // Inquisidor das Cinzas (Dano com Vida Baixa: HP 145, Stam 115)
-	ClassBoneNecromancer   uint8 = 24 // Necromante de Ossos (Lança Óssea & Cura no Abate: HP 130, Stam 120)
-	ClassPrimordialTamer   uint8 = 25 // Domador Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
-	ClassRiftKnight        uint8 = 26 // Cavaleiro da Ruptura (Resistência e Gravidade: HP 180, Stam 100)
-	ClassStormHerald       uint8 = 27 // Arauto da Tempestade (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
+	// Classes Secretas ÚNICAS Exclusivas de Raça (IDs 19 a 26 - Tier 5 travado, +11 pts/nível, Reset para o Nível 1)
+	ClassVorpalExecutioner   uint8 = 19 // Carrasco do Veneno Vorpal (Demi-Humano Escorpião)
+	ClassCrimsonWebSovereign uint8 = 20 // Soberano da Teia Carmesim (Aracne)
+	ClassBloodPackKing       uint8 = 21 // Rei-Fera da Alcateia de Sangue (Demi-Humano Lobo / Licantropo)
+	ClassMountainRunemancer  uint8 = 22 // Runomante da Montanha Eterna (Anão / Kharad)
+	ClassWorldBastion        uint8 = 23 // Bastião do Mundo (Demi-Humano Tartaruga)
+	ClassWorldTreeArchfairy  uint8 = 24 // Arquifada da Árvore do Mundo (Fadinha)
+	ClassCrimsonAristocrat   uint8 = 25 // Aristocrata Carmesim / Nosferatu Real (Dhampir)
+	ClassScrapBaron          uint8 = 26 // Barão da Sucata & Mecha Goblin (Goblin)
+
+	// Classes Secretas ÚNICAS Gerais (IDs 27 a 30 e 35 a 39 - Tier 5 travado, +11 pts/nível, Reset para o Nível 1)
+	ClassEclipseReaper     uint8 = 27 // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
+	ClassAstralDancer      uint8 = 28 // Dançarino Astral (Crítico e Esquiva: HP 135, Stam 140)
+	ClassAshInquisitor     uint8 = 29 // Inquisidor das Cinzas (Dano com Vida Baixa: HP 145, Stam 115)
+	ClassBoneNecromancer   uint8 = 30 // Necromante de Ossos (Lança Óssea & Cura no Abate: HP 130, Stam 120)
+	ClassRunicArtificer    uint8 = 35 // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
+	ClassHomunculusCreator uint8 = 36 // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
+	ClassPrimordialTamer   uint8 = 37 // Domador Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
+	ClassRiftKnight        uint8 = 38 // Cavaleiro da Ruptura (Resistência e Gravidade: HP 180, Stam 100)
+	ClassStormHerald       uint8 = 39 // Arauto da Tempestade (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
+
+	// Classes Secretas LENDÁRIAS (IDs 31 a 34 - Tier 6 Mítico, +15 pts/nível, +50 status, Reset para o Nível 1)
+	ClassPagmaDescendant   uint8 = 31 // Descendente de Pagma / Deus da Forja & Espada
+	ClassMoonlightSculptor uint8 = 32 // Escultor do Luar Lendário
+	ClassDragonMonarch     uint8 = 33 // Monarca dos Dragões & Feras Primordiais
+	ClassBlackSunEmperor   uint8 = 34 // Imperador do Sol Negro (Monarca do Eclipse)
+
+	// ClassMaxID é o maior ID de classe válido.
+	ClassMaxID uint8 = 39
 )
 
 // Os 6 Tiers de Raridade de Classe
@@ -787,12 +808,12 @@ func DeserializeWorldTime(data []byte, out *WorldTimePacket) error {
 // --- 0x22: DEV_WORLD_CONTROL (TCP: Client -> Server, 3 bytes) ---
 
 const (
-	DevCmdAdvanceHours uint8 = 1 // Avança +Value horas
-	DevCmdCycleMoon    uint8 = 2 // Cicla para próxima fase da lua
-	DevCmdCycleWeather uint8 = 3 // Cicla para próximo clima
-	DevCmdSetHour      uint8 = 4 // Define hora exata (Value % 24)
-	DevCmdSetMoon      uint8 = 5 // Define fase da lua exata (0 a 9)
-	DevCmdSetWeather   uint8 = 6 // Define clima exato (0 a 3)
+	DevCmdAdvanceHours uint8 = 1  // Avança +Value horas
+	DevCmdCycleMoon    uint8 = 2  // Cicla para próxima fase da lua
+	DevCmdCycleWeather uint8 = 3  // Cicla para próximo clima
+	DevCmdSetHour      uint8 = 4  // Define hora exata (Value % 24)
+	DevCmdSetMoon      uint8 = 5  // Define fase da lua exata (0 a 9)
+	DevCmdSetWeather   uint8 = 6  // Define clima exato (0 a 3)
 	DevCmdGiveItem     uint8 = 7  // Dá item (Value) ou kit 12 slots (255)
 	DevCmdLevelStats   uint8 = 8  // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
 	DevCmdTeleport     uint8 = 9  // Teleporte rápido (0..6)
@@ -1869,3 +1890,18 @@ func DeserializeFriendshipSync(data []byte) (FriendshipSyncPacket, error) {
 	}, nil
 }
 
+// IsUniqueClass informa se a classe é Única (Tier 5): exclusivas de raça (19-26) e gerais (27-30, 35-39).
+func IsUniqueClass(classID uint8) bool {
+	return (classID >= ClassVorpalExecutioner && classID <= ClassBoneNecromancer) ||
+		(classID >= ClassRunicArtificer && classID <= ClassStormHerald)
+}
+
+// IsLegendaryClass informa se a classe é Lendária (Tier 6, IDs 31 a 34).
+func IsLegendaryClass(classID uint8) bool {
+	return classID >= ClassPagmaDescendant && classID <= ClassBlackSunEmperor
+}
+
+// IsTranscendentClass informa se a classe reseta o nível ao ser assumida (Únicas e Lendárias, ID >= 19).
+func IsTranscendentClass(classID uint8) bool {
+	return IsUniqueClass(classID) || IsLegendaryClass(classID)
+}

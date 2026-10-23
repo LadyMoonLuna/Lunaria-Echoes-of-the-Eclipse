@@ -61,6 +61,9 @@ type Mob struct {
 	// Quebra de Armadura (Ferreiro, Alquimista, Escultor, Chef de Caça): +X% de dano recebido até ArmorBreakUntil
 	ArmorBreakPct   float32
 	ArmorBreakUntil time.Time
+
+	// Envenenado (Carrasco do Veneno Vorpal, Soberano da Teia): a Terceira Dose Letal causa dano cheio
+	PoisonedUntil time.Time
 }
 
 // NewMob cria uma nova entidade de Mob inicializada no mapa.
@@ -112,6 +115,22 @@ func (m *Mob) ApplyArmorBreak(duration time.Duration, pct float32) {
 		m.ArmorBreakPct = pct
 	}
 	m.ArmorBreakUntil = time.Now().Add(duration)
+}
+
+// MarkPoisoned marca o monstro como envenenado por um tempo.
+func (m *Mob) MarkPoisoned(d time.Duration) {
+	m.Mu.Lock()
+	defer m.Mu.Unlock()
+	if until := time.Now().Add(d); until.After(m.PoisonedUntil) {
+		m.PoisonedUntil = until
+	}
+}
+
+// IsPoisoned informa se o monstro ainda está envenenado.
+func (m *Mob) IsPoisoned() bool {
+	m.Mu.RLock()
+	defer m.Mu.RUnlock()
+	return time.Now().Before(m.PoisonedUntil)
 }
 
 // HPFraction retorna a fração de vida atual do monstro (0.0 a 1.0).

@@ -1,6 +1,7 @@
 package world
 
 import (
+	"strings"
 	"testing"
 
 	"lunaria/server/internal/protocol"
@@ -108,11 +109,11 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 		t.Fatalf("Classe Base não pode ultrapassar Tier 4! Obteve %d", p.ClassTier)
 	}
 
-	// Trocar para Classe Secreta (ActionMode 2): Ceifador do Eclipse (7)
+	// Trocar para Classe Secreta (ActionMode 2): Ceifador do Eclipse (27)
 	// Deve iniciar no Tier 5 (Única) e RESETAR NÍVEL PARA 1!
 	p.SetIdentityMode(protocol.RaceDhampir, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset)
 	if p.ClassID != protocol.ClassEclipseReaper {
-		t.Fatalf("Esperava Classe 7 Ceifador, obteve %d", p.ClassID)
+		t.Fatalf("Esperava Classe 27 Ceifador, obteve %d", p.ClassID)
 	}
 	if p.ClassTier != protocol.TierUnique {
 		t.Fatalf("Classe Secreta deve iniciar no Tier 5 Única, obteve %d", p.ClassTier)
@@ -121,14 +122,11 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 		t.Fatalf("Troca para Classe Secreta DEVE RESETAR o nível para 1! Obteve %d", p.Level)
 	}
 
-	// Evoluir Classe Secreta de Tier 5 (Única) para Tier 6 (Lendária: 2.60x) mantendo o nível!
+	// Classes Únicas NÃO evoluem: o Tier 5 é fixo (Tier 6 é exclusivo das 4 Lendárias)
 	p.AddLevel(2) // sobe para level 3
 	p.SetIdentityMode(0, 0, protocol.IdentityModeEvolveClass)
-	if p.ClassTier != protocol.TierLegendary {
-		t.Fatalf("Evolução final da Classe Secreta deve ir para Tier 6 Lendária, obteve %d", p.ClassTier)
-	}
-	if p.Level != 3 {
-		t.Fatalf("Evolução para Lendária deve manter o nível 3! Obteve %d", p.Level)
+	if p.ClassTier != protocol.TierUnique || p.Level != 3 {
+		t.Fatalf("Classe Única deve continuar no Tier 5 mantendo o nível 3, obteve Tier %d Nível %d", p.ClassTier, p.Level)
 	}
 }
 
@@ -427,7 +425,7 @@ func TestPlayerConsumablesAndSecretTriggers(t *testing.T) {
 func TestRPGEvolutionAndTierScaling(t *testing.T) {
 	// 1. Testa Atributos Base por Raça Inicial
 	races := []struct {
-		raceID uint8
+		raceID                  uint8
 		s, d, c, a, i, sp, m, l uint8
 	}{
 		{protocol.RaceValerian, 6, 6, 6, 6, 6, 6, 7, 7},
@@ -899,7 +897,7 @@ func TestSecretClasses10to15AndDevDirect(t *testing.T) {
 	p := NewPlayer(1, nil, 0, 1.5, 0)
 
 	// 1. Testa IdentityModeDevDirect (ActionMode 98) para todas as 15 classes e 6 tiers
-	for cid := uint8(1); cid <= 15; cid++ {
+	for cid := uint8(1); cid <= 18; cid++ { // Básicas e Variantes aceitam qualquer Tier no modo Dev
 		p.SetIdentityMode(protocol.TierLegendary, cid, protocol.IdentityModeDevDirect)
 		if p.ClassID != cid {
 			t.Fatalf("ActionMode 98 deveria definir ClassID=%d, obteve %d", cid, p.ClassID)
@@ -942,22 +940,11 @@ func TestSecretClasses10to15AndDevDirect(t *testing.T) {
 			t.Fatalf("No Tier 5 Única deveria ganhar +11 StatPoints por nível, ganhou %d", ptsGained)
 		}
 
-		// Testa Evolução para Tier 6 Lendária mantendo nível
+		// Classes Únicas não evoluem: continuam no Tier 5 e mantêm o nível (+15 pts é só das Lendárias)
 		lvlBeforeEvolve := p.Level
 		p.SetIdentityMode(protocol.RaceValerian, sc, protocol.IdentityModeEvolveClass)
-		if p.ClassTier != protocol.TierLegendary {
-			t.Fatalf("Evolução de classe secreta deveria subir para Tier 6 Lendária (%d), obteve %d", protocol.TierLegendary, p.ClassTier)
-		}
-		if p.Level != lvlBeforeEvolve {
-			t.Fatalf("Evolução não deveria alterar nível: antes=%d, depois=%d", lvlBeforeEvolve, p.Level)
-		}
-
-		// No Tier 6 Lendária ganha +15 StatPoints por nível
-		ptsBeforeT6 := p.StatPoints
-		p.AddLevel(1)
-		ptsGainedT6 := p.StatPoints - ptsBeforeT6
-		if ptsGainedT6 != 15 {
-			t.Fatalf("No Tier 6 Lendária deveria ganhar +15 StatPoints por nível, ganhou %d", ptsGainedT6)
+		if p.ClassTier != protocol.TierUnique || p.Level != lvlBeforeEvolve {
+			t.Fatalf("Classe Única deveria continuar no Tier 5 nível %d, obteve Tier %d nível %d", lvlBeforeEvolve, p.ClassTier, p.Level)
 		}
 	}
 
@@ -1035,8 +1022,6 @@ func TestDevControlLevelAndStats(t *testing.T) {
 		t.Fatalf("esperava Level 1 e atributos limpos após val=0, obteve Lvl %d, AllocSTR %d, AllocCON %d", p.Level, p.AllocSTR, p.AllocCON)
 	}
 }
-
-
 
 func TestBasicClassDefensivePassives(t *testing.T) {
 	// Guerreiro (Sangue de Batalha): +15% de Defesa Física -> 100 vira 85
@@ -1149,5 +1134,62 @@ func TestSecretVariantRequirementsKeepLevel(t *testing.T) {
 	low.SetIdentity(protocol.RaceValerian, protocol.ClassWarrior)
 	if ok, _ := low.CanAwakenVariant(protocol.ClassRunicSpellblade); ok {
 		t.Fatal("Guerreiro nível 1 não deveria despertar Variante (exige nível 25)")
+	}
+}
+
+func TestTranscendentClassesResetAndPower(t *testing.T) {
+	// Única Exclusiva de Raça: Bastião do Mundo exige Demi-Humano Tartaruga + Escudeiro
+	p := NewPlayer(1, nil, 0, 0, 0)
+	p.SetIdentity(protocol.RaceValerian, protocol.ClassShieldBearer)
+	if ok, why, _ := p.CanAwakenUnique(protocol.ClassWorldBastion); ok || !strings.Contains(why, "Sangue Incompatível") {
+		t.Fatalf("Valeriano não pode ser Bastião do Mundo; motivo: %q", why)
+	}
+	p.SetIdentity(protocol.RaceTurtleDemi, protocol.ClassShieldBearer)
+	if ok, why, _ := p.CanAwakenUnique(protocol.ClassWorldBastion); !ok {
+		t.Fatalf("Tartaruga Escudeiro deveria poder despertar o Bastião: %s", why)
+	}
+	p.AddLevel(29)
+	p.Mu.Lock()
+	p.AllocCON = 20
+	p.Mu.Unlock()
+	baseCON := func(classID uint8) uint8 {
+		_, _, rc, _, _, _, _, _ := GetBaseRaceAttributes(protocol.RaceTurtleDemi)
+		_, _, cc, _, _, _, _, _ := GetClassBaseAttributes(classID)
+		return rc + cc
+	}
+
+	p.SetIdentityMode(0, protocol.ClassWorldBastion, protocol.IdentityModeInitialChange)
+	if p.Level != 1 || p.XP != 0 || p.NextLevelXP != 100 || p.ClassTier != protocol.TierUnique {
+		t.Fatalf("Única deve resetar para o nível 1 no Tier 5: nível %d, XP %d/%d, tier %d", p.Level, p.XP, p.NextLevelXP, p.ClassTier)
+	}
+	if p.CON != baseCON(protocol.ClassWorldBastion)+25 {
+		t.Fatalf("Única: CON deveria ser raça+classe+25 (pontos distribuídos zerados), obteve %d", p.CON)
+	}
+	if p.StatPointsPerLevel() != 11 {
+		t.Fatalf("Única deve dar +11 pts/nível, obteve %d", p.StatPointsPerLevel())
+	}
+
+	// Lendária: +50 nos 4 atributos principais, Tier 6, +15 pts/nível
+	p.AddLevel(9)
+	p.SetIdentityMode(4, protocol.ClassDragonMonarch, protocol.IdentityModeDevDirect)
+	if p.Level != 1 || p.ClassTier != protocol.TierLegendary || p.StatPointsPerLevel() != 15 {
+		t.Fatalf("Lendária deve resetar para o nível 1 no Tier 6 com +15 pts: nível %d, tier %d, pts %d", p.Level, p.ClassTier, p.StatPointsPerLevel())
+	}
+	if b := TranscendenceBonus(protocol.ClassDragonMonarch); b[0] != 50 || b[2] != 50 || b[5] != 50 || b[6] != 50 {
+		t.Fatalf("Lendária deve ter +50 em FOR, CON, ESP e PER: %v", b)
+	}
+	if p.CON != baseCON(protocol.ClassDragonMonarch)+50 {
+		t.Fatalf("Lendária: CON deveria ser raça+classe+50, obteve %d", p.CON)
+	}
+
+	// Itens como requisito: Barão da Sucata exige Goblin + Diagrama do Mecha
+	g := NewPlayer(2, nil, 0, 0, 0)
+	g.SetIdentity(protocol.RaceGoblin, protocol.ClassFighter)
+	if ok, _, _ := g.CanAwakenUnique(protocol.ClassScrapBaron); ok {
+		t.Fatal("Goblin sem o Diagrama do Mecha não pode despertar o Barão da Sucata")
+	}
+	g.AddItem(protocol.ItemMechaBlueprint, 1)
+	if ok, why, used := g.CanAwakenUnique(protocol.ClassScrapBaron); !ok || used != protocol.ItemMechaBlueprint {
+		t.Fatalf("Goblin com o Diagrama deveria poder despertar o Barão (consumindo o Diagrama): %s, item %d", why, used)
 	}
 }

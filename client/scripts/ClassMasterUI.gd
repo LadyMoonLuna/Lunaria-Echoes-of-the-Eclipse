@@ -79,7 +79,7 @@ const MASTER_DATA := {
 	104: { # Varis, o Mercador Sombrio
 		"title": "Varis, o Mercador do Beco Sombrio",
 		"sub": "Ceifador do Eclipse & Pactos Proibidos",
-		"class_id": 19,
+		"class_id": 27,
 		"class_name": "Ceifador do Eclipse",
 		"greeting": "Pssiu... A luz da vila é fraca demais contra o que rasteja lá fora. Se você não tem medo de ceifar almas com uma foice colossal, as sombras o acolherão...",
 		"color": Color("#d500f9"),
@@ -596,6 +596,20 @@ func _render_main_view(m_info: Dictionary) -> void:
 					path_btn.pressed.connect(func(): _choose_path(path_id))
 					options_vbox.add_child(path_btn)
 
+		# Classes Únicas Exclusivas da raça do jogador (Tier 5, reset para o nível 1)
+		for unique_id in ClassPaths.uniques_for_race(my_race):
+			var u_id: int = unique_id
+			var u_info: Dictionary = ClassPaths.TRANSCENDENT[u_id]
+			if my_class == u_id:
+				continue
+			var u_btn := Button.new()
+			u_btn.custom_minimum_size = Vector2(0, 38)
+			u_btn.add_theme_font_size_override("font_size", 11)
+			u_btn.text = "🩸 Despertar Classe Única da sua Linhagem: %s (exige %s) — reseta para o Nível 1" % [u_info["name"], u_info["requirement"]]
+			u_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			u_btn.pressed.connect(func(): _learn_class(my_race, u_id))
+			options_vbox.add_child(u_btn)
+
 		# Variantes Secretas (13 a 18) que esta classe básica pode despertar (nível 25+, sem reset de nível)
 		for variant_id in ClassPaths.variants_for_base(my_class):
 			var v_id: int = variant_id
@@ -827,15 +841,13 @@ func _learn_class(race_id: int, new_class_id: int) -> void:
 	var master_name := current_npc_name if current_npc_name != "" else ("Mestre #%d" % current_npc_id)
 	if ClassPaths.is_variant(new_class_id):
 		class_name_str = ClassPaths.VARIANTS[new_class_id]["name"]
+	elif ClassPaths.TRANSCENDENT.has(new_class_id):
+		class_name_str = ClassPaths.TRANSCENDENT[new_class_id]["name"]
 	elif MASTER_DATA.has(current_npc_id):
 		class_name_str = MASTER_DATA[current_npc_id].get("class_name", class_name_str)
 	if world and world.has_method("request_class_or_race_change"):
 		# Únicas/Lendárias (19 a 27) entram no Tier 5; Variantes Secretas (13 a 18) no Tier 3; básicas no Tier 1
-		var target_tier: int = 1
-		if new_class_id >= 19:
-			target_tier = 5
-		elif new_class_id >= 13:
-			target_tier = 3
+		var target_tier: int = ClassPaths.tier_for_class(new_class_id)
 		world.request_class_or_race_change(false, new_class_id, target_tier, class_name_str, master_name)
 	else:
 		var nm := get_node_or_null("/root/NetworkManager")

@@ -451,9 +451,80 @@ def outfit_valkyrie():
     return m
 
 
+# ---------------------------------------------------------------------------
+# Classes Únicas de Raça e Lendárias
+# ---------------------------------------------------------------------------
+
+def vorpal_stinger():
+    m = W("vorpal_stinger", "Ferrão Vorpal", "Ferrão curvo de escorpião com toxina verde pingando (usado em par).", "#76ff03")
+    chitin = m.mat("chitin_amber", "#6d4c00", rough=0.25, metal=0.3)
+    venom = m.mat("venom", "#ccff90", emit="#76ff03", energy=4.0, anim={"type": "glow", "speed": 2.0, "min": 0.6, "max": 1.3})
+    m.part("cylinder", [0.02, 0.024, 0.12], (0, 0, 0), m.mat("grip_wrap", "#1b1b10", rough=0.9))
+    m.chain([(0, 0.06, 0), (0.02, 0.2, 0), (0.06, 0.32, 0), (0.11, 0.38, 0)], [0.022, 0.018, 0.012, 0.0], chitin)
+    m.part("sphere", [0.016], (0.11, 0.38, 0), venom)
+    return m
+
+
+def black_sun_blade():
+    m = W("black_sun_blade", "Lâmina do Sol Negro", "Montante de vazio com um sol negro no guarda-mão e fio de aurora dourada.", "#4a148c")
+    void = m.mat("void_blade", "#120a1c", rough=0.15, metal=0.6)
+    aurora = m.mat("aurora_edge", "#fff59d", emit="#ffd600", energy=4.0, anim={"type": "glow", "speed": 1.2, "min": 0.6, "max": 1.4})
+    sun = m.mat("black_sun", "#000000", emit="#7c4dff", energy=3.0)
+    m.part("cylinder", [0.026, 0.028, 0.3], (0, 0.0, 0), m.mat("grip_wrap", "#1a1024", rough=0.8))
+    m.part("torus", [0.08, 0.11], (0, 0.18, 0), aurora, rot=(90, 0, 0))
+    m.part("sphere", [0.07], (0, 0.18, 0), sun)
+    m.part("box", [0.12, 1.25, 0.02], (0, 0.88, 0), void)
+    m.part("box", [0.012, 1.2, 0.024], (0.06, 0.88, 0), aurora)
+    m.part("box", [0.012, 1.2, 0.024], (-0.06, 0.88, 0), aurora)
+    m.part("prism", [0.12, 0.16, 0.02], (0, 1.58, 0), void)
+    m.light("#7c4dff", 0.6, 2.0, (0, 0.6, 0))
+    return m
+
+
+def six_swords():
+    m = C("six_swords", "6 Espadas Lendárias", "Seis espadas forjadas por Pagma que flutuam em círculo ao redor do Descendente.", "#ffd700")
+    steel = m.mat("legend_steel", "#eceff1", rough=0.1, metal=1.0)
+    gold = m.mat("gold", "#ffca28", rough=0.15, metal=1.0)
+    glow = m.mat("legend_glow", "#fff8e1", emit="#ffd54f", energy=2.5)
+    m.group("orbit", (0, 0, 0), anim={"type": "spin", "axis": [0, 1, 0], "speed": 60})
+    for i in range(6):
+        a = math.radians(i * 60)
+        g = m.group("sword%d" % i, (math.cos(a) * 0.95, 1.2, math.sin(a) * 0.95), "orbit",
+                    anim={"type": "bob", "amp": 0.06, "speed": 2.0, "phase": i})
+        c = (math.cos(a) * 0.95, 1.2, math.sin(a) * 0.95)
+        m.part("box", [0.05, 0.7, 0.012], v_add(c, (0, 0.15, 0)), steel, group=g)
+        m.part("box", [0.16, 0.025, 0.03], v_add(c, (0, -0.22, 0)), gold, group=g)
+        m.part("cylinder", [0.014, 0.014, 0.14], v_add(c, (0, -0.31, 0)), gold, group=g)
+        m.part("box", [0.008, 0.6, 0.016], v_add(c, (0, 0.15, 0)), glow, group=g)
+    m.light("#ffd54f", 0.6, 2.5, (0, 1.2, 0))
+    return m
+
+
+def elder_dragon():
+    m = C("elder_dragon", "Dragão Ancião", "Dragão ancião vermelho-ouro que plana ao lado do Monarca dos Dragões.", "#ff6d00")
+    scale = m.mat("dragon_scale", "#8e1b10", rough=0.35, metal=0.4)
+    gold = m.mat("gold_horn", "#ffca28", rough=0.2, metal=0.9)
+    mem = m.mat("membrane", "#5d1010", rough=0.6, double=True)
+    eye = m.mat("eye_fire", "#fff176", emit="#ff6d00", energy=5.0)
+    c = (1.1, 1.9, 0.6)
+    m.group("body", c, anim={"type": "bob", "amp": 0.15, "speed": 1.5})
+    m.part("capsule", [0.18, 0.8], v_add(c, (0, 0, 0)), scale, rot=(90, 0, 0), group="body")
+    m.part("sphere", [0.15], v_add(c, (0, 0.12, -0.55)), scale, scale=(1, 0.9, 1.4), group="body")
+    for side in (-1, 1):
+        m.part("cylinder", [0.0, 0.04, 0.22], v_add(c, (side * 0.08, 0.28, -0.5)), gold, rot=(-40, 0, side * 20), group="body")
+        m.part("sphere", [0.025], v_add(c, (side * 0.07, 0.17, -0.72)), eye, group="body")
+        wg = m.group("dwing%d" % side, v_add(c, (side * 0.15, 0.1, -0.05)), "body",
+                     anim={"type": "sway", "axis": [0, 0, side], "amp": 18.0, "speed": 2.2})
+        m.plank(v_add(c, (side * 0.15, 0.1, -0.05)), v_add(c, (side * 0.95, 0.4, 0.15)), 0.5, 0.01, mem, group=wg)
+    m.chain([v_add(c, (0, 0, 0.4)), v_add(c, (0, -0.1, 0.8)), v_add(c, (0, -0.05, 1.15))], [0.12, 0.07, 0.0], scale, group="body")
+    m.light("#ff6d00", 0.5, 2.5, c)
+    return m
+
+
 WEAPONS_CLASSES = [assassin_dagger, heavy_gauntlet, colossal_shield, short_mace, sculptor_chisel, coiled_whip,
                    golden_needle, giant_cleaver, iron_wok, guardian_statue, tamed_beast,
                    runic_sword, arcane_orb, silver_crossbow, holy_stake, golden_spear, winged_shield,
-                   shadow_gauntlet, crimson_hammer, living_sword, scalpel, censer]
+                   shadow_gauntlet, crimson_hammer, living_sword, scalpel, censer,
+                   vorpal_stinger, black_sun_blade, six_swords, elder_dragon]
 OUTFITS_CLASSES = [outfit_assassin, outfit_fighter, outfit_shieldbearer, outfit_sculptor, outfit_tamer, outfit_tailor,
                    outfit_chef, outfit_plague_doctor, outfit_valkyrie]

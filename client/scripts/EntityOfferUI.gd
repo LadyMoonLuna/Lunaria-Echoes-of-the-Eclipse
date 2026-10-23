@@ -424,10 +424,7 @@ func _request_identity_offer_confirmation(offered_class_id: int, offered_race_id
 	var target_id: int = offered_race_id if is_race_offer else offered_class_id
 	var target_tier: int = 1
 	if not is_race_offer:
-		if offered_class_id >= 19:
-			target_tier = 5 # Classe Secreta Única: reset para o nível 1
-		elif offered_class_id >= 13:
-			target_tier = 3 # Variante Secreta
+		target_tier = ClassPaths.tier_for_class(offered_class_id) # Única 5 / Lendária 6 (reset de nível)
 	var target_name: String = "#%d" % target_id
 	var names: Array = _world_const(world, "RACE_NAMES" if is_race_offer else "CLASS_NAMES")
 	if target_id < names.size():

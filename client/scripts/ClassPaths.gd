@@ -6,6 +6,23 @@ extends RefCounted
 
 const MULT_LABELS := ["Vida", "Stamina", "Defesa", "Velocidade", "Dano"]
 
+## Nomes das classes por ID (iguais a server/internal/protocol/packets.go).
+const CLASS_NAMES := [
+	"Viajante (Sem Classe)",
+	"Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
+	"Ferreiro", "Alquimista", "Escultor", "Domador", "Alfaiate de Guerra", "Chef de Caça",
+	"Espadachim Rúnico", "Caçador de Vampiros", "Valquíria da Égide", "Monge das Sombras",
+	"Forjador de Armas Amaldiçoadas", "Médico da Peste",
+	"Carrasco do Veneno Vorpal", "Soberano da Teia Carmesim", "Rei-Fera da Alcateia de Sangue",
+	"Runomante da Montanha Eterna", "Bastião do Mundo", "Arquifada da Árvore do Mundo",
+	"Aristocrata Carmesim", "Barão da Sucata",
+	"Ceifador do Eclipse", "Dançarino Astral", "Inquisidor das Cinzas", "Necromante de Ossos",
+	"Descendente de Pagma", "Escultor do Luar Lendário", "Monarca dos Dragões", "Imperador do Sol Negro",
+	"Artífice Rúnico", "Criador de Homúnculos", "Domador Primordial", "Cavaleiro da Ruptura",
+	"Arauto da Tempestade"
+]
+
+
 const PATHS := {
 	1: {
 		1: {"rare": "Gladiador", "epic": "Senhor da Carnificina", "focus": "Dano em Área", "mult": [1.10, 1.00, 1.05, 0.95, 1.15]},
@@ -188,4 +205,125 @@ static func variant_skill_info(class_id: int) -> Dictionary:
 		"q": {"name": "%s [Q]" % v["q"][0], "desc": v["q"][1], "range": v["q"][2], "cost": "15 Stamina", "cd": "2.0s"},
 		"r": {"name": "%s [R]" % v["r"][0], "desc": v["r"][1], "range": v["r"][2], "cost": "20 Stamina", "cd": "4.0s"},
 		"f": {"name": "%s [F]" % v["f"][0], "desc": v["f"][1], "range": v["f"][2], "cost": "25 Stamina", "cd": "6.0s"},
+	}
+
+## Classes Únicas Exclusivas de Raça (19 a 26, Tier 5) e Lendárias (31 a 34, Tier 6).
+## As Únicas Gerais (27 a 30, 35 a 39) já têm página própria no Grimório.
+const TRANSCENDENT := {
+	19: {"name": "Carrasco do Veneno Vorpal", "kind": "Única de Raça", "color": Color("#76ff03"), "races": [43], "race_name": "Demi-Humano Escorpião", "requirement": "Assassino ou Alquimista, ou a Glândula Real", "weapon": "Ferrões duplos venenosos",
+		"passive": ["Neurotoxina Absoluta & Sangue Corrosivo", "Venenos causam dano verdadeiro; quem o fere leva 15% do dano de volta em ácido."],
+		"q": ["Ferrão Duplo Vorpal", "Dois golpes num alvo (2.5x) que aplicam 3 doses de toxina.", "3.8m"],
+		"r": ["Ecdise Ácida", "Fica invisível por 2s, cura 30% da Vida e deixa uma casca que explode em 4m (2.4x).", "4m"],
+		"f": ["Execução da Terceira Dose Letal", "4.0x de dano verdadeiro em 4m nos alvos envenenados (os demais levam 60%).", "4m"]},
+	20: {"name": "Soberano da Teia Carmesim", "kind": "Única de Raça", "color": Color("#d50000"), "races": [21], "race_name": "Aracne", "requirement": "Alfaiate de Guerra ou Assassino, ou o Olho de Arachna", "weapon": "Fios de seda + oito patas-lâmina",
+		"passive": ["Ninho de Seda Viva & Oito Lâminas Dorsais", "As patas de aranha golpeiam junto com cada habilidade (+15% de dano)."],
+		"q": ["Fios de Seda Cortante", "Cone de fios de 8m (2.4x) que desacelera.", "8m"],
+		"r": ["Casulo de Drenagem", "Casulo que drena em 4m (2.4x) e cura +60 de Vida.", "4m"],
+		"f": ["Domínio da Viúva Negra", "Teias venenosas em 10m (3.5x) com veneno e lentidão.", "10m"]},
+	21: {"name": "Rei-Fera da Alcateia de Sangue", "kind": "Única de Raça", "color": Color("#b71c1c"), "races": [46, 6], "race_name": "Demi-Humano Lobo ou Licantropo", "requirement": "Domador ou Lutador", "weapon": "Garras + 2 Lobos Espirituais Alfa",
+		"passive": ["Comando Alfa Supremo & Presas de Prata Negra", "2 Lobos Alfa permanentes golpeiam junto (+20%) e +20% de dano."],
+		"q": ["Frenesi de Mordidas Sincronizadas", "Mordidas em cone de 4m (2.5x) com sangramento.", "4m"],
+		"r": ["Uivo do Eclipse Lupino", "Buff de 12s, +40 de Vida e lentidão em 6m.", "6m"],
+		"f": ["Caçada Selvagem da Alcateia", "A alcateia avança numa área de 7m à frente (3.6x).", "7m"]},
+	22: {"name": "Runomante da Montanha Eterna", "kind": "Única de Raça", "color": Color("#ffab40"), "races": [37, 3], "race_name": "Anão ou Kharad", "requirement": "Ferreiro", "weapon": "Martelo rúnico",
+		"passive": ["Segredo dos Titãs & Pele de Adamante", "-40% de dano recebido; runas reforçam o equipamento."],
+		"q": ["Martelo Trovão da Montanha", "Martelada em cone de 4.5m (2.5x) que atordoa por 1s.", "4.5m"],
+		"r": ["Bigorna Ancestral Viva", "+25% de Ataque/Defesa para todos em 8m por 10s e escudo de 3s.", "8m"],
+		"f": ["Forja do Ragnarok", "Magma em 6m (3.6x) que continua queimando.", "6m"]},
+	23: {"name": "Bastião do Mundo", "kind": "Única de Raça", "color": Color("#2e7d32"), "races": [44], "race_name": "Demi-Humano Tartaruga", "requirement": "Escudeiro", "weapon": "Casco colossal",
+		"passive": ["Casco Continental & Santuário Móvel", "Converte 50% da Defesa em Ataque (+25% de dano) e -30% de dano recebido."],
+		"q": ["Giro de Carapaça Demolidora", "Gira em 4m (2.4x).", "4m"],
+		"r": ["Fortaleza Hidráulica", "+75 de Vida e -70% de dano por 4s.", "Pessoal"],
+		"f": ["Peso do Oceano Profundo", "Impacto sísmico em 7m (3.5x) e escudo de raid para o grupo.", "7m"]},
+	24: {"name": "Arquifada da Árvore do Mundo", "kind": "Única de Raça", "color": Color("#f48fb1"), "races": [41], "race_name": "Fadinha", "requirement": "Mago ou Alquimista", "weapon": "Varinha da Árvore do Mundo",
+		"passive": ["Asas de Éter Puro & Miragem Feérica", "35% de chance de esquivar de qualquer dano."],
+		"q": ["Rajada de Pó Estelar", "Pó estelar em cone de 8m (2.5x).", "8m"],
+		"r": ["Anel de Cogumelos Mágicos", "Cura +70 de Vida do grupo e transforma inimigos em 5m (polimorfia de 3s).", "5m"],
+		"f": ["Despertar de Titânia", "Explosão astral em 7m (3.5x) e cura em área.", "7m"]},
+	25: {"name": "Aristocrata Carmesim", "kind": "Única de Raça", "color": Color("#880e4f"), "races": [5], "race_name": "Dhampir / Vampiro", "requirement": "o Sangue Puro de Vesperian", "weapon": "Lança de sangue",
+		"passive": ["Imortalidade do Sangue & Domínio da Noite", "Volta com 30% de Vida uma vez a cada 10 min; +40% de dano à noite; 15% de roubo de vida."],
+		"q": ["Lança de Sangue Congelado", "Lança num alvo a até 10m (2.5x) que desacelera.", "10m"],
+		"r": ["Enxame da Noite", "Vira morcegos (intangível 2s) e drena vida em 4m (2.5x).", "4m"],
+		"f": ["Trono de Sangue", "Trono de sangue em 9m (3.6x) com roubo de vida.", "9m"]},
+	26: {"name": "Barão da Sucata", "kind": "Única de Raça", "color": Color("#ffd600"), "races": [42], "race_name": "Goblin", "requirement": "o Diagrama do Mecha", "weapon": "Mecha de sucata com canhão de moedas",
+		"passive": ["Piloto de Exoesqueleto & Ganância Explosiva", "-20% de dano recebido e +15% de chance crítica."],
+		"q": ["Canhão de Moedas & Metralha", "Metralha em cone de 7m (2.4x).", "7m"],
+		"r": ["Propulsor Turbo", "Dash de 8m intangível.", "8m"],
+		"f": ["Autodestruição Nuclear Goblin", "Explosão massiva em 8m (3.8x); custa 10% da Vida do piloto.", "8m"]},
+	31: {"name": "Descendente de Pagma", "kind": "Lendária", "color": Color("#ffd700"), "races": [], "race_name": "", "requirement": "", "weapon": "6 espadas lendárias flutuantes",
+		"passive": ["Deus da Forja & Espada", "Equipa qualquer arma; 6 espadas lendárias golpeiam junto (+30% de dano)."],
+		"q": ["Dança da Espada: Onda", "Onda de espadas em cone de 9m (3.8x).", "9m"],
+		"r": ["Transcendência de 6 Espadas", "As 6 espadas varrem 5m (3.6x); buff de 15s e escudo de 3s.", "5m"],
+		"f": ["Queda do Deus da Forja", "As espadas caem do céu em 8m (4.8x) — efeito global.", "8m"]},
+	32: {"name": "Escultor do Luar Lendário", "kind": "Lendária", "color": Color("#b3e5fc"), "races": [], "race_name": "", "requirement": "", "weapon": "Cinzel do Luar + Estátuas Vivas",
+		"passive": ["Estátuas Vivas", "Estátuas vivas lutam junto (+20% de dano)."],
+		"q": ["Lâmina da Lua Radiante", "Corte de luar em cone de 6m (3.8x).", "6m"],
+		"r": ["Destruição Escultural", "+80% de Ataque por 20s.", "Pessoal"],
+		"f": ["Legião Imperial do Luar", "A legião de estátuas varre 9m (4.6x) — efeito global.", "9m"]},
+	33: {"name": "Monarca dos Dragões", "kind": "Lendária", "color": Color("#ff6d00"), "races": [], "race_name": "", "requirement": "", "weapon": "Chicote do Monarca + Dragão Ancião e Behemoth",
+		"passive": ["Monarca das Feras Primordiais", "Dragão Ancião e Behemoth golpeiam junto (+25% de dano)."],
+		"q": ["Garra do Monarca", "Garra em cone de 5m (3.9x).", "5m"],
+		"r": ["Rugido de Subjugação", "Atordoa todos em 8m por 3s (3.7x) e buff de 10s.", "8m"],
+		"f": ["Cataclismo do Rei Dragão", "Fogo de dragão em 10m à frente (5.0x) — efeito global.", "10m"]},
+	34: {"name": "Imperador do Sol Negro", "kind": "Lendária", "color": Color("#4a148c"), "races": [], "race_name": "", "requirement": "", "weapon": "Lâmina do Sol Negro",
+		"passive": ["Monarca do Eclipse", "Domina Luz e Vazio; a Ultimate transforma o céu em Eclipse por 60s."],
+		"q": ["Corte do Horizonte de Eventos", "Corte em cone de 10m (4.0x).", "10m"],
+		"r": ["Égide da Aurora e Abismo", "Escudo de 5s, intangível 1s e +80 de Vida para o grupo em 8m.", "8m"],
+		"f": ["Apocalipse do Sol Negro", "Dano verdadeiro em 12m (5.0x) e o céu vira Eclipse — efeito global.", "12m"]},
+}
+
+## Tier em que a classe é assumida: Lendária 6, Única 5, Variante 3, Básica 1.
+static func tier_for_class(class_id: int) -> int:
+	if class_id >= 31 and class_id <= 34:
+		return 6
+	if class_id >= 19:
+		return 5
+	if class_id >= 13:
+		return 3
+	return 1
+
+static func is_legendary(class_id: int) -> bool:
+	return class_id >= 31 and class_id <= 34
+
+## Aviso de "Sangue Incompatível" (vazio se a raça pode assumir a classe).
+static func race_block_message(class_id: int, race_id: int) -> String:
+	if not TRANSCENDENT.has(class_id):
+		return ""
+	var races: Array = TRANSCENDENT[class_id]["races"]
+	if races.is_empty() or race_id in races:
+		return ""
+	return "🔒 Sangue Incompatível! Apenas a raça [%s] possui a anatomia para suportar esta Classe Única!" % TRANSCENDENT[class_id]["race_name"]
+
+## Classes Únicas Exclusivas da raça informada.
+static func uniques_for_race(race_id: int) -> Array:
+	var out: Array = []
+	for cid in TRANSCENDENT.keys():
+		if race_id in TRANSCENDENT[cid]["races"]:
+			out.append(cid)
+	return out
+
+## Dados de uma Única de Raça ou Lendária no formato do Grimório; vazio se não for uma delas.
+static func transcendent_skill_info(class_id: int) -> Dictionary:
+	if not TRANSCENDENT.has(class_id):
+		return {}
+	var t: Dictionary = TRANSCENDENT[class_id]
+	var legendary: bool = is_legendary(class_id)
+	var tier_label: String = "Tier 6 Lendária (+15 pts/nível, +50 nos atributos principais)" if legendary else "Tier 5 Única (+11 pts/nível, +25 no atributo principal e secundário)"
+	var titles := {}
+	for i in range(0, 7):
+		titles[i] = t["name"]
+	var req_text: String = ""
+	if not t["races"].is_empty():
+		req_text = " Exige a raça %s e %s." % [t["race_name"], t["requirement"]]
+	return {
+		"name": t["name"],
+		"tier_name": "%s — reseta para o nível 1" % tier_label,
+		"desc": "%s. [Passiva: %s] %s%s" % [t["weapon"], t["passive"][0], t["passive"][1], req_text],
+		"color": t["color"],
+		"evolved_titles": titles,
+		"passive": {"name": t["passive"][0], "desc": t["passive"][1], "tier_scaling": tier_label},
+		"basic": {"name": "Ataque Básico [LMB]", "desc": "Golpe com %s (1.0x dano)." % t["weapon"], "range": "3.8m", "cost": "0 Stamina", "cd": "0.45s"},
+		"q": {"name": "%s [Q]" % t["q"][0], "desc": t["q"][1], "range": t["q"][2], "cost": "15 Stamina", "cd": "2.0s"},
+		"r": {"name": "%s [R]" % t["r"][0], "desc": t["r"][1], "range": t["r"][2], "cost": "20 Stamina", "cd": "4.0s"},
+		"f": {"name": "%s [F]" % t["f"][0], "desc": t["f"][1], "range": t["f"][2], "cost": "25 Stamina", "cd": "6.0s"},
 	}

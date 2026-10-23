@@ -138,16 +138,7 @@ const RACE_NAMES := [
 ]
 const ClassPaths = preload("res://scripts/ClassPaths.gd")
 
-const CLASS_NAMES := [
-	"Viajante (Sem Classe)",
-	"Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
-	"Ferreiro", "Alquimista", "Escultor", "Domador", "Alfaiate de Guerra", "Chef de Caça",
-	"Espadachim Rúnico", "Caçador de Vampiros", "Valquíria da Égide", "Monge das Sombras",
-	"Forjador de Armas Amaldiçoadas", "Médico da Peste",
-	"Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos", "Dançarino Astral",
-	"Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial", "Cavaleiro da Ruptura",
-	"Arauto da Tempestade"
-]
+const CLASS_NAMES: Array = ClassPaths.CLASS_NAMES
 const TIER_NAMES := ["Sem Classe", "Comum", "Incomum", "Rara", "Épica", "Única", "Lendária"]
 
 const EVOLVED_CLASS_NAMES := {
@@ -169,15 +160,15 @@ const EVOLVED_CLASS_NAMES := {
 	16: ["", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras"],
 	17: ["", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas"],
 	18: ["", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste"],
-	19: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
-	20: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
-	21: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
-	22: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
-	23: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
-	24: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
-	25: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
-	26: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
-	27: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
+	27: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
+	35: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
+	36: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
+	28: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
+	29: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
+	30: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
+	37: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
+	38: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
+	39: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
 }
 
 const TIER_COLORS := [
@@ -321,7 +312,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.",
 		"f_desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade."
 	},
-	19: { # Ceifador do Eclipse
+	27: { # Ceifador do Eclipse
 		"basic": "Foice das Sombras",
 		"q": "Colheita Noturna",
 		"r": "Drenagem Abissal",
@@ -331,7 +322,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.",
 		"f_desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida (2.4x dano)."
 	},
-	20: { # Artífice Rúnico
+	35: { # Artífice Rúnico
 		"basic": "Canhonada Rúnica",
 		"q": "Salva Rúnica",
 		"r": "Sobrecarga Eletrostática",
@@ -341,7 +332,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.",
 		"f_desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano)."
 	},
-	21: { # Criador de Homúnculos
+	36: { # Criador de Homúnculos
 		"basic": "Pulso Quimérico",
 		"q": "Infusão Mutagênica",
 		"r": "Névoa de Bioplasma",
@@ -351,7 +342,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.",
 		"f_desc": "O homúnculo cresce e desfere explosão de garras e ácido colossais (2.4x dano)."
 	},
-	22: { # Dançarino Astral
+	28: { # Dançarino Astral
 		"basic": "Corte Astral",
 		"q": "Corte Cadente",
 		"r": "Valsa dos Espelhos",
@@ -361,7 +352,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.",
 		"f_desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano)."
 	},
-	23: { # Inquisidor das Cinzas
+	29: { # Inquisidor das Cinzas
 		"basic": "Chama Penitente",
 		"q": "Chicote de Penitência",
 		"r": "Selo de Excomunhão",
@@ -371,7 +362,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.",
 		"f_desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano)."
 	},
-	24: { # Necromante de Ossos
+	30: { # Necromante de Ossos
 		"basic": "Toque do Sepulcro",
 		"q": "Lança de Fêmur",
 		"r": "Explosão Óssea & Escudo",
@@ -381,7 +372,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Detona fragmentos ósseos em 5.0m e ergue barreira de ossos protetora.",
 		"f_desc": "Ergue vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal."
 	},
-	25: { # Domador Primordial
+	37: { # Domador Primordial
 		"basic": "Patada Selvagem",
 		"q": "Investida do Alfa",
 		"r": "Uivo da Alcateia",
@@ -391,7 +382,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.",
 		"f_desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano)."
 	},
-	26: { # Cavaleiro da Ruptura
+	38: { # Cavaleiro da Ruptura
 		"basic": "Golpe de Fenda",
 		"q": "Esmagamento Gravitacional",
 		"r": "Singularidade Reversa",
@@ -401,7 +392,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.",
 		"f_desc": "Cria um buraco negro em 6.5m que atordoa inimigos e desintegra matéria (2.8x dano)."
 	},
-	27: { # Arauto da Tempestade
+	39: { # Arauto da Tempestade
 		"basic": "Faísca Elétrica",
 		"q": "Lança do Trovão",
 		"r": "Passo de Relâmpago",
@@ -789,15 +780,27 @@ const DEV_CLASSES := [
 	{"id": 16, "name": "Monge das Sombras", "desc": "Variante Secreta (Lutador/Assassino, nv. 25+, sem reset). Manoplas Sombrias. [Passiva] Golpe do Ponto Vital Furtivo. [Q] Palma das Sombras, [R] Passo Fantasma, [F] Toque da Morte de Cinco Passos.", "col": Color("#7e57c2")},
 	{"id": 17, "name": "Forjador de Armas Amaldiçoadas", "desc": "Variante Secreta (Ferreiro, nv. 25+, sem reset). Martelo Carmesim + Espada Viva. [Passiva] Têmpera de Sangue (25% roubo de vida). [Q] Martelo Hemorrágico, [R] Sacrifício da Bigorna, [F] Despertar da Espada Demoníaca.", "col": Color("#c62828")},
 	{"id": 18, "name": "Médico da Peste", "desc": "Variante Secreta (Alquimista/Chef de Caça, nv. 25+, sem reset). Máscara de Corvo + Bisturi + Incensário. [Passiva] Imunidade & Cura Tóxica. [Q] Bisturi Cirúrgico, [R] Incenso Purificador, [F] Nuvem da Peste Negra.", "col": Color("#7cb342")},
-	{"id": 19, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
-	{"id": 20, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
-	{"id": 21, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
-	{"id": 22, "name": "Dançarino Astral", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
-	{"id": 23, "name": "Inquisidor das Cinzas", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
-	{"id": 24, "name": "Necromante de Ossos", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
-	{"id": 25, "name": "Domador Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
-	{"id": 26, "name": "Cavaleiro da Ruptura", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
-	{"id": 27, "name": "Arauto da Tempestade", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")}
+	{"id": 19, "name": "Carrasco do Veneno Vorpal", "desc": "Única de Raça (Demi-Humano Escorpião). [Q] Ferrão Duplo Vorpal, [R] Ecdise Ácida, [F] Execução da Terceira Dose Letal (4.0x verdadeiro).", "col": Color("#76ff03")},
+	{"id": 20, "name": "Soberano da Teia Carmesim", "desc": "Única de Raça (Aracne). [Q] Fios de Seda Cortante, [R] Casulo de Drenagem, [F] Domínio da Viúva Negra (3.5x).", "col": Color("#d50000")},
+	{"id": 21, "name": "Rei-Fera da Alcateia de Sangue", "desc": "Única de Raça (Lobo / Licantropo). [Q] Frenesi de Mordidas, [R] Uivo do Eclipse Lupino, [F] Caçada Selvagem (3.6x).", "col": Color("#b71c1c")},
+	{"id": 22, "name": "Runomante da Montanha Eterna", "desc": "Única de Raça (Anão / Kharad). [Q] Martelo Trovão, [R] Bigorna Ancestral Viva, [F] Forja do Ragnarok (3.6x).", "col": Color("#ffab40")},
+	{"id": 23, "name": "Bastião do Mundo", "desc": "Única de Raça (Tartaruga). [Q] Giro de Carapaça, [R] Fortaleza Hidráulica, [F] Peso do Oceano Profundo (3.5x).", "col": Color("#2e7d32")},
+	{"id": 24, "name": "Arquifada da Árvore do Mundo", "desc": "Única de Raça (Fadinha). [Q] Rajada de Pó Estelar, [R] Anel de Cogumelos, [F] Despertar de Titânia (3.5x).", "col": Color("#f48fb1")},
+	{"id": 25, "name": "Aristocrata Carmesim", "desc": "Única de Raça (Dhampir). [Q] Lança de Sangue Congelado, [R] Enxame da Noite, [F] Trono de Sangue (3.6x).", "col": Color("#880e4f")},
+	{"id": 26, "name": "Barão da Sucata", "desc": "Única de Raça (Goblin). [Q] Canhão de Moedas, [R] Propulsor Turbo, [F] Autodestruição Nuclear (3.8x).", "col": Color("#ffd600")},
+	{"id": 27, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
+	{"id": 35, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
+	{"id": 36, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
+	{"id": 28, "name": "Dançarino Astral", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
+	{"id": 29, "name": "Inquisidor das Cinzas", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
+	{"id": 30, "name": "Necromante de Ossos", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
+	{"id": 37, "name": "Domador Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
+	{"id": 38, "name": "Cavaleiro da Ruptura", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
+	{"id": 39, "name": "Arauto da Tempestade", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")},
+	{"id": 31, "name": "Descendente de Pagma", "desc": "LENDÁRIA (Tier 6). [Q] Dança da Espada: Onda, [R] Transcendência de 6 Espadas, [F] Queda do Deus da Forja (4.8x).", "col": Color("#ffd700")},
+	{"id": 32, "name": "Escultor do Luar Lendário", "desc": "LENDÁRIA (Tier 6). [Q] Lâmina da Lua Radiante, [R] Destruição Escultural (+80% ATK), [F] Legião Imperial do Luar (4.6x).", "col": Color("#b3e5fc")},
+	{"id": 33, "name": "Monarca dos Dragões", "desc": "LENDÁRIA (Tier 6). [Q] Garra do Monarca, [R] Rugido de Subjugação, [F] Cataclismo do Rei Dragão (5.0x).", "col": Color("#ff6d00")},
+	{"id": 34, "name": "Imperador do Sol Negro", "desc": "LENDÁRIA (Tier 6). [Q] Corte do Horizonte de Eventos, [R] Égide da Aurora e Abismo, [F] Apocalipse do Sol Negro (5.0x, céu em Eclipse).", "col": Color("#4a148c")}
 ]
 
 const DEV_ITEMS := [
@@ -1083,6 +1086,14 @@ var _active_class_or_race_modal: PanelContainer = null
 
 # Modal de Confirmação Obrigatória para Mudança de Classe ou Raça
 func request_class_or_race_change(is_race: bool, target_id: int, target_tier: int, target_name: String, source_desc: String) -> void:
+	# Classes Únicas Exclusivas de Raça: sem a raça certa, nem chega a abrir a confirmação
+	if not is_race:
+		var blood_warning: String = ClassPaths.race_block_message(target_id, my_race_id)
+		if blood_warning != "":
+			show_loot_toast(blood_warning)
+			if dev_status_label:
+				dev_status_label.text = blood_warning
+			return
 	if _active_class_or_race_modal and is_instance_valid(_active_class_or_race_modal):
 		_active_class_or_race_modal.queue_free()
 		_active_class_or_race_modal = null
@@ -1971,7 +1982,38 @@ func _update_clock_hud() -> void:
 		current_world_hour, current_world_minute, period_str, moon_str, weather_str
 	]
 
+var _legendary_flash_at: Dictionary = {} # attacker_id -> instante do último clarão (um por Ultimate)
+
+## Efeito global da Ultimate Lendária: clarão na tela de todos os jogadores.
+func _check_legendary_ultimate(attacker_id: int) -> void:
+	var atk_class: int = 0
+	if attacker_id == NetworkManager.my_player_id:
+		atk_class = my_class_id
+	elif remote_players.has(attacker_id) and is_instance_valid(remote_players[attacker_id]):
+		atk_class = remote_players[attacker_id].current_class_id
+	if not ClassPaths.is_legendary(atk_class):
+		return
+	var now: float = Time.get_ticks_msec() / 1000.0
+	if now - float(_legendary_flash_at.get(attacker_id, -99.0)) < 2.0:
+		return
+	_legendary_flash_at[attacker_id] = now
+	var flash_col: Color = Color(0.29, 0.08, 0.55, 0.7) if atk_class == 34 else Color(1.0, 0.84, 0.3, 0.6)
+	var layer := CanvasLayer.new()
+	layer.layer = 110
+	add_child(layer)
+	var rect := ColorRect.new()
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rect.color = flash_col
+	layer.add_child(rect)
+	var tw := create_tween()
+	tw.tween_property(rect, "color:a", 0.0, 1.2)
+	tw.tween_callback(layer.queue_free)
+	show_loot_toast("⚡ PODER LENDÁRIO: %s desencadeou sua Ultimate!" % ClassPaths.CLASS_NAMES[atk_class])
+
 func _on_combat_event_received(attacker_id: int, target_id: int, action_type: int, damage: int, is_crit: int, target_hp: int, target_max_hp: int) -> void:
+	if action_type == 5:
+		_check_legendary_ultimate(attacker_id)
 	if attacker_id != NetworkManager.my_player_id and remote_players.has(attacker_id):
 		if is_instance_valid(remote_players[attacker_id]):
 			remote_players[attacker_id].play_skill_animation(action_type)

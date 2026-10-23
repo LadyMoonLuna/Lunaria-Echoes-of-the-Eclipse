@@ -222,15 +222,15 @@ func _get_class_color() -> Color:
 		16: return Color("#4a148c") # Monge das Sombras
 		17: return Color("#b71c1c") # Forjador de Armas Amaldiçoadas
 		18: return Color("#558b2f") # Médico da Peste
-		19: return Color("#d500f9") # Ceifador do Eclipse
-		20: return Color("#ffb300") # Artífice Rúnico
-		21: return Color("#ea80fc") # Criador de Homúnculos
-		22: return Color("#00e5ff") # Dançarino Astral
-		23: return Color("#ff1744") # Inquisidor das Cinzas
-		24: return Color("#00e676") # Necromante de Ossos
-		25: return Color("#80d8ff") # Domador Primordial
-		26: return Color("#7c4dff") # Cavaleiro da Ruptura
-		27: return Color("#00b0ff") # Arauto da Tempestade
+		27: return Color("#d500f9") # Ceifador do Eclipse
+		35: return Color("#ffb300") # Artífice Rúnico
+		36: return Color("#ea80fc") # Criador de Homúnculos
+		28: return Color("#00e5ff") # Dançarino Astral
+		29: return Color("#ff1744") # Inquisidor das Cinzas
+		30: return Color("#00e676") # Necromante de Ossos
+		37: return Color("#80d8ff") # Domador Primordial
+		38: return Color("#7c4dff") # Cavaleiro da Ruptura
+		39: return Color("#00b0ff") # Arauto da Tempestade
 		_: return Color("#ffffff")
 
 func _spawn_skill_q_flash() -> void:
@@ -1296,28 +1296,28 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		7, 17, 20: # Ferreiro / Forjador / Artífice Rúnico: Pancada de Martelo de Forja
+		7, 17, 35: # Ferreiro / Forjador / Artífice Rúnico: Pancada de Martelo de Forja
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-85.0), deg_to_rad(20.0), 0.0), 0.12)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(75.0), 0.0, 0.0), 0.16)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		8, 18, 21: # Alquimista / Médico da Peste / Homúnculo: Lançamento de Frascos
+		8, 18, 36: # Alquimista / Médico da Peste / Homúnculo: Lançamento de Frascos
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-45.0), deg_to_rad(-35.0), 0.0), 0.1)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(45.0), deg_to_rad(25.0), 0.0), 0.12)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		19: # Ceifador do Eclipse: Golpe Giratório de Foice Colossal
+		27: # Ceifador do Eclipse: Golpe Giratório de Foice Colossal
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-40.0), deg_to_rad(-80.0), deg_to_rad(70.0)), 0.08)
 			tw.tween_property(weapon_pivot, "rotation:y", weapon_pivot.rotation.y + deg_to_rad(360.0), 0.28)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		4, 22: # Assassino / Dançarino Astral: Sequência acrobática com lâminas estelares duplas
+		4, 28: # Assassino / Dançarino Astral: Sequência acrobática com lâminas estelares duplas
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-45.0), deg_to_rad(-80.0), deg_to_rad(60.0)), 0.08)
 			if offhand_pivot:
@@ -1329,14 +1329,14 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.12)
 			tw.finished.connect(func(): is_attacking = false)
 
-		10, 23: # Domador (chicote) / Inquisidor das Cinzas: Chicoteada / arremesso do mangual em chamas
+		10, 29: # Domador (chicote) / Inquisidor das Cinzas: Chicoteada / arremesso do mangual em chamas
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-80.0), deg_to_rad(15.0), deg_to_rad(-10.0)), 0.11)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(85.0), deg_to_rad(-25.0), 0.0), 0.13)
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.13)
 			tw.finished.connect(func(): is_attacking = false)
 
-		24: # Necromante de Ossos: Erguimento do Cajado com pulso necromântico
+		30: # Necromante de Ossos: Erguimento do Cajado com pulso necromântico
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-75.0), deg_to_rad(20.0), deg_to_rad(-20.0)), 0.14)
 			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z - 0.3, 0.12)
@@ -1344,7 +1344,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "position", default_weapon_pos, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		25: # Domador Primordial: Estocada feroz de lança
+		37: # Domador Primordial: Estocada feroz de lança
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-85.0), 0.0, deg_to_rad(10.0)), 0.1)
 			tw.tween_property(weapon_pivot, "position:z", default_weapon_pos.z - 0.45, 0.1)
@@ -1352,7 +1352,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		26: # Cavaleiro da Ruptura: Golpe com Espada Colossal e avanço de Escudo
+		38: # Cavaleiro da Ruptura: Golpe com Espada Colossal e avanço de Escudo
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-90.0), deg_to_rad(15.0), deg_to_rad(-10.0)), 0.14)
 			if offhand_pivot:
@@ -1363,7 +1363,7 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
-		27: # Arauto da Tempestade: Corte descendente e descarga da Alabarda
+		39: # Arauto da Tempestade: Corte descendente e descarga da Alabarda
 			var tw := create_tween().set_parallel(false)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(-70.0), deg_to_rad(-60.0), deg_to_rad(45.0)), 0.1)
 			tw.tween_property(weapon_pivot, "rotation", Vector3(deg_to_rad(75.0), deg_to_rad(40.0), deg_to_rad(-30.0)), 0.14)
@@ -2121,6 +2121,42 @@ func _update_race_model() -> void:
 func _update_class_weapon() -> void:
 	_apply_class_visuals()
 
+## Aura exclusiva das Classes Lendárias (31 a 34): dourada, ou abissal no Imperador do Sol Negro.
+func _update_legendary_aura() -> void:
+	var old_aura := get_node_or_null("LegendaryAura")
+	if old_aura:
+		old_aura.queue_free()
+	if not ClassPaths.is_legendary(current_class_id):
+		return
+	var abyssal: bool = current_class_id == 34
+	var aura_col: Color = Color("#7c4dff") if abyssal else Color("#ffd54f")
+	var aura := Node3D.new()
+	aura.name = "LegendaryAura"
+	add_child(aura)
+	for ring_i in range(2):
+		var ring := MeshInstance3D.new()
+		var torus := TorusMesh.new()
+		torus.inner_radius = 0.55 + ring_i * 0.25
+		torus.outer_radius = 0.6 + ring_i * 0.25
+		ring.mesh = torus
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = Color(aura_col, 0.55)
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.emission_enabled = true
+		mat.emission = aura_col
+		mat.emission_energy_multiplier = 3.0
+		ring.material_override = mat
+		ring.position = Vector3(0, -0.85 + ring_i * 0.9, 0)
+		aura.add_child(ring)
+		var spin := create_tween().set_loops()
+		spin.tween_property(ring, "rotation:y", TAU * (1 if ring_i == 0 else -1), 3.0 + ring_i).as_relative()
+	var glow := OmniLight3D.new()
+	glow.light_color = aura_col
+	glow.light_energy = 1.4
+	glow.omni_range = 3.5
+	aura.add_child(glow)
+
 func _apply_class_visuals() -> void:
 	if not weapon_mesh:
 		return
@@ -2140,11 +2176,36 @@ func _apply_class_visuals() -> void:
 	if spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
 		spirit_wolf_companion.queue_free()
 		spirit_wolf_companion = null
+	_update_legendary_aura()
 	if race_model and is_instance_valid(race_model):
 		race_model.set_class(current_class_id)
 		return
 
 	match current_class_id:
+		19: # Carrasco do Veneno Vorpal: ferrões duplos
+			_build_dual_daggers()
+		20: # Soberano da Teia Carmesim: fios de seda
+			_build_war_tailor_needles()
+		21: # Rei-Fera da Alcateia: garras + lobos
+			_build_tamer_whip_and_beast()
+		22: # Runomante da Montanha: martelo rúnico
+			_build_blacksmith_hammer()
+		23: # Bastião do Mundo: casco-escudo
+			_build_shield_and_mace()
+		24: # Arquifada: varinha da Árvore do Mundo
+			_build_staff()
+		25: # Aristocrata Carmesim: lâminas de sangue
+			_build_astral_blades()
+		26: # Barão da Sucata: canhão do mecha
+			_build_hammer_cannon()
+		31: # Descendente de Pagma: espada do Deus da Forja
+			_build_sword_long()
+		32: # Escultor do Luar Lendário
+			_build_sculptor_chisel_and_statue()
+		33: # Monarca dos Dragões
+			_build_tamer_whip_and_beast()
+		34: # Imperador do Sol Negro
+			_build_void_greatsword_and_shield()
 		1: # Guerreiro: Espada Longa
 			_build_sword_long()
 		2: # Mago: Cajado Arcano
@@ -2181,23 +2242,23 @@ func _apply_class_visuals() -> void:
 			_build_blacksmith_hammer()
 		18: # Médico da Peste (variante do Alquimista)
 			_build_alchemist_flasks()
-		19: # Ceifador do Eclipse
+		27: # Ceifador do Eclipse
 			_build_scythe()
-		20: # Artífice Rúnico
+		35: # Artífice Rúnico
 			_build_hammer_cannon()
-		21: # Criador de Homúnculos
+		36: # Criador de Homúnculos
 			_build_homunculus_orb()
-		22: # Dançarino Astral
+		28: # Dançarino Astral
 			_build_astral_blades()
-		23: # Inquisidor das Cinzas
+		29: # Inquisidor das Cinzas
 			_build_ash_flail_and_chains()
-		24: # Necromante de Ossos
+		30: # Necromante de Ossos
 			_build_bone_staff()
-		25: # Domador Primordial
+		37: # Domador Primordial
 			_build_primordial_spear_and_wolf()
-		26: # Cavaleiro da Ruptura
+		38: # Cavaleiro da Ruptura
 			_build_void_greatsword_and_shield()
-		27: # Arauto da Tempestade
+		39: # Arauto da Tempestade
 			_build_storm_halberd()
 
 func _build_sword_long() -> void:
@@ -3921,7 +3982,7 @@ func _physics_process(delta: float) -> void:
 	camera_pivot.global_position = global_position + Vector3(0, 1.5, 0)
 
 	# Atualiza órbita da estátua viva / mini-homúnculo (Classes 9 e 15)
-	if current_class_id == 21 and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
+	if current_class_id == 36 and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
 		homunculus_anim_time += delta
 		var orbit_r: float = 1.15
 		var orbit_spd: float = 3.2
@@ -3932,7 +3993,7 @@ func _physics_process(delta: float) -> void:
 		)
 
 	# Atualiza companheiro Fera Domada / Lobo Espiritual (Classes 10 e 19)
-	if (current_class_id == 10 or current_class_id == 25) and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
+	if (current_class_id == 10 or current_class_id == 21 or current_class_id == 37) and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
 		spirit_wolf_anim_time += delta
 		var wolf_bob: float = sin(spirit_wolf_anim_time * 3.2) * 0.12
 		spirit_wolf_companion.position = Vector3(

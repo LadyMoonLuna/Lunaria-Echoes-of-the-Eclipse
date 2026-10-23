@@ -1,5 +1,6 @@
 extends Node3D
 
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
 var player_id: int = 0
 var target_position: Vector3 = Vector3.ZERO
 var target_rotation_y: float = 0.0
@@ -80,15 +81,10 @@ func update_label() -> void:
 			"Elfo Solar", "Elfo Lunar", "Fadinha", "Goblin", "Demi-Humano Escorpião",
 			"Demi-Humano Tartaruga", "Meio-Demônio", "Demi-Humano Lobo", "Manamante"
 		]
-		var c_names: Array[String] = [
-			"Viajante", "Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
-			"Ferreiro", "Alquimista", "Escultor", "Domador", "Alfaiate de Guerra", "Chef de Caça",
-			"Espadachim Rúnico", "Caçador de Vampiros", "Valquíria da Égide", "Monge das Sombras",
-			"Forjador de Armas Amaldiçoadas", "Médico da Peste",
-			"Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos", "Dançarino Astral",
-			"Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial", "Cavaleiro da Ruptura",
-			"Arauto da Tempestade"
-		]
+		var c_names: Array[String] = []
+		c_names.assign(ClassPaths.CLASS_NAMES)
+		if c_names.size() > 0:
+			c_names[0] = "Viajante"
 		var r_str: String = r_names[current_race_id] if current_race_id < r_names.size() else "Valeriano"
 		var race_info := LunariaModel.get_info(LunariaModel.race_uid(current_race_id))
 		if not race_info.is_empty():
@@ -108,7 +104,7 @@ func _process(delta: float) -> void:
 		race_model.set_move_speed(Vector2(step.x, step.z).length() / delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
 
-	if current_class_id == 21 and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
+	if current_class_id == 36 and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
 		homunculus_anim_time += delta
 		var orbit_r: float = 1.15
 		var orbit_spd: float = 3.2
@@ -118,7 +114,7 @@ func _process(delta: float) -> void:
 			sin(homunculus_anim_time * orbit_spd) * orbit_r
 		)
 
-	if (current_class_id == 10 or current_class_id == 25) and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
+	if (current_class_id == 10 or current_class_id == 21 or current_class_id == 37) and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
 		spirit_wolf_anim_time += delta
 		var wolf_bob: float = sin(spirit_wolf_anim_time * 3.2) * 0.12
 		spirit_wolf_companion.position = Vector3(
@@ -792,6 +788,42 @@ func _update_race_model() -> void:
 func _update_class_weapon() -> void:
 	_apply_class_visuals()
 
+## Aura exclusiva das Classes Lendárias (31 a 34): dourada, ou abissal no Imperador do Sol Negro.
+func _update_legendary_aura() -> void:
+	var old_aura := get_node_or_null("LegendaryAura")
+	if old_aura:
+		old_aura.queue_free()
+	if not ClassPaths.is_legendary(current_class_id):
+		return
+	var abyssal: bool = current_class_id == 34
+	var aura_col: Color = Color("#7c4dff") if abyssal else Color("#ffd54f")
+	var aura := Node3D.new()
+	aura.name = "LegendaryAura"
+	add_child(aura)
+	for ring_i in range(2):
+		var ring := MeshInstance3D.new()
+		var torus := TorusMesh.new()
+		torus.inner_radius = 0.55 + ring_i * 0.25
+		torus.outer_radius = 0.6 + ring_i * 0.25
+		ring.mesh = torus
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = Color(aura_col, 0.55)
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.emission_enabled = true
+		mat.emission = aura_col
+		mat.emission_energy_multiplier = 3.0
+		ring.material_override = mat
+		ring.position = Vector3(0, -0.85 + ring_i * 0.9, 0)
+		aura.add_child(ring)
+		var spin := create_tween().set_loops()
+		spin.tween_property(ring, "rotation:y", TAU * (1 if ring_i == 0 else -1), 3.0 + ring_i).as_relative()
+	var glow := OmniLight3D.new()
+	glow.light_color = aura_col
+	glow.light_energy = 1.4
+	glow.omni_range = 3.5
+	aura.add_child(glow)
+
 func _apply_class_visuals() -> void:
 	if not weapon_mesh:
 		return
@@ -810,11 +842,36 @@ func _apply_class_visuals() -> void:
 	if spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
 		spirit_wolf_companion.queue_free()
 		spirit_wolf_companion = null
+	_update_legendary_aura()
 	if race_model and is_instance_valid(race_model):
 		race_model.set_class(current_class_id)
 		return
 
 	match current_class_id:
+		19: # Carrasco do Veneno Vorpal: ferrões duplos
+			_build_dual_daggers()
+		20: # Soberano da Teia Carmesim: fios de seda
+			_build_war_tailor_needles()
+		21: # Rei-Fera da Alcateia: garras + lobos
+			_build_tamer_whip_and_beast()
+		22: # Runomante da Montanha: martelo rúnico
+			_build_blacksmith_hammer()
+		23: # Bastião do Mundo: casco-escudo
+			_build_shield_and_mace()
+		24: # Arquifada: varinha da Árvore do Mundo
+			_build_staff()
+		25: # Aristocrata Carmesim: lâminas de sangue
+			_build_astral_blades()
+		26: # Barão da Sucata: canhão do mecha
+			_build_hammer_cannon()
+		31: # Descendente de Pagma: espada do Deus da Forja
+			_build_sword_long()
+		32: # Escultor do Luar Lendário
+			_build_sculptor_chisel_and_statue()
+		33: # Monarca dos Dragões
+			_build_tamer_whip_and_beast()
+		34: # Imperador do Sol Negro
+			_build_void_greatsword_and_shield()
 		1: # Guerreiro: Espada Longa
 			_build_sword_long()
 		2: # Mago: Cajado Arcano
@@ -851,23 +908,23 @@ func _apply_class_visuals() -> void:
 			_build_blacksmith_hammer()
 		18: # Médico da Peste (variante do Alquimista)
 			_build_alchemist_flasks()
-		19: # Ceifador do Eclipse
+		27: # Ceifador do Eclipse
 			_build_scythe()
-		20: # Artífice Rúnico
+		35: # Artífice Rúnico
 			_build_hammer_cannon()
-		21: # Criador de Homúnculos
+		36: # Criador de Homúnculos
 			_build_homunculus_orb()
-		22: # Dançarino Astral
+		28: # Dançarino Astral
 			_build_astral_blades()
-		23: # Inquisidor das Cinzas
+		29: # Inquisidor das Cinzas
 			_build_ash_flail_and_chains()
-		24: # Necromante de Ossos
+		30: # Necromante de Ossos
 			_build_bone_staff()
-		25: # Domador Primordial
+		37: # Domador Primordial
 			_build_primordial_spear_and_wolf()
-		26: # Cavaleiro da Ruptura
+		38: # Cavaleiro da Ruptura
 			_build_void_greatsword_and_shield()
-		27: # Arauto da Tempestade
+		39: # Arauto da Tempestade
 			_build_storm_halberd()
 
 func _build_sword_long() -> void:
@@ -2309,15 +2366,15 @@ func _get_class_color() -> Color:
 		16: return Color("#4a148c") # Monge das Sombras
 		17: return Color("#b71c1c") # Forjador de Armas Amaldiçoadas
 		18: return Color("#558b2f") # Médico da Peste
-		19: return Color("#d500f9") # Ceifador do Eclipse
-		20: return Color("#ffb300") # Artífice Rúnico
-		21: return Color("#ea80fc") # Criador de Homúnculos
-		22: return Color("#00e5ff") # Dançarino Astral
-		23: return Color("#ff1744") # Inquisidor das Cinzas
-		24: return Color("#00e676") # Necromante de Ossos
-		25: return Color("#80d8ff") # Domador Primordial
-		26: return Color("#7c4dff") # Cavaleiro da Ruptura
-		27: return Color("#00b0ff") # Arauto da Tempestade
+		27: return Color("#d500f9") # Ceifador do Eclipse
+		35: return Color("#ffb300") # Artífice Rúnico
+		36: return Color("#ea80fc") # Criador de Homúnculos
+		28: return Color("#00e5ff") # Dançarino Astral
+		29: return Color("#ff1744") # Inquisidor das Cinzas
+		30: return Color("#00e676") # Necromante de Ossos
+		37: return Color("#80d8ff") # Domador Primordial
+		38: return Color("#7c4dff") # Cavaleiro da Ruptura
+		39: return Color("#00b0ff") # Arauto da Tempestade
 		_: return Color("#ffffff")
 
 func _animate_attack() -> void:

@@ -173,7 +173,7 @@ const ITEM_CATALOG := {
 	17: {
 		"name": "Tomo da Foice do Eclipse",
 		"category": "Artefato Proibido",
-		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 19 — Ceifador do Eclipse!",
+		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 27 — Ceifador do Eclipse!",
 		"color": Color("#aa00ff"),
 		"usable": true,
 		"btn_text": "[Consumir (Despertar Ceifador)]"
@@ -321,6 +321,30 @@ const ITEM_CATALOG := {
 		"color": Color("#5c6bc0"),
 		"usable": true,
 		"btn_text": "[Equipar Capa]"
+	},
+	56: {
+		"name": "Glândula Real do Escorpião",
+		"category": "Relíquia de Classe Única",
+		"desc": "Glândula pulsante do Escorpião Abissal (2%). Requisito do Carrasco do Veneno Vorpal (Demi-Humano Escorpião) — desperte-o num Mestre de Classe.",
+		"color": Color("#76ff03"),
+		"usable": false,
+		"btn_text": ""
+	},
+	57: {
+		"name": "Sangue Puro de Vesperian",
+		"category": "Relíquia de Classe Única",
+		"desc": "Sangue do Lorde Vesperian (25%). Requisito do Aristocrata Carmesim (Dhampir) — desperte-o num Mestre de Classe.",
+		"color": Color("#880e4f"),
+		"usable": false,
+		"btn_text": ""
+	},
+	58: {
+		"name": "Diagrama do Mecha Goblin",
+		"category": "Relíquia de Classe Única",
+		"desc": "Projeto contrabandeado do Mercado Negro de Varis. Requisito do Barão da Sucata (Goblin) — desperte-o num Mestre de Classe.",
+		"color": Color("#ffd600"),
+		"usable": false,
+		"btn_text": ""
 	}
 }
 
@@ -737,11 +761,11 @@ func _on_item_used(item_id: int) -> void:
 			16: # Sangue do Progenitor Bestial -> Raça 5 Dhampir
 				world.request_class_or_race_change(true, 5, 1, "Dhampir", "ITEM:16")
 				return
-			17: # Tomo da Foice do Eclipse -> Classe 19 Ceifador do Eclipse (Tier 5)
-				world.request_class_or_race_change(false, 19, 5, "Ceifador do Eclipse", "ITEM:17")
+			17: # Tomo da Foice do Eclipse -> Classe 27 Ceifador do Eclipse (Tier 5)
+				world.request_class_or_race_change(false, 27, 5, "Ceifador do Eclipse", "ITEM:17")
 				return
 			18: # Núcleo de Forja Estelar -> Classe 14 Artífice Rúnico (Tier 5)
-				world.request_class_or_race_change(false, 20, 5, "Artífice Rúnico", "ITEM:18")
+				world.request_class_or_race_change(false, 35, 5, "Artífice Rúnico", "ITEM:18")
 				return
 			29: # Ampulheta Rúnica -> Raça 28 Errante Temporal
 				world.request_class_or_race_change(true, 28, 1, "Errante Temporal", "ITEM:29")

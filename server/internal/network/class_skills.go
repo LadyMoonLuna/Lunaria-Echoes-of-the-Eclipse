@@ -1,6 +1,7 @@
 package network
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"sort"
@@ -103,6 +104,106 @@ func classSkillShape(classID, actionType uint8) (basicSkillShape, bool) {
 			return basicSkillShape{radius: 3.8, minDot: 0.3, maxTargets: 1}, true
 		case f: // Trinchar o Behemoth: 5.5m à frente
 			return basicSkillShape{radius: 5.5, minDot: -1, offset: 2.5}, true
+		}
+
+	// --- Classes Únicas Exclusivas de Raça (19 a 26) ---
+	case protocol.ClassVorpalExecutioner:
+		switch {
+		case q: // Ferrão Duplo Vorpal: um alvo + 3 doses de toxina
+			return basicSkillShape{radius: 3.8, minDot: 0.5, maxTargets: 1}, true
+		case r: // Ecdise Ácida: a casca deixada para trás explode
+			return basicSkillShape{radius: 4.0, minDot: -1}, true
+		case f: // Execução da Terceira Dose Letal
+			return basicSkillShape{radius: 4.0, minDot: -1}, true
+		}
+	case protocol.ClassCrimsonWebSovereign:
+		switch {
+		case q: // Fios de Seda Cortante: cone de 8m
+			return basicSkillShape{radius: 8.0, minDot: 0.5}, true
+		case r: // Casulo de Drenagem
+			return basicSkillShape{radius: 4.0, minDot: -1}, true
+		case f: // Domínio da Viúva Negra: 10m
+			return basicSkillShape{radius: 10.0, minDot: -1}, true
+		}
+	case protocol.ClassBloodPackKing:
+		switch {
+		case q: // Frenesi de Mordidas Sincronizadas
+			return basicSkillShape{radius: 4.0, minDot: 0.3}, true
+		case f: // Caçada Selvagem da Alcateia: 7m à frente
+			return basicSkillShape{radius: 7.0, minDot: -1, offset: 3.0}, true
+		}
+	case protocol.ClassMountainRunemancer:
+		switch {
+		case q: // Martelo Trovão da Montanha
+			return basicSkillShape{radius: 4.5, minDot: 0.3}, true
+		case f: // Forja do Ragnarok: magma em 6m
+			return basicSkillShape{radius: 6.0, minDot: -1}, true
+		}
+	case protocol.ClassWorldBastion:
+		switch {
+		case q: // Giro de Carapaça Demolidora
+			return basicSkillShape{radius: 4.0, minDot: -1}, true
+		case f: // Peso do Oceano Profundo
+			return basicSkillShape{radius: 7.0, minDot: -1}, true
+		}
+	case protocol.ClassWorldTreeArchfairy:
+		switch {
+		case q: // Rajada de Pó Estelar
+			return basicSkillShape{radius: 8.0, minDot: 0.6}, true
+		case r: // Anel de Cogumelos Mágicos: polimorfia em 5m
+			return basicSkillShape{radius: 5.0, minDot: -1}, true
+		case f: // Despertar de Titânia
+			return basicSkillShape{radius: 7.0, minDot: -1}, true
+		}
+	case protocol.ClassCrimsonAristocrat:
+		switch {
+		case q: // Lança de Sangue Congelado: um alvo a até 10m
+			return basicSkillShape{radius: 10.0, minDot: 0.9, maxTargets: 1}, true
+		case r: // Enxame da Noite: drena em volta
+			return basicSkillShape{radius: 4.0, minDot: -1, centerOnSelf: true}, true
+		case f: // Trono de Sangue: 9m
+			return basicSkillShape{radius: 9.0, minDot: -1}, true
+		}
+	case protocol.ClassScrapBaron:
+		switch {
+		case q: // Canhão de Moedas & Metralha
+			return basicSkillShape{radius: 7.0, minDot: 0.6}, true
+		case f: // Autodestruição Nuclear Goblin
+			return basicSkillShape{radius: 8.0, minDot: -1}, true
+		}
+
+	// --- Classes Lendárias (31 a 34) ---
+	case protocol.ClassPagmaDescendant:
+		switch {
+		case q: // Dança da Espada: Onda
+			return basicSkillShape{radius: 9.0, minDot: 0.4}, true
+		case r: // Transcendência de 6 Espadas: as espadas varrem 5m
+			return basicSkillShape{radius: 5.0, minDot: -1}, true
+		case f: // Queda do Deus da Forja
+			return basicSkillShape{radius: 8.0, minDot: -1}, true
+		}
+	case protocol.ClassMoonlightSculptor:
+		switch {
+		case q: // Lâmina da Lua Radiante
+			return basicSkillShape{radius: 6.0, minDot: 0.5}, true
+		case f: // Legião Imperial do Luar
+			return basicSkillShape{radius: 9.0, minDot: -1}, true
+		}
+	case protocol.ClassDragonMonarch:
+		switch {
+		case q: // Garra do Monarca
+			return basicSkillShape{radius: 5.0, minDot: 0.3}, true
+		case r: // Rugido de Subjugação: 8m
+			return basicSkillShape{radius: 8.0, minDot: -1}, true
+		case f: // Cataclismo do Rei Dragão: 10m à frente
+			return basicSkillShape{radius: 10.0, minDot: -1, offset: 4.0}, true
+		}
+	case protocol.ClassBlackSunEmperor:
+		switch {
+		case q: // Corte do Horizonte de Eventos
+			return basicSkillShape{radius: 10.0, minDot: 0.7}, true
+		case f: // Apocalipse do Sol Negro: 12m
+			return basicSkillShape{radius: 12.0, minDot: -1}, true
 		}
 
 	// --- Classes Secretas Variantes (13 a 18) ---
@@ -242,6 +343,7 @@ func (s *Server) applyBasicClassSkill(player *world.Player, classID, actionType 
 		}
 
 		dmg = variantDamageAgainst(classID, mob, dmg)
+		dmg = transcendentDamageAgainst(classID, actionType, mob, dmg)
 
 		finalDamage, _, newHP, dead := mob.TakeDamage(dmg, player.ID)
 		s.BroadcastCombatEvent(player.ID, mob.ID, actionType, finalDamage, isCrit, newHP, mob.MaxHP)
@@ -311,6 +413,43 @@ func (s *Server) applyBasicClassSkillEffects(attackerID uint32, classID, actionT
 			s.applyDamageOverTime(attackerID, mob, tick(0.10), 3)
 		} else if actionType == protocol.ActionSkillF { // Nuvem da Peste Negra: peste
 			s.applyDamageOverTime(attackerID, mob, tick(0.08), 5)
+		}
+	case protocol.ClassVorpalExecutioner:
+		if actionType == protocol.ActionSkillQ { // Ferrão Duplo Vorpal: 3 doses de toxina
+			mob.MarkPoisoned(6 * time.Second)
+			s.applyDamageOverTime(attackerID, mob, tick(0.10), 3)
+		}
+	case protocol.ClassCrimsonWebSovereign:
+		if actionType == protocol.ActionSkillQ {
+			mob.ApplySlow(2*time.Second, 0.30)
+		} else if actionType == protocol.ActionSkillF { // Domínio da Viúva Negra: teias venenosas
+			mob.ApplySlow(3*time.Second, 0.50)
+			mob.MarkPoisoned(5 * time.Second)
+			s.applyDamageOverTime(attackerID, mob, tick(0.08), 5)
+		}
+	case protocol.ClassBloodPackKing:
+		if actionType == protocol.ActionSkillQ { // Frenesi de Mordidas: sangramento
+			s.applyDamageOverTime(attackerID, mob, tick(0.10), 3)
+		}
+	case protocol.ClassMountainRunemancer:
+		if actionType == protocol.ActionSkillQ {
+			mob.ApplyStun(time.Second)
+		} else if actionType == protocol.ActionSkillF { // Forja do Ragnarok: magma
+			s.applyDamageOverTime(attackerID, mob, tick(0.08), 4)
+		}
+	case protocol.ClassWorldTreeArchfairy:
+		if actionType == protocol.ActionSkillR { // Anel de Cogumelos: polimorfia (3s)
+			mob.ApplyStun(3 * time.Second)
+		}
+	case protocol.ClassCrimsonAristocrat:
+		if actionType == protocol.ActionSkillQ { // Lança de Sangue Congelado
+			mob.ApplySlow(3*time.Second, 0.50)
+		}
+	case protocol.ClassDragonMonarch:
+		if actionType == protocol.ActionSkillR { // Rugido de Subjugação
+			mob.ApplyStun(3 * time.Second)
+		} else if actionType == protocol.ActionSkillF { // Cataclismo do Rei Dragão: chamas
+			s.applyDamageOverTime(attackerID, mob, tick(0.10), 5)
 		}
 	case protocol.ClassHuntingChef:
 		if actionType == protocol.ActionSkillF { // Trinchar o Behemoth: defesa do Boss pela metade
@@ -442,7 +581,217 @@ func (s *Server) applyVariantOnHitPassives(attacker *world.Player, classID uint8
 		}
 	case protocol.ClassPlagueDoctor: // Cura Tóxica: cada acerto regenera o médico
 		attacker.Heal(4)
+	case protocol.ClassCrimsonAristocrat: // Sede de sangue: 15% de roubo de vida (30% no Trono de Sangue)
+		if heal := uint16(float32(dealt) * 0.15); heal > 0 {
+			attacker.Heal(heal)
+		}
 	}
+	// Companheiros que golpeiam junto (Oito Lâminas, Lobos Alfa, Espadas, Estátuas, Dragão e Behemoth)
+	if extra := companionStrikePct(classID); extra > 0 && !dead && dealt > 0 {
+		bonus := uint16(float32(dealt) * extra)
+		if bonus == 0 {
+			bonus = 1
+		}
+		_, _, newHP, killed := mob.TakeDamage(bonus, attacker.ID)
+		if killed {
+			s.handleMobDeath(mob, attacker.ID)
+		} else if newHP > 0 {
+			s.BroadcastCombatEvent(attacker.ID, mob.ID, protocol.ActionBasicAttack, bonus, 0, newHP, mob.MaxHP)
+		}
+	}
+}
+
+// companionStrikePct é o dano extra (fração do golpe) dos companheiros que atacam junto.
+func companionStrikePct(classID uint8) float32 {
+	switch classID {
+	case protocol.ClassCrimsonWebSovereign: // Oito Lâminas Dorsais
+		return 0.15
+	case protocol.ClassBloodPackKing: // 2 Lobos Espirituais Alfa
+		return 0.20
+	case protocol.ClassPagmaDescendant: // 6 espadas lendárias flutuantes
+		return 0.30
+	case protocol.ClassMoonlightSculptor: // Estátuas Vivas
+		return 0.20
+	case protocol.ClassDragonMonarch: // Dragão Ancião + Behemoth
+		return 0.25
+	}
+	return 0
+}
+
+// transcendentDamageAgainst aplica regras de dano das Únicas/Lendárias que dependem do alvo.
+func transcendentDamageAgainst(classID, actionType uint8, mob *world.Mob, damage uint16) uint16 {
+	// Execução da Terceira Dose Letal: 4.0x cheio só em alvos envenenados (os demais levam 60%)
+	if classID == protocol.ClassVorpalExecutioner && actionType == protocol.ActionSkillF && !mob.IsPoisoned() {
+		return uint16(float32(damage) * 0.60)
+	}
+	return damage
+}
+
+// handleTranscendentPreEffects aplica os efeitos das Únicas/Lendárias que vêm antes (ou no lugar) do dano.
+// Retorna true quando a habilidade não causa dano e o processamento da ação termina aqui.
+func (s *Server) handleTranscendentPreEffects(player *world.Player, classID, actionType uint8, px, pz, aimX, aimZ float32) bool {
+	r := actionType == protocol.ActionSkillR
+	f := actionType == protocol.ActionSkillF
+	switch classID {
+	case protocol.ClassVorpalExecutioner:
+		if r { // Ecdise Ácida: invisível por 2s e cura 30% (a casca explode no lugar antigo)
+			player.SetDodgeIFrame(2 * time.Second)
+			player.Heal(player.MaxHP * 30 / 100)
+		}
+	case protocol.ClassCrimsonWebSovereign:
+		if r { // Casulo de Drenagem: +60 HP
+			player.Heal(60)
+		}
+	case protocol.ClassBloodPackKing:
+		if r { // Uivo do Eclipse Lupino: buff 12s, +40 HP e lentidão em 6m
+			player.SetBuff(12 * time.Second)
+			player.Heal(40)
+			s.slowMobsAround(player, px, pz, 6.0, 4*time.Second, 0.40)
+			return true
+		}
+	case protocol.ClassMountainRunemancer:
+		if r { // Bigorna Ancestral Viva: +25% Atq/Def para todos em 8m e escudo para o runomante
+			s.buffNearbyAllies(player, px, pz, 8.0, 10*time.Second)
+			player.SetParry(3 * time.Second)
+			return true
+		}
+	case protocol.ClassWorldBastion:
+		if r { // Fortaleza Hidráulica: +75 HP e -70% de dano por 4s
+			player.Heal(75)
+			player.SetParry(4 * time.Second)
+			return true
+		}
+		if f { // Peso do Oceano Profundo: escudo de raid para todos em 8m
+			s.parryNearbyAllies(player, px, pz, 8.0, 4*time.Second)
+		}
+	case protocol.ClassWorldTreeArchfairy:
+		if r { // Anel de Cogumelos Mágicos: cura +70 HP de todos em 7m
+			s.healNearbyAllies(player.ID, px, pz, 7.0, 70)
+		}
+		if f { // Despertar de Titânia: cura em área
+			s.healNearbyAllies(player.ID, px, pz, 7.0, 50)
+		}
+	case protocol.ClassCrimsonAristocrat:
+		if r { // Enxame da Noite: intangível por 2s
+			player.SetDodgeIFrame(2 * time.Second)
+		}
+	case protocol.ClassScrapBaron:
+		if r { // Propulsor Turbo: dash de 8m intangível
+			player.Mu.Lock()
+			player.PosX += aimX * 8.0
+			player.PosZ += aimZ * 8.0
+			player.Mu.Unlock()
+			player.SetDodgeIFrame(500 * time.Millisecond)
+			s.BroadcastPlayerRespawn(player.ID, player.PosX, player.PosY, player.PosZ)
+			return true
+		}
+		if f { // Autodestruição Nuclear: o mecha cobra 10% da Vida do piloto
+			player.SpendHPPercent(0.10)
+		}
+	case protocol.ClassPagmaDescendant:
+		if r { // Transcendência de 6 Espadas: buff de 15s e escudo de 3s
+			player.SetBuff(15 * time.Second)
+			player.SetParry(3 * time.Second)
+		}
+	case protocol.ClassMoonlightSculptor:
+		if r { // Destruição Escultural: +80% de ATK por 20s
+			player.SetBuff(20 * time.Second)
+			return true
+		}
+	case protocol.ClassDragonMonarch:
+		if r { // Rugido de Subjugação: buff de 10s (o atordoamento sai no acerto)
+			player.SetBuff(10 * time.Second)
+		}
+	case protocol.ClassBlackSunEmperor:
+		if r { // Égide da Aurora e Abismo: escudo de 5s, intangível 1s e +80 HP no grupo
+			player.SetParry(5 * time.Second)
+			player.SetDodgeIFrame(time.Second)
+			s.healNearbyAllies(player.ID, px, pz, 8.0, 80)
+			return true
+		}
+	}
+	if f && protocol.IsLegendaryClass(classID) {
+		s.triggerLegendaryUltimate(player, classID)
+	}
+	return false
+}
+
+// triggerLegendaryUltimate é o efeito global da Ultimate (F) das Classes Lendárias:
+// anúncio para o mundo inteiro e, no Imperador do Sol Negro, o céu vira Eclipse por 60s.
+func (s *Server) triggerLegendaryUltimate(player *world.Player, classID uint8) {
+	names := map[uint8]string{
+		protocol.ClassPagmaDescendant:   "QUEDA DO DEUS DA FORJA",
+		protocol.ClassMoonlightSculptor: "LEGIÃO IMPERIAL DO LUAR",
+		protocol.ClassDragonMonarch:     "CATACLISMO DO REI DRAGÃO",
+		protocol.ClassBlackSunEmperor:   "APOCALIPSE DO SOL NEGRO",
+	}
+	s.BroadcastNPCSay(0, fmt.Sprintf("[PODER LENDÁRIO] O céu treme! O jogador #%d desencadeou %s!", player.ID, names[classID]))
+	if classID != protocol.ClassBlackSunEmperor || s.clock == nil {
+		return
+	}
+	previous := s.clock.GetMoonPhase()
+	s.clock.SetMoonPhase(world.MoonPhaseEclipse)
+	s.BroadcastWorldTime()
+	time.AfterFunc(60*time.Second, func() {
+		if s.clock.GetMoonPhase() == world.MoonPhaseEclipse {
+			s.clock.SetMoonPhase(previous)
+			s.BroadcastWorldTime()
+		}
+	})
+}
+
+// slowMobsAround desacelera os monstros em volta do jogador (mesma zona).
+func (s *Server) slowMobsAround(player *world.Player, px, pz, radius float32, d time.Duration, factor float32) {
+	if s.mobManager == nil {
+		return
+	}
+	zone := player.GetZone()
+	for _, mob := range s.mobManager.GetAllMobs() {
+		if !mob.IsAlive || mob.GetZone() != zone {
+			continue
+		}
+		mob.Mu.RLock()
+		mx, mz := mob.PosX, mob.PosZ
+		mob.Mu.RUnlock()
+		if float32(math.Sqrt(float64((mx-px)*(mx-px)+(mz-pz)*(mz-pz)))) <= radius {
+			mob.ApplySlow(d, factor)
+		}
+	}
+}
+
+// buffNearbyAllies concede o buff de combate (+25% Atq/Def) a todos os jogadores em volta.
+func (s *Server) buffNearbyAllies(player *world.Player, px, pz, radius float32, d time.Duration) {
+	for _, ally := range s.alliesAround(player, px, pz, radius) {
+		ally.SetBuff(d)
+		s.sendPlayerStats(ally)
+	}
+}
+
+// parryNearbyAllies concede -70% de dano recebido a todos os jogadores em volta.
+func (s *Server) parryNearbyAllies(player *world.Player, px, pz, radius float32, d time.Duration) {
+	for _, ally := range s.alliesAround(player, px, pz, radius) {
+		ally.SetParry(d)
+	}
+}
+
+// alliesAround lista os jogadores da mesma zona dentro do raio (inclui o próprio jogador).
+func (s *Server) alliesAround(player *world.Player, px, pz, radius float32) []*world.Player {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	zone := player.GetZone()
+	var out []*world.Player
+	for _, ally := range s.players {
+		if ally.GetZone() != zone {
+			continue
+		}
+		ally.Mu.RLock()
+		ax, az := ally.PosX, ally.PosZ
+		ally.Mu.RUnlock()
+		if float32(math.Sqrt(float64((ax-px)*(ax-px)+(az-pz)*(az-pz)))) <= radius {
+			out = append(out, ally)
+		}
+	}
+	return out
 }
 
 // applyDamageOverTimeDelayed causa um único dano extra depois de `delay` (Toque da Morte de Cinco Passos).

@@ -99,25 +99,50 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         damage = 34 -- Forjador de Armas Amaldiçoadas
     elseif class_id == 18 then
         damage = 31 -- Médico da Peste (Doutor Corvo)
-    -- Classes Secretas Únicas / Lendárias (19 a 27)
+    -- Classes Secretas ÚNICAS (Tier 5): exclusivas de raça 19-26, gerais 27-30 e 35-39
     elseif class_id == 19 then
-        damage = 42 -- Ceifador do Eclipse (Classe Secreta)
+        damage = 41 -- Carrasco do Veneno Vorpal
     elseif class_id == 20 then
-        damage = 38 -- Artífice Rúnico (Classe Secreta)
+        damage = 40 -- Soberano da Teia Carmesim
     elseif class_id == 21 then
-        damage = 36 -- Criador de Homúnculos (Classe Secreta)
+        damage = 43 -- Rei-Fera da Alcateia de Sangue
     elseif class_id == 22 then
-        damage = 40 -- Dançarino Astral (Classe Secreta)
+        damage = 42 -- Runomante da Montanha Eterna
     elseif class_id == 23 then
-        damage = 38 -- Inquisidor das Cinzas (Classe Secreta)
+        damage = 38 -- Bastião do Mundo
     elseif class_id == 24 then
-        damage = 34 -- Necromante de Ossos (Classe Secreta)
+        damage = 40 -- Arquifada da Árvore do Mundo
     elseif class_id == 25 then
-        damage = 39 -- Domador Primordial (Classe Secreta)
+        damage = 42 -- Aristocrata Carmesim
     elseif class_id == 26 then
-        damage = 44 -- Cavaleiro da Ruptura (Classe Secreta)
+        damage = 41 -- Barão da Sucata
     elseif class_id == 27 then
-        damage = 36 -- Arauto da Tempestade (Classe Secreta)
+        damage = 42 -- Ceifador do Eclipse
+    elseif class_id == 28 then
+        damage = 40 -- Dançarino Astral
+    elseif class_id == 29 then
+        damage = 38 -- Inquisidor das Cinzas
+    elseif class_id == 30 then
+        damage = 36 -- Necromante de Ossos
+    elseif class_id == 35 then
+        damage = 40 -- Artífice Rúnico
+    elseif class_id == 36 then
+        damage = 38 -- Criador de Homúnculos
+    elseif class_id == 37 then
+        damage = 41 -- Domador Primordial
+    elseif class_id == 38 then
+        damage = 44 -- Cavaleiro da Ruptura
+    elseif class_id == 39 then
+        damage = 38 -- Arauto da Tempestade
+    -- Classes Secretas LENDÁRIAS (Tier 6): 31-34
+    elseif class_id == 31 then
+        damage = 50 -- Descendente de Pagma
+    elseif class_id == 32 then
+        damage = 48 -- Escultor do Luar Lendário
+    elseif class_id == 33 then
+        damage = 52 -- Monarca dos Dragões
+    elseif class_id == 34 then
+        damage = 52 -- Imperador do Sol Negro
     end
 
     -- 2. Multiplicador de Ação (ActionType)
@@ -161,18 +186,48 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
             damage = damage * 2.00 -- Forjador Amaldiçoado: Martelo Hemorrágico (2.0x)
         elseif class_id == 18 then
             damage = damage * 1.90 -- Médico da Peste: Bisturi Cirúrgico (1.9x)
+        elseif class_id == 19 then
+            damage = damage * 2.50 -- Carrasco do Veneno Vorpal: Ferrão Duplo Vorpal (2.5x)
+        elseif class_id == 20 then
+            damage = damage * 2.40 -- Soberano da Teia Carmesim: Fios de Seda Cortante (2.4x)
+        elseif class_id == 21 then
+            damage = damage * 2.50 -- Rei-Fera da Alcateia de Sangue: Frenesi de Mordidas Sincronizadas (2.5x)
         elseif class_id == 22 then
-            damage = damage * 2.00 -- Dançarino: Corte Cadente (2.0x)
+            damage = damage * 2.50 -- Runomante da Montanha Eterna: Martelo Trovão da Montanha (2.5x)
         elseif class_id == 23 then
-            damage = damage * 2.20 -- Inquisidor: Chicote de Penitência (2.2x)
+            damage = damage * 2.40 -- Bastião do Mundo: Giro de Carapaça Demolidora (2.4x)
         elseif class_id == 24 then
-            damage = damage * 2.00 -- Necromante: Lança de Fêmur (2.0x)
+            damage = damage * 2.50 -- Arquifada da Árvore do Mundo: Rajada de Pó Estelar (2.5x)
         elseif class_id == 25 then
-            damage = damage * 2.10 -- Domador Primordial: Investida do Alfa (2.1x)
+            damage = damage * 2.50 -- Aristocrata Carmesim: Lança de Sangue Congelado (2.5x)
         elseif class_id == 26 then
-            damage = damage * 1.90 -- Cavaleiro: Esmagamento Gravitacional (1.9x)
+            damage = damage * 2.40 -- Barão da Sucata: Canhão de Moedas & Metralha (2.4x)
         elseif class_id == 27 then
-            damage = damage * 2.10 -- Arauto: Lança do Trovão (2.1x)
+            damage = damage * 2.50 -- Ceifador do Eclipse: Colheita Noturna (2.5x)
+        elseif class_id == 28 then
+            damage = damage * 2.60 -- Dançarino Astral: Corte Cadente (2.6x)
+        elseif class_id == 29 then
+            damage = damage * 2.60 -- Inquisidor das Cinzas: Chicote de Penitência (2.6x)
+        elseif class_id == 30 then
+            damage = damage * 2.50 -- Necromante de Ossos: Lança de Fêmur (2.5x)
+        elseif class_id == 35 then
+            damage = damage * 2.40 -- Artífice Rúnico: Salva Rúnica (2.4x)
+        elseif class_id == 36 then
+            damage = damage * 2.40 -- Criador de Homúnculos: Frasco Quimérico (2.4x)
+        elseif class_id == 37 then
+            damage = damage * 2.50 -- Domador Primordial: Investida do Alfa (2.5x)
+        elseif class_id == 38 then
+            damage = damage * 2.40 -- Cavaleiro da Ruptura: Esmagamento Gravitacional (2.4x)
+        elseif class_id == 39 then
+            damage = damage * 2.60 -- Arauto da Tempestade: Lança do Trovão (2.6x)
+        elseif class_id == 31 then
+            damage = damage * 3.80 -- Descendente de Pagma: Dança da Espada: Onda (3.8x)
+        elseif class_id == 32 then
+            damage = damage * 3.80 -- Escultor do Luar Lendário: Lâmina da Lua Radiante (3.8x)
+        elseif class_id == 33 then
+            damage = damage * 3.90 -- Monarca dos Dragões: Garra do Monarca (3.9x)
+        elseif class_id == 34 then
+            damage = damage * 4.00 -- Imperador do Sol Negro: Corte do Horizonte de Eventos (4.0x)
         else
             damage = damage * 1.75 -- Base Q
         end
@@ -208,18 +263,48 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
             damage = damage * 1.80 -- Valquíria da Égide: Salto da Valquíria
         elseif class_id == 16 then
             damage = damage * 1.60 -- Monge das Sombras: Passo Fantasma
+        elseif class_id == 19 then
+            damage = damage * 2.40 -- Carrasco do Veneno Vorpal: Ecdise Ácida (2.4x)
+        elseif class_id == 20 then
+            damage = damage * 2.40 -- Soberano da Teia Carmesim: Casulo de Drenagem (2.4x)
+        elseif class_id == 21 then
+            damage = damage * 2.40 -- Rei-Fera da Alcateia de Sangue: Uivo do Eclipse Lupino (2.4x)
         elseif class_id == 22 then
-            damage = damage * 1.80 -- Dançarino: Valsa dos Espelhos
+            damage = damage * 2.40 -- Runomante da Montanha Eterna: Bigorna Ancestral Viva (2.4x)
         elseif class_id == 23 then
-            damage = damage * 1.75 -- Inquisidor: Selo de Excomunhão
+            damage = damage * 2.40 -- Bastião do Mundo: Fortaleza Hidráulica (2.4x)
         elseif class_id == 24 then
-            damage = damage * 1.80 -- Necromante: Explosão Óssea
+            damage = damage * 2.40 -- Arquifada da Árvore do Mundo: Anel de Cogumelos Mágicos (2.4x)
         elseif class_id == 25 then
-            damage = damage * 1.60 -- Domador Primordial: Uivo da Alcateia
+            damage = damage * 2.50 -- Aristocrata Carmesim: Enxame da Noite (2.5x)
         elseif class_id == 26 then
-            damage = damage * 2.00 -- Cavaleiro: Singularidade Reversa
+            damage = damage * 2.40 -- Barão da Sucata: Propulsor Turbo (2.4x)
         elseif class_id == 27 then
-            damage = damage * 1.75 -- Arauto: Passo de Relâmpago
+            damage = damage * 2.40 -- Ceifador do Eclipse: Drenagem Abissal (2.4x)
+        elseif class_id == 28 then
+            damage = damage * 2.40 -- Dançarino Astral: Valsa dos Espelhos (2.4x)
+        elseif class_id == 29 then
+            damage = damage * 2.40 -- Inquisidor das Cinzas: Selo de Excomunhão (2.4x)
+        elseif class_id == 30 then
+            damage = damage * 2.50 -- Necromante de Ossos: Explosão Óssea (2.5x)
+        elseif class_id == 35 then
+            damage = damage * 2.40 -- Artífice Rúnico: Têmpera Rúnica (2.4x)
+        elseif class_id == 36 then
+            damage = damage * 2.40 -- Criador de Homúnculos: Elixir do Homúnculo (2.4x)
+        elseif class_id == 37 then
+            damage = damage * 2.40 -- Domador Primordial: Uivo da Alcateia (2.4x)
+        elseif class_id == 38 then
+            damage = damage * 2.60 -- Cavaleiro da Ruptura: Singularidade Reversa (2.6x)
+        elseif class_id == 39 then
+            damage = damage * 2.50 -- Arauto da Tempestade: Passo de Relâmpago (2.5x)
+        elseif class_id == 31 then
+            damage = damage * 3.60 -- Descendente de Pagma: Transcendência de 6 Espadas (3.6x)
+        elseif class_id == 32 then
+            damage = damage * 3.60 -- Escultor do Luar Lendário: Destruição Escultural (3.6x)
+        elseif class_id == 33 then
+            damage = damage * 3.70 -- Monarca dos Dragões: Rugido de Subjugação (3.7x)
+        elseif class_id == 34 then
+            damage = damage * 3.80 -- Imperador do Sol Negro: Égide da Aurora e Abismo (3.8x)
         else
             damage = damage * 1.60 -- Base R
         end
@@ -261,18 +346,48 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
             damage = damage * 2.90 -- Forjador Amaldiçoado: Despertar da Espada Demoníaca (2.9x)
         elseif class_id == 18 then
             damage = damage * 2.60 -- Médico da Peste: Nuvem da Peste Negra (2.6x + peste)
+        elseif class_id == 19 then
+            damage = damage * 4.00 -- Carrasco do Veneno Vorpal: Execução da Terceira Dose Letal (4.0x)
+        elseif class_id == 20 then
+            damage = damage * 3.50 -- Soberano da Teia Carmesim: Domínio da Viúva Negra (3.5x)
+        elseif class_id == 21 then
+            damage = damage * 3.60 -- Rei-Fera da Alcateia de Sangue: Caçada Selvagem da Alcateia (3.6x)
         elseif class_id == 22 then
-            damage = damage * 3.00 -- Dançarino: Constelação de Mil Lâminas (3.0x)
+            damage = damage * 3.60 -- Runomante da Montanha Eterna: Forja do Ragnarok (3.6x)
         elseif class_id == 23 then
-            damage = damage * 3.20 -- Inquisidor: Crucificação de Cinzas (3.2x)
+            damage = damage * 3.50 -- Bastião do Mundo: Peso do Oceano Profundo (3.5x)
         elseif class_id == 24 then
-            damage = damage * 3.00 -- Necromante: Legião do Ossuário (3.0x)
+            damage = damage * 3.50 -- Arquifada da Árvore do Mundo: Despertar de Titânia (3.5x)
         elseif class_id == 25 then
-            damage = damage * 3.00 -- Domador Primordial: Fúria do Behemoth (3.0x)
+            damage = damage * 3.60 -- Aristocrata Carmesim: Trono de Sangue (3.6x)
         elseif class_id == 26 then
-            damage = damage * 2.80 -- Cavaleiro: Colapso Estelar (2.8x)
+            damage = damage * 3.80 -- Barão da Sucata: Autodestruição Nuclear Goblin (3.8x)
         elseif class_id == 27 then
-            damage = damage * 3.10 -- Arauto: Ira dos Céus (3.1x)
+            damage = damage * 3.20 -- Ceifador do Eclipse: Dança do Eclipse Total (3.2x)
+        elseif class_id == 28 then
+            damage = damage * 3.40 -- Dançarino Astral: Constelação de Mil Lâminas (3.4x)
+        elseif class_id == 29 then
+            damage = damage * 3.40 -- Inquisidor das Cinzas: Crucificação de Cinzas (3.4x)
+        elseif class_id == 30 then
+            damage = damage * 3.30 -- Necromante de Ossos: Legião do Ossuário (3.3x)
+        elseif class_id == 35 then
+            damage = damage * 3.20 -- Artífice Rúnico: Bombardeio Estelar (3.2x)
+        elseif class_id == 36 then
+            damage = damage * 3.20 -- Criador de Homúnculos: Magnum Opus (3.2x)
+        elseif class_id == 37 then
+            damage = damage * 3.40 -- Domador Primordial: Fúria do Behemoth (3.4x)
+        elseif class_id == 38 then
+            damage = damage * 3.30 -- Cavaleiro da Ruptura: Colapso Estelar (3.3x)
+        elseif class_id == 39 then
+            damage = damage * 3.40 -- Arauto da Tempestade: Ira dos Céus (3.4x)
+        elseif class_id == 31 then
+            damage = damage * 4.80 -- Descendente de Pagma: Queda do Deus da Forja (4.8x)
+        elseif class_id == 32 then
+            damage = damage * 4.60 -- Escultor do Luar Lendário: Legião Imperial do Luar (4.6x)
+        elseif class_id == 33 then
+            damage = damage * 5.00 -- Monarca dos Dragões: Cataclismo do Rei Dragão (5.0x)
+        elseif class_id == 34 then
+            damage = damage * 5.00 -- Imperador do Sol Negro: Apocalipse do Sol Negro (5.0x)
         else
             damage = damage * 2.50 -- Base Ultimate
         end
@@ -313,22 +428,22 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
 
     -- 5. Escala pelos 8 Atributos Alocáveis (STR, DEX, INT, SPI, MAS, LCK)
     -- STR aumenta dano físico/pesado
-    if str > 5 and (class_id == 1 or class_id == 5 or class_id == 6 or class_id == 7 or class_id == 12 or class_id == 19 or class_id == 20 or class_id == 25 or class_id == 26) then
+    if str > 5 and (class_id == 21 or class_id == 22 or class_id == 23 or class_id == 31 or class_id == 33 or class_id == 34 or class_id == 1 or class_id == 5 or class_id == 6 or class_id == 7 or class_id == 12 or class_id == 27 or class_id == 35 or class_id == 37 or class_id == 38) then
         damage = damage * (1.0 + (str - 5) * 0.03)
     end
 
     -- DEX aumenta dano de precisão / crítico / longo alcance
-    if dex > 5 and (class_id == 3 or class_id == 4 or class_id == 9 or class_id == 10 or class_id == 11 or class_id == 22) then
+    if dex > 5 and (class_id == 19 or class_id == 20 or class_id == 25 or class_id == 26 or class_id == 32 or class_id == 34 or class_id == 3 or class_id == 4 or class_id == 9 or class_id == 10 or class_id == 11 or class_id == 28) then
         damage = damage * (1.0 + (dex - 5) * 0.03)
     end
 
     -- INT aumenta dano mágico / alquímico / rúnico
-    if int_stat > 5 and (class_id == 2 or class_id == 8 or class_id == 9 or class_id == 11 or class_id == 20 or class_id == 21 or class_id == 23 or class_id == 24 or class_id == 27) then
+    if int_stat > 5 and (class_id == 20 or class_id == 24 or class_id == 25 or class_id == 32 or class_id == 34 or class_id == 2 or class_id == 8 or class_id == 9 or class_id == 11 or class_id == 35 or class_id == 36 or class_id == 29 or class_id == 30 or class_id == 39) then
         damage = damage * (1.0 + (int_stat - 5) * 0.03)
     end
 
     -- SPI aumenta dano/eficácia de classes divinas/espirituais/fera
-    if spi > 5 and (class_id == 2 or class_id == 6 or class_id == 10 or class_id == 21 or class_id == 23 or class_id == 25) then
+    if spi > 5 and (class_id == 24 or class_id == 33 or class_id == 34 or class_id == 2 or class_id == 6 or class_id == 10 or class_id == 36 or class_id == 29 or class_id == 37) then
         damage = damage * (1.0 + (spi - 5) * 0.03)
     end
 
@@ -407,18 +522,38 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- Passivas das Classes Secretas:
-    -- Dançarino Astral (ClassID = 22): Passiva +25% de chance crítica permanente
-    if class_id == 22 then
+    -- Rei-Fera (21): Presas de Prata Negra (+20% dano)
+    if class_id == 21 then
+        damage_bonus = damage_bonus + 0.20
+    end
+    -- Bastião do Mundo (23): Casco Continental converte 50% da Defesa em Ataque (+25% dano)
+    if class_id == 23 then
+        damage_bonus = damage_bonus + 0.25
+    end
+    -- Aristocrata Carmesim (25): Domínio da Noite (+40% à noite)
+    if class_id == 25 and (world_hour >= 18 or world_hour < 6) then
+        damage_bonus = damage_bonus + 0.40
+    end
+    -- Barão da Sucata (26): Ganância Explosiva (+15% chance crítica)
+    if class_id == 26 then
+        crit_chance = crit_chance + 0.15
+    end
+    -- Escultor do Luar Lendário (32): Destruição Escultural eleva o buff a +80% de ATK
+    if class_id == 32 and buff == 1 then
+        damage_bonus = damage_bonus + 0.55
+    end
+    -- Dançarino Astral (ClassID = 28): Passiva +25% de chance crítica permanente
+    if class_id == 28 then
         crit_chance = crit_chance + 0.25
     end
 
-    -- Domador Primordial (ClassID = 25): Passiva Espírito Alfa concede +25% de dano feroz constante
-    if class_id == 25 then
+    -- Domador Primordial (ClassID = 37): Passiva Espírito Alfa concede +25% de dano feroz constante
+    if class_id == 37 then
         damage_bonus = damage_bonus + 0.25
     end
 
-    -- Arauto da Tempestade (ClassID = 27): Passiva +35% de dano elétrico durante chuva (Weather == 1)
-    if class_id == 27 and weather_type == 1 then
+    -- Arauto da Tempestade (ClassID = 39): Passiva +35% de dano elétrico durante chuva (Weather == 1)
+    if class_id == 39 and weather_type == 1 then
         damage_bonus = damage_bonus + 0.35
     end
 
@@ -592,8 +727,8 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         damage_bonus = damage_bonus + 0.20
     end
 
-    -- Passiva Inquisidor das Cinzas (ClassID = 23): até +60% de dano com vida baixa
-    if class_id == 23 then
+    -- Passiva Inquisidor das Cinzas (ClassID = 29): até +60% de dano com vida baixa
+    if class_id == 29 then
         local missing_hp = 1.0 - current_hp_pct
         if missing_hp < 0 then
             missing_hp = 0

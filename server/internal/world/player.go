@@ -97,6 +97,7 @@ type Player struct {
 	SoloAlphaWolfKilled    bool // Lobo Alfa derrotado 100% Solo (Domador Primordial - Classe 13)
 	BlockedBossRupture     bool // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro da Ruptura - Classe 14)
 	PyromancerRevived      bool // Passiva Chama da Vida (Pyromante - Raça 30)
+	AristocratRevivedAt    time.Time // Passiva Imortalidade do Sangue (Aristocrata Carmesim - Classe 25)
 
 	// Cooldowns das Habilidades
 	LastActionTimes map[uint8]time.Time
@@ -273,24 +274,50 @@ func GetClassBaseAttributes(classID uint8) (str, dex, con, agi, intStat, spi, ma
 	case protocol.ClassPlagueDoctor: // 18: Médico da Peste (+2 FOR, +3 DES, +4 CON, +2 AGI, +4 INT, +3 ESP, +3 PER, +2 SOR)
 		return 2, 3, 4, 2, 4, 3, 3, 2
 
-	// Classes Secretas Únicas / Lendárias (IDs 19 a 27)
-	case protocol.ClassEclipseReaper: // 19: Ceifador (Tier 5 Única: +5 FOR, +3 DES, +3 CON, +3 AGI, +2 INT, +3 PER, +1 SOR)
+	// Classes Únicas Exclusivas de Raça (19 a 26)
+	case protocol.ClassVorpalExecutioner: // 19: Carrasco do Veneno Vorpal
+		return 3, 6, 3, 5, 2, 0, 3, 1
+	case protocol.ClassCrimsonWebSovereign: // 20: Soberano da Teia Carmesim
+		return 2, 6, 3, 4, 4, 1, 3, 1
+	case protocol.ClassBloodPackKing: // 21: Rei-Fera da Alcateia de Sangue
+		return 6, 3, 4, 5, 0, 2, 3, 1
+	case protocol.ClassMountainRunemancer: // 22: Runomante da Montanha Eterna
+		return 6, 1, 6, 1, 3, 2, 4, 1
+	case protocol.ClassWorldBastion: // 23: Bastião do Mundo
+		return 5, 1, 8, 1, 1, 3, 3, 1
+	case protocol.ClassWorldTreeArchfairy: // 24: Arquifada da Árvore do Mundo
+		return 1, 3, 2, 4, 6, 6, 2, 2
+	case protocol.ClassCrimsonAristocrat: // 25: Aristocrata Carmesim
+		return 3, 5, 3, 4, 5, 2, 3, 2
+	case protocol.ClassScrapBaron: // 26: Barão da Sucata & Mecha Goblin
+		return 3, 5, 4, 3, 3, 0, 3, 5
+	// Classes Lendárias (31 a 34)
+	case protocol.ClassPagmaDescendant: // 31: Descendente de Pagma
+		return 8, 6, 6, 4, 2, 2, 6, 2
+	case protocol.ClassMoonlightSculptor: // 32: Escultor do Luar Lendário
+		return 4, 8, 4, 6, 6, 2, 6, 2
+	case protocol.ClassDragonMonarch: // 33: Monarca dos Dragões
+		return 7, 3, 7, 4, 2, 6, 5, 2
+	case protocol.ClassBlackSunEmperor: // 34: Imperador do Sol Negro
+		return 7, 6, 4, 5, 7, 6, 3, 2
+	// Classes Únicas Gerais (27 a 30 e 35 a 39)
+	case protocol.ClassEclipseReaper: // 27: Ceifador (Tier 5 Única: +5 FOR, +3 DES, +3 CON, +3 AGI, +2 INT, +3 PER, +1 SOR)
 		return 5, 3, 3, 3, 2, 0, 3, 1
-	case protocol.ClassRunicArtificer: // 20: Artífice (Tier 5 Única: +4 FOR, +1 DES, +4 CON, +1 AGI, +4 INT, +4 PER, +2 SOR)
+	case protocol.ClassRunicArtificer: // 35: Artífice (Tier 5 Única: +4 FOR, +1 DES, +4 CON, +1 AGI, +4 INT, +4 PER, +2 SOR)
 		return 4, 1, 4, 1, 4, 0, 4, 2
-	case protocol.ClassHomunculusCreator: // 21: Criador (Tier 5 Única: +1 FOR, +1 DES, +3 CON, +1 AGI, +5 INT, +3 ESP, +4 PER, +2 SOR)
+	case protocol.ClassHomunculusCreator: // 36: Criador (Tier 5 Única: +1 FOR, +1 DES, +3 CON, +1 AGI, +5 INT, +3 ESP, +4 PER, +2 SOR)
 		return 1, 1, 3, 1, 5, 3, 4, 2
-	case protocol.ClassAstralDancer: // 22: Dançarino Astral (Tier 5 Única: +2 FOR, +6 DES, +2 CON, +6 AGI, +2 INT, +2 PER, +3 SOR)
+	case protocol.ClassAstralDancer: // 28: Dançarino Astral (Tier 5 Única: +2 FOR, +6 DES, +2 CON, +6 AGI, +2 INT, +2 PER, +3 SOR)
 		return 2, 6, 2, 6, 2, 0, 2, 3
-	case protocol.ClassAshInquisitor: // 23: Inquisidor das Cinzas (Tier 5 Única: +4 FOR, +2 DES, +4 CON, +2 AGI, +3 INT, +5 ESP, +2 PER, +1 SOR)
+	case protocol.ClassAshInquisitor: // 29: Inquisidor das Cinzas (Tier 5 Única: +4 FOR, +2 DES, +4 CON, +2 AGI, +3 INT, +5 ESP, +2 PER, +1 SOR)
 		return 4, 2, 4, 2, 3, 5, 2, 1
-	case protocol.ClassBoneNecromancer: // 24: Necromante de Ossos (Tier 5 Única: +1 FOR, +2 DES, +3 CON, +1 AGI, +6 INT, +5 ESP, +3 PER, +2 SOR)
+	case protocol.ClassBoneNecromancer: // 30: Necromante de Ossos (Tier 5 Única: +1 FOR, +2 DES, +3 CON, +1 AGI, +6 INT, +5 ESP, +3 PER, +2 SOR)
 		return 1, 2, 3, 1, 6, 5, 3, 2
-	case protocol.ClassPrimordialTamer: // 25: Domador Primordial (Tier 5 Única: +6 FOR, +3 DES, +5 CON, +4 AGI, +1 INT, +4 ESP, +3 PER, +1 SOR)
+	case protocol.ClassPrimordialTamer: // 37: Domador Primordial (Tier 5 Única: +6 FOR, +3 DES, +5 CON, +4 AGI, +1 INT, +4 ESP, +3 PER, +1 SOR)
 		return 6, 3, 5, 4, 1, 4, 3, 1
-	case protocol.ClassRiftKnight: // 26: Cavaleiro da Ruptura (Tier 5 Única: +5 FOR, +1 DES, +7 CON, +1 AGI, +3 INT, +2 ESP, +3 PER, +1 SOR)
+	case protocol.ClassRiftKnight: // 38: Cavaleiro da Ruptura (Tier 5 Única: +5 FOR, +1 DES, +7 CON, +1 AGI, +3 INT, +2 ESP, +3 PER, +1 SOR)
 		return 5, 1, 7, 1, 3, 2, 3, 1
-	case protocol.ClassStormHerald: // 27: Arauto da Tempestade (Tier 5 Única: +2 FOR, +3 DES, +2 CON, +4 AGI, +6 INT, +4 ESP, +3 PER, +3 SOR)
+	case protocol.ClassStormHerald: // 39: Arauto da Tempestade (Tier 5 Única: +2 FOR, +3 DES, +2 CON, +4 AGI, +6 INT, +4 ESP, +3 PER, +3 SOR)
 		return 2, 3, 2, 4, 6, 4, 3, 3
 	default: // 0: Viajante / Sem Classe
 		return 0, 0, 0, 0, 0, 0, 0, 0
@@ -619,32 +646,70 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 		baseHP = 135
 		baseStamina = 125
 
-	// Classes Secretas Únicas / Lendárias (IDs 19 a 27)
-	case protocol.ClassEclipseReaper: // 19: Ceifador
-		baseHP = 160
-		baseStamina = 110
-	case protocol.ClassRunicArtificer: // 20: Artífice Rúnico
-		baseHP = 150
-		baseStamina = 115
-	case protocol.ClassHomunculusCreator: // 21: Criador de Homúnculos
-		baseHP = 130
-		baseStamina = 125
-	case protocol.ClassAstralDancer: // 22: Dançarino Astral
+	// Classes Únicas Exclusivas de Raça (19 a 26)
+	case protocol.ClassVorpalExecutioner: // 19: Carrasco do Veneno Vorpal
 		baseHP = 135
 		baseStamina = 140
-	case protocol.ClassAshInquisitor: // 23: Inquisidor das Cinzas
+	case protocol.ClassCrimsonWebSovereign: // 20: Soberano da Teia Carmesim
+		baseHP = 140
+		baseStamina = 130
+	case protocol.ClassBloodPackKing: // 21: Rei-Fera da Alcateia de Sangue
+		baseHP = 170
+		baseStamina = 125
+	case protocol.ClassMountainRunemancer: // 22: Runomante da Montanha Eterna
+		baseHP = 185
+		baseStamina = 100
+	case protocol.ClassWorldBastion: // 23: Bastião do Mundo
+		baseHP = 210
+		baseStamina = 90
+	case protocol.ClassWorldTreeArchfairy: // 24: Arquifada da Árvore do Mundo
+		baseHP = 115
+		baseStamina = 150
+	case protocol.ClassCrimsonAristocrat: // 25: Aristocrata Carmesim
+		baseHP = 150
+		baseStamina = 130
+	case protocol.ClassScrapBaron: // 26: Barão da Sucata & Mecha Goblin
+		baseHP = 160
+		baseStamina = 120
+	// Classes Lendárias (31 a 34)
+	case protocol.ClassPagmaDescendant: // 31: Descendente de Pagma
+		baseHP = 220
+		baseStamina = 160
+	case protocol.ClassMoonlightSculptor: // 32: Escultor do Luar Lendário
+		baseHP = 190
+		baseStamina = 180
+	case protocol.ClassDragonMonarch: // 33: Monarca dos Dragões
+		baseHP = 240
+		baseStamina = 150
+	case protocol.ClassBlackSunEmperor: // 34: Imperador do Sol Negro
+		baseHP = 210
+		baseStamina = 170
+	// Classes Únicas Gerais (27 a 30 e 35 a 39)
+	case protocol.ClassEclipseReaper: // 27: Ceifador
+		baseHP = 160
+		baseStamina = 110
+	case protocol.ClassRunicArtificer: // 35: Artífice Rúnico
+		baseHP = 150
+		baseStamina = 115
+	case protocol.ClassHomunculusCreator: // 36: Criador de Homúnculos
+		baseHP = 130
+		baseStamina = 125
+	case protocol.ClassAstralDancer: // 28: Dançarino Astral
+		baseHP = 135
+		baseStamina = 140
+	case protocol.ClassAshInquisitor: // 29: Inquisidor das Cinzas
 		baseHP = 145
 		baseStamina = 115
-	case protocol.ClassBoneNecromancer: // 24: Necromante de Ossos
+	case protocol.ClassBoneNecromancer: // 30: Necromante de Ossos
 		baseHP = 130
 		baseStamina = 120
-	case protocol.ClassPrimordialTamer: // 25: Domador Primordial
+	case protocol.ClassPrimordialTamer: // 37: Domador Primordial
 		baseHP = 165
 		baseStamina = 120
-	case protocol.ClassRiftKnight: // 26: Cavaleiro da Ruptura
+	case protocol.ClassRiftKnight: // 38: Cavaleiro da Ruptura
 		baseHP = 180
 		baseStamina = 100
-	case protocol.ClassStormHerald: // 27: Arauto da Tempestade
+	case protocol.ClassStormHerald: // 39: Arauto da Tempestade
 		baseHP = 125
 		baseStamina = 130
 	}
@@ -849,6 +914,15 @@ func (p *Player) recalculateStatsLocked() {
 	rSTR, rDEX, rCON, rAGI, rINT, rSPI, rMAS, rLCK := GetBaseRaceAttributes(p.RaceID)
 	cSTR, cDEX, cCON, cAGI, cINT, cSPI, cMAS, cLCK := GetClassBaseAttributes(p.ClassID)
 
+	tb := TranscendenceBonus(p.ClassID)
+	cSTR += tb[0]
+	cDEX += tb[1]
+	cCON += tb[2]
+	cAGI += tb[3]
+	cINT += tb[4]
+	cSPI += tb[5]
+	cMAS += tb[6]
+	cLCK += tb[7]
 	p.STR = rSTR + cSTR + p.AllocSTR
 	p.DEX = rDEX + cDEX + p.AllocDEX
 	p.CON = rCON + cCON + p.AllocCON
@@ -1054,31 +1128,20 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 			if p.ClassTier < protocol.TierEpic {
 				p.ClassTier = protocol.TierEpic
 			}
-		} else if p.ClassID >= protocol.ClassEclipseReaper && p.ClassID <= protocol.ClassStormHerald {
-			// Se for Classe Secreta Única (19 a 27) e Tier 5: evolui para Lendária (Tier 6) mantendo nível
-			if p.ClassTier == protocol.TierUnique {
-				p.ClassTier = protocol.TierLegendary
-			}
 		}
+		// Classes Únicas (Tier 5) e Lendárias (Tier 6) não evoluem: o Tier é fixo
 		if raceID >= 11 {
 			p.RaceID = raceID
 			p.RaceEvolved = true
 			p.ApplyBaseRaceAttributes(raceID)
 		}
 
-	case protocol.IdentityModeSecretReset: // 2: Trocar para Classe Secreta com Reset de Nível (Apenas Únicas/Lendárias 19..27)
-		if classID >= protocol.ClassEclipseReaper && classID <= protocol.ClassStormHerald {
+	case protocol.IdentityModeSecretReset: // 2: Trocar para Classe Secreta (Únicas/Lendárias resetam o nível logo abaixo)
+		if protocol.IsTranscendentClass(classID) {
 			p.ClassID = classID
 			if raceID > 0 {
 				p.RaceID = raceID
 			}
-			p.ClassTier = protocol.TierUnique // Tier 5 Única
-			p.ClassPath = 0
-			p.Level = 1                       // RESET DE NÍVEL
-			p.XP = 0
-			p.NextLevelXP = 100
-			p.StatPoints = 0
-			p.ApplyBaseRaceAttributes(p.RaceID)
 		} else if classID >= protocol.ClassRunicSpellblade && classID <= protocol.ClassPlagueDoctor {
 			// Variantes Secretas (13 a 18): NÃO RESETAM O NÍVEL
 			p.ClassID = classID
@@ -1099,8 +1162,8 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 		}
 		p.NextLevelXP = 100 + uint16(p.Level-1)*50
 
-	case protocol.IdentityModeDevDirect: // 98: Ajuste Direto via Menu Dev (Classes 1..27, Tiers 1..6)
-		if classID >= 1 && classID <= 27 {
+	case protocol.IdentityModeDevDirect: // 98: Ajuste Direto via Menu Dev (Classes 1..39, Tiers 1..6; Únicas/Lendárias têm Tier fixo)
+		if classID >= 1 && classID <= protocol.ClassMaxID {
 			p.ClassID = classID
 			if raceID >= 1 && raceID <= 6 {
 				p.ClassTier = raceID
@@ -1108,6 +1171,15 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 				p.ClassTier = protocol.TierCommon
 			}
 		}
+	}
+
+	// Regra autoritativa das Classes Únicas (Tier 5) e Lendárias (Tier 6): ao assumir uma delas,
+	// em qualquer modo, o personagem volta ao nível 1 e reconstrói os atributos.
+	if protocol.IsTranscendentClass(p.ClassID) {
+		if p.ClassID != prevClass {
+			p.transcendLocked()
+		}
+		p.ClassTier = TranscendentTier(p.ClassID)
 	}
 
 	// Caminho Evolutivo: só nas 12 Classes Básicas; trocar de classe exige escolher de novo.
@@ -1131,20 +1203,26 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 
 // PendingIdentityOffer é uma troca de identidade aguardando a confirmação do jogador.
 type PendingIdentityOffer struct {
-	RaceID  uint8
-	ClassID uint8
-	Mode    uint8
-	Expires time.Time
+	RaceID   uint8
+	ClassID  uint8
+	Mode     uint8
+	CostItem uint8 // item consumido só quando o jogador confirma (0 = nenhum)
+	Expires  time.Time
 }
 
 // IdentityOfferTTL é quanto tempo uma oferta de troca de Classe/Raça espera pela confirmação.
 const IdentityOfferTTL = 2 * time.Minute
 
 // OfferIdentity registra uma troca de Classe/Raça pendente (substitui qualquer oferta anterior).
-func (p *Player) OfferIdentity(raceID, classID, mode uint8) {
+// costItem opcional: item que só é consumido quando o jogador confirma.
+func (p *Player) OfferIdentity(raceID, classID, mode uint8, costItem ...uint8) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
-	p.PendingIdentity = &PendingIdentityOffer{RaceID: raceID, ClassID: classID, Mode: mode, Expires: time.Now().Add(IdentityOfferTTL)}
+	offer := &PendingIdentityOffer{RaceID: raceID, ClassID: classID, Mode: mode, Expires: time.Now().Add(IdentityOfferTTL)}
+	if len(costItem) > 0 {
+		offer.CostItem = costItem[0]
+	}
+	p.PendingIdentity = offer
 }
 
 // AcceptIdentityOffer aplica a oferta pendente se ela ainda vale e corresponde ao que o jogador confirmou.
@@ -1159,6 +1237,9 @@ func (p *Player) AcceptIdentityOffer(targetID uint8) bool {
 	}
 	if targetID != offer.ClassID && !(offer.ClassID == 0 && targetID == offer.RaceID) {
 		return false
+	}
+	if offer.CostItem != 0 && !p.RemoveItem(offer.CostItem, 1) {
+		return false // o item de custo não está mais na mochila
 	}
 	p.SetIdentityMode(offer.RaceID, offer.ClassID, offer.Mode)
 	return true
@@ -1711,6 +1792,17 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
+	// Passivas das Classes Únicas: Arquifada esquiva 35%; Runomante -40%, Bastião -30% e Barão -20% de dano
+	if p.ClassID == protocol.ClassWorldTreeArchfairy && amount > 0 && rand.Float32() < 0.35 {
+		return p.HP, false // Miragem Feérica
+	}
+	if reduction := uniqueDamageTakenMult(p.ClassID); reduction < 1.0 && amount > 0 {
+		amount = uint16(float32(amount) * reduction)
+		if amount == 0 {
+			amount = 1
+		}
+	}
+
 	// Passiva Médico da Peste (Imunidade & Cura Tóxica): -15% de dano recebido
 	if p.ClassID == protocol.ClassPlagueDoctor && amount > 0 {
 		amount = uint16(float32(amount) * 0.85)
@@ -1762,12 +1854,22 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 			p.BuffActiveUntil = time.Now().Add(10 * time.Second)
 			return p.HP, false
 		}
+		// Passiva Aristocrata Carmesim (Imortalidade do Sangue): volta com 30% de Vida, a cada 10 minutos
+		if p.ClassID == protocol.ClassCrimsonAristocrat && time.Since(p.AristocratRevivedAt) >= AristocratReviveCooldown {
+			p.AristocratRevivedAt = time.Now()
+			p.HP = p.MaxHP * 30 / 100
+			p.IFrameUntil = time.Now().Add(1500 * time.Millisecond)
+			return p.HP, false
+		}
 		p.HP = 0
 		return 0, true
 	}
 	p.HP -= amount
 	return p.HP, false
 }
+
+// AristocratReviveCooldown é a recarga da Imortalidade do Sangue do Aristocrata Carmesim.
+const AristocratReviveCooldown = 10 * time.Minute
 
 // UpdateFromMove atualiza posição, rotação e endereço UDP caso o Seq seja estritamente superior ao LastSeq.
 func (p *Player) UpdateFromMove(seq uint32, posX, posY, posZ, rotY float32, addr *net.UDPAddr) bool {

@@ -2,6 +2,7 @@ package network
 
 import (
 	"testing"
+	"time"
 
 	"lunaria/server/internal/protocol"
 	"lunaria/server/internal/world"
@@ -119,5 +120,38 @@ func TestVampireHunterAndCursedSmithPassives(t *testing.T) {
 	s.applyBasicClassSkill(player, protocol.ClassCursedSmith, protocol.ActionSkillF, 0, 0, 0, 0, 0, -1, shape, 100, 0)
 	if player.HP != 100 { // 2 alvos x 100 de dano x 25%
 		t.Fatalf("Têmpera de Sangue: esperava HP 100, obteve %d", player.HP)
+	}
+}
+
+func TestVorpalExecutionAndLegendaryCompanions(t *testing.T) {
+	s := setupMockServer()
+	player := world.NewPlayer(1, nil, 0, 1.5, 0)
+	poisoned := addTestMob(s, 1, 0, -2, 1000)
+	clean := addTestMob(s, 2, 0, 2, 1000)
+	poisoned.MarkPoisoned(5 * time.Second)
+
+	// Terceira Dose Letal: dano cheio no envenenado, 60% no limpo
+	shape, _ := classSkillShape(protocol.ClassVorpalExecutioner, protocol.ActionSkillF)
+	s.applyBasicClassSkill(player, protocol.ClassVorpalExecutioner, protocol.ActionSkillF, 0, 0, 0, 0, 0, -1, shape, 100, 0)
+	if poisoned.HP != 900 || clean.HP != 940 {
+		t.Fatalf("esperava 100 no envenenado e 60 no limpo: HP %d, %d", poisoned.HP, clean.HP)
+	}
+
+	// Descendente de Pagma: 6 espadas golpeiam junto (+30% do dano)
+	target := addTestMob(s, 3, 0, -3, 1000)
+	shape, _ = classSkillShape(protocol.ClassPagmaDescendant, protocol.ActionSkillQ)
+	s.applyBasicClassSkill(player, protocol.ClassPagmaDescendant, protocol.ActionSkillQ, 0, 0, 0, 0, 0, -1, shape, 100, 0)
+	if target.HP != 870 {
+		t.Fatalf("Pagma: esperava 100 + 30 das espadas (HP 870), obteve %d", target.HP)
+	}
+}
+
+func TestBlackSunUltimateTurnsSkyToEclipse(t *testing.T) {
+	s := setupMockServer()
+	player := world.NewPlayer(1, nil, 0, 1.5, 0)
+	s.clock.SetMoonPhase(world.MoonPhaseWaxingCrescent)
+	s.handleTranscendentPreEffects(player, protocol.ClassBlackSunEmperor, protocol.ActionSkillF, 0, 0, 0, -1)
+	if s.clock.GetMoonPhase() != world.MoonPhaseEclipse {
+		t.Fatalf("o Apocalipse do Sol Negro deveria mudar o céu para Eclipse, fase %d", s.clock.GetMoonPhase())
 	}
 }
