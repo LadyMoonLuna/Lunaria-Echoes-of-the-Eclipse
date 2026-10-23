@@ -173,7 +173,8 @@ const MASTER_DATA := {
 			{"icon": "🌌", "title": "Consulta Astronômica: As 10 Fases Lunares", "desc": "Aprenda sobre o impacto de cada lua nos elementos e monstros de Lunaria.", "action": "moon_lore"},
 			{"icon": "🔮", "title": "Orbe de Ressonância Estelar", "desc": "Canalizador mágico que aumenta a amplificação de dano elemental.", "action": "star_orb"},
 			{"icon": "📜", "title": "Tomo de Meditação Arcana", "desc": "Grimório que ensina técnicas aceleradas de foco místico.", "action": "arcane_tome"},
-			{"icon": "✨", "title": "Pergaminho de Éter Puro", "desc": "Restaura instantaneamente a energia arcana e purifica anomalias.", "action": "ether_scroll"}
+			{"icon": "✨", "title": "Pergaminho de Éter Puro", "desc": "Restaura instantaneamente a energia arcana e purifica anomalias.", "action": "ether_scroll"},
+			{"icon": "📜", "title": "Rumores das Linhagens Secretas", "desc": "Aurelius conta uma pista sobre como despertar uma raça secreta.", "action": "lineage_rumor"}
 		]
 	},
 	109: { # Kaelen, o Mestre Caçador
@@ -337,6 +338,40 @@ const MASTER_DATA := {
 		]
 	}
 }
+
+# Pistas das Provações de Linhagem (servidor: race_trials.go)
+const LINEAGE_RUMORS := [
+	"Lupharion: um Varkai, Ferovar ou Ulvar que derrubar o Licantropo Alfa sob a Lua de Sangue.",
+	"Seraphel: leve uma Tocha Sagrada ao altar da Igreja e espere a aurora (05h–06h).",
+	"Umbryss: no Santuário, encare o Eclipse Total sem fugir por 20 segundos.",
+	"Runaric: entregue o Malho Rúnico a um Garrick que confie muito em você.",
+	"Sylvari: fique na clareira do Bosque quando as pétalas voarem ou o arco-íris surgir.",
+	"Myconid: nos Esgotos, durante o Nevoeiro de Esporos, ofereça restos orgânicos à colônia.",
+	"Ignivarn: derrube cinco Executores na Fronteira das Cinzas sob calor ou chuva de cinzas.",
+	"Chimeryth: carregue um Retalho Quimérico quando a Quimera Costurada cair.",
+	"Thalassiano: deixe a Monção do Bosque te abraçar por 40 segundos.",
+	"Cambion: à meia-noite, no coração das Cinzas, com uma Glândula de Veneno nas mãos.",
+	"Nephilim: no Santuário, entre o pôr do sol e a lua, numa noite de Lua Cheia.",
+	"Aurelith: leve o Olho do Arauto para Irmã Seraphina purificar, de dia.",
+	"Pyrael: dance (permaneça) 45 segundos sob a Chuva de Cinzas.",
+	"Jotunar: só quem derrota Ymir herda o gelo eterno.",
+	"Terravyrn: com uma Escama Primordial, transforme dez Gárgulas em pó.",
+	"Hydravyrn: com uma Escama Primordial, deixe a chuva do Bosque molhá-la.",
+	"Fulgravyrn: com uma Escama Primordial, espere o raio nas Ruínas durante a tempestade.",
+	"Arcavyrn: com uma Escama Primordial, entre na Tempestade Arcana do Santuário.",
+	"Orkhan: leve Carne Nobre Assada ao Chef Bartolomeu quando forem bons amigos (nível 10+).",
+	"Dvergar: seja Alma Irmã de Garrick e entregue-lhe Minério de Ferro.",
+	"Elarin: ouça as estátuas cantarem com Iolanthe numa noite de Lua Cheia.",
+	"Solarin: ao meio-dia em ponto, céu limpo, no centro da praça (nível 15+).",
+	"Lunarin: à meia-noite da Lua Cheia, no centro da praça (nível 15+).",
+	"Faelith: entre na ciranda dos vaga-lumes no Bosque por 45 segundos.",
+	"Gnarlin: conquiste a confiança de Varis e fale com ele à noite.",
+	"Testudar: fique um minuto inteiro parado na chuva da clareira do Bosque.",
+	"Lilitara: Nyx guarda um segredo que só revela sob a Lua de Sangue a quem é próximo dela.",
+	"Ulvar: quando Thorne e Cinza confiarem em você, visite-os na Lua Cheia.",
+	"Manamante: medite uma hora de madrugada (00h–03h) no centro da Torre Arcana (nível 20+).",
+	"Sangrael, Cinerion, Aracne, Borealin, Cronari e Escarion despertam com relíquias raríssimas de monstros.",
+]
 
 # Referências de Nós
 var main_panel: PanelContainer = null
@@ -944,6 +979,9 @@ func _on_service_requested(action_key: String, service_title: String) -> void:
 		"alpha_tips":
 			if world and world.has_method("show_loot_toast"):
 				world.show_loot_toast("🐺 Kaelen: \"O Lobo Alfa espreita no Bosque Sussurrante (75, -60) na Lua Cheia!\"")
+		"lineage_rumor":
+			if world and world.has_method("show_loot_toast"):
+				world.show_loot_toast("📜 Aurelius: \"%s\"" % LINEAGE_RUMORS[randi() % LINEAGE_RUMORS.size()])
 		"thorne_pack":
 			if world and world.has_method("show_loot_toast"):
 				world.show_loot_toast("🐺 Thorne: \"Os lobos confiam em quem devolve à terra o que tirou deles. Presas, peles...\"")

@@ -940,6 +940,14 @@ func (s *Server) handleSelectIdentity(pkt protocol.SelectIdentityPacket) {
 		return
 	}
 
+	// Raças secretas só despertam pelas Provações de Linhagem, itens ou evoluções (nunca direto pelo 0x30)
+	if pkt.RaceID > protocol.RaceVarkai && pkt.RaceID != player.RaceID {
+		s.BroadcastNPCSay(0, "[LINHAGEM] Esta raça só desperta pela sua Provação de Linhagem. Procure rumores com Mestre Aurelius.")
+		log.Printf("[LINHAGEM] Jogador #%d pediu a Raça %d direto (0x30) — recusado\n", pkt.PlayerID, pkt.RaceID)
+		s.sendPlayerStats(player)
+		return
+	}
+
 	// Classes Básicas (1 a 12) só são aprendidas ao lado do Mestre de cada uma
 	if ok, reason := s.checkBasicClassRequest(player, pkt.ClassID); !ok {
 		s.BroadcastNPCSay(0, fmt.Sprintf("[CLASSE] %s", reason))
@@ -1332,6 +1340,11 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Sssss... Um veneno primordial tão concentrado... Minha essência se alimenta deste néctar proibido, mortal #%d... [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
 				log.Printf("[PRESENTE] Jogador #%d entregou Veneno ao Alquimista Esquecido (+25 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
 			}
+		}
+
+		// Provações de Linhagem que se concluem conversando com um NPC
+		if s.checkRaceTrialsOnInteract(player, pkt.TargetNPCID) {
+			return
 		}
 
 		// Novos Mestres de Classe (111 a 115) e o Eremita secreto (116)
@@ -2891,6 +2904,14 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 
 	xp := getMobKillXP(mobType)
 	dealers := mob.GetDamageDealers()
+
+	// Provações de Linhagem baseadas em abates
+	s.mu.RLock()
+	trialKiller := s.players[killerPlayerID]
+	s.mu.RUnlock()
+	if trialKiller != nil {
+		s.checkRaceTrialsOnKill(trialKiller, mobType)
+	}
 
 	s.mu.RLock()
 	var eligible []*world.Player
@@ -4467,6 +4488,7 @@ func (s *Server) runGameLoop() {
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
 				s.updateClassMasterRoutines(int(h))
+				s.updatePlaceTrials()
 				if s.serverTick%(GameTickRate*2) < GameTickRate {
 					s.updateCompanions() // Companheiros atacam sozinhos a cada 2s
 				}
