@@ -119,10 +119,10 @@ func TestLivingNPCScripts(t *testing.T) {
 		t.Fatalf("falha ao vincular lyra: %v", err)
 	}
 
-	// De dia (10h): Primeiro waypoint para o Laboratório respeitando as vielas
+	// De dia (10h): Primeiro waypoint para o Laboratório respeitando o mapa expandido
 	_ = CallOnTick(lyra, 10)
-	if lyra.TargetX != 14.0 || lyra.TargetZ != -18.0 {
-		t.Errorf("esperava primeiro waypoint do laboratorio (14, -18), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
+	if lyra.TargetX != -15.0 || lyra.TargetZ != 10.0 {
+		t.Errorf("esperava primeiro waypoint do laboratorio (-15, 10), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
 	}
 
 	// Interação com Alquimista (classe 6) ou alta perícia MAS (12)
@@ -131,15 +131,15 @@ func TestLivingNPCScripts(t *testing.T) {
 		t.Errorf("fala de alquimia inesperada: %s", lyraSaid)
 	}
 
-	// De noite (20h): Primeiro waypoint para Casa Residencial respeitando as vielas
+	// De noite (20h): Primeiro waypoint para Taverna/Descanso
 	_ = CallOnTick(lyra, 20)
-	if lyra.TargetX != 10.0 || lyra.TargetZ != -18.0 {
-		t.Errorf("esperava primeiro waypoint da casa (10, -18), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
+	if lyra.TargetX != 20.0 || lyra.TargetZ != -10.0 {
+		t.Errorf("esperava primeiro waypoint da noite (20, -10), obteve (%f, %f)", lyra.TargetX, lyra.TargetZ)
 	}
 
 	// 2. Varis, o Contrabandista (104)
 	var varisSaid string
-	varis := world.NewNPC(104, "Varis, o Contrabandista", -19.0, 0.0, 17.0, filepath.Join(scriptsDir, "shadow_merchant.lua"), clock, func(id uint32, msg string) {
+	varis := world.NewNPC(104, "Varis, o Contrabandista", 0.0, 0.0, 10.0, filepath.Join(scriptsDir, "shadow_merchant.lua"), clock, func(id uint32, msg string) {
 		varisSaid = msg
 	})
 	defer varis.Close()
@@ -148,7 +148,7 @@ func TestLivingNPCScripts(t *testing.T) {
 		t.Fatalf("falha ao vincular varis: %v", err)
 	}
 
-	// De dia (12h): Deve ficar inativo nos esgotos (-22, -22)
+	// De dia (12h): Deve ficar inativo e fora de serviço
 	_ = CallOnTick(varis, 12)
 	if varis.GetActive() {
 		t.Errorf("esperava Varis inativo de dia")
@@ -158,13 +158,13 @@ func TestLivingNPCScripts(t *testing.T) {
 		t.Errorf("esperava snapshot inativo (255, -100), obteve state=%d, y=%f", snap.State, snap.PosY)
 	}
 
-	// De noite (22h): Deve ficar ativo em (-19, 17)
+	// De noite (22h): Deve ficar ativo no Mercado Negro (Zone 7 em 0, 10)
 	_ = CallOnTick(varis, 22)
 	if !varis.GetActive() {
 		t.Errorf("esperava Varis ativo de noite")
 	}
-	if varis.PosX != -19.0 || varis.PosZ != 17.0 {
-		t.Errorf("esperava Varis em (-19, 17) de noite, obteve (%f, %f)", varis.PosX, varis.PosZ)
+	if varis.PosX != 0.0 || varis.PosZ != 10.0 {
+		t.Errorf("esperava Varis no Mercado Negro em (0, 10) de noite, obteve (%f, %f)", varis.PosX, varis.PosZ)
 	}
 	// Reatividade com Dhampir (raça 5) e Revenant (raça 7)
 	_ = CallOnPlayerInteract(varis, 1, 22, 5, 1, 5)

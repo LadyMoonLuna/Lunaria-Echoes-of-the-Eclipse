@@ -94,6 +94,32 @@ func (e *Engine) BindNPC(npc *world.NPC) error {
 		return 0
 	}))
 
+	// npc_set_zone(zone_id)
+	L.SetGlobal("npc_set_zone", L.NewFunction(func(L *lua.LState) int {
+		zoneID := uint8(L.CheckInt(1))
+		npc.SetZone(zoneID)
+		return 0
+	}))
+
+	// npc_get_zone() -> zone_id
+	L.SetGlobal("npc_get_zone", L.NewFunction(func(L *lua.LState) int {
+		L.Push(lua.LNumber(npc.GetZone()))
+		return 1
+	}))
+
+	// npc_set_shop_open(open_bool)
+	L.SetGlobal("npc_set_shop_open", L.NewFunction(func(L *lua.LState) int {
+		open := L.CheckBool(1)
+		npc.SetShopOpen(open)
+		return 0
+	}))
+
+	// npc_is_shop_open() -> bool
+	L.SetGlobal("npc_is_shop_open", L.NewFunction(func(L *lua.LState) int {
+		L.Push(lua.LBool(npc.IsShopOpen()))
+		return 1
+	}))
+
 	// npc_get_id()
 	L.SetGlobal("npc_get_id", L.NewFunction(func(L *lua.LState) int {
 		L.Push(lua.LNumber(npc.ID))
