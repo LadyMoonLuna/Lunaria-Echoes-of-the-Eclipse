@@ -370,6 +370,9 @@ var use_btn: Button = null
 var drop_btn: Button = null
 var drop_qty: SpinBox = null
 var bag_grid: GridContainer = null
+var bag_search: LineEdit = null
+var bag_sort: OptionButton = null
+const BAG_SORTS := ["Ordem de chegada", "Nome (A-Z)", "Tipo", "Peso total", "Qualidade", "Quantidade"]
 var gold_label: Label = null
 var eclipse_label: Label = null
 var weight_bar: ProgressBar = null
@@ -764,7 +767,27 @@ func _build_bag_section() -> Control:
 	page.add_theme_stylebox_override("panel", _box(COL_PARCHMENT, COL_PARCHMENT_DARK, 2, 4, 10))
 	var vb := VBoxContainer.new()
 	page.add_child(vb)
-	vb.add_child(_label("🎒 Mochila", 14, COL_INK))
+	# Organizador: busca por nome e ordenação
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	vb.add_child(head)
+	head.add_child(_label("🎒 Mochila", 14, COL_INK))
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(spacer)
+	bag_search = LineEdit.new()
+	bag_search.placeholder_text = "🔍 Buscar item..."
+	bag_search.custom_minimum_size = Vector2(220, 26)
+	bag_search.clear_button_enabled = true
+	bag_search.text_changed.connect(func(_txt: String): _update_bag())
+	head.add_child(bag_search)
+	head.add_child(_label("Organizar:", 12, COL_INK_SOFT))
+	bag_sort = OptionButton.new()
+	bag_sort.focus_mode = Control.FOCUS_NONE
+	for sort_name in BAG_SORTS:
+		bag_sort.add_item(sort_name)
+	bag_sort.item_selected.connect(func(_idx: int): _update_bag())
+	head.add_child(bag_sort)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(0, 114)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -849,16 +872,84 @@ func _update_bag() -> void:
 		return
 	for c in bag_grid.get_children():
 		c.queue_free()
-	for i in range(inventory_items.size()):
+	var order := _bag_view_order()
+	for i in order:
 		var entry: Dictionary = inventory_items[i]
 		bag_grid.add_child(_create_bag_slot(i, int(entry["id"]), int(entry["quantity"])))
 	# Completa a grade com espaços vazios para manter o visual de pergaminho
-	var empty_count: int = max(0, 28 - inventory_items.size())
+	var empty_count: int = max(0, 28 - order.size())
 	for _i in range(empty_count):
 		var blank := Panel.new()
 		blank.custom_minimum_size = Vector2(52, 52)
 		blank.add_theme_stylebox_override("panel", _box(COL_PARCHMENT_DARK, Color(COL_WOOD.r, COL_WOOD.g, COL_WOOD.b, 0.4), 1, 4, 0))
 		bag_grid.add_child(blank)
+
+## Índices da mochila na ordem de exibição: filtrados pela busca e ordenados pelo organizador.
+## Os índices continuam apontando para inventory_items, então seleção e uso não mudam.
+func _bag_view_order() -> Array:
+	var query := ""
+	if bag_search:
+		query = _fold(bag_search.text.strip_edges())
+	var order: Array = []
+	for i in range(inventory_items.size()):
+		var item_id: int = int(inventory_items[i]["id"])
+		if query == "" or _fold(_item_name(item_id)).find(query) >= 0 or _fold(_item_category(item_id)).find(query) >= 0:
+			order.append(i)
+	var mode: int = bag_sort.selected if bag_sort else 0
+	if mode > 0:
+		order.sort_custom(func(a: int, b: int) -> bool: return _bag_less(a, b, mode))
+	return order
+
+func _bag_less(a: int, b: int, mode: int) -> bool:
+	var ea: Dictionary = inventory_items[a]
+	var eb: Dictionary = inventory_items[b]
+	var ia: int = int(ea["id"])
+	var ib: int = int(eb["id"])
+	var na := _fold(_item_name(ia))
+	var nb := _fold(_item_name(ib))
+	match mode:
+		2: # Tipo (equipamento, ferramenta, consumível, material) e depois nome
+			var ta := _item_type_rank(ia)
+			var tb := _item_type_rank(ib)
+			if ta != tb:
+				return ta < tb
+		3: # Peso total, mais pesado primeiro
+			var wa: float = ItemData.weight(ia) * int(ea["quantity"])
+			var wb: float = ItemData.weight(ib) * int(eb["quantity"])
+			if not is_equal_approx(wa, wb):
+				return wa > wb
+		4: # Qualidade, melhor primeiro
+			var qa := int(ea.get("quality", 100))
+			var qb := int(eb.get("quality", 100))
+			if qa != qb:
+				return qa > qb
+		5: # Quantidade, maior primeiro
+			if int(ea["quantity"]) != int(eb["quantity"]):
+				return int(ea["quantity"]) > int(eb["quantity"])
+	if na != nb:
+		return na < nb
+	return a < b
+
+func _item_type_rank(item_id: int) -> int:
+	if ItemData.slot_of(item_id) >= 0:
+		return 0
+	if ItemData.info(item_id).has("tool"):
+		return 1
+	if item_id >= 100:
+		return 3
+	return 2
+
+func _item_category(item_id: int) -> String:
+	return ["Equipamento", "Ferramenta", "Consumível", "Material"][_item_type_rank(item_id)]
+
+## Minúsculas sem acentos, para a busca achar "pocao" em "Poção".
+static func _fold(txt: String) -> String:
+	var out := txt.to_lower()
+	var from := "áàâãäéèêëíìîïóòôõöúùûüç"
+	var to := "aaaaaeeeeiiiiooooouuuuc"
+	for k in range(from.length()):
+		out = out.replace(from[k], to[k])
+	return out
 
 func _create_bag_slot(bag_index: int, item_id: int, qty: int) -> Control:
 	var btn := Button.new()

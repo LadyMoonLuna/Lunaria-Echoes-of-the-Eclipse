@@ -1414,6 +1414,8 @@ func _perform_dodge_roll() -> void:
 	dodge_timer = 0.35
 
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	if get_viewport().gui_get_focus_owner() is LineEdit:
+		input_dir = Vector2.ZERO # digitando numa caixa de texto (busca do inventário): não anda
 	var cam_yaw: float = camera_pivot.global_rotation.y
 	var forward: Vector3 = Vector3(-sin(cam_yaw), 0, -cos(cam_yaw))
 	var right: Vector3 = Vector3(cos(cam_yaw), 0, -sin(cam_yaw))
@@ -4051,6 +4053,8 @@ func _physics_process(delta: float) -> void:
 				velocity.y = JUMP_VELOCITY
 
 			var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+			if get_viewport().gui_get_focus_owner() is LineEdit:
+				input_dir = Vector2.ZERO
 			var cam_yaw: float = camera_pivot.global_rotation.y
 			var forward: Vector3 = Vector3(-sin(cam_yaw), 0, -cos(cam_yaw))
 			var right: Vector3 = Vector3(cos(cam_yaw), 0, -sin(cam_yaw))
