@@ -18,6 +18,7 @@ signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: floa
 signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
 signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
 signal discovered_materials_received(mode: int, material_ids: Array) # mode 0 = lista completa, 1 = novas descobertas
+signal quest_state_received(quest_id: int, stage: int, have: int, need: int) # stage 255 = concluída
 signal player_respawn_received(player_id: int, respawn_pos: Vector3)
 signal player_respawned(player_id: int, pos_x: float, pos_y: float, pos_z: float)
 signal mob_state_received(mobs_dict: Dictionary)
@@ -258,6 +259,12 @@ func _process_tcp() -> void:
 					d_ids.append(tcp_rx_buffer[4 + i * 2] | (tcp_rx_buffer[5 + i * 2] << 8))
 				discovered_materials_received.emit(d_mode, d_ids)
 				tcp_rx_buffer = tcp_rx_buffer.slice(d_size)
+
+			elif opcode == 0x47: # QUEST_STATE: op | missão | etapa | tem | precisa
+				if tcp_rx_buffer.size() < 5:
+					break
+				quest_state_received.emit(tcp_rx_buffer[1], tcp_rx_buffer[2], tcp_rx_buffer[3], tcp_rx_buffer[4])
+				tcp_rx_buffer = tcp_rx_buffer.slice(5)
 
 			elif opcode == 0x42: # GROUND_ITEMS_SYNC: op | count u16 | count × (dropID u32, item, qtd, X f32, Z f32)
 				if tcp_rx_buffer.size() < 3:

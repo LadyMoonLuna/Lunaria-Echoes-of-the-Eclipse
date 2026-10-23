@@ -34,10 +34,6 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemCookedNobleMeat: {Name: "Carne Nobre Assada", Weight: 0.7, Slot: NoSlot},
 	protocol.ItemWolfBloodPotion: {Name: "Poção de Sangue Lupino", Weight: 0.5, Slot: NoSlot},
 
-	protocol.ItemWolfGreyPelt:      {Name: "Pelagem Cinzenta de Lobo", Weight: 1.5, Slot: NoSlot},
-	protocol.ItemSharpWolfFang:     {Name: "Presa Lupina Afiada", Weight: 0.2, Slot: NoSlot},
-	protocol.ItemBeastClaw:         {Name: "Garra de Fera", Weight: 0.3, Slot: NoSlot},
-	protocol.ItemFreshWolfBlood:    {Name: "Sangue Lupino Fresco", Weight: 0.6, Slot: NoSlot},
 	protocol.ItemAlphaWolfPelt:     {Name: "Pele Intacta de Lobo Alfa", Weight: 4.5, Slot: protocol.SlotChest, BonusSTR: 3, BonusHP: 35, BonusDEF: 4},
 	protocol.ItemPureLunarBlood:    {Name: "Sangue Lunar Puro", Weight: 0.6, Slot: NoSlot},
 	protocol.ItemDarkPoisonGland:   {Name: "Glândula de Veneno Sombrio", Weight: 0.5, Slot: NoSlot},
@@ -57,7 +53,6 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemHeraldEclipseEye:         {Name: "Olho do Arauto do Eclipse", Weight: 0.3, Slot: NoSlot},
 	protocol.ItemSacredTorch:              {Name: "Tocha Sagrada do Santuário", Weight: 1.5, Slot: NoSlot},
 
-	protocol.ItemIronOre:              {Name: "Minério de Ferro", Weight: 4.0, Slot: NoSlot},
 	protocol.ItemRunicWarhammerRecipe: {Name: "Receita: Malho Rúnico", Weight: 0.1, Slot: NoSlot},
 	protocol.ItemRunicWarhammer:       {Name: "Malho de Batalha Rúnico", Weight: 16.0, Slot: protocol.SlotMainHand, BonusSTR: 8, BonusCON: 6, BonusMAS: 4, BonusATK: 45},
 	protocol.ItemOrganicTrash:         {Name: "Lixo Orgânico", Weight: 0.6, Slot: NoSlot},
@@ -76,13 +71,10 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemStarlightRing:       {Name: "Anel Estelar", Weight: 0.1, Slot: protocol.SlotRing1, BonusINT: 3, BonusLCK: 4},
 	protocol.ItemAlphaPeltCloak:      {Name: "Capa de Pele Alfa", Weight: 2.5, Slot: protocol.SlotCloak, BonusSTR: 3, BonusAGI: 3, BonusHP: 35, BonusDEF: 2},
 
-	protocol.ItemPerfectSilkCocoon:      {Name: "Casulo de Seda Perfeito", Weight: 0.4, Slot: NoSlot},
 	protocol.ItemSpiderQueenHeart:       {Name: "Coração da Rainha Aranha", Weight: 0.3, Slot: NoSlot},
 	protocol.ItemArachnaEye:             {Name: "Olho Multifacetado de Arachna", Weight: 0.3, Slot: NoSlot},
 	protocol.ItemImperialSilkCloak:      {Name: "Manto de Seda Imperial", Weight: 1.5, Slot: NoSlot},
-	protocol.ItemPureAcid:               {Name: "Ácido Puro", Weight: 0.5, Slot: NoSlot},
 	protocol.ItemAbyssalScorpionStinger: {Name: "Ferrão de Escorpião Abissal", Weight: 0.3, Slot: NoSlot},
-	protocol.ItemVorpalPoison:           {Name: "Veneno Vorpal", Weight: 0.4, Slot: NoSlot},
 	protocol.ItemChimeraFleshPart:       {Name: "Retalho Quimérico Costurado", Weight: 0.8, Slot: NoSlot},
 	protocol.ItemAncientIceCore:         {Name: "Núcleo de Gelo Antigo", Weight: 4.0, Slot: NoSlot},
 	protocol.ItemPrimordialDragonScale:  {Name: "Escama Dracônica Primordial", Weight: 3.5, Slot: NoSlot},
@@ -113,6 +105,8 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemAlchemyCatalyst: {Name: "Catalisador Alquímico", Weight: 1.6, Slot: protocol.SlotOffHand, BonusINT: 2, BonusMAS: 2, BonusATK: 4},
 	protocol.ItemIronWok:         {Name: "Wok de Ferro", Weight: 4.0, Slot: protocol.SlotOffHand, BonusCON: 2, BonusDEF: 5},
 	protocol.ItemHuntersQuiver:   {Name: "Aljava de Caçador", Weight: 1.5, Slot: protocol.SlotOffHand, BonusDEX: 2, BonusATK: 4},
+	protocol.ItemAutopsyDagger:   {Name: "Adaga de Autópsia", Weight: 0.6, Slot: protocol.SlotMainHand, BonusDEX: 1, BonusATK: 4},
+	protocol.ItemMetalScrap:      {Name: "Sucata Metálica", Weight: 1.0, Slot: NoSlot},
 	protocol.ItemLeadPlate:       {Name: "Placa de Chumbo", Weight: 25.0, Slot: NoSlot},
 	protocol.ItemOffhandKnuckle:  {Name: "Manopla Secundária", Weight: 2.2, Slot: protocol.SlotOffHand, BonusSTR: 1, BonusATK: 5, BonusDEF: 1},
 }

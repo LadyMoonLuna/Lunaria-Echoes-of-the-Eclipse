@@ -75,6 +75,28 @@ function UpdateMob(mob_id, mob_type, mob_x, mob_z, mob_hp, mob_max_hp, current_s
         end
 
     -- ------------------------------------------------------------------------
+    -- 25. JAVALI SELVAGEM (MobType == 25): territorial — só investe de perto
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 25 then
+        local aggro_radius = 6.0
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if player_dist > 1.8 then
+                mob_set_state(mob_id, 1) -- Investida
+                mob_move_to(mob_id, player_x, player_z, 3.6)
+            elseif data.attack_cd <= 0 then
+                mob_set_state(mob_id, 2) -- Chifrada com as presas
+                mob_attack_player(mob_id, nearest_player_id, 10)
+                data.attack_cd = 1.5
+            end
+        else
+            local dist_to_spawn = math.sqrt((spawn_x - mob_x)^2 + (spawn_z - mob_z)^2)
+            mob_set_state(mob_id, 0)
+            if dist_to_spawn > 1.0 then
+                mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+            end
+        end
+
+    -- ------------------------------------------------------------------------
     -- 2. SAQUEADOR DESERDADO (MobType == 2)
     -- ------------------------------------------------------------------------
     elseif mob_type == 2 then
@@ -1283,7 +1305,7 @@ DropTables = {
     [15] = {
         name = "Aranha Tecelã da Bruma",
         drops = {
-            { item_id = 42, name = "Casulo de Seda Perfeito", rate = 1.00, rare = false },
+            { item_id = 132, name = "Teias de Aranha", rate = 1.00, rare = false },
             { item_id = 11, name = "Glândula de Veneno", rate = 0.25, rare = false },
         }
     },
@@ -1298,14 +1320,14 @@ DropTables = {
     [17] = {
         name = "Lodo Ácido Corrosivo",
         drops = {
-            { item_id = 46, name = "Ácido Puro", rate = 1.00, rare = false },
+            { item_id = 153, name = "Seiva Ácida", rate = 1.00, rare = false },
             { item_id = 28, name = "Lixo Orgânico", rate = 1.00, rare = false },
         }
     },
     [18] = {
         name = "Escorpião Abissal Gigante",
         drops = {
-            { item_id = 48, name = "Veneno Vorpal", rate = 1.00, rare = false },
+            { item_id = 143, name = "Bolsa de Veneno Vorpal", rate = 1.00, rare = false },
             { item_id = 47, name = "Ferrão de Escorpião Abissal", rate = 0.001, rare = true, secret = true },
         }
     },

@@ -110,6 +110,7 @@ type Player struct {
 	PunchCombo             int               // Socos seguidos do Punho Celeste
 	TrialProgress          map[uint8]float32 // Progresso das Provações de Linhagem (raça -> abates/segundos)
 	ThorneTrust            int               // Confiança de Thorne: só sobe com presas (+15) e peles de Alfa (+25)
+	GarrickQuestStage      uint8             // Missão "O Aprendiz do Ferreiro": 0 = não iniciada, 1..3 = parte atual, 4 = concluída
 	TamerUnlocked          bool              // Missão secreta de Thorne concluída: pode aprender Senhor das Feras (Classe 10)
 	BlockedBossRupture     bool              // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro do Vazio - Classe 14)
 	PyromancerRevived      bool              // Passiva Chama da Vida (Pyrael - Raça 30)
@@ -1065,8 +1066,6 @@ func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player
 	// Todo jogador começa ao conectar com 3x Frasco de Vidro Vazio (ItemID=1) e 2x Carne Crua de Lobo (ItemID=2)
 	p.Inventory[protocol.ItemEmptyFlask] = 3
 	p.Inventory[protocol.ItemRawWolfMeat] = 2
-	p.Inventory[ItemStoneAxe] = 1 // ferramentas iniciais de coleta (Tier 1)
-	p.Inventory[ItemStonePickaxe] = 1
 
 	p.recalculateStatsLocked()
 	p.HP = p.MaxHP

@@ -5,7 +5,7 @@ const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
 const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
 ## Textura do corpo principal de cada tipo de mob
 const MOB_TEXTURES := {
-	1: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
+	1: "fur", 25: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
 	10: "cloth", 11: "stone", 12: "cloth", 13: "metal_hammered", 14: "obsidian",
 }
 
@@ -35,6 +35,7 @@ var collision_shape: CollisionShape3D = null
 
 const MOB_NAMES := {
 	1: "Lobo da Bruma",
+	25: "Javali Selvagem",
 	2: "Saqueador Deserdado",
 	3: "Besteiro da Vigília",
 	4: "Acólito do Eclipse",
@@ -130,7 +131,7 @@ func _setup_collision() -> void:
 		cap.radius = 0.9
 		cap.height = 1.5
 		collision_shape.position = Vector3(0, 0.75, 0)
-	elif mob_type == 1 or mob_type == 6 or mob_type == 15 or mob_type == 17:
+	elif mob_type == 1 or mob_type == 6 or mob_type == 15 or mob_type == 17 or mob_type == 25:
 		cap.radius = 0.6
 		cap.height = 1.3
 		collision_shape.position = Vector3(0, 0.65, 0)
@@ -1443,7 +1444,7 @@ func _build_visuals() -> void:
 		name_tag.font_size = 22
 
 	var tag_height := 2.3
-	if mob_type == 1 or mob_type == 17:
+	if mob_type == 1 or mob_type == 17 or mob_type == 25:
 		tag_height = 1.4
 	elif mob_type == 15:
 		tag_height = 1.6

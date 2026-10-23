@@ -105,6 +105,30 @@ def lobo_alfa():
     return m
 
 
+def javali():
+    m = M(25, "javali", "Javali Selvagem", "Morador do Bosque Sussurrante",
+          "Javali atarracado de pelagem marrom-escura e eriçada, crina de cerdas no dorso, focinho largo e chato "
+          "e duas presas curvas e amareladas saindo da mandíbula. Menor e mais fraco que um lobo, mas teimoso.",
+          "#6d4c41", scale=0.8)
+    fur = m.mat("fur_boar", "#4e3628", rough=1.0)
+    fur_l = m.mat("fur_boar_light", "#7a5a44", rough=1.0)
+    skin = m.mat("snout", "#3a2a24", rough=0.5)
+    eye = m.mat("eye_dark", "#ffcc80", emit="#ff6d00", energy=1.5)
+    tusk = m.mat("tusk", "#efe2c4", rough=0.4)
+    _wolf(m, fur, fur_l, skin, eye, tusk, mane=0.7)
+    # Corpo mais largo e baixo, focinho chato e presas curvas
+    m.part("sphere", [0.27], (0, 0.6, -0.05), fur, scale=(1.25, 1.0, 1.6))
+    m.part("cylinder", [0.075, 0.075, 0.04], (0, 0.8, -1.0), skin, rot=(90, 0, 0))
+    for side in (-1, 1):
+        m.chain([(0.05 * side, 0.76, -0.9), (0.09 * side, 0.82, -0.95), (0.1 * side, 0.9, -0.9)], [0.018, 0.014, 0.006], tusk)
+    # Crina de cerdas no dorso
+    for i in range(9):
+        z = -0.45 + i * 0.11
+        m.part("cylinder", [0.0, 0.02, 0.11], (0, 0.86 - abs(z) * 0.05, z), fur_l, rot=(-15, 0, 0))
+    m.primary = "fur_boar"
+    return m
+
+
 # ---------------------------------------------------------------------------
 # Humanoides
 # ---------------------------------------------------------------------------
@@ -406,5 +430,5 @@ def malakor():
     return m
 
 
-MOBS = [lobo_bruma, saqueador, besteiro, acolito_eclipse, executor, lobo_alfa, licantropo_alfa, cultista, gargula,
+MOBS = [javali, lobo_bruma, saqueador, besteiro, acolito_eclipse, executor, lobo_alfa, licantropo_alfa, cultista, gargula,
         inquisidor, vaelen, malakor]

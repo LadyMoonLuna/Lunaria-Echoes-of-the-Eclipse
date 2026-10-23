@@ -23,6 +23,7 @@ var label_3d: Label3D = null
 
 const MOB_NAMES := {
 	1: "Lobo da Bruma",
+	25: "Javali Selvagem",
 	2: "Saqueador Deserdado",
 	3: "Besteiro da Vigília",
 	4: "Acólito do Eclipse",

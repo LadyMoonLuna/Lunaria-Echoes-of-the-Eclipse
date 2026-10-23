@@ -434,6 +434,13 @@ func NewMobManager() *MobManager {
 	mob208.IsActive = false
 	mm.Mobs[208] = mob208
 
+	// MobType 25: Javali Selvagem (140 HP) — vara de javalis perto da entrada do Bosque
+	boarSpawns := [][2]float32{{20, 230}, {-25, 215}, {38, 205}, {-42, 248}, {8, 185}, {-15, 192}, {55, 175}, {-60, 200}}
+	for i, sp := range boarSpawns {
+		id := uint32(230 + i)
+		mm.Mobs[id] = NewMobWithZone(id, "Javali Selvagem", protocol.MobTypeWildBoar, ZoneForest, sp[0], 0.0, sp[1], 140, 3.6)
+	}
+
 	// MobType 15: Aranha Tecelã da Bruma (380 HP)
 	mm.Mobs[215] = NewMobWithZone(215, "Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneForest, 105.0, 0.0, -100.0, 380, 3.8)
 	mm.Mobs[216] = NewMobWithZone(216, "Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneForest, 115.0, 0.0, -110.0, 380, 3.8)

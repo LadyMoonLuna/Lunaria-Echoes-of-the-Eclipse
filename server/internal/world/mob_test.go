@@ -10,8 +10,8 @@ import (
 
 func TestMobCreationAndSpawns(t *testing.T) {
 	mm := NewMobManager()
-	if len(mm.Mobs) != 29 {
-		t.Fatalf("esperava 29 mobs registrados, obteve %d", len(mm.Mobs))
+	if len(mm.Mobs) != 37 { // 29 + 8 Javalis Selvagens
+		t.Fatalf("esperava 37 mobs registrados, obteve %d", len(mm.Mobs))
 	}
 
 	wolf1 := mm.GetMob(201)

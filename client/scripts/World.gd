@@ -536,6 +536,12 @@ var discovered_materials: Dictionary = {} # material_id -> true (espelho do serv
 var resource_nodes_nodes: Dictionary = {} # node_id -> Node3D
 var resource_nodes_data: Dictionary = {} # node_id -> Dictionary
 var discovery_banner: Label = null
+var quest_label: Label = null
+const QUEST_PARTS := {
+	1: ["O Aprendiz do Ferreiro (1/3)", "Traga Pinho do Refúgio a Garrick — use o Machado Velho nos pinheiros da Vila"],
+	2: ["O Aprendiz do Ferreiro (2/3)", "Traga Cobre a Garrick — use a Picareta Desgastada nos veios perto da Vila"],
+	3: ["O Aprendiz do Ferreiro (3/3)", "Traga Couro de Javali a Garrick — cace e esfole Javalis no Bosque Sussurrante"],
+}
 var _discovery_queue: Array = []
 const HARVEST_RANGE := 3.5
 const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte"}
@@ -608,6 +614,7 @@ func _ready() -> void:
 	NetworkManager.ground_items_received.connect(_on_ground_items_received)
 	NetworkManager.resource_nodes_received.connect(_on_resource_nodes_received)
 	NetworkManager.discovered_materials_received.connect(_on_discovered_materials_received)
+	NetworkManager.quest_state_received.connect(_on_quest_state_received)
 	for mid in ItemDataScript.STARTING_DISCOVERED:
 		discovered_materials[mid] = true
 	NetworkManager.player_attributes_received.connect(_on_player_attributes_received)
@@ -896,59 +903,31 @@ const DEV_CLASSES := [
 	{"id": 34, "name": "Soberano do Sol Negro", "desc": "LENDÁRIA (Tier 6). [Q] Corte do Horizonte de Eventos, [R] Égide da Aurora e Abismo, [F] Apocalipse do Sol Negro (5.0x, céu em Eclipse).", "col": Color("#4a148c")}
 ]
 
-const DEV_ITEMS := [
-	# Relíquias Secretas 0.1%
-	{"id": 14, "name": "Cálice da Alma Partida", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desperta o Cinerion da Cripta. Drop de Acólito do Eclipse."},
-	{"id": 15, "name": "Chave Rúnica da Cripta", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Chave sagrada antiga das catacumbas da Vigília. Drop Comandante Vaelen."},
-	{"id": 16, "name": "Medalhão da Vigília", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Insígnia dos cavaleiros juramentados. Drop Executor de Ferro."},
-	{"id": 17, "name": "Tomo da Foice do Eclipse", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Liturgia secreta do Ceifador da Lua Negra. Drop Acólitos e Malakor."},
-	{"id": 30, "name": "Casulo de Seda Prateada", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Segredos da linhagem Aracne. Drop de predadores no Bosque."},
-	# Equipamentos
-	{"id": 10, "name": "Espada Longa de Ferro", "cat": "Mão Primária", "rate": "15.0%", "desc": "Lâmina forjada de ferro temperado."},
-	{"id": 11, "name": "Escudo de Madeira Reforçado", "cat": "Mão Secundária", "rate": "15.0%", "desc": "Escudo com encaixes de ferro batido."},
-	{"id": 12, "name": "Arco de Bordo Longo", "cat": "Longo Alcance", "rate": "15.0%", "desc": "Disparos precisos à longa distância."},
-	{"id": 13, "name": "Cajado do Aprendiz", "cat": "Arma Mágica", "rate": "15.0%", "desc": "Foco de canalização do éter."},
-	{"id": 20, "name": "Armadura de Prata Imperial", "cat": "Peitoral", "rate": "10.0%", "desc": "Defesa física e resistência espiritual."},
-	{"id": 21, "name": "Elmo de Ferro Batido", "cat": "Cabeça", "rate": "12.0%", "desc": "Proteção craniana reforçada."},
-	{"id": 22, "name": "Botas de Couro de Fera", "cat": "Pés", "rate": "15.0%", "desc": "Tração firme e passos silenciosos."},
-	{"id": 23, "name": "Luvas de Malha Pesada", "cat": "Mãos", "rate": "15.0%", "desc": "Proteção manual em combate."},
-	{"id": 25, "name": "Calças de Aço Temperado", "cat": "Pernas", "rate": "12.0%", "desc": "Articulações reforçadas para mobilidade."},
-	{"id": 26, "name": "Ombreiras Rúnicas", "cat": "Ombros", "rate": "10.0%", "desc": "Runas protetoras contra dano elemental."},
-	{"id": 27, "name": "Cinto do Conquistador", "cat": "Cintura", "rate": "12.0%", "desc": "Fivela pesada e couro espesso."},
-	{"id": 28, "name": "Amuleto do Eclipse", "cat": "Colar", "rate": "8.0%", "desc": "Vibra com o ciclo da lua aumentando poder."},
-	{"id": 29, "name": "Anel de Presa Ancestral", "cat": "Anel", "rate": "5.0%", "desc": "Marfim fóssil aumentando chance de crítico."},
-	# Consumíveis & Materiais
-	{"id": 1, "name": "Poção de Vida / Frasco Vazio", "cat": "Consumível", "rate": "80.0%", "desc": "Restaura +50 HP instantaneamente."},
-	{"id": 2, "name": "Frasco de Stamina", "cat": "Consumível", "rate": "40.0%", "desc": "Restaura +60 de Stamina."},
-	{"id": 3, "name": "Elixir de Mana", "cat": "Consumível", "rate": "35.0%", "desc": "Restaura energia arcana do éter."},
-	{"id": 4, "name": "Carne Nobre Assada", "cat": "Alimento", "rate": "70.0%", "desc": "Regenera vida fora de combate."},
-	{"id": 5, "name": "Carne Crua de Lobo", "cat": "Material", "rate": "100.0%", "desc": "Colhida de lobos no bosque."},
-	{"id": 6, "name": "Pelagem Cinzenta", "cat": "Material", "rate": "100.0%", "desc": "Pele espessa para alfaiataria."},
-	{"id": 7, "name": "Presa Lupina Afiada", "cat": "Troféu", "rate": "25.0%", "desc": "Presa afiada extraída em autópsia."},
-	{"id": 8, "name": "Garra de Fera", "cat": "Troféu", "rate": "20.0%", "desc": "Garra curvada de predador."},
-	{"id": 9, "name": "Olho da Coruja Noturna", "cat": "Místico", "rate": "15.0%", "desc": "Globo ocular sensível à penumbra."},
-	{"id": 18, "name": "Asa de Morcego Primordial", "cat": "Material", "rate": "30.0%", "desc": "Membrana alada dos esgotos."},
-	{"id": 19, "name": "Glândula Venenosa", "cat": "Troféu", "rate": "25.0%", "desc": "Toxina corrosiva pura."},
-	{"id": 24, "name": "Escama de Dragão de Cinzas", "cat": "Troféu", "rate": "5.0%", "desc": "Escama impérvia ao calor extremo."},
-	# Quadrante 4: Drops de Criaturas e Raid Bosses
-	{"id": 42, "name": "Casulo de Seda Perfeito", "cat": "Material", "rate": "100.0%", "desc": "Seda densa e brilhante da Aranha Tecelã."},
-	{"id": 43, "name": "Coração da Rainha Aranha", "cat": "Troféu", "rate": "100.0%", "desc": "Coração pulsante e gélido de Arachna (+12 INT, +8 ESP)."},
-	{"id": 44, "name": "Olho Multifacetado de Arachna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desbloqueia a Raça Secreta 21 Aracne (Tecelão da Bruma)."},
-	{"id": 45, "name": "Manto de Seda Imperial", "cat": "Manto/Capa", "rate": "100.0%", "desc": "Manto lendário tecido por Arachna (+45 HP, +6 INT, +5 ESP)."},
-	{"id": 46, "name": "Ácido Puro", "cat": "Material", "rate": "100.0%", "desc": "Fluido cáustico corrosivo colhido do Lodo Ácido."},
-	{"id": 47, "name": "Ferrão de Escorpião Abissal", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Ferrão letal que desbloqueia a Raça Escarion."},
-	{"id": 48, "name": "Veneno Vorpal", "cat": "Troféu", "rate": "100.0%", "desc": "Toxina negra de altíssima letalidade."},
-	{"id": 49, "name": "Retalho Quimérico Costurado", "cat": "Material", "rate": "100.0%", "desc": "Tecido mutagênico do Experimento Nº 0."},
-	{"id": 50, "name": "Núcleo de Gelo Antigo", "cat": "Troféu", "rate": "100.0%", "desc": "Fragmento glacial ancestral extraído de Golens e Ymir."},
-	{"id": 51, "name": "Escama Dracônica Primordial", "cat": "Material", "rate": "100.0%", "desc": "Escama blindada resistente a impacto e gelo extremo."},
-	{"id": 52, "name": "Coração de Geada Eterna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Coração de Ymir que desperta a Raça 24 Borealin (Jotunar)."},
-	{"id": 53, "name": "Insígnia do Guarda Carmesim", "cat": "Distintivo", "rate": "100.0%", "desc": "Emblema de honra dos guardas góticos de Vesperian."},
-	{"id": 54, "name": "Sangue Puro do Progenitor", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Sangue milenar de Lorde Vesperian que desperta a Raça Sangrael!"},
-	{"id": 55, "name": "Anel Carmesim de Vesperian", "cat": "Anel", "rate": "100.0%", "desc": "Anel de prata e rubi (+6 FOR, +6 CON, +10% Roubo de Vida)."}
-]
+# Lista de itens do Dev Manager montada a partir do catálogo real (ItemData), sempre com IDs corretos
+func _dev_items_list() -> Array:
+	var out: Array = []
+	var ids: Array = ItemDataScript.ITEMS.keys()
+	ids.sort()
+	for iid in ids:
+		var info: Dictionary = ItemDataScript.ITEMS[iid]
+		var cat := "Item"
+		var desc := "%.1f kg" % float(info["weight"])
+		if ItemDataScript.is_material(iid):
+			var m: Dictionary = ItemDataScript.material(iid)
+			cat = "%s %s" % [ItemDataScript.CATEGORY_NAMES.get(m["category"], ""), ItemDataScript.rarity_name(int(m["rarity"]))]
+			desc += " • " + m["trait"]
+		elif info.has("tool"):
+			cat = "Ferramenta Tier %d" % int(info["tool_tier"])
+		elif int(info["slot"]) >= 0:
+			cat = "Equipamento"
+		if inventory_ui and inventory_ui.ITEM_CATALOG.has(iid):
+			desc += " • " + str(inventory_ui.ITEM_CATALOG[iid].get("desc", ""))
+		out.append({"id": iid, "name": info["name"], "cat": cat, "rate": "-", "desc": desc})
+	return out
 
 const DEV_BESTIARY := [
 	# ZoneID 1 — Bosque Sussurrante (600x600m)
+	{"name": "Javali Selvagem", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "140 HP", "spawn": "Vara de javalis perto da entrada do bosque", "drops": [2, 128, 142], "col": Color("#8d6e63")},
 	{"name": "Lobo da Bruma", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "220 HP", "spawn": "Comum a qualquer hora no bosque", "drops": [5, 6, 7, 30], "col": Color("#90a4ae")},
 	{"name": "Lobo Alfa (Chefe da Alcateia)", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "750 HP", "spawn": "🌕 Spawn na LUA CHEIA", "drops": [7, 8, 29, 30], "col": Color("#ffd54f")},
 	{"name": "Licantropo Alfa (Raid Boss Feral)", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "2200 HP", "spawn": "🩸 Spawn na LUA DE SANGUE", "drops": [7, 8, 28, 30], "col": Color("#e53935")},
@@ -1808,7 +1787,7 @@ func _build_dev_tab_items(tabs: TabContainer) -> void:
 	vb.add_theme_constant_override("separation", 6)
 	scroll.add_child(vb)
 
-	for item in DEV_ITEMS:
+	for item in _dev_items_list():
 		var is_secret: bool = item["rate"].contains("SECRETO")
 		var col := Color(0.85, 0.35, 0.9) if is_secret else Color(0.3, 0.6, 0.8)
 		var card := PanelContainer.new()
@@ -2477,6 +2456,31 @@ func _setup_discovery_banner() -> void:
 	discovery_banner.add_theme_constant_override("outline_size", 8)
 	hud.add_child(discovery_banner)
 
+func _on_quest_state_received(_quest_id: int, stage: int, have: int, need: int) -> void:
+	if quest_label == null:
+		var vbox := get_node_or_null("HUD/PlayerStatusPanel/VBox")
+		if not vbox:
+			return
+		quest_label = Label.new()
+		quest_label.name = "QuestTracker"
+		quest_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		quest_label.custom_minimum_size = Vector2(320, 0)
+		quest_label.add_theme_font_size_override("font_size", 12)
+		quest_label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.55))
+		vbox.add_child(quest_label)
+	if stage == 0:
+		quest_label.text = "📜 Missão disponível: fale com Garrick, o Ferreiro (E)"
+	elif stage == 255:
+		quest_label.text = "📜 O Aprendiz do Ferreiro — concluída!"
+		var tw := create_tween()
+		tw.tween_interval(6.0)
+		tw.tween_callback(func(): quest_label.visible = false)
+	elif QUEST_PARTS.has(stage):
+		var part: Array = QUEST_PARTS[stage]
+		var done_mark := " ✔ volte a Garrick!" if have >= need else ""
+		quest_label.text = "📜 %s\n%s: %d/%d%s" % [part[0], part[1], have, need, done_mark]
+	quest_label.visible = true
+
 func _on_discovered_materials_received(mode: int, material_ids: Array) -> void:
 	if mode == 0:
 		discovered_materials.clear()
@@ -2567,6 +2571,7 @@ func _add_mesh(parent: Node3D, mesh: Mesh, m: Material, pos: Vector3, rot: Vecto
 	mi.position = pos
 	mi.rotation_degrees = rot
 	mi.scale = scl
+	mi.visibility_range_end = 140.0 # ~200 nós por zona: só desenha os próximos
 	parent.add_child(mi)
 	return mi
 
@@ -2703,8 +2708,8 @@ func _apply_node_state(root: Node3D, nd: Dictionary) -> void:
 	var lbl: Label3D = root.get_meta("label")
 	if lbl:
 		var mat_name: String = mat.get("name", "Recurso")
-		if not is_material_discovered(mat_id):
-			mat_name = "??? (%s desconhecido)" % NODE_KIND_NAMES.get(int(nd["kind"]), "Recurso")
+		# Material ainda não encontrado: nenhum texto; o nome aparece depois da primeira coleta
+		lbl.visible = is_material_discovered(mat_id)
 		if available:
 			lbl.text = "%s [%s]\n%s" % [mat_name, ItemDataScript.rarity_name(rarity), _node_requirement_text(nd)]
 			lbl.modulate = ItemDataScript.rarity_color(rarity).lightened(0.2)

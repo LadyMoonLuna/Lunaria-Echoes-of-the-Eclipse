@@ -45,14 +45,14 @@ var ToolsDB = map[uint8]ToolDef{
 }
 
 var toolItems = map[uint8]ItemInfo{
-	ItemStoneAxe:       {Name: "Machado de Pedra", Weight: 3.0, Slot: NoSlot},
+	ItemStoneAxe:       {Name: "Machado Velho", Weight: 3.0, Slot: NoSlot},
 	ItemIronAxe:        {Name: "Machado de Ferro", Weight: 3.5, Slot: NoSlot},
 	ItemTemperedAxe:    {Name: "Machado de Aço Temperado", Weight: 3.5, Slot: NoSlot},
 	ItemMithrilAxe:     {Name: "Machado de Mithril", Weight: 2.0, Slot: NoSlot},
 	ItemOrichalcumAxe:  {Name: "Machado de Oricalco", Weight: 3.8, Slot: NoSlot},
 	ItemAdamantineAxe:  {Name: "Machado Adamantino", Weight: 4.5, Slot: NoSlot},
 	ItemBlackSunAxe:    {Name: "Machado do Sol Negro", Weight: 4.0, Slot: NoSlot},
-	ItemStonePickaxe:   {Name: "Picareta de Pedra", Weight: 3.5, Slot: NoSlot},
+	ItemStonePickaxe:   {Name: "Picareta Desgastada", Weight: 3.5, Slot: NoSlot},
 	ItemIronPickaxe:    {Name: "Picareta de Ferro", Weight: 4.0, Slot: NoSlot},
 	ItemTemperedPick:   {Name: "Picareta de Aço Temperado", Weight: 4.0, Slot: NoSlot},
 	ItemMithrilPickaxe: {Name: "Picareta de Mithril", Weight: 2.5, Slot: NoSlot},
@@ -66,7 +66,7 @@ var toolItems = map[uint8]ItemInfo{
 var cuttingWeapons = map[uint8]bool{
 	protocol.ItemIronLongsword: true, protocol.ItemSteelDagger: true, protocol.ItemOffhandDagger: true,
 	protocol.ItemGiantCleaver: true, protocol.ItemColossalSword: true, protocol.ItemSteelNeedles: true,
-	protocol.ItemInquisitorShadowScythe: true,
+	protocol.ItemInquisitorShadowScythe: true, protocol.ItemAutopsyDagger: true,
 }
 
 func init() {

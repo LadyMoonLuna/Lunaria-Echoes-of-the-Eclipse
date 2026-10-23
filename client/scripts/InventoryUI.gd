@@ -101,38 +101,6 @@ const ITEM_CATALOG := {
 		"usable": true,
 		"btn_text": "[Beber Elixir (+20% Buff)]"
 	},
-	5: {
-		"name": "Pelagem Cinzenta de Lobo",
-		"category": "Material Anatômico",
-		"desc": "Pelo denso e espesso de lobo da bruma. Matéria-prima nobre para reforço de couro e forjas.",
-		"color": Color("#90a4ae"),
-		"usable": false,
-		"btn_text": ""
-	},
-	6: {
-		"name": "Presa Lupina Afiada",
-		"category": "Material Anatômico",
-		"desc": "Presa de predador da floresta. Essencial para a confecção de pontas de flecha e adagas perfurantes.",
-		"color": Color("#cfd8dc"),
-		"usable": false,
-		"btn_text": ""
-	},
-	7: {
-		"name": "Garra de Fera",
-		"category": "Material Anatômico",
-		"desc": "Garra encurvada e afiada, extraída com perícia anatômica de monstros abatidos.",
-		"color": Color("#b0bec5"),
-		"usable": false,
-		"btn_text": ""
-	},
-	8: {
-		"name": "Sangue Lupino Fresco",
-		"category": "Reagente Alquímico",
-		"desc": "Coletado em frasco de vidro ao abater lobos. Reagente base para elixires e transmutação.",
-		"color": Color("#c62828"),
-		"usable": false,
-		"btn_text": ""
-	},
 	9: {
 		"name": "Pele Intacta de Lobo Alfa",
 		"category": "Peitoral",
@@ -212,14 +180,6 @@ const ITEM_CATALOG := {
 		"color": Color("#ffab00"),
 		"usable": true,
 		"btn_text": "[Ativar / Entregar a Garrick]"
-	},
-	25: {
-		"name": "Minério de Ferro",
-		"category": "Material de Forja",
-		"desc": "Minério denso e puro extraído das rochas de Lunaria. Presente ideal para fortalecer laços com o mestre ferreiro Garrick!",
-		"color": Color("#90a4ae"),
-		"usable": false,
-		"btn_text": ""
 	},
 	26: {
 		"name": "Receita: Malho de Batalha Rúnico",
@@ -389,6 +349,8 @@ const ITEM_CATALOG := {
 	72: {"name": "Catalisador Alquímico", "category": "Mão Secundária", "desc": "Aparelho de vidro e cobre que acelera reações químicas.", "color": Color("#4db6ac"), "usable": true, "btn_text": "[Equipar]"},
 	73: {"name": "Wok de Ferro", "category": "Mão Secundária", "desc": "Frigideira de ferro preto que também serve de escudo.", "color": Color("#424242"), "usable": true, "btn_text": "[Equipar]"},
 	74: {"name": "Aljava de Caçador", "category": "Mão Secundária", "desc": "Aljava de couro com flechas emplumadas.", "color": Color("#8d6e63"), "usable": true, "btn_text": "[Equipar]"},
+	77: {"name": "Adaga de Autópsia", "category": "Arma — Mão Principal", "desc": "Presente de Garrick. Lâmina curta e precisa: sem uma arma cortante não se abre carcaça nenhuma.", "color": Color("#b0bec5"), "usable": true, "btn_text": "[Equipar Arma]"},
+	78: {"name": "Sucata Metálica", "category": "Lixo Metálico", "desc": "Restos de metal arruinados por uma extração ou forja mal feita. Pode ser derretida no futuro.", "color": Color("#757575"), "usable": false, "btn_text": ""},
 	76: {"name": "Placa de Chumbo", "category": "Material de Teste", "desc": "Placa maciça de chumbo (25 kg). Ótima para testar a sobrecarga — e péssima para carregar.", "color": Color("#78909c"), "usable": false, "btn_text": ""},
 	75: {"name": "Manopla Secundária", "category": "Mão Secundária", "desc": "Segunda manopla de ferro para combos com as duas mãos.", "color": Color("#78909c"), "usable": true, "btn_text": "[Equipar]"}
 }

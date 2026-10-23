@@ -303,8 +303,8 @@ func TestPlayerInventoryAndEquip(t *testing.T) {
 	}
 
 	slots := p.GetInventorySlots()
-	if len(slots) != 6 { // Frasco (1), Carne (2), Pele (9), Anel (13), Machado e Picareta de Pedra
-		t.Fatalf("Esperava 6 slots, obteve %d", len(slots))
+	if len(slots) != 4 { // Frasco (1), Carne (2), Pele (9), Anel (13)
+		t.Fatalf("Esperava 4 slots, obteve %d", len(slots))
 	}
 
 	// Equipar Pele de Lobo Alfa (9): Capa de Pele Alfa -> +35 MaxHP, +3 STR

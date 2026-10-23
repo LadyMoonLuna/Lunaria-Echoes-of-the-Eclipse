@@ -72,6 +72,7 @@ const (
 	PacketTypeHarvestNode         uint8 = 0x44 // [Client -> Server] Coletar nó de recurso (9 bytes)
 	PacketTypeResourceNodesSync   uint8 = 0x45 // [Server -> Client] Nós de recurso da zona
 	PacketTypeDiscoveredMaterials uint8 = 0x46 // [Server -> Client] Materiais descobertos (lista completa ou novos)
+	PacketTypeQuestState          uint8 = 0x47 // [Server -> Client] Estado de missão (5 bytes)
 )
 
 // Tipos de Projéteis 3D
@@ -115,6 +116,7 @@ const (
 	MobTypeYmirFrostPatriarch   uint8 = 22 // Ymir, o Patriarca Jotunar (Boss - HP 5.200)
 	MobTypeVesperianBloodGuard  uint8 = 23 // Guarda Sanguinário de Vesperian (HP 680)
 	MobTypeLordVesperianVampire uint8 = 24 // Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto - HP 8.500)
+	MobTypeWildBoar             uint8 = 25 // Javali Selvagem (Bosque Sussurrante - HP 140, mais fraco que o Lobo da Bruma)
 )
 
 // Estados de Mobs do Marco 4
@@ -228,15 +230,15 @@ const (
 	ItemWolfBloodPotion uint8 = 4 // Poção de Sangue Lupino (+20% Velocidade e Crítico por 20s)
 
 	// Materiais Anatômicos de Criaturas
-	ItemWolfGreyPelt      uint8 = 5  // Pelagem Cinzenta de Lobo
-	ItemSharpWolfFang     uint8 = 6  // Presa Lupina Afiada
-	ItemBeastClaw         uint8 = 7  // Garra de Fera
-	ItemFreshWolfBlood    uint8 = 8  // Sangue Lupino Fresco (Coletado de Lobo se tiver Frasco Vazio)
-	ItemAlphaWolfPelt     uint8 = 9  // Pele Intacta de Lobo Alfa (Armadura: +35 MaxHP, +3 FOR)
-	ItemPureLunarBlood    uint8 = 10 // Sangue Lunar Puro (Coletado de Lobo Alfa com Frasco Vazio)
-	ItemDarkPoisonGland   uint8 = 11 // Glândula de Veneno Sombrio (Coletado com Frasco Vazio)
-	ItemHeavySteelPlate   uint8 = 12 // Placa de Aço Pesada (Armadura: +50 MaxHP, +4 CON)
-	ItemAncestralFangRing uint8 = 13 // Anel de Presa Ancestral (Acessório/Anel 1: +3 DES, +3 AGI)
+	ItemWolfGreyPelt      uint8 = 129 // Unificado: Couro de Lobo (material 129)
+	ItemSharpWolfFang     uint8 = 142 // Unificado: Presas e Garras Afiadas (material 142)
+	ItemBeastClaw         uint8 = 142 // Unificado: Presas e Garras Afiadas (material 142)
+	ItemFreshWolfBlood    uint8 = 136 // Unificado: Sangue de Lobo (material 136)
+	ItemAlphaWolfPelt     uint8 = 9   // Pele Intacta de Lobo Alfa (Armadura: +35 MaxHP, +3 FOR)
+	ItemPureLunarBlood    uint8 = 10  // Sangue Lunar Puro (Coletado de Lobo Alfa com Frasco Vazio)
+	ItemDarkPoisonGland   uint8 = 11  // Glândula de Veneno Sombrio (Coletado com Frasco Vazio)
+	ItemHeavySteelPlate   uint8 = 12  // Placa de Aço Pesada (Armadura: +50 MaxHP, +4 CON)
+	ItemAncestralFangRing uint8 = 13  // Anel de Presa Ancestral (Acessório/Anel 1: +3 DES, +3 AGI)
 
 	// Itens de Eventos & Rituais Secretos
 	ItemBrokenSoulChalice    uint8 = 14 // Cálice da Alma Partida (Morte à noite desperta Raça 7 Cinerion - Drop 0.1%)
@@ -255,10 +257,10 @@ const (
 	ItemSacredTorch              uint8 = 24 // Tocha Sagrada do Santuário
 
 	// Minérios, Receitas e Forja
-	ItemIronOre              uint8 = 25 // Minério de Ferro (Presente compatível para Garrick e matéria-prima)
-	ItemRunicWarhammerRecipe uint8 = 26 // Receita: Malho de Batalha Rúnico (Receita secreta do Ferreiro)
-	ItemRunicWarhammer       uint8 = 27 // Malho de Batalha Rúnico (Arma Exclusiva Forjada: +45 Dano, +8 FOR, +6 CON, +4 MAS)
-	ItemOrganicTrash         uint8 = 28 // Lixo Orgânico / Restos Estragados (Falha na autópsia / corte na Zona Vermelha)
+	ItemIronOre              uint8 = 116 // Unificado: Ferro (material 116) — presente compatível para Garrick
+	ItemRunicWarhammerRecipe uint8 = 26  // Receita: Malho de Batalha Rúnico (Receita secreta do Ferreiro)
+	ItemRunicWarhammer       uint8 = 27  // Malho de Batalha Rúnico (Arma Exclusiva Forjada: +45 Dano, +8 FOR, +6 CON, +4 MAS)
+	ItemOrganicTrash         uint8 = 28  // Lixo Orgânico / Restos Estragados (Falha na autópsia / corte na Zona Vermelha)
 
 	// Itens Secretos de Desbloqueio de Raças/Classes (Chance 0.1%)
 	ItemRunicHourglass   uint8 = 29 // Ampulheta Rúnica (Desperta Raça 28 Cronari / Cronari - Drop 0.1%)
@@ -278,23 +280,23 @@ const (
 	ItemAlphaPeltCloak      uint8 = 41 // Capa de Pele Alfa (Capa: +35 HP, +3 FOR, +3 AGI)
 
 	// Quadrante 4: Drops de Criaturas e Raid Bosses
-	ItemPerfectSilkCocoon      uint8 = 42 // Casulo de Seda Perfeito
-	ItemSpiderQueenHeart       uint8 = 43 // Coração da Rainha Aranha (Relíquia: +12 INT, +8 SPI)
-	ItemArachnaEye             uint8 = 44 // Olho Multifacetado de Arachna (0.1% - Desbloqueia Raça 21 Aracne)
-	ItemImperialSilkCloak      uint8 = 45 // Manto de Seda Imperial (Capa: +45 HP, +6 INT, +5 SPI)
-	ItemPureAcid               uint8 = 46 // Ácido Puro (Alquimia / Corrosivo)
-	ItemAbyssalScorpionStinger uint8 = 47 // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Escarion)
-	ItemVorpalPoison           uint8 = 48 // Veneno Vorpal (Toxina Letal)
-	ItemChimeraFleshPart       uint8 = 49 // Retalho Quimérico Costurado (Mutagênico)
-	ItemAncientIceCore         uint8 = 50 // Núcleo de Gelo Antigo (Gélido)
-	ItemPrimordialDragonScale  uint8 = 51 // Escama Dracônica Primordial (Armadura Superior)
-	ItemEternalFrostHeart      uint8 = 52 // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Borealin / Jotunar)
-	ItemCrimsonGuardInsignia   uint8 = 53 // Insígnia do Guarda Carmesim
-	ItemProgenitorPureBlood    uint8 = 54 // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Sangrael)
-	ItemVesperianCrimsonRing   uint8 = 55 // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
-	ItemRoyalVenomGland        uint8 = 56 // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Algoz Vorpal)
-	ItemVesperianPureBlood     uint8 = 57 // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Conde Escarlate)
-	ItemMechaBlueprint         uint8 = 58 // Diagrama do Mecha Gnarlin (Mercado Negro de Varis - requisito do Barão Engrenagem)
+	ItemPerfectSilkCocoon      uint8 = 132 // Unificado: Teias de Aranha (material 132)
+	ItemSpiderQueenHeart       uint8 = 43  // Coração da Rainha Aranha (Relíquia: +12 INT, +8 SPI)
+	ItemArachnaEye             uint8 = 44  // Olho Multifacetado de Arachna (0.1% - Desbloqueia Raça 21 Aracne)
+	ItemImperialSilkCloak      uint8 = 45  // Manto de Seda Imperial (Capa: +45 HP, +6 INT, +5 SPI)
+	ItemPureAcid               uint8 = 153 // Unificado: Seiva Ácida (material 153)
+	ItemAbyssalScorpionStinger uint8 = 47  // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Escarion)
+	ItemVorpalPoison           uint8 = 143 // Unificado: Bolsa de Veneno Vorpal (material 143)
+	ItemChimeraFleshPart       uint8 = 49  // Retalho Quimérico Costurado (Mutagênico)
+	ItemAncientIceCore         uint8 = 50  // Núcleo de Gelo Antigo (Gélido)
+	ItemPrimordialDragonScale  uint8 = 51  // Escama Dracônica Primordial (Armadura Superior)
+	ItemEternalFrostHeart      uint8 = 52  // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Borealin / Jotunar)
+	ItemCrimsonGuardInsignia   uint8 = 53  // Insígnia do Guarda Carmesim
+	ItemProgenitorPureBlood    uint8 = 54  // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Sangrael)
+	ItemVesperianCrimsonRing   uint8 = 55  // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
+	ItemRoyalVenomGland        uint8 = 56  // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Algoz Vorpal)
+	ItemVesperianPureBlood     uint8 = 57  // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Conde Escarlate)
+	ItemMechaBlueprint         uint8 = 58  // Diagrama do Mecha Gnarlin (Mercado Negro de Varis - requisito do Barão Engrenagem)
 
 	// Armas de Mão Principal (Slot 12) e itens de Mão Secundária (Slot 13)
 	ItemIronLongsword   uint8 = 59 // Espada Longa de Ferro (1 mão)
@@ -315,6 +317,8 @@ const (
 	ItemHuntersQuiver   uint8 = 74 // Aljava de Caçador (Mão Secundária)
 	ItemOffhandKnuckle  uint8 = 75 // Manopla Secundária
 	ItemLeadPlate       uint8 = 76 // Placa de Chumbo (25 kg) — item de teste de sobrecarga
+	ItemAutopsyDagger   uint8 = 77 // Adaga de Autópsia (presente de Garrick; arma cortante para dissecar)
+	ItemMetalScrap      uint8 = 78 // Sucata Metálica (resultado de extração/criação metálica de baixa qualidade)
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -2209,4 +2213,13 @@ func DeserializeDiscoveredMaterials(data []byte) (uint8, []uint16, error) {
 		ids[i] = binary.LittleEndian.Uint16(data[4+i*2 : 6+i*2])
 	}
 	return data[1], ids, nil
+}
+
+// --- 0x47: QUEST_STATE (TCP: Server -> Client, 5 bytes) ---
+// op | questID | etapa (0 = não iniciada, 1..N = em andamento, 255 = concluída) | tem | precisa
+
+const QuestStatePacketSize = 5
+
+func SerializeQuestState(questID, stage, have, need uint8) [QuestStatePacketSize]byte {
+	return [QuestStatePacketSize]byte{PacketTypeQuestState, questID, stage, have, need}
 }

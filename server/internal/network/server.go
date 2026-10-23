@@ -529,6 +529,9 @@ func (s *Server) sendInventorySync(p *world.Player) {
 	_, _ = p.TCPConn.Write(data)
 	_ = p.TCPConn.SetWriteDeadline(time.Time{})
 	s.sendDiscoveries(p, false) // aviso de materiais descobertos pela primeira vez
+	if st := questStage(p); st > questStageNotStarted && st < questStageDone {
+		s.sendQuestState(p) // progresso da coleta na missão
+	}
 }
 
 // sendFriendshipSync envia o pacote 0x24 (FRIENDSHIP_SYNC) para o jogador especificado via TCP.
@@ -617,6 +620,7 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 	s.sendGroundItems(player)
 	s.sendResourceNodes(player)
 	s.sendDiscoveries(player, true)
+	s.sendQuestState(player)
 
 	// 5. Envia pacote 0x3E (CORPSE_SNAPSHOT) com cadáveres ativos no chão
 	s.sendCorpseSnapshots(player)
@@ -1308,14 +1312,14 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 		s.sendFriendshipSync(player, pkt.TargetNPCID)
 
 		// Entrega de Presentes Compatíveis:
-		// Garrick (ID 100 ou 1): Aceita Minério de Ferro (+20 Afiança)
+		// Garrick (ID 100 ou 1): Aceita Ferro (+20 Afiança)
 		if (pkt.TargetNPCID == 100 || pkt.TargetNPCID == 1) && player.HasItem(protocol.ItemIronOre) {
 			player.RemoveItem(protocol.ItemIronOre, 1)
 			newPts := player.AddFriendship(pkt.TargetNPCID, 20)
 			s.sendFriendshipSync(player, pkt.TargetNPCID)
 			s.sendInventorySync(player)
-			s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da bigorna! Um excelente pedaço de Minério de Ferro! Muito obrigado pelo presente, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-			log.Printf("[PRESENTE] Jogador #%d entregou Minério de Ferro para Garrick (+20 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
+			s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da bigorna! Um excelente lingote de Ferro! Muito obrigado pelo presente, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
+			log.Printf("[PRESENTE] Jogador #%d entregou Ferro para Garrick (+20 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
 		}
 
 		// Lyra (ID 103 ou 102): Aceita Frascos de Sangue compatíveis (+15 a +25 Afiança)
@@ -1390,6 +1394,11 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Sssss... Um veneno primordial tão concentrado... Minha essência se alimenta deste néctar proibido, mortal #%d... [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
 				log.Printf("[PRESENTE] Jogador #%d entregou Veneno ao Alquimista Esquecido (+25 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
 			}
+		}
+
+		// Missão "O Aprendiz do Ferreiro" com Garrick
+		if (pkt.TargetNPCID == 100 || pkt.TargetNPCID == 1) && s.handleBlacksmithQuest(player, pkt.TargetNPCID) {
+			return
 		}
 
 		// Provações de Linhagem que se concluem conversando com um NPC
@@ -2897,6 +2906,8 @@ func getMobKillXP(mobType uint8) uint16 {
 	switch mobType {
 	case protocol.MobTypeMistWolf: // 1: Lobo da Bruma (35 XP)
 		return 35
+	case protocol.MobTypeWildBoar: // 25: Javali Selvagem (20 XP)
+		return 20
 	case protocol.MobTypeOutcastRaider: // 2: Saqueador Deserdado (45 XP)
 		return 45
 	case protocol.MobTypeVigilCrossbowman: // 3: Besteiro da Vigília (40 XP)
@@ -3103,18 +3114,22 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 		var flaskMsg string
 
 		switch mobType {
+		case protocol.MobTypeWildBoar: // 25: Javali Selvagem
+			killer.AddItem(protocol.ItemRawWolfMeat, 1)
+			drops = append(drops, "Carne Crua x1")
+
 		case protocol.MobTypeMistWolf: // 1: Lobo da Bruma
 			killer.AddItem(protocol.ItemRawWolfMeat, 1)
 			killer.AddItem(protocol.ItemWolfGreyPelt, 1)
-			drops = append(drops, "Carne Crua de Lobo x1", "Pelagem Cinzenta x1")
+			drops = append(drops, "Carne Crua de Lobo x1", "Couro de Lobo x1")
 
 			if rand.Float64() < 0.25+luckBonus {
 				killer.AddItem(protocol.ItemSharpWolfFang, 1)
-				drops = append(drops, "Presa Lupina Afiada x1")
+				drops = append(drops, "Presas e Garras Afiadas x1")
 			}
 			if rand.Float64() < 0.20+luckBonus {
 				killer.AddItem(protocol.ItemBeastClaw, 1)
-				drops = append(drops, "Garra de Fera x1")
+				drops = append(drops, "Presas e Garras Afiadas x1 (garra)")
 			}
 			if rand.Float64() < 0.03+luckBonus { // 3% Raro
 				killer.AddItem(protocol.ItemAncestralFangRing, 1)
@@ -3132,7 +3147,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 
 			if rand.Float64() < 0.35+luckBonus { // 35% Minério de Ferro (Presente compatível para Garrick)
 				killer.AddItem(protocol.ItemIronOre, 1)
-				drops = append(drops, "Minério de Ferro x1")
+				drops = append(drops, "Ferro x1")
 			}
 
 			if rand.Float64() < 0.04+luckBonus { // 4% Raro (reduzido para evitar excessos)
@@ -3158,7 +3173,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
 			killer.AddItem(protocol.ItemEmptyFlask, 1)
 			killer.AddItem(protocol.ItemIronOre, 2)
-			drops = append(drops, "Placa de Aço Pesada x1", "Frasco de Vidro Vazio x1", "Minério de Ferro x2")
+			drops = append(drops, "Placa de Aço Pesada x1", "Frasco de Vidro Vazio x1", "Ferro x2")
 			if rand.Float64() < 0.04+luckBonus { // 4% Raro
 				killer.AddItem(protocol.ItemTitansHammerTome, 1)
 				drops = append(drops, "Tomo do Martelo Titânico [RARO] x1")
@@ -3262,7 +3277,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 
 		case protocol.MobTypeMistWeaverSpider: // 15: Aranha Tecelã da Bruma
 			killer.AddItem(protocol.ItemPerfectSilkCocoon, 1)
-			drops = append(drops, "Casulo de Seda Perfeito x1")
+			drops = append(drops, "Teias de Aranha x1")
 			if rand.Float64() < 0.25+luckBonus {
 				killer.AddItem(protocol.ItemDarkPoisonGland, 1)
 				drops = append(drops, "Glândula de Veneno x1")
@@ -3280,11 +3295,11 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 		case protocol.MobTypeAcidCorrosiveSlime: // 17: Lodo Ácido Corrosivo
 			killer.AddItem(protocol.ItemPureAcid, 1)
 			killer.AddItem(protocol.ItemOrganicTrash, 1)
-			drops = append(drops, "Ácido Puro x1", "Lixo Orgânico x1")
+			drops = append(drops, "Seiva Ácida x1", "Lixo Orgânico x1")
 
 		case protocol.MobTypeAbyssalScorpion: // 18: Escorpião Abissal Gigante
 			killer.AddItem(protocol.ItemVorpalPoison, 1)
-			drops = append(drops, "Veneno Vorpal x1")
+			drops = append(drops, "Bolsa de Veneno Vorpal x1")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemAbyssalScorpionStinger, 1)
 				drops = append(drops, "Ferrão de Escorpião Abissal [SECRETO 0.1% - Desbloqueia Raça Escarion!] x1")
@@ -3379,9 +3394,9 @@ func (s *Server) generateDropRatesReport() string {
 	sb.WriteString("==================================================\n")
 	sb.WriteString("[Mob 1] Lobo da Bruma:\n")
 	sb.WriteString("  - Item #1 (Carne Crua de Lobo): 100.0%\n")
-	sb.WriteString("  - Item #2 (Pelagem Cinzenta): 100.0%\n")
+	sb.WriteString("  - Item #129 (Couro de Lobo): 100.0%\n")
 	sb.WriteString("  - Item #3 (Presa Lupina Afiada): 25.0%\n")
-	sb.WriteString("  - Item #4 (Garra de Fera): 20.0%\n")
+	sb.WriteString("  - Item #142 (Presas e Garras Afiadas): 20.0%\n")
 	sb.WriteString("  - Item #9 (Anel de Presa Ancestral): 3.0% [RARO]\n")
 	sb.WriteString("  - Item #30 (Casulo de Seda Prateada): 0.1% [SECRETO 1/1000]\n")
 	sb.WriteString("[Mob 2] Saqueador Deserdado:\n")
@@ -3431,14 +3446,14 @@ func (s *Server) generateDropRatesReport() string {
 	sb.WriteString("  - Item #15 (Coração do Licantropo Alfa): 0.1% [SECRETO 1/1000]\n")
 	sb.WriteString("  - Item #18 (Núcleo de Forja Estelar): 0.1% [SECRETO 1/1000]\n")
 	sb.WriteString("[Mob 15] Aranha Tecelã da Bruma:\n")
-	sb.WriteString("  - Item #42 (Casulo de Seda Perfeito): 100.0%\n")
+	sb.WriteString("  - Item #132 (Teias de Aranha): 100.0%\n")
 	sb.WriteString("  - Item #11 (Glândula de Veneno): 25.0%\n")
 	sb.WriteString("[Mob 16] Arachna, a Rainha Tecelã (Raid Boss):\n")
 	sb.WriteString("  - Item #43 (Coração da Rainha Aranha): 100.0%\n")
 	sb.WriteString("  - Item #45 (Manto de Seda Imperial): 100.0%\n")
 	sb.WriteString("  - Item #44 (Olho Multifacetado de Arachna): 0.1% [SECRETO 1/1000 - Desbloqueia Raça Aracne!]\n")
 	sb.WriteString("[Mob 17] Lodo Ácido Corrosivo:\n")
-	sb.WriteString("  - Item #46 (Ácido Puro): 100.0%\n")
+	sb.WriteString("  - Item #153 (Seiva Ácida): 100.0%\n")
 	sb.WriteString("  - Item #28 (Lixo Orgânico): 100.0%\n")
 	sb.WriteString("[Mob 18] Escorpião Abissal Gigante:\n")
 	sb.WriteString("  - Item #48 (Veneno Vorpal): 100.0%\n")
@@ -3557,7 +3572,13 @@ func (s *Server) handleInteractCorpse(pkt protocol.InteractCorpsePacket) {
 		return
 	}
 
-	// 2. Extrai pontos vitais (órgãos) da criatura
+	// 2. Sem uma lâmina não há autópsia
+	if !player.HasCuttingWeapon() {
+		s.sendPlayerNPCSay(player, 0, "🔪 Você precisa de uma arma cortante (adaga, espada, cutelo...) para abrir a carcaça. Garrick, o Ferreiro, pode ajudar.")
+		return
+	}
+
+	// 3. Extrai pontos vitais (órgãos) da criatura
 	player.SetInAutopsy(true)
 	corpse.Mu.RLock()
 	mobType := corpse.MobType

@@ -145,7 +145,7 @@ var MaterialsDB = map[uint16]MaterialDef{
 	MatBlackSunShard: {MatBlackSunShard, "Fragmento do Sol Negro", MatCrystal, RarityMythic, 300, 1.2, "Trevas +80%, Fogo +60%", "Pedaço do sol que morreu no primeiro Eclipse.", 100, 80, 100},
 
 	MatBoarLeather: {MatBoarLeather, "Couro de Javali", MatHideThread, RarityCommon, 50, 2.0, "Corte +10%", "Couro grosso e resistente para armaduras leves.", 20, 0, 5},
-	MatWolfLeather: {MatWolfLeather, "Couro de Lobo", MatHideThread, RarityCommon, 45, 1.8, "Frio +15%", "Couro flexível que mantém o calor.", 15, 0, 10},
+	MatWolfLeather: {MatWolfLeather, "Couro de Lobo", MatHideThread, RarityCommon, 45, 1.8, "Frio +15%", "Couro cinzento e flexível que mantém o calor.", 15, 0, 10},
 	MatThickFur:    {MatThickFur, "Pelos Espessos", MatHideThread, RarityUncommon, 30, 1.0, "Frio +30%", "Isolante perfeito para mantos de inverno.", 5, 0, 10},
 	MatRoughThread: {MatRoughThread, "Linhas Grossas", MatHideThread, RarityCommon, 20, 0.3, "—", "Fios de tendão seco para costura.", 10, 5, 10},
 	MatSpiderWeb:   {MatSpiderWeb, "Teias de Aranha", MatHideThread, RarityUncommon, 35, 0.2, "Corte +15%", "Pegajosa e surpreendentemente resistente.", 5, 5, 30},
@@ -159,7 +159,7 @@ var MaterialsDB = map[uint16]MaterialDef{
 	MatElasticGuts:    {MatElasticGuts, "Intestinos e Tendões Elásticos", MatOrganBlood, RarityUncommon, 60, 0.8, "Tração +30%", "Viram cordas de arco e molas de besta.", 20, 10, 20},
 	MatLungs:          {MatLungs, "Pulmões", MatOrganBlood, RarityUncommon, 0, 0.7, "Vento +25%", "Guardam o fôlego da criatura; usados em foles mágicos.", 25, 15, 45},
 	MatFacetedEyes:    {MatFacetedEyes, "Olhos Multifacetados", MatOrganBlood, RarityRare, 0, 0.4, "Precisão +30%", "Lentes naturais para lunetas e amuletos de visão.", 10, 25, 75},
-	MatSharpFangs:     {MatSharpFangs, "Presas Afiadas", MatOrganBlood, RarityCommon, 40, 0.3, "Perfuração +20%", "Pontas de flecha e serrilhados de lâmina.", 15, 5, 15},
+	MatSharpFangs:     {MatSharpFangs, "Presas e Garras Afiadas", MatOrganBlood, RarityCommon, 40, 0.3, "Perfuração +20%", "Pontas de flecha e serrilhados de lâmina.", 15, 5, 15},
 	MatVorpalSac:      {MatVorpalSac, "Bolsa de Veneno Vorpal", MatOrganBlood, RarityEpic, 0, 0.5, "Veneno +60%", "Uma gota derruba um touro. Corte com MUITO cuidado.", 20, 30, 60},
 	MatScorpionChitin: {MatScorpionChitin, "Quitina de Escorpião", MatHideThread, RarityUnique, 200, 2.5, "Corte +40%, Veneno +50%", "Carapaça abissal leve e quase impenetrável.", 15, 5, 35},
 

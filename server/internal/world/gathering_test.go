@@ -45,8 +45,8 @@ func TestResourceNodesAndTools(t *testing.T) {
 		t.Fatal("tipo de nó errado")
 	}
 	p := NewPlayer(1, nil, 0, 0, 0)
-	if p.BestTool(ToolAxe) != 1 || p.BestTool(ToolPickaxe) != 1 || p.BestTool(ToolShears) != 0 {
-		t.Fatal("ferramentas iniciais deveriam ser Tier 1")
+	if p.BestTool(ToolAxe) != 0 || p.BestTool(ToolPickaxe) != 0 || p.BestTool(ToolShears) != 0 {
+		t.Fatal("o jogador começa sem ferramentas")
 	}
 	p.AddItem(ItemMithrilAxe, 1)
 	if p.BestTool(ToolAxe) != 4 {

@@ -97,7 +97,13 @@ var uniqueNodes = []ResourceNode{
 	{ZoneID: ZoneForest, MaterialID: MatYggdrasilRoot, X: -60, Z: -40},
 }
 
-const nodesPerOpenZone = 46
+// Densidade: cada zona aberta tem ~42 agrupamentos (bosques, pedreiras, veios, canteiros, fontes)
+// de 3 a 7 nós cada — em torno de 200 nós por zona de 600x600 m.
+const (
+	clustersPerOpenZone = 42
+	minClusterSize      = 3
+	maxClusterSize      = 7
+)
 
 // ResourceNodeManager guarda os nós de todas as zonas.
 type ResourceNodeManager struct {
@@ -127,26 +133,50 @@ func NewResourceNodeManager() *ResourceNodeManager {
 		for _, e := range table {
 			total += e.weight
 		}
-		for i := 0; i < nodesPerOpenZone; i++ {
+		pick := func() uint16 {
 			r := rng.Intn(total)
-			var mat uint16
 			for _, e := range table {
 				if r < e.weight {
-					mat = e.material
-					break
+					return e.material
 				}
 				r -= e.weight
 			}
-			// Longe do centro (spawn/praça) e dentro dos limites da zona
-			var x, z float32
+			return table[0].material
+		}
+		for c := 0; c < clustersPerOpenZone; c++ {
+			mat := pick()
+			// Centro do agrupamento longe do spawn/praça e dentro dos limites da zona
+			var cx, cz float64
 			for {
-				x = float32(rng.Float64()*540 - 270)
-				z = float32(rng.Float64()*540 - 270)
-				if math.Hypot(float64(x), float64(z)) > 35 {
+				cx = rng.Float64()*520 - 260
+				cz = rng.Float64()*520 - 260
+				if math.Hypot(cx, cz) > 40 {
 					break
 				}
 			}
-			add(ResourceNode{ZoneID: zone, MaterialID: mat, X: x, Z: z})
+			size := minClusterSize + rng.Intn(maxClusterSize-minClusterSize+1)
+			spread := 9.0
+			switch NodeKindForMaterial(mat) {
+			case NodeTree:
+				spread = 16.0 // bosques mais abertos
+			case NodeWater:
+				size = 1 + rng.Intn(2) // fontes são raras e pequenas
+				spread = 5.0
+			}
+			for k := 0; k < size; k++ {
+				m := mat
+				if rng.Float64() < 0.2 {
+					m = pick() // um pouco de variedade dentro do grupo
+					if NodeKindForMaterial(m) == NodeWater {
+						m = mat
+					}
+				}
+				ang := rng.Float64() * 2 * math.Pi
+				dist := 2.5 + rng.Float64()*spread
+				x := float32(cx + math.Cos(ang)*dist)
+				z := float32(cz + math.Sin(ang)*dist)
+				add(ResourceNode{ZoneID: zone, MaterialID: m, X: x, Z: z})
+			}
 		}
 	}
 	for _, n := range uniqueNodes {

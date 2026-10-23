@@ -45,8 +45,14 @@ var mobAnatomy = map[uint8][]visceralOrgan{
 		{OrganGuts, MatElasticGuts, "Intestinos e Tendões", 5}, {OrganLungs, MatLungs, "Pulmões do Lobo", 6},
 		{OrganFangOrClaw, MatSharpFangs, "Presas Afiadas", 4},
 	},
+	protocol.MobTypeWildBoar: {
+		{OrganBlood, MatFreshBlood, "Sangue de Javali", 3}, {OrganPelt, MatBoarLeather, "Couro de Javali", 3},
+		{OrganHeart, MatPulsingHeart, "Coração do Javali", 6}, {OrganLiver, MatFilterLiver, "Fígado do Javali", 4},
+		{OrganGuts, MatElasticGuts, "Intestinos e Tendões", 4}, {OrganLungs, MatLungs, "Pulmões do Javali", 5},
+		{OrganFangOrClaw, MatSharpFangs, "Presas do Javali", 3},
+	},
 	protocol.MobTypeOutcastRaider: {
-		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganPelt, MatBoarLeather, "Couro de Javali (armadura)", 3},
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganPelt, MatRoughThread, "Linhas da Armadura", 3},
 		{OrganHeart, MatPulsingHeart, "Coração Humano", 7}, {OrganLiver, MatFilterLiver, "Fígado", 5},
 		{OrganGuts, MatElasticGuts, "Tendões", 5}, {OrganLungs, MatLungs, "Pulmões", 6},
 	},
@@ -139,7 +145,15 @@ func appendAnatomy(organs []CorpseOrgan, mobType uint8) []CorpseOrgan {
 			next = o.Index + 1
 		}
 	}
+	have := map[uint8]bool{}
+	for _, o := range organs {
+		have[o.ItemReward] = true
+	}
 	for _, v := range mobAnatomy[mobType] {
+		if have[uint8(v.material)] {
+			continue // o saque tradicional já tem este material
+		}
+		have[uint8(v.material)] = true
 		organs = append(organs, CorpseOrgan{
 			Index: next, Name: v.name, OrganType: v.organType,
 			ItemReward: uint8(v.material), Quantity: 1, Difficulty: v.difficulty,
@@ -233,7 +247,7 @@ func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 			ItemReward: protocol.ItemSharpWolfFang, Quantity: 1, Difficulty: 4,
 		})
 		organs = append(organs, CorpseOrgan{
-			Index: 2, Name: "Sangue Lupino Fresco", OrganType: OrganBlood,
+			Index: 2, Name: "Sangue de Lobo", OrganType: OrganBlood,
 			ItemReward: protocol.ItemFreshWolfBlood, Quantity: 1, Difficulty: 5,
 		})
 		if rand.Float64() < 0.20+luckBonus {
@@ -249,7 +263,7 @@ func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 			ItemReward: protocol.ItemCookedNobleMeat, Quantity: 1, Difficulty: 2,
 		})
 		organs = append(organs, CorpseOrgan{
-			Index: 1, Name: "Minério de Ferro Bruto", OrganType: OrganFangOrClaw,
+			Index: 1, Name: "Ferro Bruto", OrganType: OrganFangOrClaw,
 			ItemReward: protocol.ItemIronOre, Quantity: 1, Difficulty: 4,
 		})
 		if rand.Float64() < 0.15+luckBonus {
@@ -289,7 +303,7 @@ func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 			ItemReward: protocol.ItemHeavySteelPlate, Quantity: 1, Difficulty: 5,
 		})
 		organs = append(organs, CorpseOrgan{
-			Index: 1, Name: "Minério de Ferro Puro", OrganType: OrganFangOrClaw,
+			Index: 1, Name: "Ferro Puro", OrganType: OrganFangOrClaw,
 			ItemReward: protocol.ItemIronOre, Quantity: 2, Difficulty: 4,
 		})
 		if rand.Float64() < 0.15+luckBonus {
