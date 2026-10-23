@@ -1087,7 +1087,7 @@ var _active_class_or_race_modal: PanelContainer = null
 # Modal de Confirmação Obrigatória para Mudança de Classe ou Raça
 func request_class_or_race_change(is_race: bool, target_id: int, target_tier: int, target_name: String, source_desc: String) -> void:
 	# Classes Únicas Exclusivas de Raça: sem a raça certa, nem chega a abrir a confirmação
-	if not is_race:
+	if not is_race and not source_desc.begins_with("DEV_COMBO:"):
 		var blood_warning: String = ClassPaths.race_block_message(target_id, my_race_id)
 		if blood_warning != "":
 			show_loot_toast(blood_warning)
@@ -1220,6 +1220,17 @@ func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: i
 		show_loot_toast("%s [%s] confirmada!" % ["Raça" if is_race else "Classe", target_name])
 		return
 
+	# Combo do Dev Manager: primeiro a raça exigida (modo 99), depois a classe no Tier fixo (modo 98)
+	if source_desc.begins_with("DEV_COMBO:"):
+		var combo_race: int = int(source_desc.replace("DEV_COMBO:", ""))
+		if NetworkManager:
+			NetworkManager.send_select_identity(combo_race, 0, 99)
+			NetworkManager.send_select_identity(target_tier, target_id, 98)
+		if dev_status_label:
+			dev_status_label.text = "Combo confirmado: %s" % target_name
+		show_loot_toast("Combo [%s] confirmado!" % target_name)
+		return
+
 	# Item da mochila: o servidor consome o item e aplica o efeito dele (troca de raça/classe incluída).
 	# Mandar 0x30 junto mudaria a identidade mesmo que o servidor recusasse o item.
 	if source_desc.begins_with("ITEM:"):
@@ -1257,6 +1268,14 @@ func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: i
 
 func _on_dev_activate_race(race_id: int, race_name: String) -> void:
 	request_class_or_race_change(true, race_id, 1, race_name, "DEV F9")
+
+## Combo do Dev Manager: assume a raça exigida e a Classe Única de Raça (com o modal de confirmação).
+func _on_dev_activate_combo(class_id: int, target_class_name: String) -> void:
+	var races: Array = ClassPaths.TRANSCENDENT[class_id]["races"]
+	var race_id: int = races[0]
+	var race_label: String = RACE_NAMES[race_id] if race_id < RACE_NAMES.size() else "#%d" % race_id
+	request_class_or_race_change(false, class_id, ClassPaths.tier_for_class(class_id),
+		"%s + Raça %s" % [target_class_name, race_label], "DEV_COMBO:%d" % race_id)
 
 func _on_dev_activate_class(class_id: int, target_class_name: String) -> void:
 	var shown_name: String = target_class_name
@@ -1429,7 +1448,7 @@ func _build_dev_tab_classes(tabs: TabContainer) -> void:
 		path_hb.add_child(p_btn)
 	_dev_update_path_buttons()
 
-	# 3. Lista das 15 Classes
+	# 3. Lista das classes em 4 seções (Básicas, Variantes, Únicas, Lendárias)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1440,38 +1459,75 @@ func _build_dev_tab_classes(tabs: TabContainer) -> void:
 	vb.add_theme_constant_override("separation", 6)
 	scroll.add_child(vb)
 
+	var sections := [
+		{"title": "⚔️ Básicas de Combate & Produção (1 a 12)", "col": Color(0.45, 0.75, 1.0), "ids": range(1, 13)},
+		{"title": "🔮 Secretas Variantes — Até Épico (13 a 18)", "col": Color(0.7, 0.55, 1.0), "ids": range(13, 19)},
+		{"title": "🩸 Secretas ÚNICAS — Exclusivas de Raça & Gerais [Reset Nv.1] (19 a 30, 35 a 39)", "col": Color(1.0, 0.35, 0.35), "ids": range(19, 31) + range(35, 40)},
+		{"title": "👑 Secretas LENDÁRIAS — Tier 6 Supremo [Reset Nv.1] (31 a 34)", "col": Color(1.0, 0.84, 0.3), "ids": range(31, 35)},
+	]
+	var by_id := {}
 	for c in DEV_CLASSES:
-		var card := PanelContainer.new()
-		card.add_theme_stylebox_override("panel", _dev_get_card_style(c["col"]))
-		vb.add_child(card)
+		by_id[int(c["id"])] = c
+	for section in sections:
+		var sec_lbl := Label.new()
+		sec_lbl.text = section["title"]
+		sec_lbl.add_theme_font_size_override("font_size", 14)
+		sec_lbl.add_theme_color_override("font_color", section["col"])
+		vb.add_child(sec_lbl)
+		vb.add_child(HSeparator.new())
+		for class_key in section["ids"]:
+			if by_id.has(class_key):
+				_dev_add_class_card(vb, by_id[class_key])
 
-		var hb := HBoxContainer.new()
-		hb.add_theme_constant_override("separation", 10)
-		card.add_child(hb)
+func _dev_add_class_card(vb: VBoxContainer, c: Dictionary) -> void:
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", _dev_get_card_style(c["col"]))
+	vb.add_child(card)
 
-		var info_vb := VBoxContainer.new()
-		info_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		hb.add_child(info_vb)
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 10)
+	card.add_child(hb)
 
-		var name_lbl := Label.new()
-		name_lbl.text = "#%d %s" % [c["id"], c["name"]]
-		name_lbl.add_theme_font_size_override("font_size", 12)
-		name_lbl.add_theme_color_override("font_color", c["col"])
-		info_vb.add_child(name_lbl)
+	var info_vb := VBoxContainer.new()
+	info_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(info_vb)
 
-		var desc_lbl := Label.new()
-		desc_lbl.text = c["desc"]
-		desc_lbl.add_theme_font_size_override("font_size", 10)
-		desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
-		info_vb.add_child(desc_lbl)
+	var cid: int = c["id"]
+	var cname: String = c["name"]
+	var tier_tag: String = ""
+	if cid >= 19:
+		tier_tag = "  [Tier %d fixo — Reset Nv.1]" % ClassPaths.tier_for_class(cid)
 
-		var cid: int = c["id"]
-		var cname: String = c["name"]
-		var btn := _dev_create_btn("Ativar Classe", c["col"], func():
-			_on_dev_activate_class(cid, cname)
+	var name_lbl := Label.new()
+	name_lbl.text = "#%d %s%s" % [cid, cname, tier_tag]
+	name_lbl.add_theme_font_size_override("font_size", 12)
+	name_lbl.add_theme_color_override("font_color", c["col"])
+	info_vb.add_child(name_lbl)
+
+	var desc_lbl := Label.new()
+	desc_lbl.text = c["desc"]
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_lbl.add_theme_font_size_override("font_size", 10)
+	desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
+	info_vb.add_child(desc_lbl)
+
+	var btn_vb := VBoxContainer.new()
+	btn_vb.add_theme_constant_override("separation", 4)
+	hb.add_child(btn_vb)
+
+	var btn := _dev_create_btn("Ativar Classe", c["col"], func():
+		_on_dev_activate_class(cid, cname)
+	)
+	btn.custom_minimum_size = Vector2(130, 28)
+	btn_vb.add_child(btn)
+
+	# Únicas Exclusivas de Raça: troca a raça e a classe de uma vez para testar direto
+	if ClassPaths.TRANSCENDENT.has(cid) and not ClassPaths.TRANSCENDENT[cid]["races"].is_empty():
+		var combo_btn := _dev_create_btn("[⚡ Ativar Combo Raça + Classe Única]", Color(1.0, 0.3, 0.3), func():
+			_on_dev_activate_combo(cid, cname)
 		)
-		btn.custom_minimum_size = Vector2(110, 28)
-		hb.add_child(btn)
+		combo_btn.custom_minimum_size = Vector2(130, 28)
+		btn_vb.add_child(combo_btn)
 
 func _build_dev_tab_world(tabs: TabContainer) -> void:
 	var tab := VBoxContainer.new()

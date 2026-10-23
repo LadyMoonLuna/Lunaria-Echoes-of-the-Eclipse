@@ -755,7 +755,9 @@ func _render_trade_view(m_info: Dictionary) -> void:
 # -------------------------------------------------------------
 func _on_talk_pressed() -> void:
 	print("[ClassMasterUI] Conversando com NPC #%d!" % current_npc_id)
-	NetworkManager.send_player_interact(current_npc_id)
+	var nm_node := get_node_or_null("/root/NetworkManager")
+	if nm_node:
+		nm_node.send_player_interact(current_npc_id)
 
 	var world := get_parent()
 	var cur_pts: int = 0
@@ -802,7 +804,9 @@ func _on_open_trade_pressed() -> void:
 func _on_service_requested(action_key: String, service_title: String) -> void:
 	print("[ClassMasterUI] Serviço solicitado: %s (%s) ao NPC #%d" % [service_title, action_key, current_npc_id])
 	# Notifica o servidor via interação de pacote para registrar transações / ofertas
-	NetworkManager.send_player_interact(current_npc_id)
+	var nm_node := get_node_or_null("/root/NetworkManager")
+	if nm_node:
+		nm_node.send_player_interact(current_npc_id)
 
 	var world := get_parent()
 	var m_info: Dictionary = MASTER_DATA.get(current_npc_id, MASTER_DATA[105])
@@ -829,7 +833,9 @@ func _on_service_requested(action_key: String, service_title: String) -> void:
 
 func _on_secret_knowledge_pressed() -> void:
 	print("[ClassMasterUI] Absorvendo conhecimento secreto com NPC #%d!" % current_npc_id)
-	NetworkManager.send_player_interact(current_npc_id)
+	var nm_node := get_node_or_null("/root/NetworkManager")
+	if nm_node:
+		nm_node.send_player_interact(current_npc_id)
 	var world := get_parent()
 	if world and world.has_method("show_loot_toast"):
 		world.show_loot_toast("🔮 Conhecimento Arcano Proibido revelado pelo Espírito dos Esgotos!")

@@ -1179,23 +1179,23 @@ func _build_tab_classes() -> void:
 	lvl_vb.add_child(lvl_hb)
 
 	lvl_hb.add_child(_create_action_btn("⬆️ +1 Nível", Color(0.18, 0.45, 0.25), func():
-		NetworkManager.send_dev_level_control(1)
+		_net().send_dev_level_control(1)
 		_set_status("Comando enviado: +1 Nível (pontos de status concedidos conforme Tier).")
 	))
 	lvl_hb.add_child(_create_action_btn("⬆️ +5 Níveis", Color(0.2, 0.55, 0.3), func():
-		NetworkManager.send_dev_level_control(5)
+		_net().send_dev_level_control(5)
 		_set_status("Comando enviado: +5 Níveis adicionados!")
 	))
 	lvl_hb.add_child(_create_action_btn("👑 Nível Máximo (50)", Color(0.65, 0.5, 0.15), func():
-		NetworkManager.send_dev_level_control(50)
+		_net().send_dev_level_control(50)
 		_set_status("Comando enviado: Definido Nível 50 Máximo!")
 	))
 	lvl_hb.add_child(_create_action_btn("💖 Full HP/Stam + 20 Pts Status", Color(0.2, 0.6, 0.7), func():
-		NetworkManager.send_dev_level_control(99)
+		_net().send_dev_level_control(99)
 		_set_status("Comando enviado: 100% HP/Stamina restaurados e +20 StatPoints livres!")
 	))
 	lvl_hb.add_child(_create_action_btn("🔄 Resetar Nv. 1", Color(0.6, 0.2, 0.2), func():
-		NetworkManager.send_dev_level_control(0)
+		_net().send_dev_level_control(0)
 		_set_status("Comando enviado: Resetado para Nível 1 e atributos alocados limpos.")
 	))
 
@@ -1374,11 +1374,11 @@ func _build_tab_world() -> void:
 	vb1.add_child(h_times)
 
 	h_times.add_child(_create_action_btn("⏩ +1 Hora", Color(0.2, 0.45, 0.7), func():
-		NetworkManager.send_skip_time(1)
+		_net().send_skip_time(1)
 		_set_status("Avançado +1 hora no relógio do servidor.")
 	))
 	h_times.add_child(_create_action_btn("⏩ +6 Horas", Color(0.2, 0.45, 0.7), func():
-		NetworkManager.send_skip_time(6)
+		_net().send_skip_time(6)
 		_set_status("Avançado +6 horas no relógio do servidor.")
 	))
 
@@ -1391,7 +1391,7 @@ func _build_tab_world() -> void:
 	]
 	for hp in hour_presets:
 		var btn := _create_action_btn(hp["name"], Color(0.25, 0.35, 0.5), func():
-			NetworkManager.send_set_hour(hp["val"])
+			_net().send_set_hour(hp["val"])
 			_set_status("Horário definido diretamente para %s." % hp["name"])
 		)
 		h_times.add_child(btn)
@@ -1414,7 +1414,7 @@ func _build_tab_world() -> void:
 	var h_moon_cycle := HBoxContainer.new()
 	vb2.add_child(h_moon_cycle)
 	h_moon_cycle.add_child(_create_action_btn("⏭ Passar Próxima Fase da Lua", Color(0.45, 0.25, 0.75), func():
-		NetworkManager.send_cycle_moon()
+		_net().send_cycle_moon()
 		_set_status("Ciclando para a próxima fase da lua no servidor.")
 	))
 
@@ -1438,7 +1438,7 @@ func _build_tab_world() -> void:
 	]
 	for m in moons:
 		var btn := _create_action_btn(m["name"], m["col"], func():
-			NetworkManager.send_set_moon(m["val"])
+			_net().send_set_moon(m["val"])
 			_set_status("Fase da Lua definida para: %s!" % m["name"])
 		)
 		grid_moon.add_child(btn)
@@ -1463,7 +1463,7 @@ func _build_tab_world() -> void:
 	vb3.add_child(h_weather)
 
 	h_weather.add_child(_create_action_btn("⏭ Alternar Clima", Color(0.2, 0.5, 0.6), func():
-		NetworkManager.send_cycle_weather()
+		_net().send_cycle_weather()
 		_set_status("Ciclando para o próximo clima no servidor.")
 	))
 
@@ -1475,7 +1475,7 @@ func _build_tab_world() -> void:
 	]
 	for w in weathers:
 		var btn := _create_action_btn(w["name"], w["col"], func():
-			NetworkManager.send_set_weather(w["val"])
+			_net().send_set_weather(w["val"])
 			_set_status("Clima definido para: %s!" % w["name"])
 		)
 		h_weather.add_child(btn)
@@ -1501,12 +1501,12 @@ func _build_tab_items() -> void:
 	page.add_child(top_box)
 
 	top_box.add_child(_create_action_btn("📦 Pegar Kit Completo dos 12 Equipamentos", Color(0.18, 0.45, 0.25), func():
-		NetworkManager.send_give_item(255)
+		_net().send_give_item(255)
 		_set_status("Comando enviado: Kit Completo dos 12 Equipamentos entregue no inventário!")
 	))
 
 	top_box.add_child(_create_action_btn("🧪 +5 Frascos de Vidro Vazios", Color(0.25, 0.45, 0.65), func():
-		NetworkManager.send_give_item(1)
+		_net().send_give_item(1)
 		_set_status("Comando enviado: +5 Frascos adicionados ao inventário!")
 	))
 
@@ -1514,7 +1514,7 @@ func _build_tab_items() -> void:
 		var world = get_parent()
 		if world and world.get("dev_drop_rates_ui"):
 			world.dev_drop_rates_ui.toggle_menu()
-		NetworkManager.send_dev_get_drop_rates()
+		_net().send_dev_get_drop_rates()
 		_set_status("Painel de Taxas de Drop alternado e sincronizado com o servidor!")
 	))
 
@@ -1615,7 +1615,7 @@ func _create_item_card(item: Dictionary) -> PanelContainer:
 	var iid: int = item["id"]
 	var iname: String = item["name"]
 	give_btn.pressed.connect(func():
-		NetworkManager.send_give_item(iid)
+		_net().send_give_item(iid)
 		_set_status("Item #%d (%s) adicionado diretamente ao inventário!" % [iid, iname])
 	)
 	hb.add_child(give_btn)
@@ -1733,7 +1733,7 @@ func _create_mob_card(mob: Dictionary) -> PanelContainer:
 	var zid: int = mob["zone_id"]
 	var zname: String = mob["zone"]
 	tp_btn.pressed.connect(func():
-		NetworkManager.send_dev_teleport(zid)
+		_net().send_dev_teleport(zid)
 		_set_status("Teleportando até a zona: %s (Destino #%d)!" % [zname, zid])
 	)
 	btn_vb.add_child(tp_btn)
@@ -1746,7 +1746,7 @@ func _create_mob_card(mob: Dictionary) -> PanelContainer:
 	var mname: String = mob["name"]
 	loot_btn.pressed.connect(func():
 		for lid in loot_ids:
-			NetworkManager.send_give_item(lid)
+			_net().send_give_item(lid)
 		_set_status("Drops da criatura %s adicionados ao inventário!" % mname)
 	)
 	btn_vb.add_child(loot_btn)
@@ -1800,7 +1800,7 @@ func _build_tab_teleports() -> void:
 	]
 	for tp in teleports:
 		var btn := _create_action_btn(tp["name"], tp["col"], func():
-			NetworkManager.send_dev_teleport(tp["val"])
+			_net().send_dev_teleport(tp["val"])
 			_set_status("Teleportando com segurança para %s..." % tp["name"])
 		)
 		grid_tp.add_child(btn)
@@ -1930,3 +1930,7 @@ func _set_status(msg: String) -> void:
 	if status_label:
 		status_label.text = "[DEV F10] " + msg
 		status_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+
+## Acesso ao autoload NetworkManager sem depender do identificador global (compila também com --check-only).
+func _net() -> Node:
+	return get_node("/root/NetworkManager")
