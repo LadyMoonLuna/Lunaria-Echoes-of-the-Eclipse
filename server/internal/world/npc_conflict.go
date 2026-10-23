@@ -114,9 +114,9 @@ type Apprentice struct {
 }
 
 var Apprentices = []Apprentice{
-	{117, "Bran", 100, 26, 22, "Novo Ferreiro da Vila"},
-	{118, "Pip", 103, 26, -18, "Nova Alquimista da Vila"},
-	{119, "Tilda", 115, -34, 20, "Nova Cozinheira da Vila"},
+	{117, "Bran", 100, 26, 17, "Novo Ferreiro da Vila"},
+	{118, "Pip", 103, 25, -12.5, "Nova Alquimista da Vila"},
+	{119, "Tilda", 115, -35, 17, "Nova Cozinheira da Vila"},
 }
 
 func init() {

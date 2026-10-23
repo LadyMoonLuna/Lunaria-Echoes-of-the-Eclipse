@@ -14,7 +14,8 @@ type PortalDef struct {
 	NightOnly    bool // Restrito para a noite (18h às 06h)
 }
 
-// OfficialPortals contém os 32 portais oficiais de mão dupla de Lunaria.
+// OfficialPortals contém os 32 portais de mão dupla entre zonas; as portas dos prédios da Vila
+// (33 a 52) são acrescentadas em interiors.go.
 var OfficialPortals = map[uint8]PortalDef{
 	// 1 & 2: Vila do Refúgio <-> Bosque Sussurrante / Floresta
 	1: {
@@ -369,6 +370,9 @@ func GetDefaultSafeCoordinates(zoneID uint8) (float32, float32, float32) {
 	case ZoneMistMarsh:
 		return 275.0, 1.5, 0.0
 	default: // ZoneVillage (0)
+		if IsInteriorZone(zoneID) {
+			return 0.0, 1.5, InteriorArriveZ
+		}
 		return 0.0, 1.5, 0.0
 	}
 }

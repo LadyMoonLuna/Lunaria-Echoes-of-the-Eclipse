@@ -38,10 +38,15 @@ var ZoneBaseTemp = map[uint8]float32{
 	ZoneFrozenPeaks:   -14,
 	ZoneBasaltHills:   23,
 	ZoneMistMarsh:     18,
+	// Interiores dos prédios da Vila: sempre agradáveis (a Forja é quente)
+	ZoneForgeInterior: 26, ZoneTavernInterior: 22, ZoneAlchemyLab: 20, ZoneBarracks: 19,
+	ZoneHunterLodge: 20, ZoneJewelerAtelier: 20, ZoneResidence: 21,
 }
 
 // Ambientes fechados: o clima de fora não entra e a variação do dia é menor.
-var indoorZones = map[uint8]bool{ZoneChurch: true, ZoneMageTower: true, ZoneBlackMarket: true, ZoneAncientSewers: true}
+var indoorZones = map[uint8]bool{ZoneChurch: true, ZoneMageTower: true, ZoneBlackMarket: true, ZoneAncientSewers: true,
+	ZoneForgeInterior: true, ZoneTavernInterior: true, ZoneAlchemyLab: true, ZoneBarracks: true,
+	ZoneHunterLodge: true, ZoneJewelerAtelier: true, ZoneResidence: true}
 
 // WeatherTempOffset: quanto cada clima esquenta ou esfria (°C).
 var WeatherTempOffset = map[uint8]float32{

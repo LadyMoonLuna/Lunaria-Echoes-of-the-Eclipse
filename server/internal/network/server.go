@@ -46,6 +46,7 @@ type Server struct {
 
 	garrickLastDefend time.Time
 	devItemQuality    map[uint32]uint8 // qualidade escolhida no Dev Menu para os itens dados (por jogador)
+	lastDoor          map[uint32]uint8 // porta (portal de entrada) por onde cada jogador entrou no interior atual
 	guardLastAttack   map[uint32]time.Time
 
 	forgeWarningMu   sync.Mutex
@@ -133,18 +134,19 @@ func (s *Server) Start() error {
 	currentH := s.clock.GetCurrentHour()
 
 	// 1. Garrick, o Ferreiro (ID 100)
-	// Dia (06h-17h59): Forja do Garrick (30.0, 25.0) em ZoneVillage (0). ShopOpen = true
-	// Noite (18h-23h59): Taverna do Javali Dourado (-30.0, 25.0). ShopOpen = false
-	// Madrugada (00h-05h59): Casa residencial (20.0, 20.0). ShopOpen = false
-	garrickX, garrickZ := float32(30.0), float32(25.0)
+	// Dia (06h-17h59): dentro da Forja do Garrick (zona interna 17). ShopOpen = true
+	// Noite (18h-23h59): dentro da Taverna do Javali Dourado (zona 18). ShopOpen = false
+	// Madrugada (00h-05h59): Casa dos Moradores (zona 23). ShopOpen = false
+	garrickX, garrickZ := world.GarrickForgePost[0], world.GarrickForgePost[1]
+	garrickZone := world.ZoneForgeInterior
 	garrickShop := true
-	garrickState := uint8(2) // Trabalhando na Forja
+	garrickState := uint8(2) // Trabalhando na Forja (interior)
 	if currentH >= 18 && currentH < 24 {
-		garrickX, garrickZ = -30.0, 25.0
+		garrickX, garrickZ, garrickZone = world.TavernSeatA[0], world.TavernSeatA[1], world.ZoneTavernInterior
 		garrickShop = false
 		garrickState = 3 // Na Taverna
 	} else if currentH < 6 {
-		garrickX, garrickZ = 20.0, 20.0
+		garrickX, garrickZ, garrickZone = world.ResidenceBedA[0], world.ResidenceBedA[1], world.ZoneResidence
 		garrickShop = false
 		garrickState = 0 // Descansando
 	}
@@ -156,22 +158,24 @@ func (s *Server) Start() error {
 		s.clock,
 		s.BroadcastNPCSay,
 	)
+	garrick.SetZone(garrickZone)
 	garrick.SetShopOpen(garrickShop)
 	garrick.SetState(garrickState)
 
 	// 2. Lyra, a Alquimista (ID 103)
-	// Dia (06h às 17h59): Laboratório de Alquimia (30.0, 0.0, -20.0). ShopOpen = true
+	// Dia (06h às 17h59): dentro do Laboratório de Alquimia (zona interna 19). ShopOpen = true
 	// Noite (18h às 23h59): Taverna (-30.0, 0.0, 25.0). ShopOpen = false
 	// Madrugada (00h às 05h59): Casa residencial (20.0, 0.0, -35.0). ShopOpen = false
-	lyraX, lyraZ := float32(30.0), float32(-20.0)
+	lyraX, lyraZ := world.LyraLabPost[0], world.LyraLabPost[1]
+	lyraZone := world.ZoneAlchemyLab
 	lyraShop := true
 	lyraState := uint8(2)
 	if currentH >= 18 && currentH < 24 {
-		lyraX, lyraZ = -30.0, 25.0
+		lyraX, lyraZ, lyraZone = world.TavernSeatB[0], world.TavernSeatB[1], world.ZoneTavernInterior
 		lyraShop = false
 		lyraState = 3
 	} else if currentH < 6 {
-		lyraX, lyraZ = 20.0, -35.0
+		lyraX, lyraZ, lyraZone = world.ResidenceBedB[0], world.ResidenceBedB[1], world.ZoneResidence
 		lyraShop = false
 		lyraState = 0
 	}
@@ -183,6 +187,7 @@ func (s *Server) Start() error {
 		s.clock,
 		s.BroadcastNPCSay,
 	)
+	lyra.SetZone(lyraZone)
 	lyra.SetShopOpen(lyraShop)
 	lyra.SetState(lyraState)
 
@@ -212,21 +217,21 @@ func (s *Server) Start() error {
 	varis.SetShopOpen(varisShop)
 
 	// 4. Capitão Randel (ID 105)
-	// Quartel (0.0, 0.0, 48.0) na ZoneVillage (0). Patrulha contínua da praça e quartel.
+	// Pátio do Quartel (0.0, 0.0, 40.0) na ZoneVillage (0). Patrulha contínua da praça e quartel.
 	guard1 := world.NewNPC(
 		105,
 		"Capitão Randel",
-		0.0, 0.0, 48.0,
+		0.0, 0.0, 40.0, // pátio na frente do Quartel
 		guardScript,
 		s.clock,
 		s.BroadcastNPCSay,
 	)
 	guard1.SetPatrolRoute([]world.Waypoint{
-		{X: 0.0, Z: 48.0},   // Quartel da Guarda
-		{X: 15.0, Z: 48.0},  // Pátio Leste
+		{X: 0.0, Z: 40.0},   // Porta do Quartel da Guarda
+		{X: 15.0, Z: 40.0},  // Pátio Leste
 		{X: 0.0, Z: 30.0},   // Avenida Norte
-		{X: -15.0, Z: 48.0}, // Pátio Oeste
-		{X: 0.0, Z: 48.0},   // Quartel da Guarda
+		{X: -15.0, Z: 40.0}, // Pátio Oeste
+		{X: 0.0, Z: 40.0},   // Porta do Quartel da Guarda
 	}, 2.8, 3.0)
 
 	// 5. Guarda Valen (ID 106)
@@ -288,13 +293,13 @@ func (s *Server) Start() error {
 	kaelen := world.NewNPC(
 		109,
 		"Kaelen, o Mestre Caçador",
-		25.0, 0.0, -95.0,
+		25.0, 0.0, -88.0, // varanda do Posto do Caçador
 		kaelenScript,
 		s.clock,
 		s.BroadcastNPCSay,
 	)
 	kaelen.SetPatrolRoute([]world.Waypoint{
-		{X: 25.0, Z: -95.0},
+		{X: 25.0, Z: -88.0},
 		{X: 10.0, Z: -160.0},
 		{X: 0.0, Z: -260.0},
 		{X: 10.0, Z: -160.0},
@@ -1299,6 +1304,23 @@ func (s *Server) handlePortalTravel(playerID uint32, targetZoneID, portalID uint
 		}
 	}
 
+	// Portas dos prédios: lembra por qual porta entrou para sair na frente dela (as casas comuns
+	// compartilham o mesmo interior)
+	if b, ok := world.BuildingByPortal(portal.ID); ok && portal.TargetZoneID == b.Interior {
+		s.mu.Lock()
+		if s.lastDoor == nil {
+			s.lastDoor = make(map[uint32]uint8)
+		}
+		s.lastDoor[player.ID] = b.InPortal
+		s.mu.Unlock()
+	} else if world.IsInteriorZone(currentZone) && portal.TargetZoneID == world.ZoneVillage {
+		s.mu.RLock()
+		entry := s.lastDoor[player.ID]
+		s.mu.RUnlock()
+		if b, ok := world.BuildingByPortal(entry); ok && b.Interior == currentZone {
+			portal.TargetX, portal.TargetZ = b.OutsidePos()
+		}
+	}
 	s.movePlayerToZone(player, portal)
 }
 
@@ -4752,6 +4774,23 @@ func (s *Server) runGameLoop() {
 	}
 }
 
+// placeInRoutine põe o NPC no posto da hora: trabalho (06h-18h), Taverna (18h-24h) ou cama (00h-06h).
+func (s *Server) placeInRoutine(n *world.NPC, hour int, workZone uint8, work, tavern, bed [2]float32) {
+	zone, pos, shop, state := workZone, work, true, uint8(2)
+	switch {
+	case hour >= 18:
+		zone, pos, shop, state = world.ZoneTavernInterior, tavern, false, 3
+	case hour < 6:
+		zone, pos, shop, state = world.ZoneResidence, bed, false, 0
+	}
+	n.SetShopOpen(shop)
+	n.SetState(state)
+	if n.GetZone() != zone {
+		n.SetZone(zone)
+		n.Teleport(pos[0], 0, pos[1])
+	}
+}
+
 // updateNPCRoutines sincroniza as rotinas autoritativas, zonas e lojas de todos os NPCs conforme a hora do mundo.
 func (s *Server) updateNPCRoutines(worldHour int) {
 	s.mu.RLock()
@@ -4764,74 +4803,13 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	ghost := s.npcs[110]
 	s.mu.RUnlock()
 
-	// 1. Garrick (100)
-	if garrick != nil {
-		if worldHour >= 6 && worldHour < 18 {
-			garrick.SetZone(world.ZoneVillage)
-			garrick.SetShopOpen(true)
-			dx := garrick.PosX - 30.0
-			dz := garrick.PosZ - 25.0
-			if (dx*dx + dz*dz) > 4.0 {
-				garrick.SetTarget(30.0, 25.0, 2.4)
-			} else {
-				garrick.SetState(2) // Trabalhando na Forja
-			}
-		} else if worldHour >= 18 && worldHour < 24 {
-			garrick.SetZone(world.ZoneVillage)
-			garrick.SetShopOpen(false)
-			dx := garrick.PosX - (-30.0)
-			dz := garrick.PosZ - 25.0
-			if (dx*dx + dz*dz) > 4.0 {
-				garrick.SetTarget(-30.0, 25.0, 2.4)
-			} else {
-				garrick.SetState(3) // Bebendo na Taverna
-			}
-		} else { // 00h às 05h59 (Dormir)
-			garrick.SetZone(world.ZoneVillage)
-			garrick.SetShopOpen(false)
-			dx := garrick.PosX - 20.0
-			dz := garrick.PosZ - 20.0
-			if (dx*dx + dz*dz) > 4.0 {
-				garrick.SetTarget(20.0, 20.0, 2.4)
-			} else {
-				garrick.SetState(0) // Dormindo
-			}
-		}
+	// 1. Garrick (100) e 2. Lyra (103): trabalham dentro da Forja e do Laboratório, à noite vão à
+	// Taverna e de madrugada dormem na Casa dos Moradores (zonas internas dos prédios)
+	if garrick != nil && !garrick.LifeBusy() {
+		s.placeInRoutine(garrick, worldHour, world.ZoneForgeInterior, world.GarrickForgePost, world.TavernSeatA, world.ResidenceBedA)
 	}
-
-	// 2. Lyra (103)
 	if lyra != nil && !lyra.LifeBusy() {
-		if worldHour >= 6 && worldHour < 18 {
-			lyra.SetZone(world.ZoneVillage)
-			lyra.SetShopOpen(true)
-			dx := lyra.PosX - 30.0
-			dz := lyra.PosZ - (-20.0)
-			if (dx*dx + dz*dz) > 4.0 {
-				lyra.SetTarget(30.0, -20.0, 2.3)
-			} else {
-				lyra.SetState(2) // No Laboratório
-			}
-		} else if worldHour >= 18 && worldHour < 24 {
-			lyra.SetZone(world.ZoneVillage)
-			lyra.SetShopOpen(false)
-			dx := lyra.PosX - (-30.0)
-			dz := lyra.PosZ - 25.0
-			if (dx*dx + dz*dz) > 4.0 {
-				lyra.SetTarget(-30.0, 25.0, 2.3)
-			} else {
-				lyra.SetState(3) // Na Taverna
-			}
-		} else { // 00h às 05h59 (Dormir)
-			lyra.SetZone(world.ZoneVillage)
-			lyra.SetShopOpen(false)
-			dx := lyra.PosX - 20.0
-			dz := lyra.PosZ - (-35.0)
-			if (dx*dx + dz*dz) > 4.0 {
-				lyra.SetTarget(20.0, -35.0, 2.3)
-			} else {
-				lyra.SetState(0) // Dormindo
-			}
-		}
+		s.placeInRoutine(lyra, worldHour, world.ZoneAlchemyLab, world.LyraLabPost, world.TavernSeatB, world.ResidenceBedB)
 	}
 
 	// 3. Varis (104)
@@ -4915,17 +4893,18 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	}
 }
 
-// checkForgeFireHazard verifica se jogadores colidem com a Fornalha Incandescente do Garrick (30.0, 25.0)
+// checkForgeFireHazard verifica se jogadores pisam nas brasas da Fornalha do Garrick (dentro da Forja, zona 17)
 // e aplica 15 de Dano de Fogo autoritativo a cada 0.8s na Vila (ZoneVillage).
 func (s *Server) checkForgeFireHazard() {
-	forgeX, forgeZ := float32(30.0), float32(25.0)
-	radius := float32(2.3)
+	// Só as brasas da fornalha, dentro da Forja (zona interna), queimam: a porta e a sala são seguras
+	forgeX, forgeZ := world.ForgeFirePos[0], world.ForgeFirePos[1]
+	radius := world.ForgeFireRadius
 	radiusSq := radius * radius
 
 	s.mu.RLock()
 	players := make([]*world.Player, 0, len(s.players))
 	for _, p := range s.players {
-		if p.GetZone() == world.ZoneVillage {
+		if p.GetZone() == world.ZoneForgeInterior {
 			players = append(players, p)
 		}
 	}
@@ -4938,7 +4917,7 @@ func (s *Server) checkForgeFireHazard() {
 		isAlive := p.HP > 0
 		p.Mu.RUnlock()
 
-		if !isAlive || p.GetZone() != world.ZoneVillage {
+		if !isAlive || p.GetZone() != world.ZoneForgeInterior {
 			continue
 		}
 

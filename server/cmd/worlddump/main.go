@@ -88,6 +88,27 @@ func main() {
 		return dangers[i].Z < dangers[j].Z
 	})
 	out["dangers"] = dangers
+	// Prédios da Vila com porta para o interior (os portais de porta ficam fora da lista acima)
+	type buildingOut struct {
+		Key       string  `json:"key"`
+		Name      string  `json:"name"`
+		Interior  uint8   `json:"interior"`
+		X         float32 `json:"x"`
+		Z         float32 `json:"z"`
+		W         float32 `json:"w"`
+		D         float32 `json:"d"`
+		H         float32 `json:"h"`
+		Door      string  `json:"door"`
+		InPortal  uint8   `json:"in_portal"`
+		OutPortal uint8   `json:"out_portal"`
+	}
+	var buildings []buildingOut
+	for _, b := range world.VillageBuildings {
+		buildings = append(buildings, buildingOut{b.Key, b.Name, b.Interior, b.X, b.Z, b.W, b.D, b.H, b.Door, b.InPortal, b.OutPortal})
+	}
+	out["buildings"] = buildings
+	out["interior"] = map[string]float32{"half": world.InteriorHalf, "door_z": world.InteriorDoorZ, "arrive_z": world.InteriorArriveZ,
+		"forge_fire_x": world.ForgeFirePos[0], "forge_fire_z": world.ForgeFirePos[1], "forge_fire_r": world.ForgeFireRadius}
 	out["river"] = map[string]float64{
 		"source_gz": world.RiverSourceGZ, "mouth_gz": world.RiverMouthGZ, "mouth_lake_r": world.RiverMouthLakeR,
 		"span": world.ZoneSpan,

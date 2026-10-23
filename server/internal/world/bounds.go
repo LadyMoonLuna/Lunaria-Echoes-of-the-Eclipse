@@ -23,7 +23,7 @@ const (
 	ZoneBasaltHills uint8 = 15 // Colinas de Basalto (entre a Vila e a Fronteira das Cinzas)
 	ZoneMistMarsh   uint8 = 16 // Pântano das Brumas (além do Santuário)
 
-	ZoneCount = 17
+	ZoneCount = 24 // 17..23 são interiores dos prédios da Vila (interiors.go)
 )
 
 // MapSize é a dimensão padrão de mundo aberto expandido para 600x600 metros.
@@ -41,6 +41,8 @@ const (
 	Bounds80Max  float32 = 38.0
 	Bounds60Min  float32 = -28.0
 	Bounds60Max  float32 = 28.0
+	Bounds26Min  float32 = -12.5 // interiores dos prédios da Vila
+	Bounds26Max  float32 = 12.5
 )
 
 // GetZoneBounds retorna os limites mínimos e máximos da zona com base no seu ZoneID.
@@ -51,6 +53,9 @@ func GetZoneBounds(zoneID uint8) (float32, float32) {
 	case ZoneBlackMarket:
 		return Bounds80Min, Bounds80Max
 	default:
+		if IsInteriorZone(zoneID) {
+			return Bounds26Min, Bounds26Max
+		}
 		// Zonas 0, 1, 2, 3, 4, 8 (600x600m)
 		return Bounds600Min, Bounds600Max
 	}
@@ -117,6 +122,9 @@ func GetZoneName(zoneID uint8) string {
 	case ZoneAncientSewers:
 		return "Esgotos Antigos"
 	default:
+		if IsInteriorZone(zoneID) {
+			return interiorName(zoneID)
+		}
 		return "Zona Desconhecida"
 	}
 }

@@ -3836,6 +3836,8 @@ func _load_zone_map(zone_id: int) -> void:
 			_build_zone_8_sewers(current_map_root)
 		9, 10, 11, 12, 13, 14, 15, 16:
 			_build_transition_zone(current_map_root, zone_id)
+		17, 18, 19, 20, 21, 22, 23:
+			_build_interior(current_map_root, zone_id)
 		_:
 			_build_zone_0_village(current_map_root)
 
@@ -3849,6 +3851,8 @@ func _load_zone_map(zone_id: int) -> void:
 const ZONE_FLOOR_TEXTURES := {
 	0: ["ground", 3.0], 1: ["moss", 2.0], 2: ["stone_blocks", 2.4], 3: ["marble", 2.0],
 	4: ["obsidian", 2.5], 5: ["marble", 1.6], 6: ["stone_blocks", 1.8], 7: ["planks", 1.4], 8: ["stone_blocks", 2.0],
+	17: ["stone_blocks", 1.6], 18: ["planks", 1.4], 19: ["planks", 1.4], 20: ["stone_blocks", 1.6],
+	21: ["planks", 1.4], 22: ["marble", 1.6], 23: ["planks", 1.4],
 }
 
 ## Percorre a geometria da zona e aplica a biblioteca LunariaTextures a todo material liso,
@@ -3964,58 +3968,17 @@ func _create_portal_area(parent: Node3D, pos: Vector3, label_text: String, color
 	col.position = Vector3(0, 1.6, 0)
 	portal.add_child(col)
 
-	# Base circular luminosa no chão
-	var pad := MeshInstance3D.new()
-	var pad_mesh := CylinderMesh.new()
-	pad_mesh.top_radius = 2.2
-	pad_mesh.bottom_radius = 2.4
-	pad_mesh.height = 0.15
-	pad.mesh = pad_mesh
-	var pad_mat := StandardMaterial3D.new()
-	pad_mat.albedo_color = color
-	pad_mat.emission_enabled = true
-	pad_mat.emission = color
-	pad_mat.emission_energy_multiplier = 3.2
-	pad_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	pad_mat.albedo_color.a = 0.85
-	pad.material_override = pad_mat
-	pad.position = Vector3(0, 0.08, 0)
-	portal.add_child(pad)
-
-	# Coluna de feixe de luz / vórtice translúcido
-	var beam := MeshInstance3D.new()
-	var beam_mesh := CylinderMesh.new()
-	beam_mesh.top_radius = 1.8
-	beam_mesh.bottom_radius = 2.0
-	beam_mesh.height = 3.0
-	beam.mesh = beam_mesh
-	var beam_mat := StandardMaterial3D.new()
-	beam_mat.albedo_color = Color(color.r, color.g, color.b, 0.35)
-	beam_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	beam_mat.emission_enabled = true
-	beam_mat.emission = color
-	beam_mat.emission_energy_multiplier = 2.2
-	beam.material_override = beam_mat
-	beam.position = Vector3(0, 1.5, 0)
-	portal.add_child(beam)
-
-	# Luz pontual
-	var p_light := OmniLight3D.new()
-	p_light.light_color = color
-	p_light.light_energy = 3.0
-	p_light.omni_range = 8.5
-	p_light.position = Vector3(0, 1.8, 0)
-	portal.add_child(p_light)
-
+	# Portal discreto: sem disco, feixe ou luz — só uma plaquinha que aparece de perto
 	# Placa flutuante Billboard
 	var lbl := Label3D.new()
 	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lbl.text = label_text
-	lbl.font_size = 22
-	lbl.outline_size = 8
+	lbl.font_size = 14
+	lbl.outline_size = 5
 	lbl.outline_modulate = Color.BLACK
-	lbl.modulate = color
-	lbl.position = Vector3(0, 3.4, 0)
+	lbl.modulate = Color(color.lightened(0.4), 0.75)
+	lbl.position = Vector3(0, 2.4, 0)
+	lbl.visibility_range_end = 14.0
 	portal.add_child(lbl)
 
 	portal.body_entered.connect(func(body: Node3D):
@@ -4960,28 +4923,14 @@ func _build_zone_0_village(root: Node3D) -> void:
 
 	# 4. Construções da Vila Ampliada (Coordenadas bem espaçadas sem NENHUMA sobreposição)
 
-	# A. Forja do Garrick (30, 0, 25)
-	_create_solid_building(root, "GarrickForgeBuilding", Vector3(30.0, 0.0, 25.0), Vector3(9.0, 4.5, 6.5), Color(0.35, 0.32, 0.3), Color(0.38, 0.2, 0.12), "A Forja de Garrick", Color(1.0, 0.85, 0.4), "south")
-	var forge_fire := OmniLight3D.new()
-	forge_fire.light_color = Color(1.0, 0.45, 0.1)
-	forge_fire.light_energy = 3.5
-	forge_fire.omni_range = 7.0
-	forge_fire.position = Vector3(30.0, 1.5, 22.0)
-	root.add_child(forge_fire)
-	_create_shop_counter_area(root, Vector3(30.0, 0.5, 21.8), "A Forja de Garrick")
-
-	# B. Taverna do Javali Dourado (-30, 0, 25)
-	_create_solid_building(root, "TavernBuilding", Vector3(-30.0, 0.0, 25.0), Vector3(10.0, 5.0, 8.0), Color(0.32, 0.24, 0.18), Color(0.45, 0.22, 0.14), "Taverna do Javali Dourado", Color(1.0, 0.85, 0.5), "south")
-
-	# C. Laboratório de Alquimia da Lyra (30, 0, -20)
-	_create_solid_building(root, "LyraAlchemyLab", Vector3(30.0, 0.0, -20.0), Vector3(8.5, 4.5, 7.0), Color(0.32, 0.28, 0.36), Color(0.4, 0.2, 0.45), "Laboratório de Alquimia da Lyra", Color(0.85, 0.7, 1.0), "north")
-	_create_shop_counter_area(root, Vector3(30.0, 0.5, -16.5), "Laboratório de Alquimia da Lyra")
-
-	# D. Quartel da Guarda Real (0, 0, 48)
-	_create_solid_building(root, "GuardBarracks", Vector3(0.0, 0.0, 48.0), Vector3(11.0, 5.2, 8.5), Color(0.28, 0.3, 0.35), Color(0.15, 0.25, 0.45), "Quartel da Guarda Real", Color(0.85, 0.95, 1.0), "north")
+	# A. Prédios organizados da Vila (Forja, Taverna, Laboratório, Quartel, Posto do Caçador, Ateliê e Casas):
+	# fachada fechada com porta; encostar na porta leva ao interior (zona interna do servidor)
+	for bdef in LunariaWorldData.BUILDINGS:
+		_create_village_house(root, bdef)
+	_create_forge_yard_brazier(root)
 
 	# E. Igreja da Luz Sagrada (-50, 0, -45)
-	var church_body := _create_solid_building(root, "HolyLightChurch", Vector3(-50.0, 0.0, -45.0), Vector3(12.0, 7.0, 16.0), Color(0.92, 0.90, 0.85), Color(0.85, 0.70, 0.22), "Igreja da Luz Sagrada", Color(1.0, 0.88, 0.25), "south")
+	var church_body := _create_solid_building(root, "HolyLightChurch", Vector3(-50.0, 0.0, -45.0), Vector3(12.0, 7.0, 16.0), Color(0.92, 0.90, 0.85), Color(0.85, 0.70, 0.22), "Igreja da Luz Sagrada", Color(1.0, 0.88, 0.25), "north")
 	var church_tower := MeshInstance3D.new()
 	var c_tmesh := BoxMesh.new()
 	c_tmesh.size = Vector3(4.0, 14.0, 4.0)
@@ -5059,8 +5008,6 @@ func _build_zone_0_village(root: Node3D) -> void:
 	# Portal Area3D verde levando aos Esgotos Zona 8 (Portal ID 15)
 	_create_portal_area(root, Vector3(-65.0, 0.0, -65.0), "🕳️ Descer para os Esgotos Antigos", Color(0.2, 0.9, 0.4), 8, 15)
 
-	# I. Posto do Caçador (25, 0, -95)
-	_create_solid_building(root, "HunterCabin", Vector3(25.0, 0.0, -95.0), Vector3(7.5, 3.8, 6.5), Color(0.32, 0.20, 0.12), Color(0.20, 0.14, 0.08), "Posto do Caçador", Color(0.9, 0.8, 0.4), "north")
 
 	# 5. Novas Estruturas das Raças nos Arredores da Vila (Entre ±90m e ±220m)
 
@@ -6381,3 +6328,378 @@ func _dev_pick_quality(what: String, on_pick: Callable) -> void:
 	cancel.text = "Cancelar"
 	cancel.pressed.connect(func(): holder.queue_free())
 	vb.add_child(cancel)
+
+
+# =============================================================================
+# PRÉDIOS DA VILA E INTERIORES (dados em WorldData.BUILDINGS, gerados do servidor)
+# =============================================================================
+const HOUSE_STYLES := {
+	"forge": {"wall": Color(0.42, 0.38, 0.34), "roof": Color(0.32, 0.18, 0.12), "trim": Color(0.25, 0.16, 0.1), "chimney": true},
+	"tavern": {"wall": Color(0.78, 0.68, 0.52), "roof": Color(0.5, 0.24, 0.14), "trim": Color(0.3, 0.19, 0.11), "chimney": true},
+	"lab": {"wall": Color(0.62, 0.58, 0.7), "roof": Color(0.33, 0.2, 0.42), "trim": Color(0.26, 0.18, 0.3), "chimney": true},
+	"barracks": {"wall": Color(0.55, 0.57, 0.6), "roof": Color(0.16, 0.25, 0.45), "trim": Color(0.22, 0.24, 0.3), "chimney": false},
+	"hunter": {"wall": Color(0.45, 0.32, 0.2), "roof": Color(0.24, 0.17, 0.1), "trim": Color(0.22, 0.14, 0.08), "chimney": true},
+	"atelier": {"wall": Color(0.85, 0.83, 0.8), "roof": Color(0.2, 0.45, 0.5), "trim": Color(0.3, 0.3, 0.36), "chimney": false},
+	"house": {"wall": Color(0.82, 0.76, 0.64), "roof": Color(0.55, 0.28, 0.18), "trim": Color(0.32, 0.21, 0.13), "chimney": true},
+}
+
+func _house_mat(tex: String, col: Color, scale: float = 1.2) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	LunariaTextures.apply(m, tex, scale, false)
+	m.albedo_color = col
+	m.roughness = 0.85
+	return m
+
+func _house_box(parent: Node3D, pos: Vector3, size: Vector3, mat: Material) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = size
+	mi.mesh = bm
+	mi.material_override = mat
+	mi.position = pos
+	parent.add_child(mi)
+	return mi
+
+## Casa enxaimel de fachada fechada: fundação de pedra, paredes rebocadas com vigas, telhado de duas
+## águas, porta, janelas iluminadas e placa. A porta tem um Area3D invisível que leva ao interior.
+func _create_village_house(parent: Node3D, b: Dictionary) -> void:
+	var key: String = b["key"]
+	var style: Dictionary = HOUSE_STYLES.get("house" if key.begins_with("house") else key, HOUSE_STYLES["house"])
+	var door: String = b["door"]
+	var w: float = b["w"]
+	var d: float = b["d"]
+	var h: float = b["h"]
+	# Moldura local: porta sempre em -z; gira o prédio para a porta olhar para o lado certo
+	var lw := w
+	var ld := d
+	var yaw := 0.0
+	match door:
+		"north": yaw = PI
+		"east":
+			yaw = -PI * 0.5
+			lw = d
+			ld = w
+		"west":
+			yaw = PI * 0.5
+			lw = d
+			ld = w
+	var body := StaticBody3D.new()
+	body.name = "House_" + key
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.position = Vector3(b["x"], ground_y(b["x"], b["z"]), b["z"])
+	body.rotation.y = yaw
+	parent.add_child(body)
+	var cs := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(lw, h, ld)
+	cs.shape = shape
+	cs.position = Vector3(0, h * 0.5, 0)
+	body.add_child(cs)
+
+	var stone := _house_mat("stone_blocks", Color(0.55, 0.53, 0.5))
+	var plaster := _house_mat("plaster", style["wall"], 1.5)
+	var beam := _house_mat("wood", style["trim"], 0.6)
+	var roof_mat := _house_mat("roof_tiles", style["roof"], 1.6)
+	_house_box(body, Vector3(0, 0.25, 0), Vector3(lw + 0.4, 0.5, ld + 0.4), stone)
+	_house_box(body, Vector3(0, 0.5 + (h - 0.5) * 0.5, 0), Vector3(lw, h - 0.5, ld), plaster)
+	# Vigas aparentes (cantos e cinta no meio da altura)
+	for cx in [-lw * 0.5, lw * 0.5]:
+		for cz in [-ld * 0.5, ld * 0.5]:
+			_house_box(body, Vector3(cx, h * 0.5, cz), Vector3(0.32, h, 0.32), beam)
+	_house_box(body, Vector3(0, h * 0.55, -ld * 0.5 - 0.02), Vector3(lw, 0.22, 0.12), beam)
+	_house_box(body, Vector3(0, h * 0.55, ld * 0.5 + 0.02), Vector3(lw, 0.22, 0.12), beam)
+	_house_box(body, Vector3(0, h - 0.1, 0), Vector3(lw + 0.3, 0.22, ld + 0.3), beam)
+	# Telhado de duas águas (cumeeira ao longo da fachada)
+	var roof := MeshInstance3D.new()
+	var prism := PrismMesh.new()
+	prism.size = Vector3(ld + 1.0, 2.4, lw + 0.9)
+	roof.mesh = prism
+	roof.material_override = roof_mat
+	roof.position = Vector3(0, h + 1.2, 0)
+	roof.rotation.y = PI * 0.5
+	body.add_child(roof)
+	if style["chimney"]:
+		_house_box(body, Vector3(lw * 0.3, h + 1.8, ld * 0.15), Vector3(0.8, 2.6, 0.8), stone)
+	# Porta de madeira com batente e lampião
+	var front := -ld * 0.5 - 0.06
+	_house_box(body, Vector3(0, 1.3, front), Vector3(1.7, 2.6, 0.1), _house_mat("planks", Color(0.36, 0.22, 0.12), 0.8))
+	_house_box(body, Vector3(-0.95, 1.35, front - 0.03), Vector3(0.2, 2.8, 0.16), beam)
+	_house_box(body, Vector3(0.95, 1.35, front - 0.03), Vector3(0.2, 2.8, 0.16), beam)
+	_house_box(body, Vector3(0, 2.8, front - 0.03), Vector3(2.1, 0.2, 0.16), beam)
+	var lamp := OmniLight3D.new()
+	lamp.light_color = Color(1.0, 0.78, 0.45)
+	lamp.light_energy = 1.2
+	lamp.omni_range = 5.0
+	lamp.position = Vector3(1.4, 2.6, front - 0.4)
+	body.add_child(lamp)
+	# Janelas com luz quente
+	var glass := StandardMaterial3D.new()
+	glass.albedo_color = Color(1.0, 0.85, 0.55)
+	glass.emission_enabled = true
+	glass.emission = Color(1.0, 0.75, 0.4)
+	glass.emission_energy_multiplier = 0.8
+	for wx in [-lw * 0.3, lw * 0.3]:
+		_house_box(body, Vector3(wx, h * 0.38 + 0.6, front), Vector3(1.0, 0.9, 0.08), glass)
+		_house_box(body, Vector3(wx, h * 0.38 + 0.12, front - 0.05), Vector3(1.2, 0.12, 0.2), beam)
+	# Placa pendurada sobre a porta (pequena, sem brilho)
+	var sign := Label3D.new()
+	sign.text = b["name"]
+	sign.font_size = 18
+	sign.outline_size = 5
+	sign.modulate = Color(1.0, 0.9, 0.7)
+	sign.position = Vector3(0, 3.25, front - 0.12)
+	sign.rotation.y = PI
+	sign.visibility_range_end = 30.0
+	body.add_child(sign)
+	# Área da porta (invisível): ao tentar entrar, o jogador já é levado para dentro
+	var area := Area3D.new()
+	area.name = "Door_%s" % key
+	area.collision_layer = 0
+	area.collision_mask = 2 | 1
+	area.position = Vector3(0, 1.3, front - 0.55)
+	body.add_child(area)
+	var acs := CollisionShape3D.new()
+	var abox := BoxShape3D.new()
+	abox.size = Vector3(1.8, 2.6, 1.0)
+	acs.shape = abox
+	area.add_child(acs)
+	var interior: int = b["interior"]
+	var in_portal: int = b["in_portal"]
+	area.body_entered.connect(func(entered: Node3D):
+		if entered == local_player:
+			_on_portal_body_entered(interior, in_portal, false)
+	)
+
+## Braseiro do pátio da Forja: onde os moradores se aquecem (PlaceFurnace no servidor).
+func _create_forge_yard_brazier(parent: Node3D) -> void:
+	var root := Node3D.new()
+	root.position = Vector3(35.0, ground_y(35.0, 17.0), 17.0)
+	parent.add_child(root)
+	var bowl := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.7
+	cm.bottom_radius = 0.35
+	cm.height = 0.8
+	bowl.mesh = cm
+	bowl.material_override = _house_mat("metal_hammered", Color(0.25, 0.23, 0.22), 0.5)
+	bowl.position = Vector3(0, 0.6, 0)
+	root.add_child(bowl)
+	_add_fire(root, Vector3(0, 1.05, 0), 0.5)
+
+func _add_fire(parent: Node3D, pos: Vector3, size: float) -> void:
+	var fire := GPUParticles3D.new()
+	fire.amount = 36
+	fire.lifetime = 0.8
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3.UP
+	pm.spread = 18.0
+	pm.initial_velocity_min = 0.6
+	pm.initial_velocity_max = 1.4
+	pm.gravity = Vector3(0, 0.6, 0)
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = size * 0.6
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(1.0, 0.85, 0.3, 1.0))
+	ramp.set_color(1, Color(0.9, 0.2, 0.05, 0.0))
+	var gt := GradientTexture1D.new()
+	gt.gradient = ramp
+	pm.color_ramp = gt
+	fire.process_material = pm
+	var q := SphereMesh.new()
+	q.radius = size * 0.35
+	q.height = size * 0.7
+	var fm := StandardMaterial3D.new()
+	fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fm.vertex_color_use_as_albedo = true
+	fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	q.material = fm
+	fire.draw_pass_1 = q
+	fire.position = pos
+	parent.add_child(fire)
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.55, 0.2)
+	light.light_energy = 2.5
+	light.omni_range = 6.0 + size * 4.0
+	light.position = pos + Vector3(0, 0.4, 0)
+	parent.add_child(light)
+	var flick := light.create_tween().set_loops()
+	flick.tween_property(light, "light_energy", 3.1, 0.18)
+	flick.tween_property(light, "light_energy", 2.2, 0.23)
+
+## Interior de um prédio da Vila: sala de 24 x 21,5 m com porta na parede sul.
+func _build_interior(root: Node3D, zone_id: int) -> void:
+	var bdef: Dictionary = {}
+	for b in LunariaWorldData.BUILDINGS:
+		if int(b["interior"]) == zone_id:
+			bdef = b
+			break
+	var key: String = String(bdef.get("key", "house"))
+	if key.begins_with("house"):
+		key = "house"
+	var style: Dictionary = HOUSE_STYLES.get(key, HOUSE_STYLES["house"])
+	var floor_tex: String = "stone_blocks" if key in ["forge", "barracks"] else ("marble" if key == "atelier" else "planks")
+	_create_zone_floor(root, Vector3(26.0, 1.0, 26.0), Color(0.5, 0.42, 0.34), 0.8, Vector3(8, 8, 1))
+	var floor_top := _house_mat(floor_tex, Color(0.55, 0.45, 0.35) if floor_tex == "planks" else Color(0.6, 0.58, 0.55), 1.4)
+	_house_box(root, Vector3(0, 0.01, 1.25), Vector3(24.0, 0.02, 21.5), floor_top)
+	var wall_mat := _house_mat("plaster", style["wall"].lightened(0.1), 1.5)
+	var beam := _house_mat("wood", style["trim"], 0.6)
+	var dz: float = -LunariaWorldData.INTERIOR_DOOR_Z - 0.5
+	var wh := 6.0
+	_create_wall_segment(root, Vector3(0, wh * 0.5, 12.25), Vector3(24.5, wh, 0.5), wall_mat)
+	_create_wall_segment(root, Vector3(-12.25, wh * 0.5, 1.25), Vector3(0.5, wh, 21.5), wall_mat)
+	_create_wall_segment(root, Vector3(12.25, wh * 0.5, 1.25), Vector3(0.5, wh, 21.5), wall_mat)
+	_create_wall_segment(root, Vector3(-6.35, wh * 0.5, dz), Vector3(11.8, wh, 0.5), wall_mat)
+	_create_wall_segment(root, Vector3(6.35, wh * 0.5, dz), Vector3(11.8, wh, 0.5), wall_mat)
+	_create_wall_segment(root, Vector3(0, 4.4, dz), Vector3(0.9, 3.2, 0.5), wall_mat)
+	for bx in [-12.0, -6.0, 0.0, 6.0, 12.0]:
+		_house_box(root, Vector3(bx, wh - 0.2, 1.25), Vector3(0.35, 0.35, 21.5), beam)
+	# Porta de saída (Area3D invisível na soleira) e plaquinha
+	_house_box(root, Vector3(0, 1.4, dz - 0.3), Vector3(1.7, 2.8, 0.1), _house_mat("planks", Color(0.36, 0.22, 0.12), 0.8))
+	var exit_lbl := Label3D.new()
+	exit_lbl.text = "🚪 Saída"
+	exit_lbl.font_size = 16
+	exit_lbl.outline_size = 5
+	exit_lbl.position = Vector3(0, 3.2, dz + 0.3)
+	exit_lbl.visibility_range_end = 12.0
+	root.add_child(exit_lbl)
+	var exit_area := Area3D.new()
+	exit_area.collision_layer = 0
+	exit_area.collision_mask = 2 | 1
+	exit_area.position = Vector3(0, 1.3, dz + 0.55)
+	root.add_child(exit_area)
+	var ecs := CollisionShape3D.new()
+	var ebox := BoxShape3D.new()
+	ebox.size = Vector3(2.2, 2.6, 0.7)
+	ecs.shape = ebox
+	exit_area.add_child(ecs)
+	var out_portal: int = int(bdef.get("out_portal", 0))
+	exit_area.body_entered.connect(func(entered: Node3D):
+		if entered == local_player:
+			_on_portal_body_entered(0, out_portal, false)
+	)
+	# Iluminação quente
+	for lp in [Vector3(-6, 4.5, 3), Vector3(6, 4.5, 3), Vector3(0, 4.5, -4)]:
+		var l := OmniLight3D.new()
+		l.light_color = Color(1.0, 0.82, 0.6)
+		l.light_energy = 1.6
+		l.omni_range = 11.0
+		l.position = lp
+		root.add_child(l)
+	var title := Label3D.new()
+	title.text = String(bdef.get("name", "Interior"))
+	title.font_size = 30
+	title.outline_size = 8
+	title.modulate = Color(1.0, 0.88, 0.6)
+	title.position = Vector3(0, 5.2, 12.0)
+	root.add_child(title)
+	var wood := Color(0.42, 0.28, 0.16)
+	match key:
+		"forge":
+			# Fornalha acesa: as brasas (servidor: ForgeFirePos) são o único ponto que queima
+			var ff: Vector3 = LunariaWorldData.FORGE_FIRE
+			var furnace := _create_furniture_piece(root, Vector3(ff.x - 1.6, 1.4, ff.z + 1.4), Vector3(2.6, 2.8, 2.2), Color(0.35, 0.32, 0.3))
+			furnace.name = "ForjaFornalha"
+			_house_box(root, Vector3(ff.x - 1.6, 4.4, ff.z + 1.6), Vector3(1.2, 3.2, 1.2), _house_mat("stone_blocks", Color(0.4, 0.38, 0.36)))
+			var embers := StandardMaterial3D.new()
+			embers.albedo_color = Color(1.0, 0.4, 0.1)
+			embers.emission_enabled = true
+			embers.emission = Color(1.0, 0.35, 0.05)
+			embers.emission_energy_multiplier = 2.5
+			var pit := MeshInstance3D.new()
+			var pc := CylinderMesh.new()
+			pc.top_radius = LunariaWorldData.FORGE_FIRE_RADIUS
+			pc.bottom_radius = LunariaWorldData.FORGE_FIRE_RADIUS
+			pc.height = 0.12
+			pit.mesh = pc
+			pit.material_override = embers
+			pit.position = Vector3(ff.x, 0.08, ff.z)
+			root.add_child(pit)
+			_add_fire(root, Vector3(ff.x, 0.3, ff.z), 0.9)
+			var warn := Label3D.new()
+			warn.text = "🔥 Brasas da Fornalha"
+			warn.font_size = 14
+			warn.modulate = Color(1.0, 0.6, 0.3)
+			warn.position = Vector3(ff.x, 1.8, ff.z)
+			warn.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			warn.visibility_range_end = 10.0
+			root.add_child(warn)
+			# Bigorna (Garrick trabalha atrás dela) e barril de têmpera
+			_create_furniture_piece(root, Vector3(0, 0.45, 1.6), Vector3(0.7, 0.9, 0.7), Color(0.3, 0.28, 0.27))
+			_create_furniture_piece(root, Vector3(0, 1.0, 1.6), Vector3(1.5, 0.3, 0.6), Color(0.22, 0.22, 0.24))
+			_create_furniture_piece(root, Vector3(-3.5, 0.55, 8.5), Vector3(1.1, 1.1, 1.1), Color(0.35, 0.24, 0.14))
+			_create_furniture_piece(root, Vector3(6.0, 0.5, 10.8), Vector3(5.0, 1.0, 1.2), wood)
+			_create_furniture_piece(root, Vector3(11.5, 1.6, 3.0), Vector3(0.3, 2.4, 5.0), wood)
+			# Espaço livre reservado para as futuras bancadas de criação do ferreiro
+			for i in range(3):
+				var pad := MeshInstance3D.new()
+				var pm := BoxMesh.new()
+				pm.size = Vector3(3.0, 0.02, 2.4)
+				pad.mesh = pm
+				var padm := StandardMaterial3D.new()
+				padm.albedo_color = Color(0.3, 0.26, 0.22)
+				pad.material_override = padm
+				pad.position = Vector3(6.5, 0.025, -3.5 + i * 3.6)
+				pad.name = "CraftingSlot_%d" % i
+				root.add_child(pad)
+		"tavern":
+			_create_furniture_piece(root, Vector3(0, 0.6, 9.5), Vector3(10.0, 1.2, 1.2), wood)
+			for bx in [-4.0, 0.0, 4.0]:
+				_create_furniture_piece(root, Vector3(bx, 0.7, 11.5), Vector3(1.0, 1.4, 1.0), Color(0.36, 0.22, 0.12))
+			for tp in [Vector3(-6, 0, 1), Vector3(6, 0, 1), Vector3(-6, 0, -4), Vector3(6, 0, -4)]:
+				_create_furniture_piece(root, tp + Vector3(0, 0.45, 0), Vector3(2.2, 0.9, 1.4), wood)
+			_create_furniture_piece(root, Vector3(-11.3, 1.2, 4), Vector3(1.2, 2.4, 3.0), Color(0.45, 0.42, 0.4))
+			_add_fire(root, Vector3(-10.6, 0.5, 4), 0.6)
+		"lab":
+			_create_furniture_piece(root, Vector3(0, 0.5, 6.5), Vector3(6.0, 1.0, 1.4), wood)
+			_create_furniture_piece(root, Vector3(-11.4, 1.6, 2), Vector3(1.0, 3.2, 6.0), wood)
+			_create_furniture_piece(root, Vector3(7.0, 0.45, 2.0), Vector3(1.6, 0.9, 1.6), Color(0.2, 0.2, 0.22))
+			_add_fire(root, Vector3(7.0, 0.2, 2.0), 0.35)
+			for i in range(6):
+				var fl := MeshInstance3D.new()
+				var fc := CylinderMesh.new()
+				fc.top_radius = 0.08
+				fc.bottom_radius = 0.14
+				fc.height = 0.35
+				fl.mesh = fc
+				var fmat := StandardMaterial3D.new()
+				fmat.albedo_color = [Color(0.4, 1, 0.5), Color(0.5, 0.6, 1), Color(1, 0.4, 0.8)][i % 3]
+				fmat.emission_enabled = true
+				fmat.emission = fmat.albedo_color
+				fmat.emission_energy_multiplier = 1.2
+				fl.material_override = fmat
+				fl.position = Vector3(-2.2 + i * 0.9, 1.18, 6.5)
+				root.add_child(fl)
+		"barracks":
+			for bz in [-3.0, 1.0, 5.0, 9.0]:
+				_create_furniture_piece(root, Vector3(-9.5, 0.4, bz), Vector3(3.6, 0.8, 1.6), Color(0.4, 0.35, 0.3))
+			_create_furniture_piece(root, Vector3(9.5, 1.2, 4), Vector3(0.6, 2.4, 6.0), Color(0.3, 0.3, 0.32))
+			_create_furniture_piece(root, Vector3(0, 0.45, 5), Vector3(4.0, 0.9, 2.0), wood)
+		"hunter":
+			_create_furniture_piece(root, Vector3(-8, 0.4, 8), Vector3(3.6, 0.8, 2.0), Color(0.45, 0.35, 0.25))
+			_create_furniture_piece(root, Vector3(0, 0.45, 4), Vector3(3.0, 0.9, 1.6), wood)
+			_create_furniture_piece(root, Vector3(11.5, 1.8, 2), Vector3(0.2, 1.8, 3.0), Color(0.55, 0.45, 0.35))
+			_create_furniture_piece(root, Vector3(-11.3, 1.2, -1), Vector3(1.2, 2.4, 3.0), Color(0.45, 0.42, 0.4))
+			_add_fire(root, Vector3(-10.6, 0.5, -1), 0.5)
+		"atelier":
+			for i in range(3):
+				_create_furniture_piece(root, Vector3(-6 + i * 6, 0.55, 6), Vector3(3.0, 1.1, 1.2), Color(0.3, 0.3, 0.36))
+				var gem := MeshInstance3D.new()
+				var gs := SphereMesh.new()
+				gs.radius = 0.18
+				gs.height = 0.36
+				gem.mesh = gs
+				var gm := StandardMaterial3D.new()
+				gm.albedo_color = [Color(1, 0.2, 0.25), Color(0.3, 0.5, 1), Color(0.7, 1, 0.9)][i]
+				gm.emission_enabled = true
+				gm.emission = gm.albedo_color
+				gm.emission_energy_multiplier = 1.5
+				gem.material_override = gm
+				gem.position = Vector3(-6 + i * 6, 1.3, 6)
+				root.add_child(gem)
+		_: # Casa dos Moradores
+			for bx in [-5.0, 5.0]:
+				_create_furniture_piece(root, Vector3(bx, 0.35, 8.5), Vector3(2.2, 0.7, 3.2), Color(0.55, 0.4, 0.3))
+			_create_furniture_piece(root, Vector3(0, 0.45, 1), Vector3(2.4, 0.9, 1.6), wood)
+			_create_furniture_piece(root, Vector3(11.3, 1.2, 2), Vector3(1.2, 2.4, 3.0), Color(0.45, 0.42, 0.4))
+			_add_fire(root, Vector3(10.6, 0.5, 2), 0.5)

@@ -67,3 +67,24 @@ const RIVER_SOURCE_GZ := 1950.0
 const RIVER_MOUTH_GZ := -2370.0
 const RIVER_MOUTH_LAKE_R := 75.0
 const ZONE_SPAN := 600.0
+
+## Prédios da Vila (server/internal/world/interiors.go): porta -> zona interna.
+const BUILDINGS := [
+	{"key": "forge", "name": "Forja do Garrick", "interior": 17, "x": 30.0, "z": 25.0, "w": 10.0, "d": 8.0, "h": 5.0, "door": "south", "in_portal": 33, "out_portal": 34},
+	{"key": "tavern", "name": "Taverna do Javali Dourado", "interior": 18, "x": -30.0, "z": 25.0, "w": 12.0, "d": 9.0, "h": 5.5, "door": "south", "in_portal": 35, "out_portal": 36},
+	{"key": "lab", "name": "Laboratório de Alquimia da Lyra", "interior": 19, "x": 30.0, "z": -20.0, "w": 9.0, "d": 8.0, "h": 4.8, "door": "north", "in_portal": 37, "out_portal": 38},
+	{"key": "barracks", "name": "Quartel da Guarda Real", "interior": 20, "x": 0.0, "z": 48.0, "w": 12.0, "d": 9.0, "h": 5.4, "door": "south", "in_portal": 39, "out_portal": 40},
+	{"key": "hunter", "name": "Posto do Caçador", "interior": 21, "x": 25.0, "z": -95.0, "w": 8.0, "d": 7.0, "h": 4.2, "door": "north", "in_portal": 41, "out_portal": 42},
+	{"key": "atelier", "name": "Ateliê da Joalheira Selene", "interior": 22, "x": 52.0, "z": 22.0, "w": 8.0, "d": 7.0, "h": 4.5, "door": "south", "in_portal": 43, "out_portal": 44},
+	{"key": "house_ne", "name": "Casa dos Moradores", "interior": 23, "x": -55.0, "z": 22.0, "w": 8.0, "d": 7.0, "h": 4.2, "door": "south", "in_portal": 45, "out_portal": 46},
+	{"key": "house_sw", "name": "Casa dos Moradores", "interior": 23, "x": -28.0, "z": -20.0, "w": 8.0, "d": 7.0, "h": 4.2, "door": "north", "in_portal": 47, "out_portal": 48},
+	{"key": "house_se", "name": "Casa dos Moradores", "interior": 23, "x": 55.0, "z": -20.0, "w": 8.0, "d": 7.0, "h": 4.2, "door": "north", "in_portal": 49, "out_portal": 50},
+	{"key": "house_n", "name": "Casa dos Moradores", "interior": 23, "x": -22.0, "z": 50.0, "w": 8.0, "d": 7.0, "h": 4.2, "door": "south", "in_portal": 51, "out_portal": 52},
+]
+
+## Sala interna dos prédios (porta na parede sul).
+const INTERIOR_HALF := 13.0
+const INTERIOR_DOOR_Z := 9.0
+const INTERIOR_ARRIVE_Z := -6.0
+const FORGE_FIRE := Vector3(-7.0, 0.0, 7.0)
+const FORGE_FIRE_RADIUS := 1.6

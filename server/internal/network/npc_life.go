@@ -28,9 +28,6 @@ func (s *Server) initNPCLife(npcs []*world.NPC) {
 	for _, npc := range npcs {
 		x, _, z := npc.GetPos()
 		home := [2]float32{x, z}
-		if npc.ID == 100 {
-			home = world.PlaceFurnace // Garrick trabalha na Fornalha
-		}
 		npc.InitLife(home)
 	}
 }

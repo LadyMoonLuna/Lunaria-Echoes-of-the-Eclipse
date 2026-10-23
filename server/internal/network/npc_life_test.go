@@ -53,7 +53,7 @@ func TestThirstSendsNPCToFountainAndRefills(t *testing.T) {
 
 func TestNPCPaysTavernWithOwnGold(t *testing.T) {
 	s := lifeTestServer()
-	g := addLifeNPC(s, 100, -30, 25)
+	g := addLifeNPC(s, 100, world.PlaceTavern[0], world.PlaceTavern[1])
 	b := addLifeNPC(s, world.TavernNPCID, -38, 22)
 	g.WithLife(func(n *world.NPC) { n.Hunger = 10 })
 	s.updateNPCLife(1) // planeja e já está na taverna -> come

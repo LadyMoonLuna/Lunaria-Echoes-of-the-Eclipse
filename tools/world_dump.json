@@ -1,4 +1,136 @@
 {
+  "buildings": [
+    {
+      "key": "forge",
+      "name": "Forja do Garrick",
+      "interior": 17,
+      "x": 30,
+      "z": 25,
+      "w": 10,
+      "d": 8,
+      "h": 5,
+      "door": "south",
+      "in_portal": 33,
+      "out_portal": 34
+    },
+    {
+      "key": "tavern",
+      "name": "Taverna do Javali Dourado",
+      "interior": 18,
+      "x": -30,
+      "z": 25,
+      "w": 12,
+      "d": 9,
+      "h": 5.5,
+      "door": "south",
+      "in_portal": 35,
+      "out_portal": 36
+    },
+    {
+      "key": "lab",
+      "name": "Laboratório de Alquimia da Lyra",
+      "interior": 19,
+      "x": 30,
+      "z": -20,
+      "w": 9,
+      "d": 8,
+      "h": 4.8,
+      "door": "north",
+      "in_portal": 37,
+      "out_portal": 38
+    },
+    {
+      "key": "barracks",
+      "name": "Quartel da Guarda Real",
+      "interior": 20,
+      "x": 0,
+      "z": 48,
+      "w": 12,
+      "d": 9,
+      "h": 5.4,
+      "door": "south",
+      "in_portal": 39,
+      "out_portal": 40
+    },
+    {
+      "key": "hunter",
+      "name": "Posto do Caçador",
+      "interior": 21,
+      "x": 25,
+      "z": -95,
+      "w": 8,
+      "d": 7,
+      "h": 4.2,
+      "door": "north",
+      "in_portal": 41,
+      "out_portal": 42
+    },
+    {
+      "key": "atelier",
+      "name": "Ateliê da Joalheira Selene",
+      "interior": 22,
+      "x": 52,
+      "z": 22,
+      "w": 8,
+      "d": 7,
+      "h": 4.5,
+      "door": "south",
+      "in_portal": 43,
+      "out_portal": 44
+    },
+    {
+      "key": "house_ne",
+      "name": "Casa dos Moradores",
+      "interior": 23,
+      "x": -55,
+      "z": 22,
+      "w": 8,
+      "d": 7,
+      "h": 4.2,
+      "door": "south",
+      "in_portal": 45,
+      "out_portal": 46
+    },
+    {
+      "key": "house_sw",
+      "name": "Casa dos Moradores",
+      "interior": 23,
+      "x": -28,
+      "z": -20,
+      "w": 8,
+      "d": 7,
+      "h": 4.2,
+      "door": "north",
+      "in_portal": 47,
+      "out_portal": 48
+    },
+    {
+      "key": "house_se",
+      "name": "Casa dos Moradores",
+      "interior": 23,
+      "x": 55,
+      "z": -20,
+      "w": 8,
+      "d": 7,
+      "h": 4.2,
+      "door": "north",
+      "in_portal": 49,
+      "out_portal": 50
+    },
+    {
+      "key": "house_n",
+      "name": "Casa dos Moradores",
+      "interior": 23,
+      "x": -22,
+      "z": 50,
+      "w": 8,
+      "d": 7,
+      "h": 4.2,
+      "door": "south",
+      "in_portal": 51,
+      "out_portal": 52
+    }
+  ],
   "dangers": [
     {
       "zone": 1,
@@ -470,6 +602,14 @@
       "name": "Aranha Tecelã da Bruma"
     }
   ],
+  "interior": {
+    "arrive_z": -6,
+    "door_z": 9,
+    "forge_fire_r": 1.6,
+    "forge_fire_x": -7,
+    "forge_fire_z": 7,
+    "half": 13
+  },
   "portals": [
     {
       "id": 1,

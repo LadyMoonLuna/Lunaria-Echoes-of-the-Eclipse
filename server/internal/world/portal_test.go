@@ -5,8 +5,8 @@ import (
 )
 
 func TestOfficialPortalsCountAndIntegrity(t *testing.T) {
-	if len(OfficialPortals) != 32 {
-		t.Fatalf("esperado 32 portais oficiais, obteve %d", len(OfficialPortals))
+	if len(OfficialPortals) != 32+2*len(VillageBuildings) {
+		t.Fatalf("esperado %d portais oficiais, obteve %d", 32+2*len(VillageBuildings), len(OfficialPortals))
 	}
 
 	for id := uint8(1); id <= 32; id++ {

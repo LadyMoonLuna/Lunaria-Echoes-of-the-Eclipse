@@ -25,7 +25,7 @@ const (
 
 // spawnJeweler cria a Mestra Joalheira Selene, na praça de comércio.
 func spawnJeweler(clock *world.WorldClock, say world.SayCallback) *world.NPC {
-	n := world.NewNPC(world.JewelerID, "Mestra Joalheira Selene Lapidária", 46, 0, 8, "", clock, say)
+	n := world.NewNPC(world.JewelerID, "Mestra Joalheira Selene Lapidária", 52, 0, 15, "", clock, say) // balcão na frente do Ateliê
 	n.SetActive(true)
 	n.SetShopOpen(true)
 	return n

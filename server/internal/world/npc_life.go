@@ -35,11 +35,11 @@ const (
 
 // Lugares da Vila do Refúgio (Zona 0)
 var (
-	PlaceFountain         = [2]float32{0, 0}    // Fonte Central
-	PlaceTavern           = [2]float32{-30, 25} // Taverna
-	PlaceFurnace          = [2]float32{30, 25}  // Fornalha do Garrick
-	PlaceSouthGateVillage = [2]float32{0, -284} // Portal Sul da Vila -> Bosque
-	PlaceNorthGateForest  = [2]float32{0, 284}  // Saída Norte do Bosque -> Vila
+	PlaceFountain         = [2]float32{0, 0}      // Fonte Central
+	PlaceTavern           = [2]float32{-33, 16.5} // Terraço da Taverna (mesas na frente da porta)
+	PlaceFurnace          = [2]float32{35, 17}    // Braseiro do pátio da Forja do Garrick
+	PlaceSouthGateVillage = [2]float32{0, -284}   // Portal Sul da Vila -> Bosque
+	PlaceNorthGateForest  = [2]float32{0, 284}    // Saída Norte do Bosque -> Vila
 )
 
 // Ritmos (por minuto real)
