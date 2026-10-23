@@ -404,7 +404,7 @@ const (
 	SelectIdentityPacketSize = 9  // uint8 (1) + uint32 (4) + 4x uint8 (4) = 9 bytes
 	PlayerActionPacketSize   = 14 // uint8 (1) + uint32 (4) + uint8 (1) + 2x float32 (8) = 14 bytes
 	CombatEventPacketSize    = 17 // uint8 (1) + 2x uint32 (8) + uint8 (1) + uint16 (2) + uint8 (1) + 2x uint16 (4) = 17 bytes
-	PlayerStatsPacketSize    = 32 // uint8 (1) + uint32 (4) + 4x uint8 (4) + 4x uint16 (8) + uint8 (1) + 2x uint16 (4) + 10x uint8 (10) = 32 bytes
+	PlayerStatsPacketSize    = 36 // 32 bytes de status + Mana (uint16) + Mana Máxima (uint16)
 	PlayerRespawnPacketSize  = 17 // uint8 (1) + uint32 (4) + 3x float32 (12) = 17 bytes
 	AllocateStatPacketSize   = 6  // uint8 (1) + uint32 (4) + uint8 (1) = 6 bytes
 
@@ -1052,10 +1052,13 @@ type PlayerStatsPacket struct {
 	MAS         uint8
 	LCK         uint8
 	SubPath     uint8
+	Mana        uint16
+	MaxMana     uint16
 }
 
-// SerializePlayerStats cria o payload de 32 bytes do pacote PLAYER_STATS.
-func SerializePlayerStats(playerID uint32, raceID, classID, classTier, level uint8, hp, maxHP, stamina, maxStamina uint16, buffActive uint8, xp, nextLevelXP uint16, statPoints, str, dex, con, agi, intStat, spi, mas, lck, subPath uint8) [PlayerStatsPacketSize]byte {
+// SerializePlayerStats cria o payload de 36 bytes do pacote PLAYER_STATS.
+// SubPath 0 = Caminho ainda não escolhido.
+func SerializePlayerStats(playerID uint32, raceID, classID, classTier, level uint8, hp, maxHP, stamina, maxStamina uint16, buffActive uint8, xp, nextLevelXP uint16, statPoints, str, dex, con, agi, intStat, spi, mas, lck, subPath uint8, mana, maxMana uint16) [PlayerStatsPacketSize]byte {
 	var b [PlayerStatsPacketSize]byte
 	b[0] = PacketTypePlayerStats
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
@@ -1079,10 +1082,9 @@ func SerializePlayerStats(playerID uint32, raceID, classID, classTier, level uin
 	b[28] = spi
 	b[29] = mas
 	b[30] = lck
-	if subPath == 0 {
-		subPath = 1
-	}
 	b[31] = subPath
+	binary.LittleEndian.PutUint16(b[32:34], mana)
+	binary.LittleEndian.PutUint16(b[34:36], maxMana)
 	return b
 }
 
@@ -1093,7 +1095,7 @@ func SerializePlayerStatsPacket(pkt PlayerStatsPacket) [PlayerStatsPacketSize]by
 		pkt.HP, pkt.MaxHP, pkt.Stamina, pkt.MaxStamina, pkt.BuffActive,
 		pkt.XP, pkt.NextLevelXP, pkt.StatPoints,
 		pkt.STR, pkt.DEX, pkt.CON, pkt.AGI, pkt.INT, pkt.SPI, pkt.MAS, pkt.LCK,
-		pkt.SubPath,
+		pkt.SubPath, pkt.Mana, pkt.MaxMana,
 	)
 }
 
@@ -1126,13 +1128,12 @@ func DeserializePlayerStats(data []byte, out *PlayerStatsPacket) error {
 	out.SPI = data[28]
 	out.MAS = data[29]
 	out.LCK = data[30]
-	if len(data) >= PlayerStatsPacketSize {
+	if len(data) >= 32 {
 		out.SubPath = data[31]
-		if out.SubPath == 0 {
-			out.SubPath = 1
-		}
-	} else {
-		out.SubPath = 1
+	}
+	if len(data) >= PlayerStatsPacketSize {
+		out.Mana = binary.LittleEndian.Uint16(data[32:34])
+		out.MaxMana = binary.LittleEndian.Uint16(data[34:36])
 	}
 	return nil
 }

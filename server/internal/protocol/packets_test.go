@@ -341,8 +341,9 @@ func TestPlayerStatsPacket(t *testing.T) {
 	mas := uint8(7)
 	lck := uint8(9)
 	subPath := uint8(3)
+	mana, maxMana := uint16(140), uint16(260)
 
-	data := SerializePlayerStats(playerID, raceID, classID, classTier, level, hp, maxHP, stamina, maxStamina, buffActive, xp, nextLevelXP, statPoints, str, dex, con, agi, intStat, spi, mas, lck, subPath)
+	data := SerializePlayerStats(playerID, raceID, classID, classTier, level, hp, maxHP, stamina, maxStamina, buffActive, xp, nextLevelXP, statPoints, str, dex, con, agi, intStat, spi, mas, lck, subPath, mana, maxMana)
 	if len(data) != PlayerStatsPacketSize {
 		t.Fatalf("esperava %d bytes, obteve %d", PlayerStatsPacketSize, len(data))
 	}
@@ -360,7 +361,7 @@ func TestPlayerStatsPacket(t *testing.T) {
 		parsed.BuffActive != buffActive || parsed.XP != xp || parsed.NextLevelXP != nextLevelXP ||
 		parsed.StatPoints != statPoints || parsed.STR != str || parsed.DEX != dex || parsed.CON != con ||
 		parsed.AGI != agi || parsed.INT != intStat || parsed.SPI != spi || parsed.MAS != mas || parsed.LCK != lck ||
-		parsed.SubPath != subPath {
+		parsed.SubPath != subPath || parsed.Mana != mana || parsed.MaxMana != maxMana {
 		t.Fatalf("dados divergentes em PLAYER_STATS: %+v", parsed)
 	}
 }

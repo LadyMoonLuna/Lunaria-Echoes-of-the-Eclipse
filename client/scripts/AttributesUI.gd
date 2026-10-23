@@ -50,13 +50,13 @@ const STAT_INFO := {
 	5: {
 		"code": "INT",
 		"name": "Inteligência",
-		"desc": "+Dano Mágico/Alquímico & Área",
+		"desc": "+Dano Mágico/Alquímico, Área & +6 Mana Máxima por ponto",
 		"color": Color("#ab47bc")
 	},
 	6: {
 		"code": "ESP",
 		"name": "Espírito",
-		"desc": "+Poder de Cura & Redução de Recarga",
+		"desc": "+Poder de Cura & +0.15 Regeneração de Mana/s por ponto",
 		"color": Color("#ffd54f")
 	},
 	7: {

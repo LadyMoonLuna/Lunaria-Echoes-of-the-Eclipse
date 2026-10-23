@@ -468,6 +468,10 @@ var my_race_id: int = 1
 var my_class_id: int = 0
 var my_class_tier: int = 0
 var my_sub_path: int = 0 # Caminho Evolutivo (1 a 4; 0 = ainda não escolhido)
+var my_mana: int = 0
+var my_max_mana: int = 0
+var mana_bar: ProgressBar = null
+var mana_label: Label = null
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -532,6 +536,7 @@ func _ready() -> void:
 	NetworkManager.combat_event_received.connect(_on_combat_event_received)
 	NetworkManager.player_stats_received.connect(_on_player_stats_received)
 	NetworkManager.player_stats_full_received.connect(_on_player_stats_full_received)
+	NetworkManager.player_mana_received.connect(_on_player_mana_received)
 	NetworkManager.player_attributes_received.connect(_on_player_attributes_received)
 	NetworkManager.player_respawn_received.connect(_on_player_respawn_received)
 	NetworkManager.mob_state_received.connect(_on_mob_state_received)
@@ -550,6 +555,7 @@ func _ready() -> void:
 		default_structures.queue_free()
 
 	_setup_burn_overlay()
+	_setup_mana_bar()
 	_setup_action_bar()
 	_setup_xp_hud()
 	_setup_loot_toast()
@@ -2149,6 +2155,45 @@ func _on_player_stats_full_received(player_id: int, race_id: int, class_id: int,
 			local_player.apply_identity(race_id, class_id)
 			local_player.set_path_info(class_tier, my_sub_path)
 		_update_hud()
+
+func _on_player_mana_received(player_id: int, mana: int, max_mana: int) -> void:
+	if player_id != NetworkManager.my_player_id:
+		return
+	my_mana = mana
+	my_max_mana = max_mana
+	if mana_bar:
+		mana_bar.max_value = max(1, my_max_mana)
+		mana_bar.value = my_mana
+	if mana_label:
+		mana_label.text = "Mana: %d / %d" % [my_mana, my_max_mana]
+
+## Barra de Mana (azul) logo abaixo da Stamina, no painel de status.
+func _setup_mana_bar() -> void:
+	var vbox := get_node_or_null("HUD/PlayerStatusPanel/VBox")
+	var stam_label := get_node_or_null("HUD/PlayerStatusPanel/VBox/StaminaLabel")
+	if not vbox or not stam_label:
+		return
+	mana_bar = ProgressBar.new()
+	mana_bar.name = "ManaBar"
+	mana_bar.custom_minimum_size = Vector2(0, 12)
+	mana_bar.show_percentage = false
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.06, 0.12, 0.85)
+	bg.set_corner_radius_all(3)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.2, 0.45, 1.0, 1.0)
+	fill.set_corner_radius_all(3)
+	mana_bar.add_theme_stylebox_override("background", bg)
+	mana_bar.add_theme_stylebox_override("fill", fill)
+	vbox.add_child(mana_bar)
+	vbox.move_child(mana_bar, stam_label.get_index() + 1)
+	mana_label = Label.new()
+	mana_label.name = "ManaLabel"
+	mana_label.text = "Mana: 0 / 0"
+	mana_label.add_theme_font_size_override("font_size", 12)
+	mana_label.add_theme_color_override("font_color", Color(0.7, 0.82, 1.0))
+	vbox.add_child(mana_label)
+	vbox.move_child(mana_label, mana_bar.get_index() + 1)
 
 func _on_player_respawn_received(player_id: int, respawn_pos: Vector3) -> void:
 	if player_id == NetworkManager.my_player_id:

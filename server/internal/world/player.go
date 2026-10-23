@@ -26,18 +26,22 @@ type Player struct {
 	LastSeen time.Time
 
 	// Marco 3 & Atualização: Identidade, Classes e Tiers
-	RaceID      uint8
-	ClassID     uint8
-	ClassTier   uint8
-	ClassPath   uint8 // 0=Base, 1=Caminho A, 2=Caminho B
-	SubPath     uint8 // 1, 2, 3 ou 4 (Caminhos Evolutivos das 12 classes básicas)
-	PathTier    uint8 // Tier em que o Caminho atual foi escolhido (subir de Tier libera a troca)
-	Level       uint8
-	HP          uint16
-	MaxHP       uint16
-	Stamina     float32
-	MaxStamina  uint16
-	RaceEvolved bool // Se já realizou a evolução racial no Nível 10+
+	RaceID       uint8
+	ClassID      uint8
+	ClassTier    uint8
+	ClassPath    uint8 // 0=Base, 1=Caminho A, 2=Caminho B
+	SubPath      uint8 // 1, 2, 3 ou 4 (Caminhos Evolutivos das 12 classes básicas)
+	PathTier     uint8 // Tier em que o Caminho atual foi escolhido (subir de Tier libera a troca)
+	Level        uint8
+	HP           uint16
+	MaxHP        uint16
+	Stamina      float32
+	Mana         float32   // Mana atual (reserva das habilidades mágicas)
+	MaxMana      uint16    // Mana máxima (raça, nível, INT, Tier e classe)
+	lastSentMana uint16    // Mana enviada no último PLAYER_STATS
+	LastCombatAt time.Time // último golpe dado ou recebido (regeneração de Mana fora de combate é maior)
+	MaxStamina   uint16
+	RaceEvolved  bool // Se já realizou a evolução racial no Nível 10+
 
 	// Provação Lendária (Tier 5 -> Tier 6 Nível 45+)
 	LegendaryQuestActive bool  // Se a provação lendária está em andamento
@@ -944,6 +948,13 @@ func (p *Player) recalculateStatsLocked() {
 	p.MAS = rMAS + cMAS + p.AllocMAS
 	p.LCK = rLCK + cLCK + p.AllocLCK
 
+	oldMaxMana := p.MaxMana
+	_, _, _, _, totalINT, _, _, _ := p.getAttributesLocked() // INT com equipamentos
+	p.MaxMana = CalculateMaxMana(p.RaceID, p.ClassID, p.ClassTier, p.Level, totalINT)
+	if oldMaxMana == 0 || p.Mana > float32(p.MaxMana) {
+		p.Mana = float32(p.MaxMana) // primeira vez (ou máximo menor): enche/limita
+	}
+
 	baseMaxHP, baseMaxStam := CalculateStats(p.ClassID, p.RaceID, p.ClassTier, p.Level, p.SubPath)
 
 	// Bônus de MaxHP e MaxStamina acumulados dos 12 slots de equipamento
@@ -1212,6 +1223,9 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 	if p.Stamina > float32(p.MaxStamina) || actionMode == protocol.IdentityModeInitialChange || actionMode == protocol.IdentityModeSecretReset || actionMode == protocol.IdentityModeTrainLevel5 || actionMode == protocol.IdentityModeDevDirect {
 		p.Stamina = float32(p.MaxStamina)
 	}
+	if p.Mana > float32(p.MaxMana) || actionMode == protocol.IdentityModeInitialChange || actionMode == protocol.IdentityModeSecretReset || actionMode == protocol.IdentityModeTrainLevel5 || actionMode == protocol.IdentityModeDevDirect {
+		p.Mana = float32(p.MaxMana)
+	}
 }
 
 // PendingIdentityOffer é uma troca de identidade aguardando a confirmação do jogador.
@@ -1275,9 +1289,13 @@ func (p *Player) AddLevel(amount uint8) {
 	}
 	p.NextLevelXP = 100 + uint16(p.Level-1)*50
 	oldMaxHP := p.MaxHP
+	oldMaxMana := p.MaxMana
 	p.recalculateStatsLocked()
 	if p.MaxHP > oldMaxHP {
 		p.HP += (p.MaxHP - oldMaxHP)
+	}
+	if p.MaxMana > oldMaxMana {
+		p.Mana += float32(p.MaxMana - oldMaxMana)
 	}
 	if p.HP > p.MaxHP {
 		p.HP = p.MaxHP
@@ -1429,9 +1447,13 @@ func (p *Player) AllocateStat(statID uint8) bool {
 
 	p.StatPoints--
 	oldMaxHP := p.MaxHP
+	oldMaxMana := p.MaxMana
 	p.recalculateStatsLocked()
 	if p.MaxHP > oldMaxHP {
 		p.HP += (p.MaxHP - oldMaxHP)
+	}
+	if p.MaxMana > oldMaxMana {
+		p.Mana += float32(p.MaxMana - oldMaxMana)
 	}
 	if p.HP > p.MaxHP {
 		p.HP = p.MaxHP
@@ -1672,6 +1694,7 @@ func (p *Player) Respawn(safeX, safeY, safeZ float32) {
 
 	p.HP = p.MaxHP
 	p.Stamina = float32(p.MaxStamina)
+	p.Mana = float32(p.MaxMana)
 	p.PosX = safeX
 	p.PosY = safeY
 	p.PosZ = safeZ
@@ -1744,6 +1767,8 @@ func (p *Player) ConsumeStamina(amount float32) bool {
 func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
+
+	p.LastCombatAt = time.Now()
 
 	// Se estiver invulnerável (Dodge Roll ou pós-respawn), ignora dano
 	if time.Now().Before(p.IFrameUntil) {
@@ -1991,6 +2016,8 @@ func (p *Player) ToStatsPacket() protocol.PlayerStatsPacket {
 		MAS:         mas,
 		LCK:         lck,
 		SubPath:     p.SubPath,
+		Mana:        uint16(p.Mana),
+		MaxMana:     p.MaxMana,
 	}
 }
 

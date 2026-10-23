@@ -347,8 +347,18 @@ func TestSecretClasses10to15CombatMultipliers(t *testing.T) {
 	}
 
 	// Classe 15 (Arauto do Trovão, Base 36): Q=2.1x (~75.6), F=3.1x (~111.6)
-	dmg15Clear, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassStormHerald, protocol.ActionBasicAttack, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierCommon, 1, 0)
-	dmg15Rain, _ := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassStormHerald, protocol.ActionBasicAttack, 100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherRain, protocol.TierCommon, 1, 0)
+	// Compara só golpes sem crítico (o crítico é aleatório e distorceria a comparação)
+	stormNonCrit := func(weather uint8) uint16 {
+		for i := 0; i < 200; i++ {
+			dmg, crit := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassStormHerald, protocol.ActionBasicAttack, 100.0, 12, world.MoonPhaseWaxingCrescent, weather, protocol.TierCommon, 1, 0)
+			if crit == 0 {
+				return dmg
+			}
+		}
+		return 0
+	}
+	dmg15Clear := stormNonCrit(world.WeatherClear)
+	dmg15Rain := stormNonCrit(world.WeatherRain)
 	if dmg15Rain <= dmg15Clear {
 		t.Fatalf("Arauto do Trovão na chuva (+35%%) deveria causar mais dano que em clima limpo (Chuva: %d, Limpo: %d)", dmg15Rain, dmg15Clear)
 	}

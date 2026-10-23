@@ -1630,11 +1630,20 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		staminaCost = 0.0
 	}
 
+	// Habilidades Q/R/F: o recurso depende da classe (físicas: Stamina, mágicas: Mana, híbridas: as duas)
+	if skillStam, skillMana := world.SkillCost(player.ClassID, pkt.ActionType); skillStam > 0 || skillMana > 0 {
+		staminaCost = 0
+		if !player.PaySkillCost(skillStam, skillMana) {
+			s.sendPlayerStats(player) // recurso insuficiente
+			return
+		}
+	}
 	if staminaCost > 0 && !player.ConsumeStamina(staminaCost) {
 		// Estamina insuficiente para executar a ação
 		s.sendPlayerStats(player)
 		return
 	}
+	player.MarkInCombat()
 
 	player.RecordAction(pkt.ActionType)
 
@@ -4210,6 +4219,15 @@ func (s *Server) runGameLoop() {
 			s.mu.RLock()
 			for _, p := range s.players {
 				p.RegenerateStamina(dt, isNight, currentMoon)
+				p.RegenerateMana(dt, p.OutOfCombat())
+			}
+			// Mana: envia o valor atualizado 2x por segundo (a regeneração é contínua)
+			if s.serverTick%15 == 0 {
+				for _, p := range s.players {
+					if p.ManaChanged() {
+						go s.sendPlayerStats(p)
+					}
+				}
 			}
 
 			// 3. Atualização física suave dos NPCs a 30 Hz

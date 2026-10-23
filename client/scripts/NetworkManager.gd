@@ -8,6 +8,7 @@ signal npc_state_received(npcs_dict: Dictionary)
 signal npc_spoke(npc_id: int, message: String)
 signal world_time_updated(hour: int, minute: int, moon_phase: int, weather_type: int)
 signal combat_event_received(attacker_id: int, target_id: int, action_type: int, damage: int, is_crit: int, target_hp: int, target_max_hp: int)
+signal player_mana_received(player_id: int, mana: int, max_mana: int)
 signal player_stats_received(player_id: int, race_id: int, class_id: int, hp: int, max_hp: int, stamina: int, max_stamina: int)
 signal player_stats_updated(player_id: int, race_id: int, class_id: int, hp: int, max_hp: int, stamina: int, max_stamina: int)
 signal player_stats_full_received(player_id: int, race_id: int, class_id: int, class_tier: int, level: int, hp: int, max_hp: int, stamina: int, max_stamina: int, buff_active: int)
@@ -124,9 +125,9 @@ func _process_tcp() -> void:
 				npc_spoke.emit(npc_id, text)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
 
-			elif opcode == 0x33: # PLAYER_STATS (32 bytes = PlayerStatsPacketSize no servidor)
+			elif opcode == 0x33: # PLAYER_STATS (36 bytes = PlayerStatsPacketSize no servidor)
 				# Espera o pacote inteiro: adivinhar o tamanho pelo que já chegou quebra o enquadramento do TCP
-				var expected_len: int = 32
+				var expected_len: int = 36
 				if tcp_rx_buffer.size() < expected_len:
 					break
 				var b := StreamPeerBuffer.new()
@@ -178,7 +179,10 @@ func _process_tcp() -> void:
 					spi_stat = b.get_u8()
 					mas_stat = b.get_u8()
 					lck_stat = b.get_u8()
-				player_sub_paths[pid] = b.get_u8() # Caminho da classe (1 a 4)
+				player_sub_paths[pid] = b.get_u8() # Caminho da classe (1 a 4; 0 = não escolhido)
+				var tcp_mana: int = b.get_u16()
+				var tcp_max_mana: int = b.get_u16()
+				player_mana_received.emit(pid, tcp_mana, tcp_max_mana)
 				player_stats_received.emit(pid, race, cls, hp, max_hp, stam, max_stam)
 				player_stats_updated.emit(pid, race, cls, hp, max_hp, stam, max_stam)
 				player_stats_full_received.emit(pid, race, cls, tier, lvl, hp, max_hp, stam, max_stam, buff)
@@ -468,6 +472,11 @@ func _process_udp() -> void:
 				spi_stat = buffer.get_u8()
 				mas_stat = buffer.get_u8()
 				lck_stat = buffer.get_u8()
+			if packet.size() >= 36:
+				player_sub_paths[pid] = buffer.get_u8()
+				var udp_mana: int = buffer.get_u16()
+				var udp_max_mana: int = buffer.get_u16()
+				player_mana_received.emit(pid, udp_mana, udp_max_mana)
 			player_stats_received.emit(pid, race, cls, hp, max_hp, stam, max_stam)
 			player_stats_updated.emit(pid, race, cls, hp, max_hp, stam, max_stam)
 			player_stats_full_received.emit(pid, race, cls, tier, lvl, hp, max_hp, stam, max_stam, buff)
