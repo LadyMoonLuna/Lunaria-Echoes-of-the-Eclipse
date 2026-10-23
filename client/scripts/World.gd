@@ -567,6 +567,8 @@ var my_max_stamina: int = 100
 var action_bar_container: HBoxContainer = null
 var action_bar_slots: Array[PanelContainer] = []
 var action_bar_name_labels: Array[Label] = []
+var action_bar_cd_labels: Array[Label] = []
+const ACTION_BAR_IDS := [1, 3, 4, 5, 6] # LMB, Q, R, F, Z
 
 func _ready() -> void:
 	for action_name in ["skill_racial", "skill_1", "skill_2", "skill_3", "dodge", "interact"]:
@@ -666,6 +668,7 @@ func _ready() -> void:
 		footer_lbl.text = "[WASD] Mover | [LMB] Ataque | [Shift] Esquiva | [G] Pegar Item | [Q/R/F] Skills | [Z] Racial | [E] Interagir | [C] Linhagem | [K] Atributos | [I] Inventário | [H] Grimório | [F9/F10] Dev Manager"
 
 func _process(delta: float) -> void:
+	_update_action_bar_cooldowns()
 	if portal_cooldown > 0.0:
 		portal_cooldown -= delta
 
@@ -2994,6 +2997,7 @@ func _setup_action_bar() -> void:
 
 	action_bar_slots.clear()
 	action_bar_name_labels.clear()
+	action_bar_cd_labels.clear()
 
 	var keys := ["[LMB]", "[Q]", "[R]", "[F]", "[Z]"]
 	var titles := ["Básico", "Skill 1", "Skill 2", "Ultimate", "Racial"]
@@ -3033,6 +3037,19 @@ func _setup_action_bar() -> void:
 		name_lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0, 1.0))
 		vbox.add_child(name_lbl)
 		action_bar_name_labels.append(name_lbl)
+
+		# Recarga: número grande por cima do slot, que escurece enquanto conta
+		var cd_lbl := Label.new()
+		cd_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cd_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		cd_lbl.add_theme_font_size_override("font_size", 22)
+		cd_lbl.add_theme_color_override("font_color", Color(1, 1, 1))
+		cd_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+		cd_lbl.add_theme_constant_override("outline_size", 6)
+		cd_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cd_lbl.visible = false
+		slot.add_child(cd_lbl)
+		action_bar_cd_labels.append(cd_lbl)
 
 	_update_action_bar_skills()
 
@@ -3078,6 +3095,24 @@ func _update_action_bar_skills() -> void:
 		action_bar_slots[2].tooltip_text = "%s [R]\n%s" % [get_action_name.call(4), get_action_desc.call(4)]
 		action_bar_slots[3].tooltip_text = "%s [F]\n%s" % [get_action_name.call(5), get_action_desc.call(5)]
 		action_bar_slots[4].tooltip_text = "%s [Z]\n%s" % [get_action_name.call(6), get_action_desc.call(6)]
+
+## Atualiza a recarga visível de cada slot (chamado a cada quadro).
+func _update_action_bar_cooldowns() -> void:
+	if action_bar_cd_labels.size() < ACTION_BAR_IDS.size() or local_player == null or not is_instance_valid(local_player):
+		return
+	if not local_player.has_method("action_cooldown_left"):
+		return
+	for i in range(ACTION_BAR_IDS.size()):
+		var left: float = local_player.action_cooldown_left(ACTION_BAR_IDS[i])
+		var lbl: Label = action_bar_cd_labels[i]
+		var slot: PanelContainer = action_bar_slots[i]
+		if left > 0.05 and ACTION_BAR_IDS[i] != 1:
+			lbl.visible = true
+			lbl.text = "%.1f" % left if left < 10.0 else "%d" % int(ceil(left))
+			slot.self_modulate = Color(0.45, 0.45, 0.5, 1.0)
+		else:
+			lbl.visible = false
+			slot.self_modulate = Color(1, 1, 1, 1)
 
 func flash_action_bar_slot(slot_idx: int) -> void:
 	if slot_idx < 0 or slot_idx >= action_bar_slots.size():

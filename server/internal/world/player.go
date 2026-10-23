@@ -1591,8 +1591,8 @@ func (p *Player) CanPerformAction(actionType uint8) bool {
 	switch actionType {
 	case protocol.ActionBasicAttack: // 1: Ataque Básico (cd 0.45s)
 		cd = 450 * time.Millisecond
-	case protocol.ActionDodgeRoll: // 2: Esquiva (cd 0.5s)
-		cd = 500 * time.Millisecond
+	case protocol.ActionDodgeRoll: // 2: Esquiva (cd 0.9s: o rolamento dura 0,35s + recuperação)
+		cd = 900 * time.Millisecond
 	case protocol.ActionSkillQ: // 3: Skill Q (cd 2.0s)
 		cd = 2000 * time.Millisecond
 	case protocol.ActionSkillR: // 4: Skill R (cd 4.0s)

@@ -22,6 +22,13 @@ var current_class_id: int = 1  # 1..15
 var is_attacking: bool = false
 var is_dodging: bool = false
 var dodge_timer: float = 0.0
+
+# Recarga (CD) de cada ação, igual à do servidor (world.CanPerformAction). Durante a recarga
+# a ação não acontece: sem animação, sem pacote. Cronari (raça 28) recarrega 25% mais rápido.
+const ACTION_COOLDOWNS := {1: 0.45, 2: 0.9, 3: 2.0, 4: 4.0, 5: 6.0, 6: 10.0}
+const JUMP_COOLDOWN: float = 0.45
+var action_ready_at: Dictionary = {}
+var jump_cooldown: float = 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 var attack_cooldown: float = 0.0
 var is_menu_open: bool = false
@@ -351,6 +358,19 @@ func apply_skill_keybinds(new_bindings: Dictionary) -> void:
 		cfg.set_value("Keybinds", k, skill_slot_bindings[k])
 	cfg.save("user://skill_keybinds.cfg")
 
+func action_cooldown_total(action_id: int) -> float:
+	var cd: float = ACTION_COOLDOWNS.get(action_id, 0.3)
+	if current_race_id == 28:
+		cd *= 0.75
+	return cd
+
+func action_cooldown_left(action_id: int) -> float:
+	var ready_at: int = action_ready_at.get(action_id, 0)
+	return maxf(0.0, float(ready_at - Time.get_ticks_msec()) / 1000.0)
+
+func _start_cooldown(action_id: int) -> void:
+	action_ready_at[action_id] = Time.get_ticks_msec() + int(action_cooldown_total(action_id) * 1000.0)
+
 func trigger_action_by_id(action_id: int) -> void:
 	match action_id:
 		1: _perform_basic_attack()
@@ -362,8 +382,9 @@ func trigger_action_by_id(action_id: int) -> void:
 		_: _perform_basic_attack()
 
 func _perform_basic_attack() -> void:
-	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0:
-		return
+	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0 or action_cooldown_left(1) > 0.0:
+		return # em recarga: nada acontece
+	_start_cooldown(1)
 
 	is_attacking = true
 	attack_cooldown = 0.35
@@ -380,8 +401,9 @@ func _perform_basic_attack() -> void:
 	_animate_attack_visual(1)
 
 func _perform_special_skill() -> void:
-	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0:
-		return
+	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0 or action_cooldown_left(3) > 0.0:
+		return # em recarga: nada acontece
+	_start_cooldown(3)
 
 	is_attacking = true
 	attack_cooldown = 0.65
@@ -399,8 +421,9 @@ func _perform_special_skill() -> void:
 	_animate_attack_visual(3)
 
 func _perform_skill_r() -> void:
-	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0:
-		return
+	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0 or action_cooldown_left(4) > 0.0:
+		return # em recarga: nada acontece
+	_start_cooldown(4)
 
 	is_attacking = true
 	attack_cooldown = 0.5
@@ -418,8 +441,9 @@ func _perform_skill_r() -> void:
 	_animate_attack_visual(4)
 
 func _perform_skill_f() -> void:
-	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0:
-		return
+	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0 or action_cooldown_left(5) > 0.0:
+		return # em recarga: nada acontece
+	_start_cooldown(5)
 
 	is_attacking = true
 	attack_cooldown = 0.65
@@ -437,8 +461,9 @@ func _perform_skill_f() -> void:
 	_animate_attack_visual(5)
 
 func _perform_racial_skill() -> void:
-	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0:
-		return
+	if is_menu_open or is_attacking or is_dodging or attack_cooldown > 0.0 or action_cooldown_left(6) > 0.0:
+		return # em recarga: nada acontece
+	_start_cooldown(6)
 
 	is_attacking = true
 	attack_cooldown = 0.65
@@ -1405,10 +1430,12 @@ func can_dash() -> bool:
 	return get_weight_ratio() < 1.00
 
 func _perform_dodge_roll() -> void:
-	if is_menu_open or is_dodging:
+	# Sem rolar no ar nem emendar rolamentos: só no chão e fora da recarga
+	if is_menu_open or is_dodging or not is_on_floor() or action_cooldown_left(2) > 0.0:
 		return
 	if not can_dash():
 		return # acima de 100% do peso a esquiva (Shift) fica bloqueada
+	_start_cooldown(2)
 
 	is_dodging = true
 	dodge_timer = 0.35
@@ -4034,6 +4061,8 @@ func _physics_process(delta: float) -> void:
 
 	if attack_cooldown > 0.0:
 		attack_cooldown -= delta
+	if jump_cooldown > 0.0 and is_on_floor():
+		jump_cooldown -= delta
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -4049,8 +4078,9 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0.0, SPEED * 2.0 * delta)
 			velocity.z = move_toward(velocity.z, 0.0, SPEED * 2.0 * delta)
 		else:
-			if Input.is_action_just_pressed("jump") and is_on_floor():
+			if Input.is_action_just_pressed("jump") and is_on_floor() and jump_cooldown <= 0.0:
 				velocity.y = JUMP_VELOCITY
+				jump_cooldown = JUMP_COOLDOWN
 
 			var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 			if get_viewport().gui_get_focus_owner() is LineEdit:
