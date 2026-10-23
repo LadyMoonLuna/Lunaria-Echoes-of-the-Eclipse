@@ -31,6 +31,18 @@ static func get_default_npc_name(id: int) -> String:
 			return "Kaelen\n<Mestre Batedor> [E]"
 		110:
 			return "Alquimista Esquecido\n<Espírito dos Esgotos> [E]"
+		111:
+			return "Nyx Sombraveloz\n<Mestra das Lâminas Silentes> [E]"
+		112:
+			return "Mestre Tao Ferroventre\n<Grão-Mestre do Punho Celeste> [E]"
+		113:
+			return "Iolanthe Mármore-Lunar\n<Escultora de Almas> [E]"
+		114:
+			return "Madame Fiorella\n<Tecelã Carmesim> [E]"
+		115:
+			return "Chef Bartolomeu\n<Mestre do Banquete> [E]"
+		116:
+			return "Thorne\n<Eremita das Feras> [E]"
 		_:
 			return "NPC #%d" % id
 
@@ -893,6 +905,8 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 		model_id = 105
 	elif is_valen:
 		model_id = 106
+	elif npc_id >= 111 and npc_id <= 116:
+		model_id = npc_id
 	_apply_npc_model(model_id)
 
 func _apply_npc_model(model_id: int) -> void:

@@ -310,6 +310,7 @@ func (s *Server) Start() error {
 	}
 
 	allLivingNPCs := []*world.NPC{garrick, lyra, varis, guard1, guard2, seraphina, aurelius, kaelen, ghostAlchemist}
+	allLivingNPCs = append(allLivingNPCs, s.spawnClassMasters(scriptsDir, currentH)...)
 	for _, npc := range allLivingNPCs {
 		if err := s.luaEngine.BindNPC(npc); err != nil {
 			log.Printf("[AVISO] Nao foi possivel vincular script do NPC '%s' (ID %d): %v\n", npc.Name, npc.ID, err)
@@ -939,6 +940,14 @@ func (s *Server) handleSelectIdentity(pkt protocol.SelectIdentityPacket) {
 		return
 	}
 
+	// Classes Básicas (1 a 12) só são aprendidas ao lado do Mestre de cada uma
+	if ok, reason := s.checkBasicClassRequest(player, pkt.ClassID); !ok {
+		s.BroadcastNPCSay(0, fmt.Sprintf("[CLASSE] %s", reason))
+		log.Printf("[CLASSE] Jogador #%d pediu a Classe %d longe do Mestre — recusado\n", pkt.PlayerID, pkt.ClassID)
+		s.sendPlayerStats(player)
+		return
+	}
+
 	// Variantes Secretas (13 a 18) exigem a classe básica de origem e o nível Raro (25+)
 	if pkt.ClassID >= protocol.ClassRunicSpellblade && pkt.ClassID <= protocol.ClassPlagueDoctor && pkt.ClassID != player.ClassID {
 		if ok, reason := player.CanAwakenVariant(pkt.ClassID); !ok {
@@ -1323,6 +1332,11 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Sssss... Um veneno primordial tão concentrado... Minha essência se alimenta deste néctar proibido, mortal #%d... [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
 				log.Printf("[PRESENTE] Jogador #%d entregou Veneno ao Alquimista Esquecido (+25 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
 			}
+		}
+
+		// Novos Mestres de Classe (111 a 115) e o Eremita secreto (116)
+		if s.handleClassMasterInteract(player, pkt.TargetNPCID) {
+			return
 		}
 
 		// 1. Mestres de Classes Básicas para Viajantes Sem Classe (ClassID == 0):
@@ -4434,6 +4448,7 @@ func (s *Server) runGameLoop() {
 
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
+				s.updateClassMasterRoutines(int(h))
 				s.updateMoonPhaseCreatures(moon)
 
 				// Logging quando muda a hora cheia

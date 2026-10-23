@@ -686,7 +686,7 @@ const CLASS_ACTIVE_SKILLS := {
 	10: { # Senhor das Feras
 		"name": "Senhor das Feras",
 		"tier_name": "Tier 1 a Tier 4 (Senhor dos Predadores — Estilo Taming Master)",
-		"desc": "Mestre das feras com chicote bestial de couro trançado. [Passiva: Senhor da Matilha] Luta com Fera Domada que divide dano.",
+		"desc": "🔒 CLASSE SECRETA — nenhum mestre da vila a ensina; dizem que um eremita vive entre os lobos do Bosque. Mestre das feras com chicote bestial de couro trançado. [Passiva: Senhor da Matilha] Luta com Fera Domada que divide dano.",
 		"color": Color("#ffd740"),
 		"evolved_titles": {
 			1: "Senhor das Feras Comum",

@@ -100,6 +100,8 @@ type Player struct {
 	LowHPKills             int       // Abates com HP <= 30% (Inquisidor da Chama Branca - Classe 11)
 	PerfectAutopsiesStreak int       // Sequência de autópsias perfeitas na Zona Verde (Arauto do Ossuário - Classe 12)
 	SoloAlphaWolfKilled    bool      // Lobo Alfa derrotado 100% Solo (Senhor da Selva Primordial - Classe 13)
+	ThorneTrust            int       // Confiança de Thorne: só sobe com presas (+15) e peles de Alfa (+25)
+	TamerUnlocked          bool      // Missão secreta de Thorne concluída: pode aprender Senhor das Feras (Classe 10)
 	BlockedBossRupture     bool      // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro do Vazio - Classe 14)
 	PyromancerRevived      bool      // Passiva Chama da Vida (Pyrael - Raça 30)
 	AristocratRevivedAt    time.Time // Passiva Imortalidade do Sangue (Conde Escarlate - Classe 25)

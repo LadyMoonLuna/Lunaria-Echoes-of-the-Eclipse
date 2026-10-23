@@ -14,6 +14,7 @@ const ClassMasterUIScript = preload("res://scripts/ClassMasterUI.gd")
 const DevDropRatesUIScript = preload("res://scripts/DevDropRatesUI.gd")
 const AutopsyUIScript = preload("res://scripts/AutopsyUI.gd")
 const CorpseEntityScript = preload("res://scripts/CorpseEntity.gd")
+const NPCEntityScript = preload("res://scripts/NPCEntity.gd")
 
 @onready var players_container: Node3D = $Players
 @onready var npcs_container: Node3D = $NPCs
@@ -2046,7 +2047,7 @@ func _try_interact_nearest_npc() -> void:
 	if nearest_id > 0:
 		print("[World] Interagindo com NPC #%d (distância: %.2fm)" % [nearest_id, min_dist])
 		NetworkManager.send_player_interact(nearest_id)
-		if nearest_id in [100, 103, 104, 105, 106, 107, 108, 109, 110]:
+		if nearest_id in [100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116]:
 			if class_master_ui:
 				class_master_ui.open_master_menu(nearest_id)
 
@@ -2529,6 +2530,9 @@ func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int
 	elif nid == 110:
 		p_name = "Alquimista Esquecido\n<Espírito dos Esgotos> [E]"
 		script_path = "scripts/npcs/ghost_alchemist.lua"
+	elif nid >= 111 and nid <= 116:
+		p_name = NPCEntityScript.get_default_npc_name(nid)
+		script_path = "scripts/npcs/%s.lua" % ["nyx", "tao", "iolanthe", "fiorella", "bartolomeu", "thorne"][nid - 111]
 	else:
 		p_name = "NPC #%d" % nid
 
@@ -2588,6 +2592,8 @@ func _on_npc_spoke(npc_id: int, message: String) -> void:
 			sender_name = "Kaelen"
 		elif npc_id == 110:
 			sender_name = "Alquimista Esquecido"
+		elif npc_id >= 111 and npc_id <= 116:
+			sender_name = NPCEntityScript.get_default_npc_name(npc_id).split("\n")[0]
 		dialogue_label.text = "[%s]: %s" % [sender_name, message]
 		dialogue_label.visible = true
 		dialogue_clear_timer.start(8.0)

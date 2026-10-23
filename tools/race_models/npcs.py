@@ -3,7 +3,7 @@
 import math
 
 from modelkit import Model, humanoid, v_add
-from races_base import eyes, belt
+from races_base import eyes, belt, hair_long, hair_short, pointed_ears
 
 
 def N(npc_id, key, name, title, desc, color, scale=1.0):
@@ -285,4 +285,170 @@ def ghost_alchemist():
     return m
 
 
-NPCS = [garrick, lyra, varis, randel, valen, ghost_alchemist]
+def nyx():
+    m = N(111, "nyx", "Nyx Sombraveloz", "Mestra das Lâminas Silentes",
+          "Assassina Umbryss esguia de pele cinza-lavanda, olhos violeta brilhantes e cabelo preto curto. "
+          "Veste couro negro justo com faixas roxas, capuz baixo, máscara cobrindo o nariz e duas adagas curvas nas costas.",
+          "#7e57c2", scale=0.97)
+    skin = m.mat("skin", "#b9a7c9", rough=0.5)
+    leather = m.mat("night_leather", "#17131d", rough=0.6)
+    sash = m.mat("violet_sash", "#5e35b1", rough=0.8, double=True)
+    steel = m.mat("dagger_steel", "#c5cae9", rough=0.2, metal=0.95)
+    hair = m.mat("hair", "#0d0b12", rough=0.8)
+    eye = m.mat("eye", "#e1bee7", emit="#ab47bc", energy=4.0)
+    humanoid(m, skin, leather, leather, leather, hands=leather, forearm=leather, w=0.92)
+    eyes(m, eye)
+    hair_short(m, hair)
+    m.part("box", [0.2, 0.06, 0.04], (0, 1.68, -0.12), leather)  # máscara
+    m.part("sphere", [0.17], (0, 1.76, 0.03), leather, scale=(1.05, 1.0, 1.1))  # capuz
+    m.part("box", [0.42, 0.06, 0.25], (0, 1.02, 0), sash, rot=(0, 0, 8))
+    m.part("box", [0.08, 0.4, 0.02], (0.08, 0.8, -0.13), sash, rot=(0, 0, -6))
+    for side in (-1, 1):
+        m.part("box", [0.03, 0.42, 0.012], (0.1 * side, 1.35, 0.2), steel, rot=(0, 0, 35 * side))
+        m.part("box", [0.05, 0.1, 0.03], (0.1 * side + 0.11 * side, 1.55, 0.2), leather, rot=(0, 0, 35 * side))
+    return m
+
+
+def tao():
+    m = N(112, "tao", "Mestre Tao Ferroventre", "Grão-Mestre do Punho Celeste",
+          "Monge Kharad idoso e atarracado, careca, de longas sobrancelhas e barba branca. Túnica laranja de monge "
+          "amarrada na cintura, peito musculoso à mostra, faixas nas mãos e um colar de contas de madeira.",
+          "#ffb74d", scale=0.92)
+    skin = m.mat("skin", "#c4906a", rough=0.6)
+    robe = m.mat("monk_robe", "#ef6c00", rough=0.85, double=True)
+    wrap = m.mat("hand_wrap", "#efe6d2", rough=0.9)
+    beard = m.mat("white_beard", "#f5f5f5", rough=0.95)
+    beads = m.mat("wood_beads", "#6d4c41", rough=0.5)
+    sandal = m.mat("sandal", "#4e342e", rough=0.8)
+    humanoid(m, skin, skin, robe, sandal, hands=wrap, forearm=wrap, w=1.2)
+    eyes(m, m.mat("iris", "#2e1f14", rough=0.3))
+    m.part("sphere", [0.2], (0, 1.27, -0.02), skin, scale=(1.35, 1.25, 0.9))
+    m.part("box", [0.5, 0.55, 0.05], (0.12, 1.15, 0.0), robe, rot=(0, 0, -25))
+    m.part("torus", [0.19 * 1.2, 0.22 * 1.2], (0, 0.98, 0), robe, scale=(1.05, 1, 0.8))
+    m.part("capsule", [0.07, 0.26], (0, 1.56, -0.1), beard, rot=(15, 0, 0))
+    m.part("box", [0.07, 0.015, 0.03], (0.05, 1.79, -0.12), beard, rot=(0, 0, -15), mirror=True)
+    for i in range(10):
+        a = math.radians(i * 36)
+        m.part("sphere", [0.022], (math.sin(a) * 0.15, 1.5 - (1 - math.cos(a)) * 0.04, -0.12 + math.cos(a) * 0.05 - 0.02), beads)
+    return m
+
+
+def iolanthe():
+    m = N(113, "iolanthe", "Iolanthe Mármore-Lunar", "Escultora de Almas",
+          "Jovem Elarin de orelhas pontudas e longos cabelos prateados presos com um cinzel. Avental de couro "
+          "cinza coberto de pó de mármore sobre vestido azul-lunar, luvas de trabalho e uma pequena estatueta luminosa no cinto.",
+          "#b0bec5", scale=0.96)
+    skin = m.mat("skin", "#f1dccb", rough=0.5)
+    dress = m.mat("moon_dress", "#5c6bc0", rough=0.8, double=True)
+    apron = m.mat("dusty_apron", "#8d8d8d", rough=0.95)
+    hair = m.mat("silver_hair", "#e0e6ee", rough=0.6)
+    marble = m.mat("marble", "#eceff1", rough=0.35)
+    glow = m.mat("lunar_glow", "#e3f2fd", emit="#90caf9", energy=3.0)
+    humanoid(m, skin, dress, dress, m.mat("boots", "#3e3e46", rough=0.7), hands=apron, w=0.94)
+    eyes(m, m.mat("iris", "#5c6bc0", rough=0.3))
+    hair_long(m, hair, length=0.6)
+    pointed_ears(m, skin)
+    m.part("cylinder", [0.4 * 0.6, 0.3, 0.55], (0, 0.75, 0), dress)
+    m.part("box", [0.34, 0.62, 0.03], (0, 1.05, -0.17), apron)
+    m.part("box", [0.012, 0.18, 0.012], (0.06, 1.84, 0.1), m.mat("chisel", "#9e9e9e", metal=0.9, rough=0.3), rot=(0, 0, 30))
+    m.part("sphere", [0.05], (0.2, 0.92, -0.08), marble, scale=(0.8, 1.3, 0.8))
+    m.part("sphere", [0.02], (0.2, 0.99, -0.12), glow)
+    m.light("#90caf9", 0.5, 2.0, (0.2, 0.95, -0.15))
+    return m
+
+
+def fiorella():
+    m = N(114, "fiorella", "Madame Fiorella Agulhadouro", "Tecelã Carmesim",
+          "Cambion elegante de pele rosada, pequenos chifres curvos e cabelo vermelho em coque alto atravessado por "
+          "agulhas douradas. Vestido carmesim com espartilho bordado, fita métrica no pescoço e carretéis de fio de aço no cinto.",
+          "#e53950", scale=0.98)
+    skin = m.mat("skin", "#e8b4a8", rough=0.5)
+    gown = m.mat("crimson_gown", "#b71c1c", rough=0.6, double=True)
+    corset = m.mat("corset", "#3b0a12", rough=0.5)
+    gold = m.mat("gold_needle", "#ffd54f", rough=0.2, metal=1.0)
+    hair = m.mat("red_hair", "#c62828", rough=0.6)
+    horn = m.mat("horn", "#2b1b1b", rough=0.4)
+    tape = m.mat("measuring_tape", "#fff59d", rough=0.8, double=True)
+    humanoid(m, skin, gown, gown, m.mat("heels", "#1a0a0a", rough=0.4), w=0.95)
+    eyes(m, m.mat("iris", "#ffb300", emit="#ff6f00", energy=1.5))
+    m.part("sphere", [0.135], (0, 1.75, 0.02), hair, scale=(1.04, 1.0, 1.05))
+    m.part("sphere", [0.09], (0, 1.92, 0.05), hair)
+    for x in (-0.05, 0.05):
+        m.part("cylinder", [0.004, 0.004, 0.22], (x, 1.94, 0.05), gold, rot=(0, 0, 70 if x > 0 else -70))
+    m.part("cylinder", [0.0, 0.025, 0.1], (0.08, 1.86, -0.02), horn, rot=(-20, 0, -35), mirror=True)
+    m.part("cylinder", [0.42, 0.24, 0.62], (0, 0.62, 0), gown)
+    m.part("sphere", [0.19], (0, 1.2, -0.01), corset, scale=(1.05, 1.2, 0.8))
+    m.part("box", [0.03, 0.4, 0.01], (0.06, 1.38, -0.13), tape, rot=(0, 0, 4), mirror=True)
+    for x in (-0.16, 0.16):
+        m.part("cylinder", [0.04, 0.04, 0.05], (x, 0.98, -0.12), m.mat("steel_thread", "#cfd8dc", metal=0.9, rough=0.25), rot=(90, 0, 0))
+    return m
+
+
+def bartolomeu():
+    m = N(115, "bartolomeu", "Chef Bartolomeu Brasa-Alta", "Mestre do Banquete",
+          "Orkhan enorme de pele verde-oliva, presas inferiores e bigode ruivo trançado. Dólmã branco de chef manchado, "
+          "chapéu alto, avental de couro, um cutelo gigante no ombro e um wok de ferro preto pendurado nas costas.",
+          "#ff7043", scale=1.05)
+    skin = m.mat("skin", "#7f9a5a", rough=0.6)
+    white = m.mat("chef_white", "#f5f5f0", rough=0.8)
+    apron = m.mat("leather_apron", "#5d4037", rough=0.8)
+    mustache = m.mat("mustache", "#d84315", rough=0.9)
+    tusk = m.mat("tusk", "#fff8e1", rough=0.4)
+    steel = m.mat("cleaver", "#b0bec5", rough=0.25, metal=0.95)
+    wok = m.mat("black_wok", "#1c1c1c", rough=0.5, metal=0.8)
+    humanoid(m, skin, white, m.mat("checked_pants", "#37474f", rough=0.9), m.mat("boots", "#2b1f1a", rough=0.7),
+             hands=skin, forearm=white, w=1.4)
+    eyes(m, m.mat("iris", "#3e2723", rough=0.3))
+    m.part("sphere", [0.2], (0, 1.24, -0.02), white, scale=(1.55, 1.4, 1.05))
+    m.part("cylinder", [0.13, 0.15, 0.24], (0, 1.97, 0.02), white)
+    m.part("sphere", [0.16], (0, 2.1, 0.02), white, scale=(1.1, 0.6, 1.1))
+    m.part("box", [0.44, 0.7, 0.03], (0, 1.02, -0.24), apron, rot=(5, 0, 0))
+    m.part("capsule", [0.022, 0.12], (0.06, 1.66, -0.13), mustache, rot=(0, 0, 70), mirror=True)
+    m.part("cylinder", [0.0, 0.018, 0.06], (0.04, 1.64, -0.13), tusk, rot=(0, 0, 10), mirror=True)
+    m.part("box", [0.22, 0.14, 0.012], (0.32, 1.7, 0.02), steel, rot=(0, 0, -30), group="arm_r")
+    m.part("cylinder", [0.03, 0.03, 0.14], (0.24, 1.58, 0.02), apron, rot=(0, 0, -30), group="arm_r")
+    m.part("sphere", [0.24], (0, 1.3, 0.26), wok, scale=(1.0, 1.0, 0.3))
+    return m
+
+
+def thorne():
+    m = N(116, "thorne", "Thorne, o Eremita das Feras", "Mestre Secreto do Senhor das Feras",
+          "Ulvar grisalho e magro, orelhas de lobo e barba desgrenhada. Manto de peles costuradas, colar de presas, "
+          "cajado de madeira retorcida e uma loba cinzenta de olhos âmbar sempre ao seu lado.",
+          "#8d6e63", scale=1.0)
+    skin = m.mat("skin", "#a1887f", rough=0.7)
+    fur = m.mat("fur_mantle", "#6d5a4a", rough=1.0)
+    grey = m.mat("wolf_grey", "#8e8e8e", rough=1.0)
+    hair = m.mat("grey_hair", "#bdbdbd", rough=0.9)
+    fang = m.mat("fang", "#efe6d6", rough=0.4)
+    wood = m.mat("twisted_wood", "#4e342e", rough=0.9)
+    amber = m.mat("amber_eye", "#ffe082", emit="#ffab00", energy=4.0)
+    humanoid(m, skin, m.mat("hide_tunic", "#5d4330", rough=0.85), m.mat("hide_pants", "#3e2c20", rough=0.9),
+             m.mat("wrapped_feet", "#2f241c", rough=0.9), w=0.96)
+    eyes(m, amber)
+    m.part("sphere", [0.14], (0, 1.76, 0.03), hair, scale=(1.08, 1.0, 1.1))
+    m.part("capsule", [0.08, 0.2], (0, 1.58, -0.09), hair, rot=(15, 0, 0))
+    m.part("cylinder", [0.0, 0.04, 0.11], (0.1, 1.9, 0.02), hair, rot=(0, 0, -20), mirror=True)
+    m.part("sphere", [0.24], (0, 1.45, 0.05), fur, scale=(1.5, 0.7, 1.2))
+    m.part("box", [0.5, 0.8, 0.04], (0, 1.0, 0.18), fur, rot=(-5, 0, 0))
+    for i in range(5):
+        m.part("cylinder", [0.0, 0.012, 0.05], (-0.08 + i * 0.04, 1.42, -0.16), fang, rot=(180, 0, 0))
+    m.part("cylinder", [0.02, 0.025, 1.7], (0.35, 0.85, -0.1), wood, rot=(0, 0, 4), group="arm_r")
+    m.part("sphere", [0.05], (0.36, 1.72, -0.1), wood)
+    # Cinza, a loba
+    m.group("wolf", (-0.6, 0.0, 0.1), anim={"type": "bob", "amp": 0.02, "speed": 2.5})
+    m.part("capsule", [0.13, 0.55], (-0.6, 0.42, 0.1), grey, rot=(90, 0, 0), group="wolf")
+    m.part("sphere", [0.11], (-0.6, 0.56, -0.26), grey, group="wolf")
+    m.part("box", [0.08, 0.07, 0.12], (-0.6, 0.53, -0.38), grey, group="wolf")
+    m.part("sphere", [0.016], (-0.645, 0.59, -0.35), amber, group="wolf")
+    m.part("sphere", [0.016], (-0.555, 0.59, -0.35), amber, group="wolf")
+    m.part("cylinder", [0.0, 0.04, 0.09], (-0.65, 0.68, -0.24), grey, group="wolf")
+    m.part("cylinder", [0.0, 0.04, 0.09], (-0.55, 0.68, -0.24), grey, group="wolf")
+    for x in (-0.68, -0.52):
+        for z in (-0.12, 0.32):
+            m.part("capsule", [0.04, 0.32], (x, 0.16, z), grey, group="wolf")
+    m.part("cylinder", [0.05, 0.02, 0.3], (-0.6, 0.5, 0.52), grey, rot=(-50, 0, 0), group="wolf")
+    return m
+
+
+NPCS = [garrick, lyra, varis, randel, valen, ghost_alchemist, nyx, tao, iolanthe, fiorella, bartolomeu, thorne]

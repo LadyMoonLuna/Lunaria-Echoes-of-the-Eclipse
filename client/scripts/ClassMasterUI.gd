@@ -215,6 +215,126 @@ const MASTER_DATA := {
 			{"icon": "🧪", "title": "Elixir Ectoplásmico das Sombras", "desc": "Torna o viajante translúcido, reduzindo a agressividade de monstros.", "action": "ghost_elixir"},
 			{"icon": "📜", "title": "Fragmento do Pergaminho Proibido", "desc": "Notas alquímicas antigas contendo fórmulas nunca ensinadas na superfície.", "action": "ghost_scroll"}
 		]
+	},
+	111: { # Nyx Sombraveloz
+		"title": "Nyx Sombraveloz, Mestra das Lâminas Silentes",
+		"sub": "Beco do Mercado Negro (só à noite) • Umbryss, 31 anos • Ex-Irmandade do Sol Negro",
+		"class_id": 4,
+		"class_name": "Lâmina Silente",
+		"greeting": "Você me encontrou nas sombras. Poucos conseguem. Fale baixo — e diga o que quer.",
+		"color": Color("#7e57c2"),
+		"talk_quotes": [
+			"Fugi da Irmandade do Sol Negro quando mandaram matar uma criança no Eclipse. Desde então, caço meus antigos irmãos.",
+			"Ataque quando o inimigo virar as costas. Honra não serve de nada para quem está morto.",
+			"Chá de jasmim acalma as mãos. Mãos calmas não erram o golpe.",
+			"Traga-me Glândulas de Veneno Sombrio dos esgotos e eu passo a confiar em você."
+		],
+		"services": [
+			{"icon": "💨", "title": "Bomba de Fumaça", "desc": "Some por alguns instantes da vista dos monstros.", "action": "smoke_bomb"},
+			{"icon": "🗡️", "title": "Lâminas Envenenadas", "desc": "Adagas leves banhadas em veneno de aranha.", "action": "poison_blades"},
+			{"icon": "🎭", "title": "Máscara Sem Rosto", "desc": "Ninguém lembra de um rosto que nunca viu.", "action": "faceless_mask"},
+			{"icon": "📜", "title": "Rumores da Irmandade", "desc": "Onde os assassinos do Sol Negro andam se escondendo.", "action": "nyx_rumors"}
+		]
+	},
+	112: { # Mestre Tao Ferroventre
+		"title": "Mestre Tao Ferroventre, Grão-Mestre do Punho Celeste",
+		"sub": "Clareira na entrada do Bosque Sussurrante • Kharad, 64 anos • Palma do Vento",
+		"class_id": 5,
+		"class_name": "Punho Celeste",
+		"greeting": "Ha-ha! Um visitante! Sente-se, tome um chá. Ou levante-se e me mostre esses punhos!",
+		"color": Color("#ffb74d"),
+		"talk_quotes": [
+			"Lutei sete dias com um Jotunar no Pico das Nove Luas. Perdi dois dedos, ganhei a Palma do Vento.",
+			"A força nasce dos pés, sobe pelo quadril e só termina no punho.",
+			"Três socos seguidos e o corpo endurece como pedra. Continue batendo!",
+			"Se derrubar o Lobo Alfa, traga a pele. Meu tatame está gasto. Ha-ha!"
+		],
+		"services": [
+			{"icon": "🍵", "title": "Chá das Nove Luas", "desc": "Restaura o fôlego e acalma o espírito.", "action": "nine_moon_tea"},
+			{"icon": "🥊", "title": "Faixas de Treino", "desc": "Faixas de linho que protegem os nós dos dedos.", "action": "hand_wraps"},
+			{"icon": "🧘", "title": "Meditação na Cachoeira", "desc": "Uma lição sobre respiração e foco.", "action": "waterfall_meditation"},
+			{"icon": "🍚", "title": "Bolinho de Arroz do Monge", "desc": "Simples, quente e cheio de energia.", "action": "rice_ball"}
+		]
+	},
+	113: { # Iolanthe Mármore-Lunar
+		"title": "Iolanthe Mármore-Lunar, Escultora de Almas",
+		"sub": "Pátio das Estátuas, Ruínas da Vigília • Elarin, 27 anos • Aprendiz do Escultor do Luar",
+		"class_id": 9,
+		"class_name": "Escultor de Almas",
+		"greeting": "Shh... as estátuas estão dormindo. Fale baixinho, viajante. O que procura nas ruínas?",
+		"color": Color("#b0bec5"),
+		"talk_quotes": [
+			"Quando a Vigília caiu, os soldados me pediram para continuar de guarda. Esculpi cada um deles.",
+			"A estátua com a espada quebrada era meu irmão Corvin. Às vezes juro que ele acena.",
+			"Na Lua Cheia, as pedras cantam. É a coisa mais bonita que já ouvi.",
+			"Um Anel de Luz Estelar daria olhos lindos para minha próxima estátua."
+		],
+		"services": [
+			{"icon": "🪨", "title": "Cinzel de Pedra-Lua", "desc": "Ferramenta que desperta pequenas centelhas na pedra.", "action": "moonstone_chisel"},
+			{"icon": "✨", "title": "Pó Lunar", "desc": "Brilha no escuro e fortalece guardiões de pedra.", "action": "lunar_dust"},
+			{"icon": "🗿", "title": "Estatueta de Proteção", "desc": "Um pequeno vigia para a sua mochila.", "action": "ward_statuette"},
+			{"icon": "📖", "title": "História da Vigília", "desc": "Como a fortaleza caiu e quem ainda a protege.", "action": "vigil_story"}
+		]
+	},
+	114: { # Madame Fiorella Agulhadouro
+		"title": "Madame Fiorella Agulhadouro, Tecelã Carmesim",
+		"sub": "Ateliê Carmesim da Vila (08h–20h) • Cambion, 45 anos • Ex-costureira da corte de Aurelith",
+		"class_id": 11,
+		"class_name": "Tecelão Carmesim",
+		"greeting": "Darling! Entre! Esse traje está implorando por socorro. O que posso costurar para você hoje?",
+		"color": Color("#e53950"),
+		"talk_quotes": [
+			"Fugi de um casamento arranjado costurando o noivo na cortina. Melhor ponto que já dei!",
+			"Fio de aço encantado corta melhor que espada, darling. E combina com tudo.",
+			"Coleciono botões raros. Se achar algum, traga para mim!",
+			"Prata da lua deixa o fio firme como promessa. Um Amuleto de Prata da Lua me faria muito feliz."
+		],
+		"services": [
+			{"icon": "🧵", "title": "Carretel de Fio de Aço", "desc": "Fio encantado para costurar inimigos à distância.", "action": "steel_thread"},
+			{"icon": "🪡", "title": "Agulhas Rúnicas", "desc": "Agulhas finas que guardam pequenos feitiços.", "action": "runic_needles"},
+			{"icon": "🧥", "title": "Manto Sob Medida", "desc": "Um manto elegante para aventuras elegantes.", "action": "tailored_cloak"},
+			{"icon": "🔘", "title": "Fofocas do Ateliê", "desc": "Tudo o que a vila não quer que você saiba.", "action": "atelier_gossip"}
+		]
+	},
+	115: { # Chef Bartolomeu Brasa-Alta
+		"title": "Chef Bartolomeu Brasa-Alta, Mestre do Banquete",
+		"sub": "Cozinha da Taverna (10h–02h) • Orkhan, 52 anos • Ex-cozinheiro de navio",
+		"class_id": 12,
+		"class_name": "Mestre do Banquete",
+		"greeting": "Fome, é? Conheço essa cara! Sente-se que o ensopado já está fervendo!",
+		"color": Color("#ff7043"),
+		"talk_quotes": [
+			"Naufraguei numa ilha de monstros e passei três anos cozinhando tudo que tentava me devorar.",
+			"Meu wok é preto porque cozinhei uma Hidra por dentro. História real!",
+			"Não estou chorando, é o vapor da cebola.",
+			"Sangue Lupino Fresco é o segredo do meu chouriço. Traga um frasco para a cozinha!"
+		],
+		"services": [
+			{"icon": "🍲", "title": "Ensopado de Javali", "desc": "Restaura a vida de qualquer aventureiro faminto.", "action": "boar_stew"},
+			{"icon": "🔪", "title": "Afiar Cutelo", "desc": "Corte limpo na autópsia, corte limpo na batalha.", "action": "sharpen_cleaver"},
+			{"icon": "🍄", "title": "Sopa de Cogumelos do Bosque", "desc": "Aquece o corpo e clareia a mente.", "action": "mushroom_soup"},
+			{"icon": "📒", "title": "Histórias do Naufrágio", "desc": "Três anos numa ilha de monstros, contados com molho.", "action": "shipwreck_tales"}
+		]
+	},
+	116: { # Thorne, o Eremita das Feras (Mestre secreto)
+		"title": "Thorne, o Eremita das Feras",
+		"sub": "Coração do Bosque Sussurrante • Ulvar, 58 anos • Vive com a loba Cinza",
+		"class_id": 0,
+		"class_name": "Senhor das Feras",
+		"greeting": "...Mãos longe da arma. Cinza não gosta de estranhos. O que quer aqui?",
+		"color": Color("#8d6e63"),
+		"talk_quotes": [
+			"Numa Lua Cheia, poupei uma loba ferida em vez de matá-la. A matilha me adotou.",
+			"Os lobos lembram de quem os respeita. E de quem não respeita também.",
+			"Há vinte anos não piso na vila. Lá só ensinam a matar.",
+			"Traga o que restou dos lobos que abateu. Presas. Peles. Devolvo tudo à terra."
+		],
+		"services": [
+			{"icon": "🐺", "title": "Ouvir a Matilha", "desc": "Thorne conta o que os lobos sussurram.", "action": "thorne_pack"},
+			{"icon": "🌕", "title": "Sobre a Lua Cheia", "desc": "Por que a matilha canta quando a lua está inteira.", "action": "thorne_moon"},
+			{"icon": "🦴", "title": "Entregar Troféus de Lobo", "desc": "Presas e peles de Alfa aumentam a confiança de Thorne.", "action": "thorne_offer"},
+			{"icon": "🌿", "title": "Ervas do Bosque", "desc": "Plantas que acalmam feras assustadas.", "action": "forest_herbs"}
+		]
 	}
 }
 
@@ -824,6 +944,12 @@ func _on_service_requested(action_key: String, service_title: String) -> void:
 		"alpha_tips":
 			if world and world.has_method("show_loot_toast"):
 				world.show_loot_toast("🐺 Kaelen: \"O Lobo Alfa espreita no Bosque Sussurrante (75, -60) na Lua Cheia!\"")
+		"thorne_pack":
+			if world and world.has_method("show_loot_toast"):
+				world.show_loot_toast("🐺 Thorne: \"Os lobos confiam em quem devolve à terra o que tirou deles. Presas, peles...\"")
+		"thorne_moon":
+			if world and world.has_method("show_loot_toast"):
+				world.show_loot_toast("🌕 Thorne: \"Na Lua Cheia, ou quando os vaga-lumes dançam no Bosque, a matilha ouve um novo chamado.\"")
 		"ghost_story":
 			if world and world.has_method("show_loot_toast"):
 				world.show_loot_toast("⚗️ Sussurros dos Esgotos: \"Às 03:00 a traição de Lyra foi consumada...\"")
