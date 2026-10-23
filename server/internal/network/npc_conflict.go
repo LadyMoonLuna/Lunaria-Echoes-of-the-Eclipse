@@ -576,6 +576,10 @@ func (s *Server) tickRetaliation(n *world.NPC) {
 }
 
 // tickMobsVersusNPCs: monstros que alcançam um NPC (invasão da vila ou coleta fora dos muros) o atacam.
+// mobGiveUpFrac: abaixo desta fração de vida as feras param de atacar o NPC (evita que
+// Mestres que moram perto de covis sejam caçados até a morte enquanto ninguém olha).
+const mobGiveUpFrac = 0.35
+
 func (s *Server) tickMobsVersusNPCs(npcs []*world.NPC) {
 	if s.mobManager == nil {
 		return
@@ -599,6 +603,9 @@ func (s *Server) tickMobsVersusNPCs(npcs []*world.NPC) {
 		for _, n := range npcs {
 			if !n.Targetable() || n.GetZone() != zone {
 				continue
+			}
+			if float64(n.GetHP()) < float64(n.MaxHP)*mobGiveUpFrac {
+				continue // ferido demais: o NPC foge e a fera perde o interesse
 			}
 			nx, _, nz := n.GetPos()
 			if (nx-mx)*(nx-mx)+(nz-mz)*(nz-mz) > mobAggroOnNPC*mobAggroOnNPC {

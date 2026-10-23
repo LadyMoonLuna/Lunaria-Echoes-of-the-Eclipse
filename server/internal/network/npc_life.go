@@ -187,6 +187,12 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 func planNeeds(n *world.NPC, ctx needsCtx, villageNodes []world.ResourceNode, ev *lifeEvents) {
 	remedy, potion := uint16(protocol.ItemHerbalRemedy), uint16(protocol.ItemHealingPotion)
 	hurt := float64(n.HP) < float64(n.MaxHP)*world.HurtThreshold
+	if world.RouteTo(n.ZoneID, world.ZoneVillage, 0, 0, "") == nil {
+		// Postos distantes (Mestres de Classe, Mercado Negro...) não têm caminho até a Vila:
+		// o NPC vive das provisões do próprio acampamento em vez de morrer de fome e sede.
+		campProvisions(n)
+		return
+	}
 	switch {
 	case n.SymptomaticLocked(time.Now()):
 		severe := world.Disease(n.Disease).Severe                               // a Peste Cinzenta só a Igreja cura
@@ -806,4 +812,23 @@ func (s *Server) genericNPCTalk(p *world.Player, npc *world.NPC) {
 		}
 	}
 	s.sendPlayerNPCSay(p, npc.ID, b.String())
+}
+
+// campProvisions: comida, água, abrigo e curativos do acampamento de um NPC sem rota até a Vila.
+func campProvisions(n *world.NPC) {
+	if n.Thirst < world.NeedThreshold {
+		n.Thirst = 100
+	}
+	if n.Hunger < world.NeedThreshold {
+		n.Hunger = 100
+	}
+	if n.Cold > world.ColdThreshold {
+		n.Cold = 0
+	}
+	if n.Heat > world.HeatThreshold {
+		n.Heat = 0
+	}
+	if float64(n.HP) < float64(n.MaxHP)*world.HurtThreshold {
+		n.HP = min(n.MaxHP, n.HP+int(float64(n.MaxHP)*world.NPCPotionHealFrac))
+	}
 }

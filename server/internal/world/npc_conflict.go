@@ -440,3 +440,10 @@ func (npc *NPC) Alive() bool {
 	defer npc.mu.RUnlock()
 	return !npc.IsDead
 }
+
+// GetHP devolve a vida atual do NPC.
+func (npc *NPC) GetHP() int {
+	npc.mu.RLock()
+	defer npc.mu.RUnlock()
+	return npc.HP
+}

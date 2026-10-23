@@ -18,6 +18,7 @@ var network_timer: float = 0.0
 
 var current_race_id: int = 1   # 1=Valeriano, 2=Noctari, 3=Kharad, 4=Varkai, 5=Sangrael
 var current_class_id: int = 1  # 1..15
+var _identity_applied := false
 
 var is_attacking: bool = false
 var is_dodging: bool = false
@@ -1478,6 +1479,10 @@ func _perform_dodge_roll() -> void:
 		)
 
 func apply_identity(race_id: int, class_id: int) -> void:
+	# Os status chegam várias vezes por segundo: só reconstrói o visual quando a identidade muda
+	if _identity_applied and race_id == current_race_id and class_id == current_class_id:
+		return
+	_identity_applied = true
 	current_race_id = race_id
 	current_class_id = class_id
 	_apply_race_visuals()
@@ -1890,9 +1895,10 @@ func _apply_race_visuals() -> void:
 	body_mesh.scale = Vector3(s, s, s)
 
 	# Limpa acessórios raciais anteriores
-	var old_acc := body_mesh.get_node_or_null("RaceAccessory")
-	if old_acc and is_instance_valid(old_acc):
-		old_acc.queue_free()
+	for old_acc in body_mesh.get_children():
+		if String(old_acc.name).begins_with("RaceAccessory"):
+			old_acc.name = "OldAccessory"
+			old_acc.queue_free()
 	var race_acc := Node3D.new()
 	race_acc.name = "RaceAccessory"
 	body_mesh.add_child(race_acc)
