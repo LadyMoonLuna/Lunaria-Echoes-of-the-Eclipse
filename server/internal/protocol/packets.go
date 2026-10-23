@@ -217,7 +217,7 @@ const (
 
 // Ações do pacote 0x39 USE_OR_EQUIP_ITEM
 const (
-	ItemActionUse     uint8 = 0 // Usar consumível ou equipar (equipar um item já equipado o desequipa)
+	ItemActionUse     uint8 = 0 // Usar/equipar: SlotIndex leva a Qualidade da unidade escolhida (255 = a melhor)
 	ItemActionUnequip uint8 = 1 // Desequipar o slot informado em SlotIndex
 )
 
@@ -453,13 +453,13 @@ const (
 	PlayerRespawnPacketSize  = 17 // uint8 (1) + uint32 (4) + 3x float32 (12) = 17 bytes
 	AllocateStatPacketSize   = 8  // uint8 (1) + uint32 (4) + uint8 (1) + uint16 Amount (2) = 8 bytes
 
-	InventorySyncHeaderSize  = 33 // op (1) + 14 slots (14) + Gold u32 (4) + Eclipses u32 (4) + Peso f32 (4) + PesoMáx f32 (4) + Velocidade% u8 (1) + count (1)
+	InventorySyncHeaderSize  = 48 // op (1) + 14 slots + 14 Condições + Gold u32 + Eclipses u32 + Peso f32 + PesoMáx f32 + Velocidade% u8 + count u16
 	InventorySlotEntrySize   = 3  // item (1) + quantidade (1) + Qualidade 0-100 (1) = 3 bytes
 	UseOrEquipItemPacketSize = 8  // op (1) + playerID u32 (4) + itemID (1) + action (1) + slot (1) = 8 bytes
 
-	DropItemGroundPacketSize   = 7  // op (1) + playerID u32 (4) + slotIndex (1) + quantity (1)
+	DropItemGroundPacketSize   = 8  // op (1) + playerID u32 (4) + item (1) + Qualidade (1) + quantidade (1)
 	PickupGroundItemPacketSize = 9  // op (1) + playerID u32 (4) + dropID u32 (4)
-	GroundItemEntrySize        = 14 // dropID u32 (4) + itemID (1) + qty (1) + X f32 (4) + Z f32 (4)
+	GroundItemEntrySize        = 15 // dropID u32 (4) + itemID (1) + qty (1) + Qualidade (1) + X f32 (4) + Z f32 (4)
 
 	MobSnapshotHeaderSize  = 2  // uint8 (1) + uint8 (1) = 2 bytes
 	MobSnapshotEntrySize   = 26 // uint32 (4) + 2x uint8 (2) + 4x float32 (16) + 2x uint16 (4) = 26 bytes
@@ -1456,38 +1456,38 @@ type InventoryStatus struct {
 	SpeedPercent  uint8 // Multiplicador de velocidade por peso × 100 (0 = sobrecarregado/imóvel)
 }
 
-// InventorySyncPacket representa o estado completo da mochila, dos 14 slots, do dinheiro e do peso.
+// InventorySyncPacket representa a mochila (uma entrada por item+Qualidade), os 14 slots com a
+// Condição de cada um, o dinheiro e o peso.
 type InventorySyncPacket struct {
 	EquippedSlots       [EquipSlotCount]uint8
+	EquippedQualities   [EquipSlotCount]uint8
 	EquippedArmorID     uint8 // Helper alias -> EquippedSlots[SlotChest]
 	EquippedAccessoryID uint8 // Helper alias -> EquippedSlots[SlotRing1]
 	Status              InventoryStatus
-	SlotCount           uint8
+	SlotCount           uint16
 	Slots               []InventorySlot
 }
 
-// SerializeInventorySyncInto empacota o 0x38 diretamente no buffer fornecido.
-// Layout: op | 14 slots | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 | count | count × (item, qtd)
-func SerializeInventorySyncInto(buf []byte, equippedSlots [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) int {
+// SerializeInventorySync empacota o 0x38.
+// Layout: op | 14 slots | 14 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 |
+// count u16 | count × (item, quantidade, Qualidade)
+func SerializeInventorySync(equippedSlots, equippedQualities [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) []byte {
 	count := len(slots)
-	if count > 255 {
-		count = 255
+	if count > 65535 {
+		count = 65535
 	}
-	totalSize := InventorySyncHeaderSize + count*InventorySlotEntrySize
-	if len(buf) < totalSize {
-		return 0
-	}
+	buf := make([]byte, InventorySyncHeaderSize+count*InventorySlotEntrySize)
 	buf[0] = PacketTypeInventorySync
 	for i := 0; i < EquipSlotCount; i++ {
 		buf[1+i] = equippedSlots[i]
+		buf[15+i] = equippedQualities[i]
 	}
-	binary.LittleEndian.PutUint32(buf[15:19], status.Gold)
-	binary.LittleEndian.PutUint32(buf[19:23], status.EclipseCoins)
-	binary.LittleEndian.PutUint32(buf[23:27], math.Float32bits(status.CurrentWeight))
-	binary.LittleEndian.PutUint32(buf[27:31], math.Float32bits(status.MaxWeight))
-	buf[31] = status.SpeedPercent
-	buf[32] = uint8(count)
-
+	binary.LittleEndian.PutUint32(buf[29:33], status.Gold)
+	binary.LittleEndian.PutUint32(buf[33:37], status.EclipseCoins)
+	binary.LittleEndian.PutUint32(buf[37:41], math.Float32bits(status.CurrentWeight))
+	binary.LittleEndian.PutUint32(buf[41:45], math.Float32bits(status.MaxWeight))
+	buf[45] = status.SpeedPercent
+	binary.LittleEndian.PutUint16(buf[46:48], uint16(count))
 	offset := InventorySyncHeaderSize
 	for i := 0; i < count; i++ {
 		buf[offset] = slots[i].ItemID
@@ -1495,26 +1495,15 @@ func SerializeInventorySyncInto(buf []byte, equippedSlots [EquipSlotCount]uint8,
 		buf[offset+2] = slots[i].Quality
 		offset += InventorySlotEntrySize
 	}
-	return totalSize
-}
-
-// SerializeInventorySync aloca e empacota o pacote 0x38 INVENTORY_SYNC.
-func SerializeInventorySync(equippedSlots [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) []byte {
-	count := len(slots)
-	if count > 255 {
-		count = 255
-	}
-	buf := make([]byte, InventorySyncHeaderSize+count*InventorySlotEntrySize)
-	SerializeInventorySyncInto(buf, equippedSlots, status, slots)
 	return buf
 }
 
 // SerializeInventorySyncLegacy serializa com apenas peitoral e anel preenchidos (testes/compatibilidade).
 func SerializeInventorySyncLegacy(equippedArmorID, equippedAccessoryID uint8, slots []InventorySlot) []byte {
-	var eq [EquipSlotCount]uint8
+	var eq, q [EquipSlotCount]uint8
 	eq[SlotChest] = equippedArmorID
 	eq[SlotRing1] = equippedAccessoryID
-	return SerializeInventorySync(eq, InventoryStatus{SpeedPercent: 100}, slots)
+	return SerializeInventorySync(eq, q, InventoryStatus{SpeedPercent: 100}, slots)
 }
 
 // DeserializeInventorySync desempacota o pacote 0x38 INVENTORY_SYNC.
@@ -1527,30 +1516,23 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 	}
 	for i := 0; i < EquipSlotCount; i++ {
 		out.EquippedSlots[i] = data[1+i]
+		out.EquippedQualities[i] = data[15+i]
 	}
 	out.EquippedArmorID = out.EquippedSlots[SlotChest]
 	out.EquippedAccessoryID = out.EquippedSlots[SlotRing1]
-	out.Status.Gold = binary.LittleEndian.Uint32(data[15:19])
-	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[19:23])
-	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[23:27]))
-	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[27:31]))
-	out.Status.SpeedPercent = data[31]
-	out.SlotCount = data[32]
-
-	expectedSize := InventorySyncHeaderSize + int(out.SlotCount)*InventorySlotEntrySize
-	if len(data) < expectedSize {
+	out.Status.Gold = binary.LittleEndian.Uint32(data[29:33])
+	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[33:37])
+	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[37:41]))
+	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[41:45]))
+	out.Status.SpeedPercent = data[45]
+	out.SlotCount = binary.LittleEndian.Uint16(data[46:48])
+	if len(data) < InventorySyncHeaderSize+int(out.SlotCount)*InventorySlotEntrySize {
 		return ErrInvalidPacketSize
 	}
-	if cap(out.Slots) >= int(out.SlotCount) {
-		out.Slots = out.Slots[:out.SlotCount]
-	} else {
-		out.Slots = make([]InventorySlot, out.SlotCount)
-	}
+	out.Slots = make([]InventorySlot, out.SlotCount)
 	offset := InventorySyncHeaderSize
-	for i := 0; i < int(out.SlotCount); i++ {
-		out.Slots[i].ItemID = data[offset]
-		out.Slots[i].Quantity = data[offset+1]
-		out.Slots[i].Quality = data[offset+2]
+	for i := range out.Slots {
+		out.Slots[i] = InventorySlot{ItemID: data[offset], Quantity: data[offset+1], Quality: data[offset+2]}
 		offset += InventorySlotEntrySize
 	}
 	return nil
@@ -1601,20 +1583,21 @@ func DeserializeUseOrEquipItem(data []byte, out *UseOrEquipItemPacket) error {
 
 // --- 0x41: DROP_ITEM_GROUND / 0x42: GROUND_ITEMS_SYNC / 0x43: PICKUP_GROUND_ITEM ---
 
-// DropItemGroundPacket: o cliente descarta Quantity unidades do item na posição SlotIndex da mochila
-// (a mesma ordem da lista enviada no 0x38).
+// DropItemGroundPacket: o cliente descarta Quantity unidades do item com a Qualidade indicada.
 type DropItemGroundPacket struct {
-	PlayerID  uint32
-	SlotIndex uint8
-	Quantity  uint8
+	PlayerID uint32
+	ItemID   uint8
+	Quality  uint8
+	Quantity uint8
 }
 
-func SerializeDropItemGround(playerID uint32, slotIndex, quantity uint8) [DropItemGroundPacketSize]byte {
+func SerializeDropItemGround(playerID uint32, itemID, quality, quantity uint8) [DropItemGroundPacketSize]byte {
 	var b [DropItemGroundPacketSize]byte
 	b[0] = PacketTypeDropItemGround
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
-	b[5] = slotIndex
-	b[6] = quantity
+	b[5] = itemID
+	b[6] = quality
+	b[7] = quantity
 	return b
 }
 
@@ -1626,8 +1609,9 @@ func DeserializeDropItemGround(data []byte, out *DropItemGroundPacket) error {
 		return ErrInvalidPacketType
 	}
 	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
-	out.SlotIndex = data[5]
-	out.Quantity = data[6]
+	out.ItemID = data[5]
+	out.Quality = data[6]
+	out.Quantity = data[7]
 	return nil
 }
 
@@ -1662,6 +1646,7 @@ type GroundItemEntry struct {
 	DropID   uint32
 	ItemID   uint8
 	Quantity uint8
+	Quality  uint8
 	X, Z     float32
 }
 
@@ -1680,8 +1665,9 @@ func SerializeGroundItemsSync(items []GroundItemEntry) []byte {
 		binary.LittleEndian.PutUint32(buf[off:off+4], it.DropID)
 		buf[off+4] = it.ItemID
 		buf[off+5] = it.Quantity
-		binary.LittleEndian.PutUint32(buf[off+6:off+10], math.Float32bits(it.X))
-		binary.LittleEndian.PutUint32(buf[off+10:off+14], math.Float32bits(it.Z))
+		buf[off+6] = it.Quality
+		binary.LittleEndian.PutUint32(buf[off+7:off+11], math.Float32bits(it.X))
+		binary.LittleEndian.PutUint32(buf[off+11:off+15], math.Float32bits(it.Z))
 		off += GroundItemEntrySize
 	}
 	return buf
@@ -1705,8 +1691,9 @@ func DeserializeGroundItemsSync(data []byte) ([]GroundItemEntry, error) {
 		items[i].DropID = binary.LittleEndian.Uint32(data[off : off+4])
 		items[i].ItemID = data[off+4]
 		items[i].Quantity = data[off+5]
-		items[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+6 : off+10]))
-		items[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+10 : off+14]))
+		items[i].Quality = data[off+6]
+		items[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+7 : off+11]))
+		items[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+11 : off+15]))
 		off += GroundItemEntrySize
 	}
 	return items, nil

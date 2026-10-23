@@ -6,29 +6,68 @@ import (
 	"lunaria/server/internal/protocol"
 )
 
-func TestItemQuality(t *testing.T) {
+func TestUnitQuality(t *testing.T) {
 	p := NewPlayer(1, nil, 0, 0, 0)
-	p.AddItemWithQuality(uint8(MatPulsingHeart), 1, 90)
-	p.AddItemWithQuality(uint8(MatPulsingHeart), 1, 50)
-	if q := p.ItemQualityOf(uint8(MatPulsingHeart)); q != 70 {
-		t.Fatalf("a pilha deveria ter a média 70, tem %d", q)
+	heart := uint8(MatPulsingHeart)
+	p.AddItemWithQuality(heart, 1, 90)
+	p.AddItemWithQuality(heart, 2, 50)
+	p.AddItemWithQuality(heart, 1, 70)
+	got := p.UnitQualities(heart)
+	if len(got) != 4 || got[0] != 90 || got[1] != 70 || got[2] != 50 || got[3] != 50 {
+		t.Fatalf("cada unidade deveria manter a sua Qualidade (melhor -> pior): %v", got)
 	}
-	if JunkFor(uint8(MatIron)) != protocol.ItemMetalScrap || JunkFor(uint8(MatPulsingHeart)) != protocol.ItemOrganicTrash {
+	// A mochila manda uma entrada por Qualidade
+	groups := map[uint8]uint8{}
+	for _, s := range p.GetInventorySlots() {
+		if s.ItemID == heart {
+			groups[s.Quality] = s.Quantity
+		}
+	}
+	if len(groups) != 3 || groups[50] != 2 || groups[90] != 1 {
+		t.Fatalf("grupos por Qualidade errados: %v", groups)
+	}
+	// Remoções genéricas (entregas de missão, consumo) tiram primeiro as piores
+	p.RemoveItem(heart, 1)
+	if got := p.UnitQualities(heart); len(got) != 3 || got[2] != 50 || got[0] != 90 {
+		t.Fatalf("deveria sair uma unidade de pior Qualidade: %v", got)
+	}
+	// Largar no chão escolhe a Qualidade exata
+	if n := p.TakeItemUnits(heart, 90, 1); n != 1 {
+		t.Fatal("deveria largar a unidade 90")
+	}
+	if got := p.UnitQualities(heart); len(got) != 2 || got[0] != 70 {
+		t.Fatalf("restaram %v", got)
+	}
+	if JunkFor(uint8(MatIron)) != protocol.ItemMetalScrap || JunkFor(heart) != protocol.ItemOrganicTrash {
 		t.Fatal("lixo errado: metal vira sucata, orgânico vira lixo orgânico")
 	}
-	// Equipamento perfeito rende 100%; com Qualidade 0 rende metade
-	p.AddItem(protocol.ItemIronLongsword, 1)
-	p.EquipItem(protocol.ItemIronLongsword)
-	if atk, _, _ := p.EquipBonuses(); atk != 12 {
-		t.Fatalf("espada nova (Condição 100) deveria dar 12 de ATK, deu %d", atk)
+}
+
+func TestEquipKeepsUnitCondition(t *testing.T) {
+	p := NewPlayer(1, nil, 0, 0, 0)
+	sword := protocol.ItemIronLongsword
+	p.AddItemWithQuality(sword, 1, 40)
+	p.AddItemWithQuality(sword, 1, 100)
+	p.EquipItemQuality(sword, 40)
+	if p.EquippedQualityOf(protocol.SlotMainHand) != 40 {
+		t.Fatal("a espada equipada deveria ter Condição 40")
 	}
-	p.ItemQuality[protocol.ItemIronLongsword] = 0
-	if atk, _, _ := p.EquipBonuses(); atk != 6 {
-		t.Fatalf("espada arruinada deveria dar 6 de ATK, deu %d", atk)
+	if atk, _, _ := p.EquipBonuses(); atk != 8 { // 12 × (0,5 + 40/200) = 8,4
+		t.Fatalf("ATK deveria cair com a Condição: %d", atk)
 	}
-	for _, s := range p.GetInventorySlots() {
-		if s.ItemID == uint8(MatPulsingHeart) && s.Quality != 70 {
-			t.Fatal("a Qualidade deveria ir na sincronização da mochila")
-		}
+	if got := p.UnitQualities(sword); len(got) != 1 || got[0] != 100 {
+		t.Fatalf("a espada perfeita deveria continuar na mochila: %v", got)
+	}
+	// Trocar pela perfeita devolve a de Condição 40 para a mochila
+	p.EquipItemQuality(sword, 100)
+	if p.EquippedQualityOf(protocol.SlotMainHand) != 100 {
+		t.Fatal("troca de espada falhou")
+	}
+	if got := p.UnitQualities(sword); len(got) != 1 || got[0] != 40 {
+		t.Fatalf("a espada antiga deveria voltar com Condição 40: %v", got)
+	}
+	p.UnequipSlot(protocol.SlotMainHand)
+	if got := p.UnitQualities(sword); len(got) != 2 || got[0] != 100 || got[1] != 40 {
+		t.Fatalf("desequipar deveria devolver Condição 100: %v", got)
 	}
 }

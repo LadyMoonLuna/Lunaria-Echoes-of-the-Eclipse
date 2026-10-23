@@ -20,7 +20,8 @@ var is_open: bool = false
 var equipped_slots: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var equipped_armor_id: int = 0
 var equipped_acc_id: int = 0
-var inventory_items: Array = [] # Array de {"id": int, "quantity": int} na ordem do servidor
+var inventory_items: Array = [] # Array de {"id", "quantity", "quality"}: uma entrada por item + Qualidade
+var equipped_qualities: Array = [] # Condição (0-100) de cada slot equipado
 
 # Carteira e peso (0x38)
 var gold: int = 0
@@ -382,6 +383,8 @@ func _ready() -> void:
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
 		nm.inventory_updated.connect(_on_inventory_updated)
+		if nm.has_signal("equipped_qualities_updated"):
+			nm.equipped_qualities_updated.connect(_on_equipped_qualities_updated)
 		if nm.has_signal("wallet_weight_updated"):
 			nm.wallet_weight_updated.connect(_on_wallet_weight_updated)
 		if nm.has_signal("player_attributes_received"):
@@ -452,6 +455,9 @@ func _on_inventory_updated(arg1, arg2 = null, arg3 = null) -> void:
 	_refresh_selection()
 	_update_display()
 
+func _on_equipped_qualities_updated(qualities: Array) -> void:
+	equipped_qualities = qualities
+
 func _on_wallet_weight_updated(p_gold: int, p_eclipse: int, p_cur: float, p_max: float, p_speed: float) -> void:
 	gold = p_gold
 	eclipse_coins = p_eclipse
@@ -472,9 +478,11 @@ func _refresh_selection() -> void:
 		var sid: int = selected["index"]
 		if int(equipped_slots[sid]) != int(selected["id"]):
 			selected = {}
+		elif sid < equipped_qualities.size():
+			selected["quality"] = int(equipped_qualities[sid])
 		return
 	for i in range(inventory_items.size()):
-		if int(inventory_items[i]["id"]) == int(selected["id"]):
+		if int(inventory_items[i]["id"]) == int(selected["id"]) and int(inventory_items[i].get("quality", 100)) == int(selected.get("quality", -1)):
 			selected = {"source": "bag", "index": i, "id": int(inventory_items[i]["id"]), "qty": int(inventory_items[i]["quantity"]), "quality": int(inventory_items[i].get("quality", 100))}
 			return
 	selected = {}
@@ -865,6 +873,14 @@ func _create_bag_slot(bag_index: int, item_id: int, qty: int) -> Control:
 	btn.add_theme_stylebox_override("hover", st)
 	btn.add_theme_stylebox_override("pressed", st)
 	btn.pressed.connect(func(): _select_bag(bag_index))
+	# Qualidade da unidade no canto superior esquerdo
+	var qv: int = int(inventory_items[bag_index].get("quality", 100))
+	var ql := _label(str(qv), 9, Color("#73e673") if qv >= 80 else (Color("#ffd54f") if qv >= 35 else Color("#ef5350")))
+	ql.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	ql.add_theme_constant_override("outline_size", 3)
+	ql.position = Vector2(3, 1)
+	ql.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(ql)
 	# Quantidade no canto inferior direito
 	var q := _label(str(qty), 11, Color(1, 1, 1))
 	q.add_theme_color_override("font_outline_color", Color(0, 0, 0))
@@ -925,7 +941,8 @@ func _select_equipped(slot_idx: int) -> void:
 	if item_id <= 0:
 		selected = {}
 	else:
-		selected = {"source": "equip", "index": slot_idx, "id": item_id, "qty": 1}
+		var cond: int = int(equipped_qualities[slot_idx]) if slot_idx < equipped_qualities.size() else 100
+		selected = {"source": "equip", "index": slot_idx, "id": item_id, "qty": 1, "quality": cond}
 	_update_display()
 
 func _select_bag(bag_index: int) -> void:
@@ -1049,7 +1066,7 @@ func _on_unequip_pressed() -> void:
 func _on_use_pressed() -> void:
 	if selected.is_empty() or selected["source"] != "bag":
 		return
-	_on_item_used(int(selected["id"]))
+	_on_item_used(int(selected["id"]), int(selected.get("quality", 255)))
 
 func _on_drop_pressed() -> void:
 	if selected.is_empty() or selected["source"] != "bag":
@@ -1060,12 +1077,12 @@ func _on_drop_pressed() -> void:
 	var amount: int = clampi(int(drop_qty.value), 1, int(selected["qty"]))
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm and nm.has_method("send_drop_item_ground"):
-		nm.send_drop_item_ground(int(selected["index"]), amount)
+		nm.send_drop_item_ground(int(selected["id"]), int(selected.get("quality", 75)), amount)
 	var w := get_parent()
 	if w and w.has_method("show_loot_toast"):
 		w.show_loot_toast("🗑️ %dx %s descartado(s) no chão." % [amount, _item_name(int(selected["id"]))])
 
-func _on_item_used(item_id: int) -> void:
+func _on_item_used(item_id: int, quality: int = 255) -> void:
 	print("[InventoryUI] Utilizando/equipando Item ID %d..." % item_id)
 	var world := get_parent()
 	if world and world.has_method("request_class_or_race_change"):
@@ -1100,4 +1117,4 @@ func _on_item_used(item_id: int) -> void:
 
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
-		nm.send_use_item(item_id)
+		nm.send_use_item(item_id, quality)

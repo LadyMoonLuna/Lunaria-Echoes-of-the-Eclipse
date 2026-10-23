@@ -523,7 +523,7 @@ func (s *Server) sendInventorySync(p *world.Player) {
 	}
 	equipped := p.GetEquippedSlots()
 	slots := p.GetInventorySlots()
-	data := protocol.SerializeInventorySync(equipped, p.InventoryStatus(), slots)
+	data := protocol.SerializeInventorySync(equipped, p.GetEquippedQualities(), p.InventoryStatus(), slots)
 
 	_ = p.TCPConn.SetWriteDeadline(time.Now().Add(100 * time.Millisecond))
 	_, _ = p.TCPConn.Write(data)
@@ -904,7 +904,7 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 
 	itemID := pkt.ItemID
 	if world.IsEquippable(itemID) {
-		s.toggleEquip(player, itemID)
+		s.toggleEquip(player, itemID, pkt.SlotIndex) // SlotIndex = Qualidade da unidade escolhida
 		return
 	}
 	switch itemID {

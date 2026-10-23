@@ -9,16 +9,20 @@ import (
 	"lunaria/server/internal/world"
 )
 
-// toggleEquip equipa o item; se ele já estiver equipado, desequipa (comportamento legado do 0x39).
-func (s *Server) toggleEquip(player *world.Player, itemID uint8) {
-	for slotIdx, eqID := range player.GetEquippedSlots() {
-		if eqID == itemID && player.UnequipSlot(uint8(slotIdx)) {
-			s.sendInventorySync(player)
-			s.sendPlayerStats(player)
-			return
+// toggleEquip equipa a unidade com a Qualidade pedida (255 = a melhor). Sem a unidade na mochila
+// e com o item equipado, desequipa (comportamento antigo do 0x39).
+func (s *Server) toggleEquip(player *world.Player, itemID, quality uint8) {
+	if player.GetItemCount(itemID) == 0 {
+		for slotIdx, eqID := range player.GetEquippedSlots() {
+			if eqID == itemID && player.UnequipSlot(uint8(slotIdx)) {
+				s.sendInventorySync(player)
+				s.sendPlayerStats(player)
+				return
+			}
 		}
+		return
 	}
-	ok, msg := player.EquipItem(itemID)
+	ok, msg := player.EquipItemQuality(itemID, quality)
 	if ok {
 		log.Printf("[EQUIPAMENTO] Jogador #%d equipou item ID %d: %s\n", player.ID, itemID, msg)
 		s.sendInventorySync(player)
@@ -55,7 +59,7 @@ func (s *Server) grantKillGold(p *world.Player, mobType uint8) {
 func groundEntries(items []world.GroundItem) []protocol.GroundItemEntry {
 	out := make([]protocol.GroundItemEntry, len(items))
 	for i, it := range items {
-		out[i] = protocol.GroundItemEntry{DropID: it.DropID, ItemID: it.ItemID, Quantity: it.Quantity, X: it.X, Z: it.Z}
+		out[i] = protocol.GroundItemEntry{DropID: it.DropID, ItemID: it.ItemID, Quantity: it.Quantity, Quality: it.Quality, X: it.X, Z: it.Z}
 	}
 	return out
 }
@@ -105,14 +109,15 @@ func (s *Server) handleDropItemGround(connPlayerID uint32, pkt protocol.DropItem
 	if qty == 0 {
 		qty = 1
 	}
-	itemID, taken := player.TakeInventorySlot(pkt.SlotIndex, qty)
+	itemID := pkt.ItemID
+	taken := player.TakeItemUnits(itemID, pkt.Quality, qty)
 	if taken == 0 {
 		return
 	}
 	player.Mu.RLock()
 	x, z, zone := player.PosX, player.PosZ, player.ZoneID
 	player.Mu.RUnlock()
-	drop := s.groundItems.Drop(itemID, taken, x, z, zone)
+	drop := s.groundItems.Drop(itemID, taken, pkt.Quality, x, z, zone)
 	log.Printf("[CHÃO] Jogador #%d largou %dx item %d (drop #%d) na zona %d\n", connPlayerID, taken, itemID, drop.DropID, zone)
 	s.sendInventorySync(player)
 	s.broadcastGroundItems(zone)
@@ -133,7 +138,7 @@ func (s *Server) handlePickupGroundItem(connPlayerID uint32, pkt protocol.Pickup
 	if !ok {
 		return
 	}
-	player.AddItem(it.ItemID, it.Quantity)
+	player.AddItemWithQuality(it.ItemID, it.Quantity, it.Quality) // cada unidade volta com a sua Qualidade
 	log.Printf("[CHÃO] Jogador #%d pegou %dx item %d (drop #%d)\n", connPlayerID, it.Quantity, it.ItemID, it.DropID)
 	s.sendInventorySync(player)
 	s.broadcastGroundItems(zone)

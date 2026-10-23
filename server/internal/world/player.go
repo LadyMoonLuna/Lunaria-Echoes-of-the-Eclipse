@@ -81,7 +81,9 @@ type Player struct {
 	Inventory           map[uint8]uint8                // ItemID -> Quantidade
 	EquippedSlots       [protocol.EquipSlotCount]uint8 // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
 	DiscoveredMaterials map[uint16]bool                // Materiais já vistos pelo jogador (Forja)
-	ItemQuality         map[uint8]uint8                // Qualidade média (0-100) de cada item da mochila/equipado
+	ItemUnits           map[uint8][]uint8              // Qualidade de cada unidade da mochila (melhor -> pior)
+	EquippedQuality     [protocol.EquipSlotCount]uint8 // Condição de cada item equipado
+	EquippedQualitySet  [protocol.EquipSlotCount]bool  // slot com Condição registrada (senão vale a padrão do item)
 	newDiscoveries      []uint16                       // Descobertas ainda não avisadas ao cliente
 	Gold                uint32                         // Sollares de Ouro
 	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
@@ -975,12 +977,12 @@ func (p *Player) recalculateStatsLocked() {
 	effAGIBonus := p.AllocAGI
 	var directHPBonus uint16 = 0
 
-	for _, itemID := range p.EquippedSlots {
+	for slotIdx, itemID := range p.EquippedSlots {
 		if itemID == 0 {
 			continue
 		}
 		info := GetItemInfo(itemID)
-		directHPBonus += uint16(float32(info.BonusHP)*qualityStatMult(p.itemQualityLocked(itemID)) + 0.5)
+		directHPBonus += uint16(float32(info.BonusHP)*qualityStatMult(p.slotQualityLocked(uint8(slotIdx))) + 0.5)
 		effCONBonus += info.BonusCON
 		effAGIBonus += info.BonusAGI
 	}
@@ -2010,7 +2012,6 @@ func (p *Player) AddItem(itemID, qty uint8) {
 		p.Inventory = make(map[uint8]uint8)
 	}
 	p.markDiscoveredLocked(itemID) // primeiro contato com um material
-	p.blendQualityLocked(itemID, qty, DefaultQualityFor(itemID))
 	if int(p.Inventory[itemID])+int(qty) > 255 {
 		p.Inventory[itemID] = 255
 		return
@@ -2056,12 +2057,21 @@ func (p *Player) GetItemCount(itemID uint8) uint8 {
 
 // GetInventorySlots retorna uma lista ordenada dos slots do inventário para sincronização em rede.
 func (p *Player) GetInventorySlots() []protocol.InventorySlot {
-	p.Mu.RLock()
-	defer p.Mu.RUnlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	slots := make([]protocol.InventorySlot, 0, len(p.Inventory))
 	for id := uint8(1); id <= 255; id++ {
 		if qty, exists := p.Inventory[id]; exists && qty > 0 {
-			slots = append(slots, protocol.InventorySlot{ItemID: id, Quantity: qty, Quality: p.itemQualityLocked(id)})
+			// Uma entrada por Qualidade: cada unidade mantém a sua
+			units := p.unitsLocked(id)
+			for i := 0; i < len(units); {
+				j := i
+				for j < len(units) && units[j] == units[i] {
+					j++
+				}
+				slots = append(slots, protocol.InventorySlot{ItemID: id, Quantity: uint8(j - i), Quality: units[i]})
+				i = j
+			}
 		}
 		if id == 255 {
 			break
@@ -2102,6 +2112,12 @@ func IsEquippable(itemID uint8) bool {
 // EquipItem vincula um item aos 12 slots de equipamento.
 // Anéis preenchem os slots 7..10; se todos estiverem ocupados, rotacionam substituindo o mais antigo.
 func (p *Player) EquipItem(itemID uint8) (bool, string) {
+	return p.EquipItemQuality(itemID, AnyQuality)
+}
+
+// EquipItemQuality equipa a unidade do item com a Qualidade pedida (AnyQuality = a melhor).
+// O item que sai do slot volta para a mochila com a Condição que tinha.
+func (p *Player) EquipItemQuality(itemID, quality uint8) (bool, string) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
@@ -2126,35 +2142,37 @@ func (p *Player) EquipItem(itemID uint8) (bool, string) {
 		if targetSlot != -1 {
 			p.EquippedSlots[targetSlot] = itemID
 		} else {
-			// Rotação autoritativa: devolve [7] ao inventário e rotaciona os anéis
-			oldRing := p.EquippedSlots[8]
-			p.EquippedSlots[8] = p.EquippedSlots[9]
-			p.EquippedSlots[9] = p.EquippedSlots[10]
-			p.EquippedSlots[10] = p.EquippedSlots[11]
-			p.EquippedSlots[11] = itemID
-			if p.Inventory == nil {
-				p.Inventory = make(map[uint8]uint8)
+			// Rotação autoritativa: devolve o anel mais antigo (slot 8) e rotaciona os anéis
+			oldRing, oldQ := p.EquippedSlots[8], p.slotQualityLocked(8)
+			for s := 8; s < 11; s++ {
+				p.EquippedSlots[s] = p.EquippedSlots[s+1]
+				p.EquippedQuality[s], p.EquippedQualitySet[s] = p.EquippedQuality[s+1], p.EquippedQualitySet[s+1]
 			}
-			p.Inventory[oldRing]++
+			p.EquippedSlots[11] = itemID
+			targetSlot = 11
+			p.addUnitsLocked(oldRing, 1, oldQ)
 		}
+		q, _ := p.takeUnitLocked(itemID, quality)
+		p.setSlotQualityLocked(uint8(targetSlot), q)
 		p.EquippedAccessoryID = itemID
-		p.consumeOneItemLocked(itemID)
 		p.recalculateStatsLocked()
 		return true, "Anel equipado com sucesso."
 	}
 
 	// Demais slots fixos
 	old := p.EquippedSlots[slot]
+	oldQ := p.slotQualityLocked(slot)
+	q, _ := p.takeUnitLocked(itemID, quality)
 	if old > 0 {
-		p.Inventory[old]++
+		p.addUnitsLocked(old, 1, oldQ)
 	}
 	p.EquippedSlots[slot] = itemID
+	p.setSlotQualityLocked(slot, q)
 	if slot == protocol.SlotChest {
 		p.EquippedArmorID = itemID
 	} else if slot == protocol.SlotAmulet || slot == protocol.SlotGloves {
 		p.EquippedAccessoryID = itemID
 	}
-	p.consumeOneItemLocked(itemID)
 	p.recalculateStatsLocked()
 	return true, "Equipamento vinculado com sucesso."
 }
@@ -2171,8 +2189,9 @@ func (p *Player) UnequipSlot(slotIdx uint8) bool {
 		p.Inventory = make(map[uint8]uint8)
 	}
 	old := p.EquippedSlots[slotIdx]
-	p.Inventory[old]++
+	p.addUnitsLocked(old, 1, p.slotQualityLocked(slotIdx)) // volta com a Condição que tinha
 	p.EquippedSlots[slotIdx] = 0
+	p.EquippedQualitySet[slotIdx] = false
 	if slotIdx == protocol.SlotChest {
 		p.EquippedArmorID = 0
 	} else if slotIdx == protocol.SlotRing1 || slotIdx == protocol.SlotAmulet {
@@ -2226,6 +2245,7 @@ func (p *Player) DevSetRaceAndKit(raceID, classID uint8) {
 	p.EquippedSlots[protocol.SlotRing3] = protocol.ItemObsidianRing
 	p.EquippedSlots[protocol.SlotRing4] = protocol.ItemStarlightRing
 	p.EquippedSlots[protocol.SlotCloak] = protocol.ItemAlphaPeltCloak
+	p.EquippedQualitySet = [protocol.EquipSlotCount]bool{} // kit novo: Condição perfeita
 	p.EquippedSlots[protocol.SlotMainHand] = protocol.ItemIronLongsword
 	p.EquippedSlots[protocol.SlotOffHand] = protocol.ItemTowerShield
 

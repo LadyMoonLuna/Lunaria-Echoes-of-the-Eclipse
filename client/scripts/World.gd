@@ -2419,7 +2419,7 @@ func _create_ground_item_node(it: Dictionary) -> Node3D:
 	root.add_child(glow)
 
 	var lbl := Label3D.new()
-	lbl.text = "🎒 %s x%d (%.1f kg)\n[Aperte G ou Clique para Pegar]" % [_ground_item_name(item_id), qty, ItemDataScript.weight(item_id) * qty]
+	lbl.text = "🎒 %s x%d (%.1f kg) — %s %d\n[Aperte G ou Clique para Pegar]" % [_ground_item_name(item_id), qty, ItemDataScript.weight(item_id) * qty, ItemDataScript.quality_aspect(item_id), int(it.get("quality", 75))]
 	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lbl.font_size = 40
 	lbl.pixel_size = 0.006

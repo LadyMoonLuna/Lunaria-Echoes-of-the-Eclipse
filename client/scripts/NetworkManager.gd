@@ -13,7 +13,8 @@ signal player_stats_received(player_id: int, race_id: int, class_id: int, hp: in
 signal player_stats_updated(player_id: int, race_id: int, class_id: int, hp: int, max_hp: int, stamina: int, max_stamina: int)
 signal player_stats_full_received(player_id: int, race_id: int, class_id: int, class_tier: int, level: int, hp: int, max_hp: int, stamina: int, max_stamina: int, buff_active: int)
 signal player_attributes_received(player_id: int, xp: int, next_level_xp: int, stat_points: int, str_stat: int, dex_stat: int, con_stat: int, agi_stat: int, int_stat: int, spi_stat: int, mas_stat: int, lck_stat: int)
-signal inventory_updated(equipped_slots_array: Array, items_array: Array)
+signal inventory_updated(equipped_slots_array: Array, items_array: Array) # items: {"id", "quantity", "quality"} — uma entrada por Qualidade
+signal equipped_qualities_updated(qualities: Array) # Condição (0-100) de cada um dos 14 slots
 signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: float, max_weight: float, speed_mult: float)
 signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
 signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
@@ -194,30 +195,33 @@ func _process_tcp() -> void:
 				player_attributes_received.emit(pid, xp, next_xp, stat_pts, str_stat, dex_stat, con_stat, agi_stat, int_stat, spi_stat, mas_stat, lck_stat)
 				tcp_rx_buffer = tcp_rx_buffer.slice(expected_len)
 
-			elif opcode == 0x38: # INVENTORY_SYNC: op | 14 slots | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count | count × (item, qtd, Qualidade)
-				if tcp_rx_buffer.size() < 33:
+			elif opcode == 0x38: # INVENTORY_SYNC: op | 14 slots | 14 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count u16 | count × (item, qtd, Qualidade)
+				if tcp_rx_buffer.size() < 48:
 					break
-				var slot_count: int = tcp_rx_buffer[32]
-				var total_size: int = 33 + slot_count * 3
+				var slot_count: int = tcp_rx_buffer[46] | (tcp_rx_buffer[47] << 8)
+				var total_size: int = 48 + slot_count * 3
 				if tcp_rx_buffer.size() < total_size:
 					break
 				var inv_buf := StreamPeerBuffer.new()
 				inv_buf.big_endian = false
 				inv_buf.data_array = tcp_rx_buffer.slice(0, total_size)
 				var equipped_slots: Array = []
+				var equipped_qualities: Array = []
 				for i in range(14):
 					equipped_slots.append(tcp_rx_buffer[1 + i])
-				inv_buf.seek(15)
+					equipped_qualities.append(tcp_rx_buffer[15 + i])
+				inv_buf.seek(29)
 				var gold: int = inv_buf.get_u32()
 				var eclipse_coins: int = inv_buf.get_u32()
 				var cur_weight: float = inv_buf.get_float()
 				var max_weight: float = inv_buf.get_float()
-				var speed_mult: float = float(tcp_rx_buffer[31]) / 100.0
+				var speed_mult: float = float(tcp_rx_buffer[45]) / 100.0
 				var items_array: Array = []
-				var offset: int = 33
+				var offset: int = 48
 				for i in range(slot_count):
 					items_array.append({"id": tcp_rx_buffer[offset], "quantity": tcp_rx_buffer[offset + 1], "quality": tcp_rx_buffer[offset + 2]})
 					offset += 3
+				equipped_qualities_updated.emit(equipped_qualities)
 				inventory_updated.emit(equipped_slots, items_array)
 				wallet_weight_updated.emit(gold, eclipse_coins, cur_weight, max_weight, speed_mult)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
@@ -270,7 +274,7 @@ func _process_tcp() -> void:
 				if tcp_rx_buffer.size() < 3:
 					break
 				var g_count: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
-				var g_size: int = 3 + g_count * 14
+				var g_size: int = 3 + g_count * 15
 				if tcp_rx_buffer.size() < g_size:
 					break
 				var g_buf := StreamPeerBuffer.new()
@@ -282,9 +286,10 @@ func _process_tcp() -> void:
 					var drop_id: int = g_buf.get_u32()
 					var g_item: int = g_buf.get_u8()
 					var g_qty: int = g_buf.get_u8()
+					var g_quality: int = g_buf.get_u8()
 					var gx: float = g_buf.get_float()
 					var gz: float = g_buf.get_float()
-					ground.append({"drop_id": drop_id, "id": g_item, "quantity": g_qty, "x": gx, "z": gz})
+					ground.append({"drop_id": drop_id, "id": g_item, "quantity": g_qty, "quality": g_quality, "x": gx, "z": gz})
 				ground_items_received.emit(ground)
 				tcp_rx_buffer = tcp_rx_buffer.slice(g_size)
 
@@ -779,8 +784,9 @@ func send_allocate_stat(stat_id: int, amount: int = 1) -> void:
 	tcp.put_data(buffer.data_array)
 
 # send_use_item envia o pacote TCP 0x39 para usar consumível ou equipar armadura/acessório
-func send_use_item(item_id: int) -> void:
-	_send_item_action(item_id, 0, 0)
+# quality: Qualidade da unidade a usar/equipar (255 = a melhor disponível)
+func send_use_item(item_id: int, quality: int = 255) -> void:
+	_send_item_action(item_id, 0, quality)
 
 # send_unequip_slot envia o 0x39 com Action = Desequipar para o slot (0..13)
 func send_unequip_slot(slot_index: int) -> void:
@@ -800,15 +806,16 @@ func _send_item_action(item_id: int, action: int, slot_index: int) -> void:
 
 	tcp.put_data(buffer.data_array)
 
-# send_drop_item_ground envia o 0x41: larga `quantity` unidades do item na posição `slot_index` da mochila
-func send_drop_item_ground(slot_index: int, quantity: int) -> void:
+# send_drop_item_ground envia o 0x41: larga `quantity` unidades do item com a Qualidade indicada
+func send_drop_item_ground(item_id: int, quality: int, quantity: int) -> void:
 	if my_player_id == 0:
 		return
 	var buffer := StreamPeerBuffer.new()
 	buffer.big_endian = false
 	buffer.put_u8(0x41)
 	buffer.put_u32(my_player_id)
-	buffer.put_u8(slot_index)
+	buffer.put_u8(item_id)
+	buffer.put_u8(clampi(quality, 0, 100))
 	buffer.put_u8(clampi(quantity, 1, 255))
 	tcp.put_data(buffer.data_array)
 

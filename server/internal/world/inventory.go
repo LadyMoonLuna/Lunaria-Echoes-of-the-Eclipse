@@ -113,9 +113,9 @@ func (p *Player) RemoveHeavyItems() int {
 // equipDEFLocked soma a defesa física dos itens equipados.
 func (p *Player) equipDEFLocked() uint16 {
 	var def float32
-	for _, id := range p.EquippedSlots {
+	for slotIdx, id := range p.EquippedSlots {
 		if id > 0 {
-			def += float32(GetItemInfo(id).BonusDEF) * qualityStatMult(p.itemQualityLocked(id))
+			def += float32(GetItemInfo(id).BonusDEF) * qualityStatMult(p.slotQualityLocked(uint8(slotIdx)))
 		}
 	}
 	return uint16(def + 0.5)
@@ -125,38 +125,14 @@ func (p *Player) equipDEFLocked() uint16 {
 func (p *Player) EquipBonuses() (atk, def, mdef uint16) {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
-	for _, id := range p.EquippedSlots {
+	for slotIdx, id := range p.EquippedSlots {
 		if id > 0 {
 			info := GetItemInfo(id)
-			m := qualityStatMult(p.itemQualityLocked(id))
+			m := qualityStatMult(p.slotQualityLocked(uint8(slotIdx)))
 			atk += uint16(float32(info.BonusATK)*m + 0.5)
 			def += uint16(float32(info.BonusDEF)*m + 0.5)
 			mdef += uint16(float32(info.BonusMDEF)*m + 0.5)
 		}
 	}
 	return atk, def, mdef
-}
-
-// TakeInventorySlot remove até qty unidades do item na posição slotIndex da lista da mochila
-// (mesma ordem enviada no 0x38). Retorna o item e a quantidade removida.
-func (p *Player) TakeInventorySlot(slotIndex, qty uint8) (uint8, uint8) {
-	slots := p.GetInventorySlots()
-	if int(slotIndex) >= len(slots) || qty == 0 {
-		return 0, 0
-	}
-	itemID := slots[slotIndex].ItemID
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
-	have := p.Inventory[itemID]
-	if have == 0 {
-		return 0, 0
-	}
-	if qty > have {
-		qty = have
-	}
-	p.Inventory[itemID] = have - qty
-	if p.Inventory[itemID] == 0 {
-		delete(p.Inventory, itemID)
-	}
-	return itemID, qty
 }

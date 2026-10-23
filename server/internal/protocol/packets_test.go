@@ -564,7 +564,9 @@ func TestInventorySyncPacket(t *testing.T) {
 		{ItemID: ItemFreshWolfBlood, Quantity: 1},
 	}
 
-	data := SerializeInventorySync(equippedSlots, status, slots)
+	var qualities [EquipSlotCount]uint8
+	qualities[SlotMainHand] = 64
+	data := SerializeInventorySync(equippedSlots, qualities, status, slots)
 	expectedLen := InventorySyncHeaderSize + len(slots)*InventorySlotEntrySize
 	if len(data) != expectedLen {
 		t.Fatalf("esperava tamanho %d, obteve %d", expectedLen, len(data))
@@ -578,6 +580,9 @@ func TestInventorySyncPacket(t *testing.T) {
 		t.Fatalf("erro ao decodificar INVENTORY_SYNC: %v", err)
 	}
 
+	if parsed.EquippedQualities != qualities {
+		t.Fatal("Condição dos slots divergente")
+	}
 	if parsed.Status != status {
 		t.Fatalf("dinheiro/peso divergentes: %+v vs %+v", parsed.Status, status)
 	}
@@ -589,7 +594,7 @@ func TestInventorySyncPacket(t *testing.T) {
 	if parsed.EquippedArmorID != ItemSteelChestplate || parsed.EquippedAccessoryID != ItemAncestralFangRing {
 		t.Fatalf("alias de armadura/acessorio divergente: armor=%d, acc=%d", parsed.EquippedArmorID, parsed.EquippedAccessoryID)
 	}
-	if parsed.SlotCount != uint8(len(slots)) {
+	if parsed.SlotCount != uint16(len(slots)) {
 		t.Fatalf("slot count divergente: %d vs %d", parsed.SlotCount, len(slots))
 	}
 

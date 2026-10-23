@@ -47,14 +47,8 @@ func TestOverloadFreezesMovement(t *testing.T) {
 	if p.PosX != 5 {
 		t.Fatal("sobrecarregado deveria ficar imóvel")
 	}
-	idx := uint8(0)
-	for i, sl := range p.GetInventorySlots() {
-		if sl.ItemID == protocol.ItemColossalSword {
-			idx = uint8(i)
-		}
-	}
-	id, qty := p.TakeInventorySlot(idx, 20)
-	if id != protocol.ItemColossalSword || qty != 20 || p.IsOverloaded() {
+	qty := p.TakeItemUnits(protocol.ItemColossalSword, DefaultQualityFor(protocol.ItemColossalSword), 20)
+	if qty != 20 || p.IsOverloaded() {
 		t.Fatal("largar os itens deveria liberar o movimento")
 	}
 }
@@ -92,14 +86,14 @@ func TestWeaponSlotsAndUnequip(t *testing.T) {
 
 func TestGroundItemPickupRange(t *testing.T) {
 	g := NewGroundItemManager()
-	d := g.Drop(protocol.ItemIronOre, 3, 10, 10, ZoneVillage)
+	d := g.Drop(protocol.ItemIronOre, 3, 82, 10, 10, ZoneVillage)
 	if _, ok := g.TryPickup(d.DropID, 20, 20, ZoneVillage); ok {
 		t.Fatal("longe demais para pegar")
 	}
 	if _, ok := g.TryPickup(d.DropID, 12, 12, ZoneForest); ok {
 		t.Fatal("outra zona não pode pegar")
 	}
-	if it, ok := g.TryPickup(d.DropID, 12, 12, ZoneVillage); !ok || it.Quantity != 3 {
+	if it, ok := g.TryPickup(d.DropID, 12, 12, ZoneVillage); !ok || it.Quantity != 3 || it.Quality != 82 {
 		t.Fatal("a 2.8m deveria pegar")
 	}
 	if _, ok := g.TryPickup(d.DropID, 12, 12, ZoneVillage); ok {

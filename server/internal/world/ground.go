@@ -10,6 +10,7 @@ type GroundItem struct {
 	DropID    uint32
 	ItemID    uint8
 	Quantity  uint8
+	Quality   uint8 // Qualidade de cada unidade da pilha largada
 	X, Z      float32
 	ZoneID    uint8
 	DroppedAt time.Time
@@ -33,10 +34,10 @@ func NewGroundItemManager() *GroundItemManager {
 }
 
 // Drop cria um item no chão e devolve uma cópia dele.
-func (g *GroundItemManager) Drop(itemID, qty uint8, x, z float32, zone uint8) GroundItem {
+func (g *GroundItemManager) Drop(itemID, qty, quality uint8, x, z float32, zone uint8) GroundItem {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	it := &GroundItem{DropID: g.nextID, ItemID: itemID, Quantity: qty, X: x, Z: z, ZoneID: zone, DroppedAt: time.Now()}
+	it := &GroundItem{DropID: g.nextID, ItemID: itemID, Quantity: qty, Quality: quality, X: x, Z: z, ZoneID: zone, DroppedAt: time.Now()}
 	g.nextID++
 	g.items[it.DropID] = it
 	return *it
