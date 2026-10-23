@@ -1358,7 +1358,7 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 			// Desafio Secreto: Cavaleiro do Vazio (Classe 14)
 			if player.BlockedBossRupture && player.ClassID != protocol.ClassRiftKnight {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassRiftKnight, protocol.IdentityModeSecretReset)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da guerra! Seu escudo resistiu ao impacto titânico do monstro durante o cataclismo lunar! Uma fenda dimensional responde ao seu comando... Eu o proclamo um Cavaleiro do Vazio #%d!", pkt.PlayerID))
+				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da guerra! Seu escudo resistiu ao impacto titânico do monstro durante o cataclismo lunar! Uma fenda dimensional responde ao seu comando... Confirme, #%d, e eu o proclamarei um Cavaleiro do Vazio!", pkt.PlayerID))
 				log.Printf("[CLASSE SECRETA] Capitão Randel iniciou o jogador #%d como Cavaleiro do Vazio (Classe 14)!\n", pkt.PlayerID)
 				return
 			}
@@ -1401,7 +1401,7 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassBlacksmith, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(100, fmt.Sprintf("Pela bigorna sagrada! Você quer aprender a forjar e a esmagar aço? Você agora é um Forjador de Estrelas (Tier 1), #%d!", pkt.PlayerID))
+				s.BroadcastNPCSay(100, fmt.Sprintf("Pela bigorna sagrada! Você quer aprender a forjar e a esmagar aço? Confirme e eu te ensino a ser um Forjador de Estrelas (Tier 1), #%d!", pkt.PlayerID))
 				log.Printf("[MESTRE] Garrick ensinou a Classe Forjador de Estrelas (5) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
@@ -1435,7 +1435,7 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 
 			if player.ClassID == protocol.ClassNone {
 				s.offerIdentityChange(player, player.RaceID, protocol.ClassAlchemist, protocol.IdentityModeInitialChange)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("O equilíbrio dos elementos é a maior das magias! Você agora é um Transmutador (Tier 1), #%d!", pkt.PlayerID))
+				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("O equilíbrio dos elementos é a maior das magias! Confirme e eu te ensino a arte do Transmutador (Tier 1), #%d!", pkt.PlayerID))
 				log.Printf("[MESTRE] Lyra ensinou a Classe Transmutador (6) ao jogador #%d!\n", pkt.PlayerID)
 				return
 			}
