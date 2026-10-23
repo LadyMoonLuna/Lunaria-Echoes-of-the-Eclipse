@@ -49,7 +49,17 @@ const MOB_NAMES := {
 	11: "Gárgula de Pedra",
 	12: "Inquisidor Vex",
 	13: "Comandante Vaelen",
-	14: "Malakor, o Arauto do Eclipse"
+	14: "Malakor, o Arauto do Eclipse",
+	15: "Aranha Tecelã da Bruma",
+	16: "Arachna, a Rainha Tecelã",
+	17: "Lodo Ácido Corrosivo",
+	18: "Escorpião Abissal Gigante",
+	19: "Quimera Costurada Nº 0",
+	20: "Golem de Gelo Antigo",
+	21: "Draco de Geada Selvagem",
+	22: "Ymir, o Patriarca Gigante de Gelo",
+	23: "Guarda Sanguinário de Vesperian",
+	24: "Lorde Vesperian, o Progenitor Vampiro"
 }
 
 const ITEM_NAMES := {
@@ -76,7 +86,21 @@ const ITEM_NAMES := {
 	23: "Olho do Arauto do Eclipse",
 	24: "Tocha Sagrada do Santuário",
 	25: "Minério de Ferro",
-	28: "Lixo Orgânico"
+	28: "Lixo Orgânico",
+	42: "Casulo de Seda Perfeito",
+	43: "Coração da Rainha Aranha",
+	44: "Olho Multifacetado de Arachna",
+	45: "Manto de Seda Imperial",
+	46: "Ácido Puro",
+	47: "Ferrão de Escorpião Abissal",
+	48: "Veneno Vorpal",
+	49: "Retalho Quimérico Costurado",
+	50: "Núcleo de Gelo Antigo",
+	51: "Escama Dracônica Primordial",
+	52: "Coração de Geada Eterna",
+	53: "Insígnia do Guarda Carmesim",
+	54: "Sangue Puro do Progenitor",
+	55: "Anel Carmesim de Vesperian"
 }
 
 func _ready() -> void:

@@ -144,6 +144,110 @@ const MOB_DATA := [
 			{"item": "Tomo da Foice do Eclipse (Item 17)", "rate": "0.1%", "rare": true, "secret": true},
 			{"item": "Ampulheta Rúnica (Item 29)", "rate": "0.1%", "rare": true, "secret": true}
 		]
+	},
+	{
+		"mob_id": 15,
+		"name": "Aranha Tecelã da Bruma",
+		"location": "Bosque Sussurrante (105.0, -100.0)",
+		"icon": "🕷️",
+		"drops": [
+			{"item": "Casulo de Seda Perfeito (Item 42)", "rate": "100.0%", "rare": false},
+			{"item": "Glândula de Veneno (Item 11)", "rate": "25.0%", "rare": false}
+		]
+	},
+	{
+		"mob_id": 16,
+		"name": "★ Arachna, a Rainha Tecelã [RAID BOSS] ★",
+		"location": "Bosque Sussurrante (120.0, -120.0)",
+		"icon": "👑",
+		"drops": [
+			{"item": "Coração da Rainha Aranha (Item 43)", "rate": "100.0%", "rare": false},
+			{"item": "Manto de Seda Imperial (Item 45)", "rate": "100.0%", "rare": false},
+			{"item": "Olho Multifacetado de Arachna (Item 44 - Raça Aracne)", "rate": "0.1%", "rare": true, "secret": true}
+		]
+	},
+	{
+		"mob_id": 17,
+		"name": "Lodo Ácido Corrosivo",
+		"location": "Esgotos Antigos (-30.0, 40.0)",
+		"icon": "🧪",
+		"drops": [
+			{"item": "Ácido Puro (Item 46)", "rate": "100.0%", "rare": false},
+			{"item": "Lixo Orgânico (Item 28)", "rate": "100.0%", "rare": false}
+		]
+	},
+	{
+		"mob_id": 18,
+		"name": "Escorpião Abissal Gigante",
+		"location": "Esgotos Antigos (60.0, 60.0)",
+		"icon": "🦂",
+		"drops": [
+			{"item": "Veneno Vorpal (Item 48)", "rate": "100.0%", "rare": false},
+			{"item": "Ferrão de Escorpião Abissal (Item 47 - Raça Escorpião)", "rate": "0.1%", "rare": true, "secret": true}
+		]
+	},
+	{
+		"mob_id": 19,
+		"name": "Mini-Boss Quimera Costurada Nº 0",
+		"location": "Esgotos Antigos (0.0, 110.0)",
+		"icon": "🧟",
+		"drops": [
+			{"item": "Retalho Quimérico Costurado (Item 49)", "rate": "100.0%", "rare": false},
+			{"item": "Glândula de Veneno Mutante (Item 11)", "rate": "100.0%", "rare": false},
+			{"item": "Placa de Aço Deformada (Item 12)", "rate": "100.0%", "rare": false}
+		]
+	},
+	{
+		"mob_id": 20,
+		"name": "Golem de Gelo Antigo",
+		"location": "Ruínas da Vigília & Norte Gelado (-40.0, 130.0)",
+		"icon": "🧊",
+		"drops": [
+			{"item": "Núcleo de Gelo Antigo (Item 50)", "rate": "100.0%", "rare": false},
+			{"item": "Placa de Aço Pesada (Item 12)", "rate": "100.0%", "rare": false}
+		]
+	},
+	{
+		"mob_id": 21,
+		"name": "Draco de Geada Selvagem",
+		"location": "Ruínas da Vigília & Norte Gelado (0.0, 175.0)",
+		"icon": "🐉",
+		"drops": [
+			{"item": "Escama Dracônica Primordial (Item 51)", "rate": "100.0%", "rare": false},
+			{"item": "Carne Nobre Assada (Item 10)", "rate": "100.0%", "rare": false}
+		]
+	},
+	{
+		"mob_id": 22,
+		"name": "★ Ymir, o Patriarca Gigante de Gelo [BOSS] ★",
+		"location": "Ruínas da Vigília & Norte Gelado (0.0, 150.0)",
+		"icon": "❄️",
+		"drops": [
+			{"item": "Núcleo de Gelo Ancestral (Item 50)", "rate": "100.0%", "rare": false},
+			{"item": "Placa Glacial Reforçada (Item 12)", "rate": "100.0%", "rare": false},
+			{"item": "Coração de Geada Eterna (Item 52 - Raça Boreal / Gigante)", "rate": "0.1%", "rare": true, "secret": true}
+		]
+	},
+	{
+		"mob_id": 23,
+		"name": "Guarda Sanguinário de Vesperian",
+		"location": "Santuário do Eclipse (-125.0, 125.0)",
+		"icon": "🛡️",
+		"drops": [
+			{"item": "Insígnia do Guarda Carmesim (Item 53)", "rate": "100.0%", "rare": false},
+			{"item": "Sangue Lunar Puro (Item 10)", "rate": "100.0%", "rare": false}
+		]
+	},
+	{
+		"mob_id": 24,
+		"name": "★ LORDE VESPERIAN, O PROGENITOR VAMPIRO [RAID BOSS SECRETO] ★",
+		"location": "Santuário do Eclipse (-140.0, 140.0)",
+		"icon": "🧛",
+		"drops": [
+			{"item": "Anel Carmesim de Vesperian (Item 55)", "rate": "100.0%", "rare": false},
+			{"item": "Tomo da Foice do Eclipse (Item 17)", "rate": "100.0%", "rare": false},
+			{"item": "Sangue Puro do Progenitor (Item 54 - Raça Dhampir/Vampiro)", "rate": "0.1%", "rare": true, "secret": true}
+		]
 	}
 ]
 

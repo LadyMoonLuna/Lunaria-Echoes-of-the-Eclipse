@@ -47,108 +47,168 @@ const TIER_COLORS := [
 const CLASSES_DEV_DATA := [
 	{
 		"id": 1,
-		"name": "Espadachim",
-		"desc": "Combatente equilibrado armado com espada longa e escudo de aço temperado.",
-		"passive": "Determinação do Aço (+10% defesa e dano melee por FOR)",
-		"skill_q": "Corte Crescente (1.75x dano)",
-		"skill_r": "Postura de Ferro (70% defesa e parry)",
-		"skill_f": "Impacto Sísmico (2.4x dano em raio de 4.5m)",
+		"name": "Guerreiro",
+		"desc": "Combatente com espada. [Passiva] Sangue de Batalha (+15% Defesa, +10% Dano com Espadas).",
+		"passive": "Sangue de Batalha (+15% Defesa Física e +10% Dano com Espadas)",
+		"skill_q": "Corte Duplo (1.8x dano + sangramento)",
+		"skill_r": "Investida Imparável (Dash 6m empurra e quebra postura)",
+		"skill_f": "Julgamento da Espada (2.6x dano sísmico 4.5m; +40% em alvos <35% HP)",
 		"color": Color("#4fc3f7")
 	},
 	{
 		"id": 2,
-		"name": "Batedor",
-		"desc": "Arqueiro ágil de longo alcance com flechas táticas e passos silenciosos.",
-		"passive": "Olho do Falcão (+15% alcance/precisão e +25% crítico na Lua Nova)",
-		"skill_q": "Disparo Perfurante (1.75x perfura alvos)",
-		"skill_r": "Chuva de Estrepes (lentidão 40% em área)",
-		"skill_f": "Saraivada Estelar (3 flechas 2.4x dano)",
-		"color": Color("#81c784")
-	},
-	{
-		"id": 3,
-		"name": "Iniciado",
-		"desc": "Conjurador do éter e magias elementais cósmicas com cajado de foco.",
-		"passive": "Ressonância do Éter (+15% magia e +15% dano na Gibosa Crescente)",
-		"skill_q": "Cometa Elemental (1.75x dano em área)",
-		"skill_r": "Nova de Gelo (congelamento 5m)",
-		"skill_f": "Maelstrom Cósmico (2.4x dano em 6.5m)",
+		"name": "Mago",
+		"desc": "Conjurador arcano com cajado/orbe. [Passiva] Ressonância Arcana (+20% Mágico e Mana).",
+		"passive": "Ressonância Arcana (+20% Dano Mágico e regeneração contínua de Mana)",
+		"skill_q": "Orbe de Magma (1.9x dano de fogo a 18m em área)",
+		"skill_r": "Prisão Glacial (Congela e empurra em 5m por 2s)",
+		"skill_f": "Chuva de Meteoros (2.8x dano arcano/fogo em raio de 6m)",
 		"color": Color("#ba68c8")
 	},
 	{
+		"id": 3,
+		"name": "Arqueiro",
+		"desc": "Atirador ágil de precisão à distância. [Passiva] Olho de Falcão (+20% Crítico, +12% Vel).",
+		"passive": "Olho de Falcão (+20% Taxa Crítica à distância e +12% Velocidade)",
+		"skill_q": "Tiro Perfurante (1.85x dano perfurante a 24m)",
+		"skill_r": "Salto Acrobático (Mortal para trás disparando flecha que prende por 2s)",
+		"skill_f": "Tempestade de Mil Flechas (2.6x dano em área de 6m)",
+		"color": Color("#81c784")
+	},
+	{
 		"id": 4,
-		"name": "Acólito",
-		"desc": "Guerreiro sagrado com maça, talismã e orações solares purificadoras.",
-		"passive": "Graça Sagrada (Cura aliados e +20% dano no Quarto Minguante)",
-		"skill_q": "Círculo de Luz (1.75x dano e cura +40 HP)",
-		"skill_r": "Lança do Julgamento (feixe sagrado 15m)",
-		"skill_f": "Égide Sagrada (+65 HP grupo e 2.4x dano)",
-		"color": Color("#fff176")
+		"name": "Assassino",
+		"desc": "Lâmina dupla letal e passos furtivos. [Passiva] Lâmina Silenciosa (+35% Crítico costas, +15% Esquiva).",
+		"passive": "Lâmina Silenciosa (+35% Dano Crítico pelas costas e +15% Esquiva)",
+		"skill_q": "Passo das Sombras (Teleporta para as costas com 1.9x dano + veneno)",
+		"skill_r": "Cortina de Fumaça (Furtivo/intangível por 2.5s e +30% velocidade)",
+		"skill_f": "Lótus de Sangue (8 cortes letais em 4m com 2.7x dano e hemorragia)",
+		"color": Color("#e57373")
 	},
 	{
 		"id": 5,
-		"name": "Ferreiro",
-		"desc": "Combatente pesado de forja com martelo colossal e chamas de bigorna.",
-		"passive": "Coração de Brasa (+15% dano contundente de FOR e na Gibosa Minguante)",
-		"skill_q": "Golpe de Bigorna (1.75x dano)",
-		"skill_r": "Afiação de Combate (+25% dano grupo)",
-		"skill_f": "Fúria do Vulcão (2.4x frontal 4.5m)",
+		"name": "Lutador",
+		"desc": "Mestre dos punhos pesados de Chi. [Passiva] Punhos de Ferro & Chi (ignora 25% armadura).",
+		"passive": "Punhos de Ferro & Chi (Ignora 25% armadura, escudo a cada 3 socos)",
+		"skill_q": "Gancho Demolidor (Soco explosivo de Chi com 1.85x dano e atordoamento)",
+		"skill_r": "Postura do Lótus Marcial (Purifica debuffs, cura +40 HP, -50% dano por 3s)",
+		"skill_f": "Meteoro de Um Punho (Cratera sísmica de 5.5m com 2.75x dano)",
 		"color": Color("#ffb74d")
 	},
 	{
 		"id": 6,
-		"name": "Alquimista",
-		"desc": "Especialista em frascos cáusticos, névoas corrosivas e reações químicas.",
-		"passive": "Mestria Catalítica (Poças corrosivas e quebra de resistências)",
-		"skill_q": "Frasco de Éter (1.75x e cura +40 HP)",
-		"skill_r": "Bomba de Ácido (poça corrosiva 3.5m)",
-		"skill_f": "Detonação Catalítica (2.4x dano em 5.5m)",
-		"color": Color("#69f0ae")
+		"name": "Escudeiro",
+		"desc": "Defensor colossal com escudo e maça. [Passiva] Fortaleza Viva (+35% Defesa Total).",
+		"passive": "Fortaleza Viva (+35% Defesa Total, reflete 20% dano e converte Defesa em Ataque)",
+		"skill_q": "Esmagamento de Bastião (1.7x dano e Taunt em monstros em 8m)",
+		"skill_r": "Formação Impenetrável (Bloqueia 80% do dano por 4s e concede escudo aos aliados)",
+		"skill_f": "Cidadela Inabalável (Cúpula dourada, cura +70 HP e impede mortes por 4s)",
+		"color": Color("#fff176")
 	},
 	{
 		"id": 7,
+		"name": "Ferreiro",
+		"desc": "Mestre da forja com martelo colossal estilo Overgeared. [Passiva] Orgulho do Criador (+25% Dano).",
+		"passive": "Orgulho do Criador (Equipamentos nunca quebram, +25% dano com armas forjadas)",
+		"skill_q": "Golpe da Bigorna Incandescente (1.85x dano fogo/físico, racha 30% armadura)",
+		"skill_r": "Afiação & Têmpera em Campo (Repara armas e +25% Ataque e Defesa por 10s)",
+		"skill_f": "Dança do Arsenal Forjado (4 armas espectrais girando em 5.5m com 2.7x dano)",
+		"color": Color("#ff9800")
+	},
+	{
+		"id": 8,
+		"name": "Alquimista",
+		"desc": "Especialista químico em catalisadores e frascos. [Passiva] Reação Sintética (+35% poções).",
+		"passive": "Reação Sintética (+35% potência de poções e ácido cumulativo)",
+		"skill_q": "Frasco de Fogo Grego & Cura (Cura +45 HP aliados e queima com 1.8x dano)",
+		"skill_r": "Bomba de Ácido Corrosivo (Derrete 35% defesa inimiga e desacelera)",
+		"skill_f": "Transmutação do Behemoth Químico (2.6x dano e +30% status por 8s)",
+		"color": Color("#69f0ae")
+	},
+	{
+		"id": 9,
+		"name": "Escultor",
+		"desc": "Mestre escultor com cinzel e adaga estilo Moonlight Sculptor. [Passiva] Olho da Escultura & Estátua Viva.",
+		"passive": "Olho da Escultura & Estátua Viva (+25% Crítico enxergando falhas e Estátua Guardiã)",
+		"skill_q": "Entalhe em Velocidade (5 cortes precisos com 1.9x dano que reduzem defesa)",
+		"skill_r": "Estátua Explosiva / Pele de Mármore (Explosão e 50% redução de dano)",
+		"skill_f": "Técnica Secreta: Escultura do Luar (2.8x Dano Verdadeiro e Colosso Esculpido)",
+		"color": Color("#80deea")
+	},
+	{
+		"id": 10,
+		"name": "Domador",
+		"desc": "Senhor da matilha com chicote bestial estilo The Taming Master. [Passiva] Senhor da Matilha.",
+		"passive": "Senhor da Matilha (Fera Domada leal ataca a cada 1.8s e divide dano)",
+		"skill_q": "Estalo do Chicote: Investida! (Chicoteia a 9m e fera rasga alvo com 1.9x dano)",
+		"skill_r": "Fusão & Uivo Bestial (Cura +50 HP seu e da fera, +30% velocidade)",
+		"skill_f": "Debandada das Feras Primordiais (Feras domadas atropelam em 7m com 2.8x dano)",
+		"color": Color("#ffd740")
+	},
+	{
+		"id": 11,
+		"name": "Alfaiate de Guerra",
+		"desc": "Combatente tático com fios de aço monofilamento e agulhas rúnicas blindadas.",
+		"passive": "Fios Monofilamento & Seda Blindada (Cortes a 10m e defesa de armadura pesada)",
+		"skill_q": "Teia de Fios Retalhadores (Cone de 8m fatiando com 1.85x dano)",
+		"skill_r": "Costurar Sombras / Marionete (Prende alvos por 2.5s e concede esquiva ao grupo)",
+		"skill_f": "Gaiola de Fios Carmesins (Redoma triturando alvos em 6m com 2.7x dano)",
+		"color": Color("#ce93d8")
+	},
+	{
+		"id": 12,
+		"name": "Chef de Caça",
+		"desc": "Mestre gourmet de caça com cutelo gigante e wok de ferro temperado.",
+		"passive": "Células Gourmet & Mestre Açougueiro (Zona Verde Autópsia +50%, devorar dá buffs)",
+		"skill_q": "Desossar a Vivo! (Cutelo 1.9x dano arranca bife curativo +35 HP do alvo)",
+		"skill_r": "Banquete na Wok Flamejante (Bloqueia projéteis, cura +55 HP e +25% Dano)",
+		"skill_f": "Trinchar o Behemoth (Cutelo flamejante com 2.8x em 5.5m e reduz defesa boss metade)",
+		"color": Color("#ff7043")
+	},
+	{
+		"id": 13,
 		"name": "Ceifador do Eclipse",
-		"desc": "Classe Secreta: Foice colossal com colheita de almas e roubo de vida pleno.",
+		"desc": "Classe Secreta (Tier 5): Foice colossal com colheita de almas e roubo de vida pleno.",
 		"passive": "Sede Abissal (10% roubo de vida, +40% na Lua de Sangue, +20% no Eclipse)",
-		"skill_q": "Colheita Noturna (1.75x dano)",
-		"skill_r": "Drenagem Abissal (+45 HP e lentidão)",
+		"skill_q": "Colheita Noturna (1.75x dano em arco amplo com roubo de vida)",
+		"skill_r": "Drenagem Abissal (+45 HP e lentidão nos alvos)",
 		"skill_f": "Dança do Eclipse Total (2.4x dano em 6.0m)",
 		"color": Color("#d500f9")
 	},
 	{
-		"id": 8,
+		"id": 14,
 		"name": "Artífice Rúnico",
-		"desc": "Classe Secreta: Martelo-canhão movido a núcleos estelares e engrenagens.",
+		"desc": "Classe Secreta (Tier 5): Martelo-canhão movido a núcleos estelares e engrenagens.",
 		"passive": "Ignição Titanomecânica (Dano híbrido físico/elétrico por FOR e INT)",
-		"skill_q": "Salva Rúnica (1.75x em 3 disparos)",
-		"skill_r": "Sobrecarga Eletrostática (Raios no grupo)",
-		"skill_f": "Bombardeio Titanomecânico (2.4x em 6.5m)",
+		"skill_q": "Salva Rúnica (1.75x em 3 disparos perfurantes)",
+		"skill_r": "Sobrecarga Eletrostática (Raios nas armas do grupo por 8s)",
+		"skill_f": "Bombardeio Titanomecânico (2.4x dano orbital em 6.5m)",
 		"color": Color("#ff6d00")
 	},
 	{
-		"id": 9,
+		"id": 15,
 		"name": "Criador de Homúnculos",
-		"desc": "Classe Secreta: Vida sintética e quimera transmissora de bioplasma regenerativo.",
+		"desc": "Classe Secreta (Tier 5): Vida sintética e quimera transmissora de bioplasma regenerativo.",
 		"passive": "Vínculo Quimérico (Mini-Homúnculo regenera mestre e ataca alvos)",
-		"skill_q": "Infusão Mutagênica (1.75x dano)",
-		"skill_r": "Névoa de Bioplasma (Cura +50 HP e cega em 4.5m)",
-		"skill_f": "Frenesi do Quimera Supremo (2.4x em 6m)",
+		"skill_q": "Infusão Mutagênica (1.75x dano dissolvendo resistências)",
+		"skill_r": "Névoa de Bioplasma (Cura +50 HP continuamente e cega monstros)",
+		"skill_f": "Frenesi do Quimera Supremo (2.4x explosão de garras e ácido em 6m)",
 		"color": Color("#00b0ff")
 	},
 	{
-		"id": 10,
+		"id": 16,
 		"name": "Dançarino Astral",
-		"desc": "Classe Secreta: Duelista cósmico com lâminas estelares duplas em prata e ciano.",
+		"desc": "Classe Secreta (Tier 5): Duelista cósmico com lâminas estelares duplas em prata e ciano.",
 		"passive": "Graça das Constelações (+25% crítico inato e esquiva ao custo de 10 stamina)",
 		"skill_q": "Corte Cadente (2.0x dano veloz)",
-		"skill_r": "Valsa dos Espelhos (1.5s I-Frame + contra-ataque)",
-		"skill_f": "Constelação de Mil Lâminas (3.0x dano em 5.5m)",
+		"skill_r": "Valsa dos Espelhos (1.5s I-Frame + contra-ataque refletor)",
+		"skill_f": "Constelação de Mil Lâminas (3.0x dano omnidirecional em 5.5m)",
 		"color": Color("#80d8ff")
 	},
 	{
-		"id": 11,
+		"id": 17,
 		"name": "Inquisidor das Cinzas",
-		"desc": "Classe Secreta: Executor fanático com mangual e correntes incandescentes carmesins.",
+		"desc": "Classe Secreta (Tier 5): Executor fanático com mangual e correntes incandescentes carmesins.",
 		"passive": "Fervor do Mártir (Até +60% de dano adicional quanto menor for a sua vida atual)",
 		"skill_q": "Chicote de Penitência (2.2x + roubo de vida em 8m)",
 		"skill_r": "Selo de Excomunhão (+35 HP e queima em 5m)",
@@ -156,29 +216,29 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#ff5252")
 	},
 	{
-		"id": 12,
+		"id": 18,
 		"name": "Necromante de Ossos",
-		"desc": "Classe Secreta: Manipulador sombrio de ossos e crânio de cristal verde-esmeralda.",
+		"desc": "Classe Secreta (Tier 5): Manipulador sombrio de ossos e crânio de cristal verde-esmeralda.",
 		"passive": "Colheita de Ossos (Cura +20 HP instantâneos por monstro abatido)",
-		"skill_q": "Lança de Fêmur (2.0x perfurante 16m)",
-		"skill_r": "Explosão Óssea & Escudo (5.0m e couraça protetora)",
+		"skill_q": "Lança de Fêmur (2.0x perfurante a 16m)",
+		"skill_r": "Explosão Óssea & Escudo (5.0m e couraça protetora de ossos)",
 		"skill_f": "Legião do Ossuário (3.0x dano em 6m)",
 		"color": Color("#ccff90")
 	},
 	{
-		"id": 13,
+		"id": 19,
 		"name": "Domador Primordial",
-		"desc": "Classe Secreta: Guerreiro feral com lança e Lobo Espiritual Prateado leal ao seu lado.",
+		"desc": "Classe Secreta (Tier 5): Guerreiro feral com lança e Lobo Espiritual Prateado leal ao seu lado.",
 		"passive": "Espírito Alfa (+25% dano constante de todas as fontes de ataque)",
-		"skill_q": "Investida do Alfa (2.1x dano em 5.5m)",
-		"skill_r": "Uivo da Alcateia (+50 HP cura e buff de crítico)",
-		"skill_f": "Fúria do Behemoth (3.0x frontal sísmico 5m)",
+		"skill_q": "Investida do Alfa (2.1x dano rompendo linhas inimigas)",
+		"skill_r": "Uivo da Alcateia (+50 HP cura e buff de crítico ao grupo)",
+		"skill_f": "Fúria do Behemoth (3.0x frontal sísmico em 5m)",
 		"color": Color("#ffd740")
 	},
 	{
-		"id": 14,
+		"id": 20,
 		"name": "Cavaleiro da Ruptura",
-		"desc": "Classe Secreta: Colosso espacial com espada de obsidiana e escudo gravitacional do Vazio.",
+		"desc": "Classe Secreta (Tier 5): Colosso espacial com espada de obsidiana e escudo gravitacional do Vazio.",
 		"passive": "Armadura Singular (-30% de todo dano físico e mágico recebido)",
 		"skill_q": "Esmagamento Gravitacional (Puxa monstros em 5m + 1.9x)",
 		"skill_r": "Singularidade Reversa (Absorve 80% dano e implode)",
@@ -186,11 +246,11 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#7c4dff")
 	},
 	{
-		"id": 15,
+		"id": 21,
 		"name": "Arauto da Tempestade",
-		"desc": "Classe Secreta: Avatar dos trovões com alabarda de ouro e relâmpagos celestiais.",
+		"desc": "Classe Secreta (Tier 5): Avatar dos trovões com alabarda de ouro e relâmpagos celestiais.",
 		"passive": "Condutividade Celestial (+35% de dano na Chuva e choque estático ao ser atacado)",
-		"skill_q": "Lança do Trovão (2.1x veloz 18m)",
+		"skill_q": "Lança do Trovão (2.1x veloz a 18m)",
 		"skill_r": "Passo de Relâmpago (Surto elétrico 4m + velocidade)",
 		"skill_f": "Ira dos Céus (3.1x tempestade de raios em 6m)",
 		"color": Color("#40c4ff")
@@ -198,180 +258,293 @@ const CLASSES_DEV_DATA := [
 ]
 
 # ------------------------------------------------------------------------------
-# BANCO DE DADOS: 28 RAÇAS & LINHAGENS
+# BANCO DE DADOS: 46 RAÇAS & LINHAGENS COMPLETAS
 # ------------------------------------------------------------------------------
 const RACES_DATA := [
 	# Raças Base (1-4)
 	{
 		"id": 1, "group": "BASE", "name": "Valeriano", "badge": "Base Solar", "color": Color("#ffd700"),
 		"stats": "FOR: 6 | DES: 6 | CON: 6 | AGI: 6 | INT: 6 | ESP: 6 | MAS: 7 | SOR: 7",
-		"passive": "Linhagem Solar: +10% Regeneração de Stamina durante o dia sob céu limpo.",
-		"skill_z": "Bênção Solar [Z]: Pulso radiante purifica debuffs e concede +15% Velocidade por 6s."
+		"passive": "Linhagem Solar: +15% regeneração contínua de Stamina mesmo atacando.",
+		"skill_z": "Ímpeto Valeriano [Z]: Restaura +40 Stamina, +25 HP e concede +25% Dano por 10s."
 	},
 	{
 		"id": 2, "group": "BASE", "name": "Noctari", "badge": "Base Lunar", "color": Color("#00e5ff"),
 		"stats": "FOR: 4 | DES: 8 | CON: 4 | AGI: 8 | INT: 9 | ESP: 7 | MAS: 5 | SOR: 5",
-		"passive": "Sintonia Noturna: +15% de Dano Mágico e Esquiva durante as horas da noite.",
-		"skill_z": "Manto da Penumbra [Z]: Salto etéreo para as sombras com invisibilidade por 3s."
+		"passive": "Sintonia Noturna: +25% Dano Mágico e Esquiva à noite (dobrado em Lua Cheia).",
+		"skill_z": "Explosão Lunar [Z]: Detonação mágica estelar em 5.5m causando alto dano arcano e cura +30 HP."
 	},
 	{
 		"id": 3, "group": "BASE", "name": "Kharad", "badge": "Base Forja", "color": Color("#ff9800"),
 		"stats": "FOR: 9 | DES: 4 | CON: 10 | AGI: 3 | INT: 4 | ESP: 6 | MAS: 9 | SOR: 5",
-		"passive": "Pele Pétrea: Reduz em 15% todo dano físico recebido e imunidade a sangramento.",
-		"skill_z": "Bastião Sísmico [Z]: Bate no solo gerando escudo de 25% do HP Máximo por 5s."
+		"passive": "Pele Pétrea: -20% dano recebido permanente e imunidade a desequilíbrio.",
+		"skill_z": "Baluarte Rúnico [Z]: Erupção de magma em 4.5m e escudo de 70% de redução por 5s."
 	},
 	{
 		"id": 4, "group": "BASE", "name": "Varkai", "badge": "Base Feral", "color": Color("#ff5722"),
-		"stats": "FOR: 8 | DES: 7 | CON: 7 | AGI: 9 | INT: 3 | ESP: 4 | MAS: 6 | SOR: 6",
-		"passive": "Instinto Predador: +20% Velocidade de Movimento e +10% Crítico com armas de corte.",
-		"skill_z": "Salto Predatório [Z]: Investida feroz de 8m causando atordoamento de 1.5s."
+		"stats": "FOR: 8 | DES: 7 | CON: 7 | AGI: 8 | INT: 3 | ESP: 4 | MAS: 6 | SOR: 7",
+		"passive": "Sangue Fervilhante: Abaixo de 35% HP ganha +20% dano e +30% velocidade.",
+		"skill_z": "Sopro Dracônico [Z]: Cone frontal de 5.5m de alto impacto e roubo de vida."
 	},
+
 	# Secretas Clássicas (5-10)
 	{
-		"id": 5, "group": "SECRET", "name": "Sanguis", "badge": "Secreta Vampírica", "color": Color("#e91e63"),
-		"stats": "FOR: 7 | DES: 8 | CON: 5 | AGI: 8 | INT: 8 | ESP: 4 | MAS: 5 | SOR: 5",
-		"passive": "Vampirismo: +8% de Roubo de Vida passivo em todos os ataques corporais.",
-		"skill_z": "Festim Sanguíneo [Z]: Drena 40 HP do alvo, transferindo-os diretamente para você."
+		"id": 5, "group": "SECRET", "name": "Dhampir", "badge": "Vampírico", "color": Color("#e91e63"),
+		"stats": "FOR: 8 | DES: 9 | CON: 6 | AGI: 9 | INT: 8 | ESP: 3 | MAS: 6 | SOR: 6",
+		"passive": "Vampirismo: +10% de Roubo de Vida passivo permanente em todos os ataques.",
+		"skill_z": "Sede de Sangue [Z]: Drena 45 HP do alvo num estalo sombrio restaurando a própria vida."
 	},
 	{
-		"id": 6, "group": "SECRET", "name": "Licantropo Primordial", "badge": "Secreta Lupina", "color": Color("#ff6f00"),
-		"stats": "FOR: 10 | DES: 6 | CON: 8 | AGI: 9 | INT: 2 | ESP: 5 | MAS: 5 | SOR: 5",
-		"passive": "Fúria da Matilha: +25% de Dano Físico e +30% de Velocidade durante Lua Cheia ou Sangue.",
-		"skill_z": "Forma Feral [Z]: Uivo aterrorizante que causa lentidão e aumenta o dano em 30% por 8s."
+		"id": 6, "group": "SECRET", "name": "Licantropo Primordial", "badge": "Lupino Alfa", "color": Color("#ff6f00"),
+		"stats": "FOR: 12 | DES: 9 | CON: 11 | AGI: 10 | INT: 2 | ESP: 3 | MAS: 7 | SOR: 6",
+		"passive": "Fúria Lupina: +25% de dano e velocidade durante a noite ou Luas especiais.",
+		"skill_z": "Uivo da Fera Ancestral [Z]: Uivo estarrecedor que aterroriza monstros e bufa velocidade em 40%."
 	},
 	{
-		"id": 7, "group": "SECRET", "name": "Natus Solaris", "badge": "Secreta Solar", "color": Color("#fff176"),
-		"stats": "FOR: 6 | DES: 6 | CON: 6 | AGI: 6 | INT: 9 | ESP: 10 | MAS: 4 | SOR: 3",
-		"passive": "Aura Radiante: Queima inimigos ao redor (dano contínuo de fogo) durante o dia.",
-		"skill_z": "Chama da Criação [Z]: Feixe de luz de 12m que cura aliados e calcina inimigos."
+		"id": 7, "group": "SECRET", "name": "Revenant", "badge": "Cinzas", "color": Color("#a7ffeb"),
+		"stats": "FOR: 7 | DES: 6 | CON: 9 | AGI: 5 | INT: 9 | ESP: 10 | MAS: 6 | SOR: 3",
+		"passive": "Tenacidade Fúnebre: Ao receber dano letal, sobrevive por 4s com 1 HP para lutar.",
+		"skill_z": "Pacto das Cinzas [Z]: Explosão de cinzas em 5m prendendo inimigos e drenando essência."
 	},
 	{
-		"id": 8, "group": "SECRET", "name": "Umbralis", "badge": "Secreta Abissal", "color": Color("#7c4dff"),
-		"stats": "FOR: 5 | DES: 9 | CON: 5 | AGI: 9 | INT: 9 | ESP: 4 | MAS: 5 | SOR: 4",
-		"passive": "Corpo de Éter: 10% de chance de desviar completamente de qualquer golpe físico.",
-		"skill_z": "Vácuo Espacial [Z]: Teleporta 6m para frente explodindo vácuo de trevas."
+		"id": 8, "group": "SECRET", "name": "Celestino", "badge": "Luz Solar", "color": Color("#fff176"),
+		"stats": "FOR: 6 | DES: 6 | CON: 7 | AGI: 7 | INT: 10 | ESP: 12 | MAS: 6 | SOR: 8",
+		"passive": "Aura Radiante: Inimigos próximos sofrem dano contínuo de calor sagrado de dia.",
+		"skill_z": "Chama Sagrada [Z]: Feixe purificador solar que queima inimigos e cura aliados no trajeto."
 	},
 	{
-		"id": 9, "group": "SECRET", "name": "Draconato Vulcânico", "badge": "Secreta Dracônica", "color": Color("#d32f2f"),
-		"stats": "FOR: 9 | DES: 5 | CON: 9 | AGI: 5 | INT: 7 | ESP: 5 | MAS: 5 | SOR: 5",
-		"passive": "Escamas de Magma: Imunidade a queimaduras e +15% de Armadura contra dano cortante.",
-		"skill_z": "Sopro Dracônico [Z]: Expele cone de chamas frontais (5m) causando alto dano de fogo."
+		"id": 9, "group": "SECRET", "name": "Abissal", "badge": "Sombra Cósmica", "color": Color("#7c4dff"),
+		"stats": "FOR: 6 | DES: 7 | CON: 8 | AGI: 6 | INT: 12 | ESP: 8 | MAS: 6 | SOR: 5",
+		"passive": "Corpo de Éter: 12% de chance constante de esquivar totalmente de qualquer impacto.",
+		"skill_z": "Mergulho Abissal [Z]: Teleporta pelo éter detonando ondas de vácuo gravitacional."
 	},
 	{
-		"id": 10, "group": "SECRET", "name": "Gélido", "badge": "Secreta Gélida", "color": Color("#80deea"),
-		"stats": "FOR: 5 | DES: 7 | CON: 7 | AGI: 5 | INT: 9 | ESP: 8 | MAS: 4 | SOR: 5",
-		"passive": "Presença Glacial: Inimigos que te atacam sofrem lentidão temporária de 20%.",
-		"skill_z": "Esquife de Gelo [Z]: Congela o alvo por 2s e cria uma barreira protetora de gelo."
+		"id": 10, "group": "SECRET", "name": "Autômato Rúnico", "badge": "Gélido Rúnico", "color": Color("#80deea"),
+		"stats": "FOR: 10 | DES: 5 | CON: 12 | AGI: 4 | INT: 8 | ESP: 6 | MAS: 10 | SOR: 4",
+		"passive": "Blindagem de Adamante: -20% de dano físico e imunidade permanente a venenos.",
+		"skill_z": "Sobrecarga Arcana [Z]: Detona descarga elétrica em anel de 6m atordoando monstros."
 	},
+
 	# Evoluções Ordem e Caos (11-18)
 	{
 		"id": 11, "group": "EVOLUTION", "name": "Alto Valeriano", "badge": "Ordem Solar", "color": Color("#ffe082"),
-		"stats": "FOR: 7 | DES: 7 | CON: 7 | AGI: 7 | INT: 7 | ESP: 7 | MAS: 8 | SOR: 8",
-		"passive": "Liderança Real: +20% de Stamina máxima e regeneração contínua ininterrupta.",
-		"skill_z": "Estandarte Imperial [Z]: Cura +45 HP em aliados e concede +30% Dano por 12s."
+		"stats": "FOR: 10 | DES: 8 | CON: 9 | AGI: 8 | INT: 9 | ESP: 9 | MAS: 9 | SOR: 9",
+		"passive": "Soberania da Coroa: +30% de Stamina máxima e regeneração ininterrupta.",
+		"skill_z": "Estandarte Real [Z]: Cura +50 HP em aliados e energiza armas com +35% de dano solar."
 	},
 	{
 		"id": 12, "group": "EVOLUTION", "name": "Andarilho do Éter", "badge": "Caos Cósmico", "color": Color("#ce93d8"),
-		"stats": "FOR: 5 | DES: 8 | CON: 5 | AGI: 8 | INT: 10 | ESP: 8 | MAS: 5 | SOR: 5",
-		"passive": "Corpo Etéreo: 15% de chance de ignorar completamente qualquer golpe físico ou mágico.",
-		"skill_z": "Fenda Dimensional [Z]: Rasga o espaço, teleportando 6m à frente com explosão de vácuo."
+		"stats": "FOR: 8 | DES: 10 | CON: 7 | AGI: 12 | INT: 10 | ESP: 8 | MAS: 10 | SOR: 10",
+		"passive": "Forma Etérea: 18% de chance de desviar totalmente de qualquer ataque recebido.",
+		"skill_z": "Fenda Dimensional [Z]: Rasga a tapeçaria da realidade, teleportando 6m com vácuo."
 	},
 	{
 		"id": 13, "group": "EVOLUTION", "name": "Arconte Lunar", "badge": "Ordem Selene", "color": Color("#80d8ff"),
-		"stats": "FOR: 5 | DES: 9 | CON: 5 | AGI: 9 | INT: 10 | ESP: 8 | MAS: 4 | SOR: 4",
-		"passive": "Bênção da Lua: +35% de poder mágico e regeneração contínua sob qualquer fase lunar.",
-		"skill_z": "Luz Purificadora [Z]: Cascata lunar de 6m curando +60 HP e cegando inimigos."
+		"stats": "FOR: 5 | DES: 11 | CON: 6 | AGI: 11 | INT: 14 | ESP: 11 | MAS: 8 | SOR: 8",
+		"passive": "Coração Estelar: +40% de poder mágico sob qualquer fase da lua.",
+		"skill_z": "Luz de Selene [Z]: Pilar de luz lunar curando +70 HP e cegando inimigos com dano sagrado."
 	},
 	{
 		"id": 14, "group": "EVOLUTION", "name": "Espectro Umbral", "badge": "Caos Nyx", "color": Color("#b388ff"),
-		"stats": "FOR: 4 | DES: 10 | CON: 4 | AGI: 10 | INT: 9 | ESP: 7 | MAS: 5 | SOR: 5",
-		"passive": "Véu Noturno: +30% de velocidade de movimento e +20% de dano crítico permanente.",
-		"skill_z": "Manto das Sombras [Z]: Invisibilidade por 4s; o próximo golpe causa +100% de Crítico."
+		"stats": "FOR: 6 | DES: 13 | CON: 5 | AGI: 14 | INT: 12 | ESP: 9 | MAS: 11 | SOR: 9",
+		"passive": "Assassino das Trevas: +35% de velocidade e +30% de dano crítico permanente.",
+		"skill_z": "Manto de Nyx [Z]: Invisibilidade por 4s; próximo ataque causa +120% Dano Crítico garantido."
 	},
 	{
 		"id": 15, "group": "EVOLUTION", "name": "Guardião Rúnico", "badge": "Ordem Forja", "color": Color("#ffcc80"),
-		"stats": "FOR: 10 | DES: 4 | CON: 11 | AGI: 3 | INT: 5 | ESP: 7 | MAS: 10 | SOR: 4",
-		"passive": "Pele de Adamante: Reduz em 25% o dano físico e reflete 15% do impacto.",
-		"skill_z": "Armadura Rúnica [Z]: Absorve 80% do dano por 6s e reflete 40% de volta aos agressores."
+		"stats": "FOR: 13 | DES: 6 | CON: 15 | AGI: 5 | INT: 7 | ESP: 9 | MAS: 12 | SOR: 7",
+		"passive": "Baluarte Inabalável: Imune a controle de grupo e bônus de +400 HP Máximo.",
+		"skill_z": "Muralha Rúnica [Z]: Absorve 85% de dano por 6s e reflete 50% de volta aos atacantes."
 	},
 	{
 		"id": 16, "group": "EVOLUTION", "name": "Titã de Obsidiana", "badge": "Caos Magma", "color": Color("#ffab91"),
-		"stats": "FOR: 11 | DES: 3 | CON: 11 | AGI: 3 | INT: 5 | ESP: 5 | MAS: 9 | SOR: 7",
-		"passive": "Coração Vulcânico: Cada golpe desferido causa dano adicional de fogo por segundo.",
-		"skill_z": "Fúria do Vulcão [Z]: Onda de magma de 8m causando atordoamento e queimaduras."
+		"stats": "FOR: 15 | DES: 5 | CON: 17 | AGI: 4 | INT: 6 | ESP: 7 | MAS: 10 | SOR: 6",
+		"passive": "Corpo Magmático: Atacantes corpo-a-corpo sofrem retaliação de fogo constante.",
+		"skill_z": "Erupção Magma [Z]: Racha o solo liberando gêiser vulcânico de 5.5m que incendeia inimigos."
 	},
 	{
-		"id": 17, "group": "EVOLUTION", "name": "Predador Alfa", "badge": "Ordem Alcateia", "color": Color("#ff8a65"),
-		"stats": "FOR: 9 | DES: 8 | CON: 8 | AGI: 10 | INT: 3 | ESP: 5 | MAS: 6 | SOR: 5",
-		"passive": "Espírito da Alcateia: +20% de dano e velocidade quando acompanhado de aliados.",
-		"skill_z": "Uivo Convocador [Z]: Uivo retumbante que aterroriza monstros e bufa aliados."
+		"id": 17, "group": "EVOLUTION", "name": "Soberano Dracônico", "badge": "Ordem Dracônica", "color": Color("#ff8a65"),
+		"stats": "FOR: 13 | DES: 10 | CON: 11 | AGI: 11 | INT: 6 | ESP: 7 | MAS: 9 | SOR: 10",
+		"passive": "Escamas do Soberano: Reduz 35% do dano mágico recebido e amplifica dano elemental em 30%.",
+		"skill_z": "Chamas Reais [Z]: Sopro colunar de 7m que incinera oponentes e rouba vida em massa."
 	},
 	{
 		"id": 18, "group": "EVOLUTION", "name": "Fera do Frenesi", "badge": "Caos Feral", "color": Color("#ff1744"),
-		"stats": "FOR: 10 | DES: 8 | CON: 7 | AGI: 10 | INT: 2 | ESP: 3 | MAS: 7 | SOR: 7",
-		"passive": "Sede de Sangue: Cada ataque consecutivo aumenta a velocidade de ataque em +5% (máx 50%).",
-		"skill_z": "Garras Sanguinárias [Z]: Salto devastador desferindo 4 cortes rápidos com roubo de vida."
+		"stats": "FOR: 14 | DES: 11 | CON: 10 | AGI: 13 | INT: 4 | ESP: 5 | MAS: 10 | SOR: 11",
+		"passive": "Carnificina Feral: Abates concedem +20% de cura total instantânea.",
+		"skill_z": "Frenesi Destruidor [Z]: Salto devastador desferindo 4 garras com roubo de vida."
 	},
+
 	# Novas Raças Secretas (19-28)
 	{
-		"id": 19, "group": "NEW", "name": "Revenant da Cripta", "badge": "Morte & Retorno", "color": Color("#a7ffeb"),
-		"stats": "FOR: 8 | DES: 6 | CON: 9 | AGI: 6 | INT: 7 | ESP: 8 | MAS: 5 | SOR: 5",
-		"passive": "Tenacidade Fúnebre: Ao ter o HP zerado, sobrevive por 4s com 1 HP para lutar.",
-		"skill_z": "Abraço do Túmulo [Z]: Mãos cadavéricas brotam do solo prendendo inimigos em 5m."
+		"id": 19, "group": "NEW", "name": "Sylvari", "badge": "Nascido da Seiva", "color": Color("#81c784"),
+		"stats": "FOR: 5 | DES: 7 | CON: 8 | AGI: 6 | INT: 8 | ESP: 10 | MAS: 6 | SOR: 5",
+		"passive": "Vínculo com a Seiva: +3 HP/s contínuo enquanto permanecer em terreno natural.",
+		"skill_z": "Raízes Vivas [Z]: Raízes brotam do solo em 6m prendendo e drenando vida de oponentes."
 	},
 	{
-		"id": 20, "group": "NEW", "name": "Guardião da Aurora", "badge": "Luz Solar", "color": Color("#ffff8d"),
-		"stats": "FOR: 7 | DES: 6 | CON: 8 | AGI: 6 | INT: 8 | ESP: 9 | MAS: 5 | SOR: 5",
-		"passive": "Luz Imutável: Imunidade a cegueira e +20% de Resistência Mágica.",
-		"skill_z": "Escudo da Alvorada [Z]: Barreira solar que protege todo o grupo e queima agressores."
+		"id": 20, "group": "NEW", "name": "Esporiano", "badge": "Véu Fúngico", "color": Color("#9c27b0"),
+		"stats": "FOR: 4 | DES: 5 | CON: 10 | AGI: 4 | INT: 10 | ESP: 9 | MAS: 8 | SOR: 5",
+		"passive": "Simbiose Fúngica: Imunidade total a venenos e regeneração sob toxinas.",
+		"skill_z": "Nuvem de Esporos [Z]: Libera nuvem fúngica de veneno e confusão cegando atacantes em 5m."
 	},
 	{
-		"id": 21, "group": "NEW", "name": "Ceifador do Crepúsculo", "badge": "Vazio Cósmico", "color": Color("#ea80fc"),
-		"stats": "FOR: 7 | DES: 9 | CON: 6 | AGI: 9 | INT: 9 | ESP: 6 | MAS: 4 | SOR: 4",
-		"passive": "Sentença de Morte: Golpes contra alvos com menos de 30% HP causam +35% dano.",
-		"skill_z": "Foice Espectral [Z]: Giro cósmico de 360 graus cortando o tecido da realidade."
+		"id": 21, "group": "NEW", "name": "Aracne", "badge": "Tecelã da Bruma", "color": Color("#eceff1"),
+		"stats": "FOR: 6 | DES: 11 | CON: 5 | AGI: 10 | INT: 7 | ESP: 4 | MAS: 12 | SOR: 5",
+		"passive": "Pernas de Seda: Velocidade de movimento nunca é reduzida por lentidão.",
+		"skill_z": "Teia Prateada [Z]: Dispara projétil de teia que imobiliza o alvo por 3 segundos."
 	},
 	{
-		"id": 22, "group": "NEW", "name": "Draconato de Cinzas", "badge": "Fogo & Fúria", "color": Color("#ff6e40"),
-		"stats": "FOR: 9 | DES: 6 | CON: 9 | AGI: 6 | INT: 7 | ESP: 6 | MAS: 6 | SOR: 5",
-		"passive": "Bafo de Cinzas: Ataques básicos aplicam queima cumulativa no alvo.",
-		"skill_z": "Explosão de Cinzas [Z]: Detona cinzas ardentes em raio de 6m atordoando monstros."
+		"id": 22, "group": "NEW", "name": "Draconato de Cinzas", "badge": "Escama-Negra", "color": Color("#ff6e40"),
+		"stats": "FOR: 12 | DES: 5 | CON: 12 | AGI: 5 | INT: 8 | ESP: 6 | MAS: 6 | SOR: 4",
+		"passive": "Escama-Negra: Imunidade a chamas e +15% de armadura física permanente.",
+		"skill_z": "Sopro de Cinzas [Z]: Cone frontal de brasas incandescentes e queima cumulativa."
 	},
 	{
-		"id": 23, "group": "NEW", "name": "Tecelão do Éter", "badge": "Tempo & Mana", "color": Color("#b388ff"),
-		"stats": "FOR: 4 | DES: 8 | CON: 5 | AGI: 8 | INT: 11 | ESP: 10 | MAS: 4 | SOR: 4",
-		"passive": "Fios do Tempo: Reduz o cooldown de todas as suas habilidades ativas em 15%.",
-		"skill_z": "Fuso Temporal [Z]: Rebobina a posição e restaura a vida aos valores de 3s atrás."
+		"id": 23, "group": "NEW", "name": "Quimera", "badge": "Costurado", "color": Color("#76ff03"),
+		"stats": "FOR: 9 | DES: 8 | CON: 9 | AGI: 8 | INT: 6 | ESP: 2 | MAS: 10 | SOR: 5",
+		"passive": "Corpo Reativo: Adaptação celular concedendo +25% de resistência ao último dano.",
+		"skill_z": "Mutação Bioquímica [Z]: Onda de choque bio-ácida frontal adaptativa de alto impacto."
 	},
 	{
-		"id": 24, "group": "NEW", "name": "Quimera de Obsidiana", "badge": "Rocha & Fogo", "color": Color("#ffab40"),
-		"stats": "FOR: 10 | DES: 5 | CON: 10 | AGI: 5 | INT: 6 | ESP: 6 | MAS: 7 | SOR: 5",
-		"passive": "Armadura Vulcânica: 20% do dano sofrido é convertido em Stamina instantânea.",
-		"skill_z": "Erupção Terrestre [Z]: Espinhos pontiagudos de obsidiana emergem do chão em linha."
+		"id": 24, "group": "NEW", "name": "Boreal", "badge": "Coração de Geada", "color": Color("#80d8ff"),
+		"stats": "FOR: 8 | DES: 6 | CON: 9 | AGI: 5 | INT: 9 | ESP: 8 | MAS: 6 | SOR: 4",
+		"passive": "Coração Glacial: +25% dano de frio e imunidade a congelamento e hipotermia.",
+		"skill_z": "Crio-Armadura [Z]: Armadura de gelo puro absorvendo dano e congelando atacantes."
 	},
 	{
-		"id": 25, "group": "NEW", "name": "Espírito da Tempestade", "badge": "Raio & Trovão", "color": Color("#80d8ff"),
-		"stats": "FOR: 6 | DES: 9 | CON: 6 | AGI: 10 | INT: 9 | ESP: 8 | MAS: 3 | SOR: 3",
-		"passive": "Condutância Elétrica: Seus ataques têm 20% de chance de encadear raio elétrico.",
-		"skill_z": "Surto Voltaico [Z]: Transforma-se em puro raio percorrendo 10m e eletrocutando alvos."
+		"id": 25, "group": "NEW", "name": "Thalassiano", "badge": "Maré Negra", "color": Color("#006064"),
+		"stats": "FOR: 7 | DES: 8 | CON: 7 | AGI: 9 | INT: 9 | ESP: 8 | MAS: 5 | SOR: 5",
+		"passive": "Filho do Oceano: +30% de velocidade e cura na chuva e áreas aquáticas.",
+		"skill_z": "Maré Abissal [Z]: Erupção de gêiser d'água sob pressão arrastando alvos."
 	},
 	{
-		"id": 26, "group": "NEW", "name": "Parasita Abissal", "badge": "Sombra & Roubo", "color": Color("#b39ddb"),
-		"stats": "FOR: 6 | DES: 8 | CON: 7 | AGI: 8 | INT: 9 | ESP: 6 | MAS: 5 | SOR: 5",
-		"passive": "Sifão Vital: Concede bônus permanente temporário ao drenar a força de inimigos.",
-		"skill_z": "Tentáculos do Abismo [Z]: Puxa até 3 monstros para perto de você causando dano."
+		"id": 26, "group": "NEW", "name": "Cambion", "badge": "Sangue de Enxofre", "color": Color("#ff5252"),
+		"stats": "FOR: 11 | DES: 8 | CON: 8 | AGI: 7 | INT: 9 | ESP: 2 | MAS: 5 | SOR: 6",
+		"passive": "Sangue de Enxofre: Ataques convertem 5% da vida máxima em poder ofensivo dobrado.",
+		"skill_z": "Correntes Infernais [Z]: Correntes do tártaro prendem alvos queimando suas almas."
 	},
 	{
-		"id": 27, "group": "NEW", "name": "Aracne Tecelã", "badge": "Veneno & Teia", "color": Color("#a5d6a7"),
-		"stats": "FOR: 7 | DES: 9 | CON: 6 | AGI: 9 | INT: 8 | ESP: 5 | MAS: 5 | SOR: 5",
-		"passive": "Pernas de Seda: Velocidade de movimento nunca é reduzida por efeitos de lentidão.",
-		"skill_z": "Teia Paralisante [Z]: Lança rede de seda densa que imobiliza o alvo por 2.5s."
+		"id": 27, "group": "NEW", "name": "Nephilim", "badge": "Híbrido Crepúsculo", "color": Color("#ffe082"),
+		"stats": "FOR: 9 | DES: 9 | CON: 8 | AGI: 8 | INT: 10 | ESP: 10 | MAS: 7 | SOR: 7",
+		"passive": "Dualidade Cósmica: Alterna bônus de dano sagrado e necrótico a cada golpe.",
+		"skill_z": "Julgamento Nephilim [Z]: Feixe duplo divino e sombrio desintegrando defesas."
 	},
 	{
-		"id": 28, "group": "NEW", "name": "Seraphim Corrompido", "badge": "Luz Caída", "color": Color("#ffe082"),
-		"stats": "FOR: 8 | DES: 8 | CON: 7 | AGI: 8 | INT: 9 | ESP: 9 | MAS: 3 | SOR: 2",
-		"passive": "Graça Maculada: Alterna entre bônus de luz solar de dia e poder do vazio à noite.",
-		"skill_z": "Julgamento Maculado [Z]: Feixe divino bipartido de luz pura e trevas simultâneas."
+		"id": 28, "group": "NEW", "name": "Errante Temporal", "badge": "Cronomante", "color": Color("#ffd54f"),
+		"stats": "FOR: 5 | DES: 10 | CON: 5 | AGI: 12 | INT: 12 | ESP: 9 | MAS: 8 | SOR: 9",
+		"passive": "Fios do Tempo: Reduz o cooldown de todas as habilidades de classe em 15%.",
+		"skill_z": "Reversão Temporal [Z]: Rebobina posição e vida para 3 segundos atrás."
+	},
+
+	# 18 Novas Raças do RPG (29-46)
+	{
+		"id": 29, "group": "RPG", "name": "Meio-Celestial", "badge": "RPG Divino", "color": Color("#fff59d"),
+		"stats": "FOR: 8 | DES: 8 | CON: 8 | AGI: 8 | INT: 9 | ESP: 11 | MAS: 7 | SOR: 7",
+		"passive": "Graça Divina: +15% de cura recebida e dano sagrado radiante passivo.",
+		"skill_z": "Asas de Luz [Z]: Abre asas celestes curando +65 HP e restaurando +40 Stamina."
+	},
+	{
+		"id": 30, "group": "RPG", "name": "Pyromante", "badge": "RPG Chamas", "color": Color("#ff3d00"),
+		"stats": "FOR: 6 | DES: 8 | CON: 7 | AGI: 8 | INT: 12 | ESP: 6 | MAS: 7 | SOR: 6",
+		"passive": "Chama da Vida: Revive automaticamente com 50% de HP uma vez ao receber dano fatal.",
+		"skill_z": "Combustão [Z]: Detona explosão de fogo em 6m desferindo 2.8x de dano elemental."
+	},
+	{
+		"id": 31, "group": "RPG", "name": "Gigante de Gelo", "badge": "RPG Glacial (1.45x)", "color": Color("#80deea"),
+		"stats": "FOR: 14 | DES: 4 | CON: 15 | AGI: 4 | INT: 6 | ESP: 6 | MAS: 9 | SOR: 4",
+		"passive": "Massa Glacial: Escala de 1.45x, alta tenacidade e +25% de absorção contra frio.",
+		"skill_z": "Memória Molecular [Z]: Pancada de estalagmites e +350 HP Máximo por 15s."
+	},
+	{
+		"id": 32, "group": "RPG", "name": "Drago Terra", "badge": "RPG Carapaça", "color": Color("#8d6e63"),
+		"stats": "FOR: 12 | DES: 5 | CON: 14 | AGI: 4 | INT: 5 | ESP: 6 | MAS: 10 | SOR: 5",
+		"passive": "Carapaça Telúrica: Reduz passivamente 35% de todo dano físico sofrido.",
+		"skill_z": "Insulto Sísmico [Z]: Provoca monstros em 10m forçando seu foco e quebrando posturas."
+	},
+	{
+		"id": 33, "group": "RPG", "name": "Drago Água", "badge": "RPG Marés", "color": Color("#29b6f6"),
+		"stats": "FOR: 8 | DES: 9 | CON: 9 | AGI: 8 | INT: 9 | ESP: 9 | MAS: 7 | SOR: 7",
+		"passive": "Correnteza: Recupera continuamente +2.5 HP/s na água ou sob chuva torrencial.",
+		"skill_z": "Bênção de Netuno [Z]: Dispara onda marinha em cone empurrando e atordoando inimigos."
+	},
+	{
+		"id": 34, "group": "RPG", "name": "Drago Raio", "badge": "RPG Fulgor", "color": Color("#ffd600"),
+		"stats": "FOR: 8 | DES: 11 | CON: 7 | AGI: 12 | INT: 10 | ESP: 5 | MAS: 8 | SOR: 7",
+		"passive": "Condutor de Alta Tensão: +20% de velocidade e chance de choque elétrico em contra-ataques.",
+		"skill_z": "Descarga Elétrica [Z]: Feixe perfurante de choque rápido de longo alcance (1.85x)."
+	},
+	{
+		"id": 35, "group": "RPG", "name": "Drago Místico", "badge": "RPG Rúnico", "color": Color("#ab47bc"),
+		"stats": "FOR: 6 | DES: 8 | CON: 8 | AGI: 7 | INT: 13 | ESP: 10 | MAS: 6 | SOR: 6",
+		"passive": "Sangue Rúnico: +30% de mana e amplificação mágica elemental contínua.",
+		"skill_z": "Infusão Arcana [Z]: Círculo rúnico protetor de 6m com +40% de dano mágico por 10s."
+	},
+	{
+		"id": 36, "group": "RPG", "name": "Orc", "badge": "RPG Brutal", "color": Color("#558b2f"),
+		"stats": "FOR: 13 | DES: 6 | CON: 13 | AGI: 6 | INT: 3 | ESP: 3 | MAS: 9 | SOR: 5",
+		"passive": "Fisiologia Brutal: -20% dano passivo e capacidade de ingerir qualquer lixo orgânico para cura.",
+		"skill_z": "Ataque Devastador [Z]: Golpe esmagador brutal com força tripla (3.2x dano)."
+	},
+	{
+		"id": 37, "group": "RPG", "name": "Anão", "badge": "RPG Forja (0.82x)", "color": Color("#d7ccc8"),
+		"stats": "FOR: 11 | DES: 5 | CON: 13 | AGI: 4 | INT: 6 | ESP: 7 | MAS: 12 | SOR: 5",
+		"passive": "Resistência da Montanha: Estatura de 0.82x com firmeza e maestria superior na forja.",
+		"skill_z": "Martelo Ancestral [Z]: Pancada de bigorna que atordoa oponentes em raio de 5.5m."
+	},
+	{
+		"id": 38, "group": "RPG", "name": "Elfo", "badge": "RPG Silvestre", "color": Color("#aed581"),
+		"stats": "FOR: 5 | DES: 11 | CON: 5 | AGI: 12 | INT: 10 | ESP: 8 | MAS: 7 | SOR: 6",
+		"passive": "Graça da Floresta: +15% de precisão de disparo e custo reduzido em esquivas.",
+		"skill_z": "Disparo Élfico [Z]: Projétil perfurante luminoso de éter que atravessa múltiplos alvos."
+	},
+	{
+		"id": 39, "group": "RPG", "name": "Elfo Solar (Azgher)", "badge": "RPG Solar", "color": Color("#ffb300"),
+		"stats": "FOR: 6 | DES: 10 | CON: 6 | AGI: 10 | INT: 11 | ESP: 10 | PER: 7 | SOR: 7",
+		"passive": "Bênção de Azgher: +25% de dano solar durante o dia sob céu limpo.",
+		"skill_z": "Espada Solar de Azgher [Z]: Incendeia a lâmina com corte colunar de chamas radiantes."
+	},
+	{
+		"id": 40, "group": "RPG", "name": "Elfo Lunar (Tenebra)", "badge": "RPG Sombra", "color": Color("#5c6bc0"),
+		"stats": "FOR: 5 | DES: 11 | CON: 5 | AGI: 12 | INT: 10 | ESP: 8 | MAS: 8 | SOR: 8",
+		"passive": "Véu de Tenebra: +30% de chance crítica e passos sem som durante a noite.",
+		"skill_z": "Manto de Tenebra [Z]: Mergulho nas sombras obtendo invisibilidade e ataque crítico."
+	},
+	{
+		"id": 41, "group": "RPG", "name": "Fadinha", "badge": "RPG Alado (0.55x)", "color": Color("#f48fb1"),
+		"stats": "FOR: 3 | DES: 10 | CON: 4 | AGI: 13 | INT: 11 | ESP: 11 | MAS: 5 | SOR: 10",
+		"passive": "Forma Minúscula: Estatura minúscula de 0.55x com voo leve e hitbox reduzida.",
+		"skill_z": "Pó de Fada Estelar [Z]: Espalha pó cintilante curando aliados e cegando monstros."
+	},
+	{
+		"id": 42, "group": "RPG", "name": "Goblin", "badge": "RPG Trapaceiro (0.75x)", "color": Color("#7cb342"),
+		"stats": "FOR: 6 | DES: 12 | CON: 5 | AGI: 13 | INT: 6 | ESP: 3 | MAS: 10 | SOR: 12",
+		"passive": "Trapaceiro Nato: Estatura de 0.75x com +20% de drop de ouro e bônus pelas costas.",
+		"skill_z": "Truque Sujo Goblin [Z]: Bomba de fumaça e pólvora cegando e atordoando oponentes."
+	},
+	{
+		"id": 43, "group": "RPG", "name": "Demi-Humano Escorpião", "badge": "RPG Peçonha", "color": Color("#6a1b9a"),
+		"stats": "FOR: 9 | DES: 10 | CON: 8 | AGI: 10 | INT: 7 | ESP: 3 | MAS: 11 | SOR: 6",
+		"passive": "Quitina Vorpal: +20% de dano contra alvos envenenados e resistência alta a toxinas.",
+		"skill_z": "Aguilhão de Toxina Vorpal [Z]: Estocada com ferrão traseiro injetando peçonha corrosiva."
+	},
+	{
+		"id": 44, "group": "RPG", "name": "Demi-Humano Tartaruga", "badge": "RPG Blindado (1.35x)", "color": Color("#33691e"),
+		"stats": "FOR: 9 | DES: 4 | CON: 16 | AGI: 3 | INT: 6 | ESP: 8 | MAS: 9 | SOR: 5",
+		"passive": "Casco de Titã: Escala robusta de 1.35x com -45% de dano sofrido permanentemente.",
+		"skill_z": "Lar Doce Casca [Z]: Encolhe na carapaça absorvendo 85% de dano e repelindo inimigos."
+	},
+	{
+		"id": 45, "group": "RPG", "name": "Meio-Demônio (Succubus)", "badge": "RPG Vampírico", "color": Color("#c2185b"),
+		"stats": "FOR: 8 | DES: 10 | CON: 7 | AGI: 10 | INT: 11 | ESP: 4 | MAS: 8 | SOR: 8",
+		"passive": "Charme Demoníaco: 25% de chance passiva de anular completamente ataques recebidos.",
+		"skill_z": "Drenar Força Vital [Z]: Sifão demoníaco drenando 55 HP do alvo para o jogador."
+	},
+	{
+		"id": 46, "group": "RPG", "name": "Demi-Humano Lobo", "badge": "RPG Feral", "color": Color("#78909c"),
+		"stats": "FOR: 12 | DES: 9 | CON: 10 | AGI: 11 | INT: 3 | ESP: 4 | MAS: 8 | SOR: 7",
+		"passive": "Instinto Lupino: +15% de dano físico e rastreamento de alvos com baixa integridade.",
+		"skill_z": "Despertar Forma Bestial [Z]: Uivo brutal liberando +35% de velocidade e garras vorazes."
 	}
 ]
 
@@ -415,18 +588,34 @@ const ITEMS_DATA := [
 	{"id": 15, "name": "Chave Rúnica da Cripta", "cat": "SECRET", "slot": "Relíquia Secreta (Guardião)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Chave sagrada antiga das catacumbas da Vigília. Drop do Comandante Vaelen."},
 	{"id": 16, "name": "Medalhão da Vigília", "cat": "SECRET", "slot": "Relíquia Secreta (Cavaleiro)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Insígnia dos cavaleiros juramentados do passado. Drop do Executor de Ferro."},
 	{"id": 17, "name": "Tomo da Foice do Eclipse", "cat": "SECRET", "slot": "Relíquia Secreta (Ceifador)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Grimório profano contendo a liturgia do Ceifador. Drop de Acólitos e Cultistas."},
-	{"id": 30, "name": "Casulo de Seda Prateada", "cat": "SECRET", "slot": "Relíquia Secreta (Aracne)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Casulo cristalino que abriga os segredos da linhagem Aracne. Drop de feras no Bosque."}
+	{"id": 30, "name": "Casulo de Seda Prateada", "cat": "SECRET", "slot": "Relíquia Secreta (Aracne)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Casulo cristalino que abriga os segredos da linhagem Aracne. Drop de feras no Bosque."},
+
+	# 5. Quadrante 4: Drops de Criaturas e Raid Bosses
+	{"id": 42, "name": "Casulo de Seda Perfeito", "cat": "UTIL", "slot": "Material/Autópsia", "rate": "100.0%", "secret": false, "desc": "Seda densa e brilhante da Aranha Tecelã."},
+	{"id": 43, "name": "Coração da Rainha Aranha", "cat": "ANAT", "slot": "Relíquia (+12 INT, +8 ESP)", "rate": "100.0%", "secret": false, "desc": "Coração pulsante e gélido de Arachna."},
+	{"id": 44, "name": "Olho Multifacetado de Arachna", "cat": "SECRET", "slot": "Relíquia Secreta (Aracne)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Desbloqueia a Raça Secreta 21 Aracne (Tecelão da Bruma)."},
+	{"id": 45, "name": "Manto de Seda Imperial", "cat": "EQUIP", "slot": "Capa / Manto (+45 HP, +6 INT, +5 ESP)", "rate": "100.0%", "secret": false, "desc": "Manto lendário tecido por Arachna."},
+	{"id": 46, "name": "Ácido Puro", "cat": "UTIL", "slot": "Material Corrosivo", "rate": "100.0%", "secret": false, "desc": "Fluido cáustico corrosivo colhido do Lodo Ácido."},
+	{"id": 47, "name": "Ferrão de Escorpião Abissal", "cat": "SECRET", "slot": "Relíquia Secreta (Escorpião)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Ferrão letal que desbloqueia a Raça Demi-Humano Escorpião."},
+	{"id": 48, "name": "Veneno Vorpal", "cat": "ANAT", "slot": "Toxina Letal", "rate": "100.0%", "secret": false, "desc": "Toxina negra de altíssima letalidade."},
+	{"id": 49, "name": "Retalho Quimérico Costurado", "cat": "ANAT", "slot": "Tecido Mutagênico", "rate": "100.0%", "secret": false, "desc": "Tecido mutagênico do Experimento Nº 0."},
+	{"id": 50, "name": "Núcleo de Gelo Antigo", "cat": "ANAT", "slot": "Fragmento Glacial", "rate": "100.0%", "secret": false, "desc": "Fragmento glacial ancestral extraído de Golens e Ymir."},
+	{"id": 51, "name": "Escama Dracônica Primordial", "cat": "ANAT", "slot": "Escama Superior", "rate": "100.0%", "secret": false, "desc": "Escama blindada resistente a impacto e gelo extremo."},
+	{"id": 52, "name": "Coração de Geada Eterna", "cat": "SECRET", "slot": "Relíquia Secreta (Boreal)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Coração de Ymir que desperta a Raça 24 Boreal (Gigante de Gelo)."},
+	{"id": 53, "name": "Insígnia do Guarda Carmesim", "cat": "EQUIP", "slot": "Distintivo Real", "rate": "100.0%", "secret": false, "desc": "Emblema de honra dos guardas góticos de Vesperian."},
+	{"id": 54, "name": "Sangue Puro do Progenitor", "cat": "SECRET", "slot": "Relíquia Secreta (Dhampir)", "rate": "0.1% [SECRETO]", "secret": true, "desc": "Sangue milenar de Lorde Vesperian que desperta a Raça Dhampir/Vampiro!"},
+	{"id": 55, "name": "Anel Carmesim de Vesperian", "cat": "EQUIP", "slot": "Anel (+6 FOR, +6 CON, +10% Roubo de Vida)", "rate": "100.0%", "secret": false, "desc": "Anel de prata e rubi de Lorde Vesperian."}
 ]
 
 # ------------------------------------------------------------------------------
-# BANCO DE DADOS: BESTIÁRIO COMPLETO DE LUNARIA (12 CRIATURAS)
+# BANCO DE DADOS: BESTIÁRIO COMPLETO DE LUNARIA (TODAS AS CRIATURAS & BOSSES)
 # ------------------------------------------------------------------------------
 const BESTIARY_DATA := [
-	# Bosque Sussurrante (Zona 4)
+	# ZoneID 1 — Bosque Sussurrante (600x600m)
 	{
 		"name": "Lobo da Bruma",
 		"zone": "Bosque Sussurrante",
-		"zone_id": 4,
+		"zone_id": 1,
 		"hp": "220 HP",
 		"speed": "6.2 m/s",
 		"tactics": "Predador ágil que caça em bandos e cerca o jogador pelas costas.",
@@ -438,7 +627,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Lobo Alfa (Chefe da Alcateia)",
 		"zone": "Bosque Sussurrante",
-		"zone_id": 4,
+		"zone_id": 1,
 		"hp": "750 HP",
 		"speed": "7.0 m/s",
 		"tactics": "Uivo atordoante que convoca matilha e investida sísmica de alto impacto.",
@@ -450,7 +639,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Licantropo Alfa (Raid Boss Feral)",
 		"zone": "Bosque Sussurrante",
-		"zone_id": 4,
+		"zone_id": 1,
 		"hp": "2200 HP",
 		"speed": "8.5 m/s",
 		"tactics": "Salto letal devastador, ataques que ignoram bloqueio comum e rápida regeneração.",
@@ -459,12 +648,74 @@ const BESTIARY_DATA := [
 		"loot_ids": [7, 8, 28, 30],
 		"color": Color("#e53935")
 	},
+	{
+		"name": "Aranha Tecelã da Bruma",
+		"zone": "Bosque Sussurrante",
+		"zone_id": 1,
+		"hp": "380 HP",
+		"speed": "5.0 m/s",
+		"tactics": "Cospe teias pegajosas que causam lentidão e ataca com presas venenosas.",
+		"spawn": "Espalhada pelas árvores da floresta no Bosque Sussurrante.",
+		"drops_desc": "Casulo de Seda Perfeito (100%), Glândula de Veneno (25%).",
+		"loot_ids": [42, 19],
+		"color": Color("#ba68c8")
+	},
+	{
+		"name": "★ Arachna, a Rainha Tecelã [RAID BOSS] ★",
+		"zone": "Bosque Sussurrante",
+		"zone_id": 1,
+		"hp": "6800 HP",
+		"speed": "6.5 m/s",
+		"tactics": "Raid Boss aracnídeo colossal ligado à raça Aracne! Patas articuladas gigantes, invoca aranhas e lança casulos.",
+		"spawn": "🕸️ Ninho de Teias em (120, -120) no Bosque Sussurrante.",
+		"drops_desc": "Coração da Rainha Aranha (100%), Manto de Seda Imperial (100%), Olho de Arachna (0.1% — Desbloqueia Raça Aracne!).",
+		"loot_ids": [43, 45, 44],
+		"color": Color("#e040fb")
+	},
 
-	# Ruínas da Vigília (Zona 5)
+	# ZoneID 8 — Esgotos Antigos (600x600m)
+	{
+		"name": "Lodo Ácido Corrosivo",
+		"zone": "Esgotos Antigos",
+		"zone_id": 8,
+		"hp": "320 HP",
+		"speed": "3.6 m/s",
+		"tactics": "Corrói durabilidade de armaduras e explode em poça cáustica.",
+		"spawn": "Canais lamacentos e dutos dos Esgotos Antigos.",
+		"drops_desc": "Ácido Puro (100%), Lixo Orgânico (100%).",
+		"loot_ids": [46, 28],
+		"color": Color("#76ff03")
+	},
+	{
+		"name": "Escorpião Abissal Gigante",
+		"zone": "Esgotos Antigos",
+		"zone_id": 8,
+		"hp": "540 HP",
+		"speed": "4.8 m/s",
+		"tactics": "Ataca com ferrão letal nos canais dos esgotos, aplicando veneno vorpal.",
+		"spawn": "Túneis alagados e galerias dos Esgotos Antigos.",
+		"drops_desc": "Veneno Vorpal (100%), Ferrão de Escorpião Abissal (0.1% — Desbloqueia Raça Demi-Humano Escorpião!).",
+		"loot_ids": [48, 47],
+		"color": Color("#26a69a")
+	},
+	{
+		"name": "Mini-Boss Quimera Costurada Nº 0",
+		"zone": "Esgotos Antigos",
+		"zone_id": 8,
+		"hp": "2800 HP",
+		"speed": "5.2 m/s",
+		"tactics": "Fera colossal de várias cabeças, cicatrizes luminosas e patadas brutais nos túneis profundos.",
+		"spawn": "Laboratório subterrâneo dos Esgotos Antigos em (0, 110).",
+		"drops_desc": "Retalho Quimérico (100%), Glândula de Veneno Mutante (100%), Placa Deformada (100%).",
+		"loot_ids": [49, 19, 10],
+		"color": Color("#ff7043")
+	},
+
+	# ZoneID 2 — Ruínas da Vigília & Norte Gelado (600x600m)
 	{
 		"name": "Saqueador Deserdado",
 		"zone": "Ruínas da Vigília",
-		"zone_id": 5,
+		"zone_id": 2,
 		"hp": "350 HP",
 		"speed": "4.5 m/s",
 		"tactics": "Ladrão oportunista armado com espada curva e esquiva rápida.",
@@ -476,7 +727,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Besteiro da Vigília",
 		"zone": "Ruínas da Vigília",
-		"zone_id": 5,
+		"zone_id": 2,
 		"hp": "200 HP",
 		"speed": "3.8 m/s",
 		"tactics": "Atirador à distância com virotes perfurantes e dispersão de estrepes.",
@@ -488,7 +739,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Acólito do Eclipse",
 		"zone": "Ruínas da Vigília",
-		"zone_id": 5,
+		"zone_id": 2,
 		"hp": "240 HP",
 		"speed": "4.0 m/s",
 		"tactics": "Conjurador com projéteis do vazio e chamas escuras.",
@@ -500,7 +751,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Executor de Ferro",
 		"zone": "Ruínas da Vigília",
-		"zone_id": 5,
+		"zone_id": 2,
 		"hp": "650 HP",
 		"speed": "3.2 m/s",
 		"tactics": "Tanque colossal com machado de duas mãos, armadura pesada e atordoamento frontal.",
@@ -510,9 +761,9 @@ const BESTIARY_DATA := [
 		"color": Color("#546e7a")
 	},
 	{
-		"name": "Comandante Vaelen (Boss da Vigília)",
+		"name": "Comandante Vaelen, o Traidor (Boss)",
 		"zone": "Ruínas da Vigília",
-		"zone_id": 5,
+		"zone_id": 2,
 		"hp": "3200 HP",
 		"speed": "5.5 m/s",
 		"tactics": "Mestre de armas: combo veloz de 3 golpes, estocada com parry e redemoinho mortal.",
@@ -521,12 +772,48 @@ const BESTIARY_DATA := [
 		"loot_ids": [10, 15, 20, 28],
 		"color": Color("#ff9800")
 	},
+	{
+		"name": "Golem de Gelo Antigo",
+		"zone": "Ruínas da Vigília & Norte Gelado",
+		"zone_id": 2,
+		"hp": "720 HP",
+		"speed": "3.4 m/s",
+		"tactics": "Monólito de rocha e gelo com pisada congelante e alta resistência a dano cortante.",
+		"spawn": "Habita o setor norte nevado da ZoneID 2.",
+		"drops_desc": "Núcleo de Gelo Antigo (100%), Placa de Aço Pesada (100%).",
+		"loot_ids": [50, 10],
+		"color": Color("#4fc3f7")
+	},
+	{
+		"name": "Draco de Geada Selvagem",
+		"zone": "Ruínas da Vigília & Norte Gelado",
+		"zone_id": 2,
+		"hp": "950 HP",
+		"speed": "5.8 m/s",
+		"tactics": "Rasante com asas de gelo, bafo de geada e patadas perfurantes.",
+		"spawn": "Cumes e penhascos nevados das Ruínas da Vigília.",
+		"drops_desc": "Escama Dracônica Primordial (100%), Carne Nobre Assada (100%).",
+		"loot_ids": [51, 4],
+		"color": Color("#29b6f6")
+	},
+	{
+		"name": "★ Ymir, o Patriarca Gigante de Gelo [BOSS] ★",
+		"zone": "Ruínas da Vigília & Norte Gelado",
+		"zone_id": 2,
+		"hp": "5200 HP",
+		"speed": "4.5 m/s",
+		"tactics": "Titã colossal de gelo empunhando clava glacial rúnica, barreira de estalactites e pisada sísmica.",
+		"spawn": "❄️ Trono de Gelo em (0, 150) na ZoneID 2.",
+		"drops_desc": "Núcleo de Gelo Ancestral (100%), Coração de Geada Eterna (0.1% — Desbloqueia Gigante de Gelo / Boreal!).",
+		"loot_ids": [50, 52],
+		"color": Color("#00e5ff")
+	},
 
-	# Santuário do Eclipse (Zona 6)
+	# ZoneID 3 — Santuário do Eclipse (600x600m)
 	{
 		"name": "Cultista Sombrio",
 		"zone": "Santuário do Eclipse",
-		"zone_id": 6,
+		"zone_id": 3,
 		"hp": "400 HP",
 		"speed": "4.2 m/s",
 		"tactics": "Feiticeiro fanático que invoca orbes de sombra e debuffs contínuos.",
@@ -538,7 +825,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Gárgula de Pedra",
 		"zone": "Santuário do Eclipse",
-		"zone_id": 6,
+		"zone_id": 3,
 		"hp": "580 HP",
 		"speed": "5.0 m/s",
 		"tactics": "Blindagem de pedra impenetrável; mergulha dos céus causando impacto em área.",
@@ -550,7 +837,7 @@ const BESTIARY_DATA := [
 	{
 		"name": "Inquisidor Vex (Mini-Boss)",
 		"zone": "Santuário do Eclipse",
-		"zone_id": 6,
+		"zone_id": 3,
 		"hp": "1400 HP",
 		"speed": "4.8 m/s",
 		"tactics": "Chicote flamejante de correntes carmesins; puxa o jogador e queima continuamente.",
@@ -560,9 +847,9 @@ const BESTIARY_DATA := [
 		"color": Color("#d32f2f")
 	},
 	{
-		"name": "Malakor, o Arauto do Eclipse (Raid Boss Supremo)",
+		"name": "★ Malakor, o Arauto do Eclipse [RAID BOSS] ★",
 		"zone": "Santuário do Eclipse",
-		"zone_id": 6,
+		"zone_id": 3,
 		"hp": "7500 HP",
 		"speed": "6.0 m/s",
 		"tactics": "Deus do eclipse: vórtices gravitacionais, chuva de meteoros cósmicos e eclipse total.",
@@ -570,6 +857,30 @@ const BESTIARY_DATA := [
 		"drops_desc": "Foice do Eclipse (100%), Coroa de Malakor (100%), Tomo (20%), Cálice da Alma (20%).",
 		"loot_ids": [14, 17, 20, 28, 30],
 		"color": Color("#d500f9")
+	},
+	{
+		"name": "Guarda Sanguinário de Vesperian",
+		"zone": "Santuário do Eclipse",
+		"zone_id": 3,
+		"hp": "680 HP",
+		"speed": "5.0 m/s",
+		"tactics": "Protege a Cripta Carmesim. Armadura gótica negra e carmesim com alabarda sangrenta.",
+		"spawn": "Entrada da Cripta Carmesim a Noroeste da ZoneID 3.",
+		"drops_desc": "Insígnia do Guarda Carmesim (100%), Sangue Lunar Puro (100%).",
+		"loot_ids": [53, 10],
+		"color": Color("#ef5350")
+	},
+	{
+		"name": "★ LORDE VESPERIAN, O PROGENITOR VAMPIRO [RAID BOSS SECRETO] ★",
+		"zone": "Santuário do Eclipse",
+		"zone_id": 3,
+		"hp": "8500 HP",
+		"speed": "6.8 m/s",
+		"tactics": "O primeiro vampiro da história de Lunaria! Teleporte de névoa de sangue, drena vida em área e invoca morcegos abissais.",
+		"spawn": "🩸 Cripta Carmesim em (-140, 140) na ZoneID 3 — Desperta à Noite, Lua de Sangue ou Eclipse!",
+		"drops_desc": "Sangue Puro do Progenitor (0.1% — Desbloqueia a Raça Dhampir/Vampiro!), Tomo da Foice do Eclipse, Anel Carmesim de Vesperian.",
+		"loot_ids": [55, 17, 54],
+		"color": Color("#b71c1c")
 	}
 ]
 
@@ -803,14 +1114,20 @@ func _create_race_card(race: Dictionary) -> PanelContainer:
 	return panel
 
 func _activate_race_dev(race_id: int, race_name: String) -> void:
-	print("[DevManagerUI] Ativando Raça Dev #%d (%s) com ActionMode=99..." % [race_id, race_name])
-	var nm := get_node_or_null("/root/NetworkManager")
-	if nm:
-		nm.send_select_identity(race_id, 0, 99)
-	var world = get_parent()
-	if world and world.get("local_player") and is_instance_valid(world.local_player):
-		world.local_player._change_race(race_id)
-	_set_status("Raça ativada diretamente: #%d %s (ActionMode=99)!" % [race_id, race_name])
+	print("[DevManagerUI] Solicitando Raça Dev #%d (%s)..." % [race_id, race_name])
+	var world = get_tree().current_scene
+	if not world or not world.has_method("request_class_or_race_change"):
+		world = get_parent()
+	if world and world.has_method("request_class_or_race_change"):
+		world.request_class_or_race_change(true, race_id, 1, race_name, "DEV F9")
+		_set_status("Confirmação de Raça aberta para: #%d %s!" % [race_id, race_name])
+	else:
+		var nm := get_node_or_null("/root/NetworkManager")
+		if nm:
+			nm.send_select_identity(race_id, 0, 99)
+		if world and world.get("local_player") and is_instance_valid(world.local_player):
+			world.local_player._change_race(race_id)
+		_set_status("Raça ativada diretamente: #%d %s (ActionMode=99)!" % [race_id, race_name])
 
 # ------------------------------------------------------------------------------
 # ABA 2: ⚔️ CLASSES & NÍVEL (15 CLASSES + TIERS 1 A 6)
@@ -1000,15 +1317,21 @@ func _create_class_card(c_data: Dictionary) -> PanelContainer:
 
 	return panel
 
-func _activate_class_dev(class_id: int, class_name: String) -> void:
-	print("[DevManagerUI] Definindo Classe Dev #%d (%s) no Tier %d com ActionMode=98..." % [class_id, class_name, selected_tier])
-	var nm := get_node_or_null("/root/NetworkManager")
-	if nm:
-		nm.send_select_identity(selected_tier, class_id, 98)
-	var world = get_parent()
-	if world and world.get("local_player") and is_instance_valid(world.local_player):
-		world.local_player._change_class(class_id)
-	_set_status("Classe definida: #%d %s no [%s] (ActionMode=98)!" % [class_id, class_name, TIER_NAMES[selected_tier]])
+func _activate_class_dev(class_id: int, target_class_name: String) -> void:
+	print("[DevManagerUI] Solicitando Classe Dev #%d (%s) no Tier %d..." % [class_id, target_class_name, selected_tier])
+	var world = get_tree().current_scene
+	if not world or not world.has_method("request_class_or_race_change"):
+		world = get_parent()
+	if world and world.has_method("request_class_or_race_change"):
+		world.request_class_or_race_change(false, class_id, selected_tier, target_class_name, "DEV F9")
+		_set_status("Confirmação de Classe aberta para: #%d %s (Tier %d)!" % [class_id, target_class_name, selected_tier])
+	else:
+		var nm := get_node_or_null("/root/NetworkManager")
+		if nm:
+			nm.send_select_identity(selected_tier, class_id, 98)
+		if world and world.get("local_player") and is_instance_valid(world.local_player):
+			world.local_player._change_class(class_id)
+		_set_status("Classe definida: #%d %s no [%s] (ActionMode=98)!" % [class_id, target_class_name, TIER_NAMES[selected_tier]])
 
 # ------------------------------------------------------------------------------
 # ABA 3: 🌙 MUNDO, LUA & CLIMA (RELÓGIO, 10 LUAS E 4 CLIMAS)

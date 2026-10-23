@@ -11,7 +11,6 @@ const EntityOfferUIScript = preload("res://scripts/EntityOfferUI.gd")
 const SkillsUIScript = preload("res://scripts/SkillsUI.gd")
 const ClassMasterUIScript = preload("res://scripts/ClassMasterUI.gd")
 const DevDropRatesUIScript = preload("res://scripts/DevDropRatesUI.gd")
-# const DevManagerUI = preload("res://scripts/DevManagerUI.gd")
 const AutopsyUIScript = preload("res://scripts/AutopsyUI.gd")
 const CorpseEntityScript = preload("res://scripts/CorpseEntity.gd")
 
@@ -33,6 +32,7 @@ const CorpseEntityScript = preload("res://scripts/CorpseEntity.gd")
 var local_player: CharacterBody3D = null
 var remote_players: Dictionary = {}
 var npcs: Dictionary = {}
+var npc_friendships: Dictionary = {}
 var mobs: Dictionary = {}
 var mobs_container: Node3D = null
 var projectiles_container: Node3D = null
@@ -49,6 +49,12 @@ var dev_drop_rates_ui: CanvasLayer = null
 var dev_manager_ui: Control = null
 var dev_manager_node = null
 var dev_race_menu_ui = null
+var dev_canvas_layer: CanvasLayer = null
+var dev_manager_panel: PanelContainer = null
+var dev_btn_top: Button = null
+var dev_status_label: Label = null
+var dev_selected_tier: int = 1
+var dev_tier_buttons: Array[Button] = []
 var autopsy_ui: CanvasLayer = null
 var house_doors: Array = []
 var zone_marker_nodes: Array = []
@@ -85,33 +91,80 @@ const RACE_NAMES := [
 	"Kharad",
 	"Varkai",
 	"Dhampir",
-	"Licantropo Primordial (Varkai Alfa)",
-	"Amaldiçoado das Cinzas (Revenant)"
+	"Licantropo Primordial",
+	"Revenant",
+	"Celestino",
+	"Abissal",
+	"Autômato Rúnico",
+	"Alto Valeriano",
+	"Andarilho do Éter",
+	"Arconte Lunar",
+	"Espectro Umbral",
+	"Guardião Rúnico",
+	"Titã de Obsidiana",
+	"Soberano Dracônico",
+	"Fera do Frenesi",
+	"Sylvari",
+	"Esporiano",
+	"Aracne",
+	"Draconato de Cinzas",
+	"Quimera",
+	"Boreal",
+	"Thalassiano",
+	"Cambion",
+	"Nephilim",
+	"Errante Temporal",
+	"Meio-Celestial",
+	"Pyromante",
+	"Gigante de Gelo",
+	"Drago Terra",
+	"Drago Água",
+	"Drago Raio",
+	"Drago Místico",
+	"Orc",
+	"Anão",
+	"Elfo",
+	"Elfo Solar (Azgher)",
+	"Elfo Lunar (Tenebra)",
+	"Fadinha",
+	"Goblin",
+	"Demi-Humano Escorpião",
+	"Demi-Humano Tartaruga",
+	"Meio-Demônio (Succubus)",
+	"Demi-Humano Lobo"
 ]
 const CLASS_NAMES := [
-	"Viajante (Sem Classe)", "Espadachim", "Batedor", "Iniciado", "Acólito",
-	"Ferreiro", "Alquimista", "Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos",
-	"Dançarino Astral", "Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial",
-	"Cavaleiro da Ruptura", "Arauto da Tempestade"
+	"Viajante (Sem Classe)",
+	"Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
+	"Ferreiro", "Alquimista", "Escultor", "Domador", "Alfaiate de Guerra", "Chef de Caça",
+	"Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos", "Dançarino Astral",
+	"Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial", "Cavaleiro da Ruptura",
+	"Arauto da Tempestade"
 ]
 const TIER_NAMES := ["Sem Classe", "Comum", "Incomum", "Rara", "Épica", "Única", "Lendária"]
 
 const EVOLVED_CLASS_NAMES := {
-	1: ["", "Espadachim", "Guardião", "Bastião de Ferro", "Vanguarda Real", "Vanguarda Real", "Vanguarda Real"],
-	2: ["", "Batedor", "Patrulheiro", "Franco-Atirador", "Mestre Rastreador", "Mestre Rastreador", "Mestre Rastreador"],
-	3: ["", "Iniciado", "Mago do Véu", "Arquimago", "Tecelão do Eclipse", "Tecelão do Eclipse", "Tecelão do Eclipse"],
-	4: ["", "Acólito", "Clérigo Solar", "Sacerdote da Luz", "Hierofante Sagrado", "Hierofante Sagrado", "Hierofante Sagrado"],
-	5: ["", "Ferreiro", "Armeiro de Guerra", "Mestre da Bigorna", "Grão-Mestre Forjador", "Grão-Mestre Forjador", "Grão-Mestre Forjador"],
-	6: ["", "Alquimista", "Boticário Tóxico", "Grão-Mestre Químico", "Mestre da Transmutação", "Mestre da Transmutação", "Mestre da Transmutação"],
-	7: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
-	8: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
-	9: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
-	10: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
-	11: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
-	12: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
-	13: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
-	14: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
-	15: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
+	1: ["", "Guerreiro", "Guardião", "Bastião de Ferro", "Vanguarda Real", "Vanguarda Real", "Vanguarda Real"],
+	2: ["", "Mago", "Mago do Véu", "Arquimago", "Tecelão do Eclipse", "Tecelão do Eclipse", "Tecelão do Eclipse"],
+	3: ["", "Arqueiro", "Patrulheiro", "Franco-Atirador", "Mestre Rastreador", "Mestre Rastreador", "Mestre Rastreador"],
+	4: ["", "Assassino", "Lâmina Oculta", "Sombra Letal", "Mestre das Sombras", "Mestre das Sombras", "Mestre das Sombras"],
+	5: ["", "Lutador", "Monge Marcial", "Mestre do Chi", "Campeão de Um Punho", "Campeão de Um Punho", "Campeão de Um Punho"],
+	6: ["", "Escudeiro", "Guarda Paladino", "Bastião Inabalável", "Fortaleza Eterna", "Fortaleza Eterna", "Fortaleza Eterna"],
+	7: ["", "Ferreiro", "Armeiro de Guerra", "Mestre da Bigorna", "Grão-Mestre Forjador", "Grão-Mestre Forjador", "Grão-Mestre Forjador"],
+	8: ["", "Alquimista", "Boticário Tóxico", "Grão-Mestre Químico", "Mestre da Transmutação", "Mestre da Transmutação", "Mestre da Transmutação"],
+	9: ["", "Escultor", "Entalhador Arcano", "Mestre do Luar", "Grande Escultor Divino", "Grande Escultor Divino", "Grande Escultor Divino"],
+	10: ["", "Domador", "Senhor das Feras", "Alfa da Matilha", "Grão-Mestre da Selva", "Grão-Mestre da Selva", "Grão-Mestre da Selva"],
+	11: ["", "Alfaiate de Guerra", "Tecelão de Aço", "Mestre Marionetista", "Tecelão da Realidade", "Tecelão da Realidade", "Tecelão da Realidade"],
+	12: ["", "Chef de Caça", "Açougueiro de Monstros", "Mestre Culinário Feral", "Grão-Chef Supremo", "Grão-Chef Supremo", "Grão-Chef Supremo"],
+	13: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
+	14: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
+	15: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
+	16: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
+	17: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
+	18: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
+	19: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
+	20: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
+	21: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
 }
 
 const TIER_COLORS := [
@@ -135,77 +188,137 @@ const CLASS_SKILLS := {
 		"r_desc": "Postura defensiva temporária que recupera +15 de Stamina.",
 		"f_desc": "Salto para trás com foco aumentado reduzindo dano por 2s."
 	},
-	1: {
-		"basic": "Corte da Lâmina",
-		"q": "Corte Crescente",
-		"r": "Postura de Ferro",
-		"f": "Impacto Sísmico",
-		"basic_desc": "Golpe rápido de espada em arco frontal (1.0x dano base).",
-		"q_desc": "Talho ascendente poderoso cortando alvos em cone amplo (1.75x dano).",
-		"r_desc": "Parry que reduz 70% de dano por 2.5s e causa choque nos inimigos.",
-		"f_desc": "Salto esmagador cravando a lâmina no solo, liberando onda sísmica de 4.5m (2.4x dano)."
+	1: { # Guerreiro
+		"basic": "Corte de Espada",
+		"q": "Corte Duplo",
+		"r": "Investida Imparável",
+		"f": "Julgamento da Espada",
+		"basic_desc": "Golpe veloz de espada com +15% Defesa Física e +10% Dano com Espadas.",
+		"q_desc": "1.8x dano em arco frontal aplicando sangramento contínuo.",
+		"r_desc": "Dash frontal de 6m que empurra inimigos e quebra postura.",
+		"f_desc": "2.6x dano sísmico em área de 4.5m (+40% dano em alvos com <35% HP)."
 	},
-	2: {
-		"basic": "Disparo Rápido",
-		"q": "Disparo Perfurante",
-		"r": "Chuva de Estrepes",
-		"f": "Saraivada Estelar",
-		"basic_desc": "Flecha balística veloz de longo alcance (1.0x dano).",
-		"q_desc": "Flecha pontiaguda de alta velocidade que atravessa múltiplos alvos (1.75x dano).",
-		"r_desc": "Dispara estrepes que reduzem movimentação dos monstros em 40% por 3s.",
-		"f_desc": "Dispara 3 flechas encantadas simultâneas em cone frontal aberto (2.4x dano total)."
-	},
-	3: {
+	2: { # Mago
 		"basic": "Orbe Arcano",
-		"q": "Cometa Elemental",
-		"r": "Nova de Gelo",
-		"f": "Maelstrom Cósmico",
-		"basic_desc": "Projétil de energia cósmica concentrada com velocidade de 16m/s (1.0x dano).",
-		"q_desc": "Grande esfera de fogo estelar que explode em raio de 2.8m (1.75x dano).",
-		"r_desc": "Onda congelante de 5.0m radial que paralisa e desacelera monstros por 1.5s.",
-		"f_desc": "Tempestade arcana colossal de devastação massiva em raio de 6.5m (2.4x dano)."
+		"q": "Orbe de Magma",
+		"r": "Prisão Glacial",
+		"f": "Chuva de Meteoros",
+		"basic_desc": "Projétil arcano (+20% Dano Mágico e regeneração contínua de Mana).",
+		"q_desc": "Projétil explosivo a 18m causando 1.9x dano de fogo em área.",
+		"r_desc": "Congela e empurra inimigos em 5m por 2s.",
+		"f_desc": "2.8x dano arcano/fogo devastador em raio de 6m."
 	},
-	4: {
-		"basic": "Golpe da Fé",
-		"q": "Círculo de Luz",
-		"r": "Lança do Julgamento",
-		"f": "Égide Sagrada",
-		"basic_desc": "Pancada de maça abençoada causando dano sagrado puro (1.0x dano).",
-		"q_desc": "Impacto sagrado que causa dano e cura +40 HP em aliados em 6.0m.",
-		"r_desc": "Feixe divino perfurante lançado a até 15m que purifica os alvos.",
-		"f_desc": "Explosão celestial restaurando +65 HP no grupo e desferindo 2.4x dano sagrado."
+	3: { # Arqueiro
+		"basic": "Disparo Preciso",
+		"q": "Tiro Perfurante",
+		"r": "Salto Acrobático",
+		"f": "Tempestade de Mil Flechas",
+		"basic_desc": "Flecha balística com +20% Taxa Crítica à distância e +12% Velocidade.",
+		"q_desc": "Flecha veloz a 24m que atravessa alvos causando 1.85x dano.",
+		"r_desc": "Mortal para trás disparando flecha que prende o inimigo por 2s.",
+		"f_desc": "2.6x dano em chuva de flechas numa área de 6m."
 	},
-	5: {
+	4: { # Assassino
+		"basic": "Talho Duplo",
+		"q": "Passo das Sombras",
+		"r": "Cortina de Fumaça",
+		"f": "Lótus de Sangue",
+		"basic_desc": "Golpes letais com +35% Dano Crítico pelas costas e +15% Esquiva.",
+		"q_desc": "Teleporta para as costas do alvo cortando com 1.9x dano + veneno.",
+		"r_desc": "Fica furtivo/intangível por 2.5s e ganha +30% velocidade.",
+		"f_desc": "Desfere 8 cortes letais em 4m causando 2.7x dano e hemorragia."
+	},
+	5: { # Lutador
+		"basic": "Golpe de Chi",
+		"q": "Gancho Demolidor",
+		"r": "Postura do Lótus Marcial",
+		"f": "Meteoro de Um Punho",
+		"basic_desc": "Punhos pesados que ignoram 25% da armadura e ganham escudo a cada 3 socos.",
+		"q_desc": "Soco explosivo de Chi causando 1.85x dano e atordoamento curto.",
+		"r_desc": "Purifica debuffs, cura +40 HP e reduz dano em 50% por 3s.",
+		"f_desc": "Salta e soca o chão abrindo cratera de 5.5m com 2.75x dano."
+	},
+	6: { # Escudeiro
+		"basic": "Pancada de Bastião",
+		"q": "Esmagamento de Bastião",
+		"r": "Formação Impenetrável",
+		"f": "Cidadela Inabalável",
+		"basic_desc": "+35% Defesa Total, reflete 20% do dano e converte Defesa em Ataque.",
+		"q_desc": "Golpe de escudo com 1.7x dano que provoca/Taunt monstros em 8m.",
+		"r_desc": "Bloqueia 80% do dano por 4s e concede escudo aos aliados próximos.",
+		"f_desc": "Crava o escudo no solo criando cúpula dourada que cura +70 HP e impede mortes por 4s."
+	},
+	7: { # Ferreiro
 		"basic": "Martelada Pesada",
-		"q": "Golpe de Bigorna",
-		"r": "Afiação de Combate",
-		"f": "Fúria do Vulcão",
-		"basic_desc": "Golpe esmagador contundente que atordoa armaduras leves (1.0x dano).",
-		"q_desc": "Impacto pesado concentrado no topo do crânio do alvo (1.75x dano).",
-		"r_desc": "Martela a bigorna conferindo buff de +25% de dano para o grupo por 10s.",
-		"f_desc": "Impacto sísmico frontal telegrafado de 4.5m abrindo fendas incandescentes (2.4x dano)."
+		"q": "Golpe da Bigorna Incandescente",
+		"r": "Afiação & Têmpera em Campo",
+		"f": "Dança do Arsenal Forjado",
+		"basic_desc": "Equipamentos nunca quebram, +25% dano com armas forjadas e ignora restrição de armas.",
+		"q_desc": "1.85x dano de fogo/físico que racha 30% da armadura.",
+		"r_desc": "Repara armas e concede +25% Ataque e Defesa ao grupo por 10s.",
+		"f_desc": "Invoca 4 armas espectrais forjadas que giram cortando tudo em 5.5m com 2.7x dano."
 	},
-	6: {
+	8: { # Alquimista
 		"basic": "Frasco Cáustico",
-		"q": "Frasco de Éter",
-		"r": "Bomba de Ácido",
-		"f": "Detonação Catalítica",
-		"basic_desc": "Arremesso de ampola corrosiva com alcance médio (1.0x dano).",
-		"q_desc": "Frasco que detona causando dano em área e curando +40 HP em aliados em 6.0m.",
-		"r_desc": "Arremessa poça corrosiva de 3.5m que reduz armaduras dos inimigos por 4s.",
-		"f_desc": "Reação química em cadeia explodindo violentamente em área de 5.5m (2.4x dano)."
+		"q": "Frasco de Fogo Grego & Cura",
+		"r": "Bomba de Ácido Corrosivo",
+		"f": "Transmutação do Behemoth Químico",
+		"basic_desc": "+35% potência de poções/frascos e ataques aplicam ácido cumulativo.",
+		"q_desc": "Explode curando +45 HP nos aliados e queimando inimigos com 1.8x dano.",
+		"r_desc": "Poça química que derrete 35% da defesa inimiga e desacelera.",
+		"f_desc": "Detona megabomba de 2.6x dano e transmutação com +30% status por 8s."
 	},
-	7: {
+	9: { # Escultor
+		"basic": "Entalhe Prateado",
+		"q": "Entalhe em Velocidade",
+		"r": "Estátua Explosiva / Pele de Mármore",
+		"f": "Técnica Secreta: Escultura do Luar",
+		"basic_desc": "+25% Dano Crítico enxergando falhas e mantém uma Estátua Guardiã ajudando.",
+		"q_desc": "5 cortes precisos com 1.9x dano que reduzem a defesa do alvo.",
+		"r_desc": "Deixa uma escultura que explode nos inimigos e ganha 50% redução de dano.",
+		"f_desc": "Feixe de cortes prateados em 6m causando 2.8x Dano Verdadeiro."
+	},
+	10: { # Domador
+		"basic": "Estalo de Domínio",
+		"q": "Estalo do Chicote: Investida!",
+		"r": "Fusão & Uivo Bestial",
+		"f": "Debandada das Feras Primordiais",
+		"basic_desc": "Luta acompanhado permanentemente por uma Fera Domada que divide o dano.",
+		"q_desc": "Chicoteia a 9m e ordena que a fera salte rasgando o alvo com 1.9x dano.",
+		"r_desc": "Cura +50 HP seu e da fera, concedendo +30% velocidade e garras.",
+		"f_desc": "Invoca manada de feras domadas que atropelam toda a área em 7m com 2.8x dano."
+	},
+	11: { # Alfaiate de Guerra
+		"basic": "Puntura Rúnica",
+		"q": "Teia de Fios Retalhadores",
+		"r": "Costurar Sombras / Marionete",
+		"f": "Gaiola de Fios Carmesins",
+		"basic_desc": "Ataques cortam a 10m de distância e roupas leves têm defesa de armadura pesada.",
+		"q_desc": "Cruza os dedos fatiando todos os inimigos em cone de 8m com 1.85x dano.",
+		"r_desc": "Prende os inimigos no chão por 2.5s com fios de aço e concede esquiva ao grupo.",
+		"f_desc": "Fecha uma redoma de fios de aço que tritura todos os alvos em 6m causando 2.7x dano."
+	},
+	12: { # Chef de Caça
+		"basic": "Corte de Açougue",
+		"q": "Desossar a Vivo!",
+		"r": "Banquete na Wok Flamejante",
+		"f": "Trinchar o Behemoth",
+		"basic_desc": "Zona Verde da Autópsia +50% maior; devorar carnes dá buffs especiais.",
+		"q_desc": "Golpe pesado de cutelo com 1.9x dano que arranca bife curativo (+35 HP) do alvo.",
+		"r_desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.",
+		"f_desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade."
+	},
+	13: { # Ceifador do Eclipse
 		"basic": "Foice das Sombras",
 		"q": "Colheita Noturna",
 		"r": "Drenagem Abissal",
 		"f": "Dança do Eclipse Total",
-		"basic_desc": "Varredura ampla de longo alcance de 4.8m com lifesteal embutido (1.0x dano).",
+		"basic_desc": "Varredura ampla de 4.8m com lifesteal embutido (1.0x dano).",
 		"q_desc": "Corte espiral sugando essência vital de todos os alvos no caminho (1.75x dano).",
 		"r_desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.",
 		"f_desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida (2.4x dano)."
 	},
-	8: {
+	14: { # Artífice Rúnico
 		"basic": "Canhonada Rúnica",
 		"q": "Salva Rúnica",
 		"r": "Sobrecarga Eletrostática",
@@ -215,17 +328,17 @@ const CLASS_SKILLS := {
 		"r_desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.",
 		"f_desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano)."
 	},
-	9: {
+	15: { # Criador de Homúnculos
 		"basic": "Pulso Quimérico",
 		"q": "Infusão Mutagênica",
 		"r": "Névoa de Bioplasma",
 		"f": "Frenesi do Quimera Supremo",
-		"basic_desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre (1.0x dano).",
+		"basic_desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre.",
 		"q_desc": "Elixir abissal corrosivo que dissolve resistências inimigas (1.75x dano).",
 		"r_desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.",
 		"f_desc": "O homúnculo cresce e desfere explosão de garras e ácido colossais (2.4x dano)."
 	},
-	10: {
+	16: { # Dançarino Astral
 		"basic": "Corte Astral",
 		"q": "Corte Cadente",
 		"r": "Valsa dos Espelhos",
@@ -235,7 +348,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.",
 		"f_desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano)."
 	},
-	11: {
+	17: { # Inquisidor das Cinzas
 		"basic": "Chama Penitente",
 		"q": "Chicote de Penitência",
 		"r": "Selo de Excomunhão",
@@ -245,7 +358,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.",
 		"f_desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano)."
 	},
-	12: {
+	18: { # Necromante de Ossos
 		"basic": "Toque do Sepulcro",
 		"q": "Lança de Fêmur",
 		"r": "Explosão Óssea & Escudo",
@@ -255,7 +368,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Detona fragmentos ósseos em 5.0m e ergue barreira de ossos protetora.",
 		"f_desc": "Ergue vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal."
 	},
-	13: {
+	19: { # Domador Primordial
 		"basic": "Patada Selvagem",
 		"q": "Investida do Alfa",
 		"r": "Uivo da Alcateia",
@@ -265,7 +378,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.",
 		"f_desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano)."
 	},
-	14: {
+	20: { # Cavaleiro da Ruptura
 		"basic": "Golpe de Fenda",
 		"q": "Esmagamento Gravitacional",
 		"r": "Singularidade Reversa",
@@ -275,7 +388,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.",
 		"f_desc": "Cria um buraco negro em 6.5m que atordoa inimigos e desintegra matéria (2.8x dano)."
 	},
-	15: {
+	21: { # Arauto da Tempestade
 		"basic": "Faísca Elétrica",
 		"q": "Lança do Trovão",
 		"r": "Passo de Relâmpago",
@@ -289,24 +402,62 @@ const CLASS_SKILLS := {
 
 const RACIAL_SKILL_NAMES := {
 	1: "Ímpeto Valeriano",
+	2: "Explosão Lunar",
+	3: "Baluarte Rúnico",
+	4: "Sopro Dracônico",
+	5: "Sede de Sangue",
+	6: "Uivo da Fera Ancestral",
+	7: "Pacto das Cinzas",
+	8: "Chama Sagrada",
+	9: "Mergulho Abissal",
+	10: "Sobrecarga Arcana",
 	11: "Estandarte Real",
 	12: "Fenda do Éter",
-	2: "Explosão Lunar",
-	21: "Luz de Selene",
-	22: "Manto de Nyx",
-	3: "Baluarte Rúnico",
-	31: "Muralha Rúnica",
-	32: "Erupção Magma",
-	4: "Sopro Dracônico",
-	41: "Chamas Reais",
-	42: "Frenesi Feral",
-	5: "Sede de Sangue"
+	13: "Luz de Selene",
+	14: "Manto de Nyx",
+	15: "Muralha Rúnica",
+	16: "Erupção Magma",
+	17: "Chamas Reais",
+	18: "Frenesi Destruidor",
+	19: "Raízes Vivas",
+	20: "Nuvem de Esporos",
+	21: "Teia Prateada",
+	22: "Sopro de Cinzas",
+	23: "Mutação Bioquímica",
+	24: "Crio-Armadura",
+	25: "Maré Abissal",
+	26: "Correntes Infernais",
+	27: "Julgamento Nephilim",
+	28: "Reversão Temporal",
+	29: "Asas de Luz",
+	30: "Combustão",
+	31: "Memória Molecular",
+	32: "Insulto Sísmico",
+	33: "Bênção de Netuno",
+	34: "Descarga Elétrica",
+	35: "Infusão Arcana",
+	36: "Ataque Devastador",
+	37: "Martelo Ancestral",
+	38: "Disparo Élfico",
+	39: "Espada Solar de Azgher",
+	40: "Manto de Tenebra",
+	41: "Pó de Fada Estelar",
+	42: "Truque Sujo Goblin",
+	43: "Aguilhão de Toxina Vorpal",
+	44: "Lar Doce Casca",
+	45: "Drenar Força Vital",
+	46: "Despertar Forma Bestial"
 }
 
 var current_world_hour: int = 16
 var current_world_minute: int = 0
 var current_moon_phase: int = 1
 var current_weather_type: int = 0
+
+var current_zone_id: int = 0
+var current_map_root: Node3D = null
+var portal_cooldown: float = 0.0
+var screen_fade_rect: ColorRect = null
 
 var my_race_id: int = 1
 var my_class_id: int = 0
@@ -323,6 +474,10 @@ var action_bar_slots: Array[PanelContainer] = []
 var action_bar_name_labels: Array[Label] = []
 
 func _ready() -> void:
+	for action_name in ["skill_racial", "skill_1", "skill_2", "skill_3", "dodge", "interact"]:
+		if not InputMap.has_action(action_name):
+			InputMap.add_action(action_name)
+
 	mobs_container = Node3D.new()
 	mobs_container.name = "Mobs"
 	add_child(mobs_container)
@@ -365,6 +520,7 @@ func _ready() -> void:
 	NetworkManager.world_state_received.connect(_on_world_state_received)
 	NetworkManager.player_disconnected.connect(_on_player_disconnected)
 	NetworkManager.npc_state_received.connect(_on_npc_state_received)
+	NetworkManager.npc_friendship_received.connect(_on_npc_friendship_received)
 	NetworkManager.npc_spoke.connect(_on_npc_spoke)
 	NetworkManager.world_time_updated.connect(_on_world_time_updated)
 	NetworkManager.combat_event_received.connect(_on_combat_event_received)
@@ -378,25 +534,34 @@ func _ready() -> void:
 	NetworkManager.dev_drop_rates_received.connect(_on_dev_drop_rates_received)
 	NetworkManager.corpse_snapshot_received.connect(_on_corpse_snapshot_received)
 	NetworkManager.open_autopsy_ui_received.connect(_on_open_autopsy_ui_received)
+	NetworkManager.zone_change_received.connect(_on_zone_change_received)
 
-	_create_perimeter_walls()
-	_create_zone_landmarks()
-	_create_rebirth_crystal()
-	_build_symmetric_village()
-	_build_new_landmarks()
+	var default_floor = get_node_or_null("Floor")
+	if default_floor:
+		default_floor.queue_free()
+	var default_structures = get_node_or_null("Structures")
+	if default_structures:
+		default_structures.queue_free()
+
 	_setup_burn_overlay()
 	_setup_action_bar()
 	_setup_xp_hud()
 	_setup_loot_toast()
+	_load_zone_map(0)
 	_spawn_local_player(Vector3(0, 1.5, 0))
 	_update_hud()
 	_update_clock_hud()
 
+	_build_dev_manager_ui()
+
 	var footer_lbl = get_node_or_null("HUD/FooterPanel/FooterLabel")
 	if footer_lbl:
-		footer_lbl.text = "[WASD] Mover | [LMB] Ataque | [Shift] Esquiva | [Q/R/F] Skills | [Z] Racial | [E] Interagir | [C] Linhagem | [K] Atributos | [I] Inventário | [H] Grimório | [F10] Dev Manager"
+		footer_lbl.text = "[WASD] Mover | [LMB] Ataque | [Shift] Esquiva | [Q/R/F] Skills | [Z] Racial | [E] Interagir | [C] Linhagem | [K] Atributos | [I] Inventário | [H] Grimório | [F9/F10] Dev Manager"
 
 func _process(delta: float) -> void:
+	if portal_cooldown > 0.0:
+		portal_cooldown -= delta
+
 	# 1. Lógica de atualização de tempo, clima e iluminação do mundo
 	_update_world_environment(delta)
 
@@ -477,8 +642,11 @@ func _check_proximity_interactions() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_F9:
-			print("[World] F9: Alternando Dev Manager Unificado...")
+		if event.keycode == KEY_F9 or event.keycode == KEY_F10:
+			print("[World] F9/F10: Alternando Dev Manager Unificado...")
+			_toggle_dev_manager()
+			get_viewport().set_input_as_handled()
+		elif dev_manager_panel and dev_manager_panel.visible and event.keycode == KEY_ESCAPE:
 			_toggle_dev_manager()
 			get_viewport().set_input_as_handled()
 
@@ -503,45 +671,1046 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_H:
 			if skills_ui:
 				skills_ui.toggle_menu()
-		elif event.keycode == KEY_F9:
-			print("[World] F9: Alternando Dev Manager Unificado...")
+		elif event.keycode == KEY_F9 or event.keycode == KEY_F10:
+			print("[World] F9/F10: Alternando Dev Manager Unificado...")
 			_toggle_dev_manager()
 
 func _toggle_dev_manager() -> void:
-	if not dev_manager_node or not is_instance_valid(dev_manager_node):
-		var script_res = load("res://scripts/DevManagerUI.gd")
-		if script_res:
-			# Cria um Control e atribui o script do DevManagerUI dinamicamente
-			dev_manager_node = Control.new()
-			dev_manager_node.set_script(script_res)
-			dev_manager_node.set_anchors_preset(Control.PRESET_FULL_RECT)
-			if has_node("HUD"):
-				$HUD.add_child(dev_manager_node)
-			else:
-				add_child(dev_manager_node)
-			dev_manager_ui = dev_manager_node
-			dev_race_menu_ui = dev_manager_node
+	if not dev_manager_panel:
+		return
+	dev_manager_panel.visible = not dev_manager_panel.visible
 
-	if dev_manager_node:
-		dev_manager_node.visible = not dev_manager_node.visible
-
-		if dev_manager_node.visible:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if dev_manager_panel.visible:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		if local_player and is_instance_valid(local_player):
+			local_player.set("is_menu_open", true)
+	else:
+		var any_other_open := false
+		if char_select_ui and char_select_ui.get("is_open"): any_other_open = true
+		if attributes_ui and attributes_ui.get("is_open"): any_other_open = true
+		if inventory_ui and inventory_ui.get("is_open"): any_other_open = true
+		if skills_ui and skills_ui.get("is_open"): any_other_open = true
+		if dev_drop_rates_ui and dev_drop_rates_ui.get("is_open"): any_other_open = true
+		if not any_other_open:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			if local_player and is_instance_valid(local_player):
-				local_player.set("is_menu_open", true)
-			if dev_manager_node.has_method("_update_trials_label"):
-				dev_manager_node._update_trials_label()
+				local_player.set("is_menu_open", false)
+
+# ==============================================================================
+# DEV MANAGER UNIFICADO (F9 / F10) — CONSTRUÇÃO EMBUTIDA (CANVASLAYER LAYER 120)
+# ==============================================================================
+
+const DEV_RACES := [
+	# Originais Base (1..4)
+	{"id": 1, "name": "Valeriano", "badge": "Base Solar", "col": Color("#ffd700"), "desc": "Linhagem Solar: +10% Regen Stamina e Bênção Solar [Z]"},
+	{"id": 2, "name": "Noctari", "badge": "Base Lunar", "col": Color("#00e5ff"), "desc": "Sintonia Noturna: +15% Dano Mágico e Esquiva à noite"},
+	{"id": 3, "name": "Kharad", "badge": "Base Forja", "col": Color("#ff9800"), "desc": "Pele Pétrea: -15% dano físico e Bastião Sísmico [Z]"},
+	{"id": 4, "name": "Varkai", "badge": "Base Feral", "col": Color("#ff5722"), "desc": "Instinto Predador: +20% Velocidade e Salto Predatório [Z]"},
+	# Secretas Clássicas (5..10)
+	{"id": 5, "name": "Dhampir / Sanguis", "badge": "Vampírico", "col": Color("#e91e63"), "desc": "Vampirismo: +8% Roubo de Vida passivo e Dreno Sanguíneo"},
+	{"id": 6, "name": "Licantropo Primordial", "badge": "Lupino Alfa", "col": Color("#ff6f00"), "desc": "Fúria da Matilha: +25% Dano na Lua Cheia / Sangue"},
+	{"id": 7, "name": "Revenant (Amaldiçoado)", "badge": "Cinzas", "col": Color("#a7ffeb"), "desc": "Tenacidade Fúnebre: Sobrevive 4s com 1 HP ao morrer"},
+	{"id": 8, "name": "Celestino / Natus Solaris", "badge": "Luz Solar", "col": Color("#fff176"), "desc": "Aura Radiante: Queima inimigos e feixe purificador"},
+	{"id": 9, "name": "Abissal / Umbralis", "badge": "Sombra Cósmica", "col": Color("#7c4dff"), "desc": "Corpo de Éter: 10% chance de desvio total e Vácuo [Z]"},
+	{"id": 10, "name": "Autômato Rúnico / Gélido", "badge": "Gélido", "col": Color("#80deea"), "desc": "Presença Glacial: Reduz velocidade de atacantes em 20%"},
+	# Evoluções Ordem e Caos (11..18)
+	{"id": 11, "name": "Alto Valeriano", "badge": "Ordem Solar", "col": Color("#ffe082"), "desc": "Liderança Real: +20% Stamina Máxima e Estandarte Imperial"},
+	{"id": 12, "name": "Andarilho do Éter", "badge": "Caos Cósmico", "col": Color("#ce93d8"), "desc": "Corpo Etéreo: 15% ignorar dano e Fenda Dimensional"},
+	{"id": 13, "name": "Arconte Lunar", "badge": "Ordem Selene", "col": Color("#80d8ff"), "desc": "Bênção da Lua: +35% poder mágico e Cascata Lunar"},
+	{"id": 14, "name": "Espectro Umbral", "badge": "Caos Nyx", "col": Color("#b388ff"), "desc": "Véu Noturno: +30% velocidade e Manto de Invisibilidade"},
+	{"id": 15, "name": "Guardião Rúnico", "badge": "Ordem Forja", "col": Color("#ffcc80"), "desc": "Pele de Adamante: -25% dano físico e reflete 15%"},
+	{"id": 16, "name": "Titã de Obsidiana", "badge": "Caos Magma", "col": Color("#ffab91"), "desc": "Coração Vulcânico: Dano de fogo por segundo em golpes"},
+	{"id": 17, "name": "Soberano Dracônico / Predador Alfa", "badge": "Alcateia", "col": Color("#ff8a65"), "desc": "Espírito de Alcateia: +20% dano e velocidade em grupo"},
+	{"id": 18, "name": "Fera do Frenesi", "badge": "Frenesi", "col": Color("#ff1744"), "desc": "Sede de Sangue: +5% velocidade de ataque cumulativa"},
+	# Novas Raças Secretas (19..28)
+	{"id": 19, "name": "Sylvari", "badge": "Nascido da Seiva", "col": Color("#81c784"), "desc": "Raízes Vivas: Regeneração acelerada e vínculo florestal"},
+	{"id": 20, "name": "Myconid", "badge": "Véu Fúngico", "col": Color("#c8e6c9"), "desc": "Esporos Vivos: Nuvem de veneno e cegueira ao redor"},
+	{"id": 21, "name": "Aracne", "badge": "Tecelão da Bruma", "col": Color("#a5d6a7"), "desc": "Pernas de Seda: Imune a lentidão e Teia Paralisante"},
+	{"id": 22, "name": "Draconato de Cinzas", "badge": "Escama-Negra", "col": Color("#ff6e40"), "desc": "Bafo de Cinzas: Queimadura contínua e explosão de calor"},
+	{"id": 23, "name": "Quimera", "badge": "Costurado", "col": Color("#ba68c8"), "desc": "Corpo Reativo: Adaptação física contra o último dano sofrido"},
+	{"id": 24, "name": "Boreal", "badge": "Coração de Geada", "col": Color("#80deea"), "desc": "Armadura de Gelo: Absorve impactos físicos com espinhos glaciais"},
+	{"id": 25, "name": "Thalassian", "badge": "Maré Negra", "col": Color("#4fc3f7"), "desc": "Filho da Maré: +25% poder na chuva e surto aquático"},
+	{"id": 26, "name": "Cambion", "badge": "Sangue de Enxofre", "col": Color("#ff5252"), "desc": "Pacto Abissal: Transforma parte da vida em poder devastador"},
+	{"id": 27, "name": "Nephilim", "badge": "Híbrido Crepúsculo", "col": Color("#ffe082"), "desc": "Luz e Trevas: Alterna bônus de dano sagrado e necrótico"},
+	{"id": 28, "name": "Errante Temporal", "badge": "Cronomante", "col": Color("#b388ff"), "desc": "Fios do Tempo: Reduz cooldowns e rebobina a posição"},
+	# 18 Novas Raças do RPG (29..46)
+	{"id": 29, "name": "Meio-Celestial", "badge": "RPG Divino", "col": Color("#fff59d"), "desc": "Asas de Luz [Z]: Cura +65 HP, restaura Stamina e pulso luminoso."},
+	{"id": 30, "name": "Pyromante", "badge": "RPG Chamas", "col": Color("#ff3d00"), "desc": "Combustão [Z]: Explosão ígnea devastadora (2.8x) e renascimento em cinzas."},
+	{"id": 31, "name": "Gigante de Gelo", "badge": "RPG Glacial (1.45x)", "col": Color("#80deea"), "desc": "Memória Molecular [Z]: Pancada de estalagmites e +350 HP Máx por 15s."},
+	{"id": 32, "name": "Drago Terra", "badge": "RPG Carapaça", "col": Color("#8d6e63"), "desc": "Insulto Sísmico [Z]: Provoca monstros e -35% dano passivo permanente."},
+	{"id": 33, "name": "Drago Água", "badge": "RPG Marés", "col": Color("#29b6f6"), "desc": "Bênção de Netuno [Z]: Vaga marítima em cone e regeneração sob chuva."},
+	{"id": 34, "name": "Drago Raio", "badge": "RPG Fulgor", "col": Color("#ffd600"), "desc": "Descarga Elétrica [Z]: Feixe perfurante de choque rápido (1.85x)."},
+	{"id": 35, "name": "Drago Místico", "badge": "RPG Rúnico", "col": Color("#ab47bc"), "desc": "Infusão Arcana [Z]: Runas arcanas radiantes com amplificação mágica."},
+	{"id": 36, "name": "Orc", "badge": "RPG Brutal", "col": Color("#558b2f"), "desc": "Ataque Devastador [Z]: Golpe brutal (3.2x dano) e digestão de carcaças orgânicas."},
+	{"id": 37, "name": "Anão", "badge": "RPG Forja (0.82x)", "col": Color("#d7ccc8"), "desc": "Martelo Ancestral [Z]: Choque de bigorna com atordoamento em 5.5m."},
+	{"id": 38, "name": "Elfo", "badge": "RPG Silvestre", "col": Color("#aed581"), "desc": "Disparo Élfico [Z]: Projétil luminoso perfurante e esquiva ágil."},
+	{"id": 39, "name": "Elfo Solar (Azgher)", "badge": "RPG Solar", "col": Color("#ffb300"), "desc": "Espada Solar de Azgher [Z]: Talho solar em fogo sagrado purificador."},
+	{"id": 40, "name": "Elfo Lunar (Tenebra)", "badge": "RPG Sombra", "col": Color("#5c6bc0"), "desc": "Manto de Tenebra [Z]: Véu sombrio de evasão total com ataque crítico."},
+	{"id": 41, "name": "Fadinha", "badge": "RPG Alado (0.55x)", "col": Color("#f48fb1"), "desc": "Pó de Fada Estelar [Z]: Nuvem reluzente de cura em aliados e cegueira em inimigos."},
+	{"id": 42, "name": "Goblin", "badge": "RPG Trapaceiro (0.75x)", "col": Color("#7cb342"), "desc": "Truque Sujo Goblin [Z]: Bomba de fumaça cega, confunde e atordoa oponentes."},
+	{"id": 43, "name": "Demi-Humano Escorpião", "badge": "RPG Peçonha", "col": Color("#6a1b9a"), "desc": "Aguilhão de Toxina Vorpal [Z]: Estocada venenosa de dano corrosivo contínuo."},
+	{"id": 44, "name": "Demi-Humano Tartaruga", "badge": "RPG Blindado (1.35x)", "col": Color("#33691e"), "desc": "Lar Doce Casca [Z]: Casulo impenetrável (-45% dano passivo e absorção 85%)."},
+	{"id": 45, "name": "Meio-Demônio (Succubus)", "badge": "RPG Vampírico", "col": Color("#c2185b"), "desc": "Drenar Força Vital [Z]: Sifão demoníaco com roubo de 55 HP e 25% evasão passiva."},
+	{"id": 46, "name": "Demi-Humano Lobo", "badge": "RPG Feral", "col": Color("#78909c"), "desc": "Despertar Forma Bestial [Z]: Uivo lupino brutal com +35% velocidade e garras vorazes."}
+]
+
+const DEV_CLASSES := [
+	{"id": 1, "name": "Guerreiro", "desc": "Combatente de espada. [Passiva] Sangue de Batalha (+15% Defesa, +10% Dano). [Q] Corte Duplo, [R] Investida Imparável, [F] Julgamento da Espada.", "col": Color("#4fc3f7")},
+	{"id": 2, "name": "Mago", "desc": "Conjurador com cajado/orbe. [Passiva] Ressonância Arcana (+20% Mágico). [Q] Orbe de Magma, [R] Prisão Glacial, [F] Chuva de Meteoros.", "col": Color("#ba68c8")},
+	{"id": 3, "name": "Arqueiro", "desc": "Atirador ágil de arco. [Passiva] Olho de Falcão (+20% Crítico, +12% Vel). [Q] Tiro Perfurante, [R] Salto Acrobático, [F] Tempestade de Mil Flechas.", "col": Color("#81c784")},
+	{"id": 4, "name": "Assassino", "desc": "Lâmina dupla veloz. [Passiva] Lâmina Silenciosa (+35% Crítico costas, +15% Esquiva). [Q] Passo das Sombras, [R] Cortina de Fumaça, [F] Lótus de Sangue.", "col": Color("#e57373")},
+	{"id": 5, "name": "Lutador", "desc": "Mestre do combate corpo a corpo. [Passiva] Punhos de Ferro & Chi (ignora 25% armadura). [Q] Gancho Demolidor, [R] Postura do Lótus Marcial, [F] Meteoro de Um Punho.", "col": Color("#ffb74d")},
+	{"id": 6, "name": "Escudeiro", "desc": "Defensor colossal com escudo e maça. [Passiva] Fortaleza Viva (+35% Defesa). [Q] Esmagamento de Bastião, [R] Formação Impenetrável, [F] Cidadela Inabalável.", "col": Color("#fff176")},
+	{"id": 7, "name": "Ferreiro", "desc": "Combatente forjador com martelo. [Passiva] Orgulho do Criador (+25% Dano forjadas). [Q] Golpe da Bigorna Incandescente, [R] Afiação & Têmpera em Campo, [F] Dança do Arsenal Forjado.", "col": Color("#ff9800")},
+	{"id": 8, "name": "Alquimista", "desc": "Mestre químico com catalisador e frascos. [Passiva] Reação Sintética (+35% frascos). [Q] Frasco de Fogo Grego & Cura, [R] Bomba de Ácido Corrosivo, [F] Transmutação do Behemoth.", "col": Color("#69f0ae")},
+	{"id": 9, "name": "Escultor", "desc": "Artista do luar com cinzel e adaga. [Passiva] Olho da Escultura & Estátua Viva. [Q] Entalhe em Velocidade, [R] Estátua Explosiva / Pele de Mármore, [F] Escultura do Luar.", "col": Color("#80deea")},
+	{"id": 10, "name": "Domador", "desc": "Senhor da matilha com chicote bestial. [Passiva] Luta acompanhado por Fera Domada. [Q] Estalo do Chicote: Investida!, [R] Fusão & Uivo Bestial, [F] Debandada das Feras.", "col": Color("#ffd740")},
+	{"id": 11, "name": "Alfaiate de Guerra", "desc": "Tecelão com fios de aço e agulhas rúnicas. [Passiva] Fios Monofilamento & Seda Blindada. [Q] Teia de Fios Retalhadores, [R] Costurar Sombras, [F] Gaiola de Fios Carmesins.", "col": Color("#ce93d8")},
+	{"id": 12, "name": "Chef de Caça", "desc": "Gourmet com cutelo gigante e wok de ferro. [Passiva] Células Gourmet. [Q] Desossar a Vivo! (+35 HP), [R] Banquete na Wok Flamejante, [F] Trinchar o Behemoth.", "col": Color("#ff7043")},
+	{"id": 13, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
+	{"id": 14, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
+	{"id": 15, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
+	{"id": 16, "name": "Dançarino Astral", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
+	{"id": 17, "name": "Inquisidor das Cinzas", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
+	{"id": 18, "name": "Necromante de Ossos", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
+	{"id": 19, "name": "Domador Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
+	{"id": 20, "name": "Cavaleiro da Ruptura", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
+	{"id": 21, "name": "Arauto da Tempestade", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")}
+]
+
+const DEV_ITEMS := [
+	# Relíquias Secretas 0.1%
+	{"id": 14, "name": "Cálice da Alma Partida", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desperta o Revenant da Cripta. Drop de Acólito do Eclipse."},
+	{"id": 15, "name": "Chave Rúnica da Cripta", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Chave sagrada antiga das catacumbas da Vigília. Drop Comandante Vaelen."},
+	{"id": 16, "name": "Medalhão da Vigília", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Insígnia dos cavaleiros juramentados. Drop Executor de Ferro."},
+	{"id": 17, "name": "Tomo da Foice do Eclipse", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Liturgia secreta do Ceifador do Eclipse. Drop Acólitos e Malakor."},
+	{"id": 30, "name": "Casulo de Seda Prateada", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Segredos da linhagem Aracne. Drop de predadores no Bosque."},
+	# Equipamentos
+	{"id": 10, "name": "Espada Longa de Ferro", "cat": "Mão Primária", "rate": "15.0%", "desc": "Lâmina forjada de ferro temperado."},
+	{"id": 11, "name": "Escudo de Madeira Reforçado", "cat": "Mão Secundária", "rate": "15.0%", "desc": "Escudo com encaixes de ferro batido."},
+	{"id": 12, "name": "Arco de Bordo Longo", "cat": "Longo Alcance", "rate": "15.0%", "desc": "Disparos precisos à longa distância."},
+	{"id": 13, "name": "Cajado do Aprendiz", "cat": "Arma Mágica", "rate": "15.0%", "desc": "Foco de canalização do éter."},
+	{"id": 20, "name": "Armadura de Prata Imperial", "cat": "Peitoral", "rate": "10.0%", "desc": "Defesa física e resistência espiritual."},
+	{"id": 21, "name": "Elmo de Ferro Batido", "cat": "Cabeça", "rate": "12.0%", "desc": "Proteção craniana reforçada."},
+	{"id": 22, "name": "Botas de Couro de Fera", "cat": "Pés", "rate": "15.0%", "desc": "Tração firme e passos silenciosos."},
+	{"id": 23, "name": "Luvas de Malha Pesada", "cat": "Mãos", "rate": "15.0%", "desc": "Proteção manual em combate."},
+	{"id": 25, "name": "Calças de Aço Temperado", "cat": "Pernas", "rate": "12.0%", "desc": "Articulações reforçadas para mobilidade."},
+	{"id": 26, "name": "Ombreiras Rúnicas", "cat": "Ombros", "rate": "10.0%", "desc": "Runas protetoras contra dano elemental."},
+	{"id": 27, "name": "Cinto do Conquistador", "cat": "Cintura", "rate": "12.0%", "desc": "Fivela pesada e couro espesso."},
+	{"id": 28, "name": "Amuleto do Eclipse", "cat": "Colar", "rate": "8.0%", "desc": "Vibra com o ciclo da lua aumentando poder."},
+	{"id": 29, "name": "Anel de Presa Ancestral", "cat": "Anel", "rate": "5.0%", "desc": "Marfim fóssil aumentando chance de crítico."},
+	# Consumíveis & Materiais
+	{"id": 1, "name": "Poção de Vida / Frasco Vazio", "cat": "Consumível", "rate": "80.0%", "desc": "Restaura +50 HP instantaneamente."},
+	{"id": 2, "name": "Frasco de Stamina", "cat": "Consumível", "rate": "40.0%", "desc": "Restaura +60 de Stamina."},
+	{"id": 3, "name": "Elixir de Mana", "cat": "Consumível", "rate": "35.0%", "desc": "Restaura energia arcana do éter."},
+	{"id": 4, "name": "Carne Nobre Assada", "cat": "Alimento", "rate": "70.0%", "desc": "Regenera vida fora de combate."},
+	{"id": 5, "name": "Carne Crua de Lobo", "cat": "Material", "rate": "100.0%", "desc": "Colhida de lobos no bosque."},
+	{"id": 6, "name": "Pelagem Cinzenta", "cat": "Material", "rate": "100.0%", "desc": "Pele espessa para alfaiataria."},
+	{"id": 7, "name": "Presa Lupina Afiada", "cat": "Troféu", "rate": "25.0%", "desc": "Presa afiada extraída em autópsia."},
+	{"id": 8, "name": "Garra de Fera", "cat": "Troféu", "rate": "20.0%", "desc": "Garra curvada de predador."},
+	{"id": 9, "name": "Olho da Coruja Noturna", "cat": "Místico", "rate": "15.0%", "desc": "Globo ocular sensível à penumbra."},
+	{"id": 18, "name": "Asa de Morcego Primordial", "cat": "Material", "rate": "30.0%", "desc": "Membrana alada dos esgotos."},
+	{"id": 19, "name": "Glândula Venenosa", "cat": "Troféu", "rate": "25.0%", "desc": "Toxina corrosiva pura."},
+	{"id": 24, "name": "Escama de Dragão de Cinzas", "cat": "Troféu", "rate": "5.0%", "desc": "Escama impérvia ao calor extremo."},
+	# Quadrante 4: Drops de Criaturas e Raid Bosses
+	{"id": 42, "name": "Casulo de Seda Perfeito", "cat": "Material", "rate": "100.0%", "desc": "Seda densa e brilhante da Aranha Tecelã."},
+	{"id": 43, "name": "Coração da Rainha Aranha", "cat": "Troféu", "rate": "100.0%", "desc": "Coração pulsante e gélido de Arachna (+12 INT, +8 ESP)."},
+	{"id": 44, "name": "Olho Multifacetado de Arachna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Desbloqueia a Raça Secreta 21 Aracne (Tecelão da Bruma)."},
+	{"id": 45, "name": "Manto de Seda Imperial", "cat": "Manto/Capa", "rate": "100.0%", "desc": "Manto lendário tecido por Arachna (+45 HP, +6 INT, +5 ESP)."},
+	{"id": 46, "name": "Ácido Puro", "cat": "Material", "rate": "100.0%", "desc": "Fluido cáustico corrosivo colhido do Lodo Ácido."},
+	{"id": 47, "name": "Ferrão de Escorpião Abissal", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Ferrão letal que desbloqueia a Raça Demi-Humano Escorpião."},
+	{"id": 48, "name": "Veneno Vorpal", "cat": "Troféu", "rate": "100.0%", "desc": "Toxina negra de altíssima letalidade."},
+	{"id": 49, "name": "Retalho Quimérico Costurado", "cat": "Material", "rate": "100.0%", "desc": "Tecido mutagênico do Experimento Nº 0."},
+	{"id": 50, "name": "Núcleo de Gelo Antigo", "cat": "Troféu", "rate": "100.0%", "desc": "Fragmento glacial ancestral extraído de Golens e Ymir."},
+	{"id": 51, "name": "Escama Dracônica Primordial", "cat": "Material", "rate": "100.0%", "desc": "Escama blindada resistente a impacto e gelo extremo."},
+	{"id": 52, "name": "Coração de Geada Eterna", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Coração de Ymir que desperta a Raça 24 Boreal (Gigante de Gelo)."},
+	{"id": 53, "name": "Insígnia do Guarda Carmesim", "cat": "Distintivo", "rate": "100.0%", "desc": "Emblema de honra dos guardas góticos de Vesperian."},
+	{"id": 54, "name": "Sangue Puro do Progenitor", "cat": "Relíquia 0.1%", "rate": "0.1% [SECRETO]", "desc": "Sangue milenar de Lorde Vesperian que desperta a Raça Dhampir/Vampiro!"},
+	{"id": 55, "name": "Anel Carmesim de Vesperian", "cat": "Anel", "rate": "100.0%", "desc": "Anel de prata e rubi (+6 FOR, +6 CON, +10% Roubo de Vida)."}
+]
+
+const DEV_BESTIARY := [
+	# ZoneID 1 — Bosque Sussurrante (600x600m)
+	{"name": "Lobo da Bruma", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "220 HP", "spawn": "Comum a qualquer hora no bosque", "drops": [5, 6, 7, 30], "col": Color("#90a4ae")},
+	{"name": "Lobo Alfa (Chefe da Alcateia)", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "750 HP", "spawn": "🌕 Spawn na LUA CHEIA", "drops": [7, 8, 29, 30], "col": Color("#ffd54f")},
+	{"name": "Licantropo Alfa (Raid Boss Feral)", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "2200 HP", "spawn": "🩸 Spawn na LUA DE SANGUE", "drops": [7, 8, 28, 30], "col": Color("#e53935")},
+	{"name": "Aranha Tecelã da Bruma", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "380 HP", "spawn": "Espalhada pelas árvores da floresta", "drops": [42, 19], "col": Color("#ba68c8")},
+	{"name": "★ Arachna, a Rainha Tecelã [RAID BOSS] ★", "zone": "Bosque Sussurrante", "zone_id": 1, "hp": "6800 HP", "spawn": "🕸️ Ninho de Teias em (120, -120)", "drops": [43, 45, 44], "col": Color("#e040fb")},
+
+	# ZoneID 8 — Esgotos Antigos (600x600m)
+	{"name": "Lodo Ácido Corrosivo", "zone": "Esgotos Antigos", "zone_id": 8, "hp": "320 HP", "spawn": "Canais e dutos lamacentos", "drops": [46, 28], "col": Color("#76ff03")},
+	{"name": "Escorpião Abissal Gigante", "zone": "Esgotos Antigos", "zone_id": 8, "hp": "540 HP", "spawn": "Túneis alagados e galerias profundas", "drops": [48, 47], "col": Color("#26a69a")},
+	{"name": "Mini-Boss Quimera Costurada Nº 0", "zone": "Esgotos Antigos", "zone_id": 8, "hp": "2800 HP", "spawn": "Túneis profundos do laboratório em (0, 110)", "drops": [49, 19, 10], "col": Color("#ff7043")},
+
+	# ZoneID 2 — Ruínas da Vigília & Norte Gelado (600x600m)
+	{"name": "Saqueador Deserdado", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "350 HP", "spawn": "Comum nos pátios das ruínas", "drops": [1, 4, 10, 29], "col": Color("#b0bec5")},
+	{"name": "Besteiro da Vigília", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "200 HP", "spawn": "Nas torres de vigia das ruínas", "drops": [1, 4, 12, 29], "col": Color("#78909c")},
+	{"name": "Acólito do Eclipse", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "240 HP", "spawn": "Altares e catacumbas subterrâneas", "drops": [3, 14, 17, 30], "col": Color("#ab47bc")},
+	{"name": "Executor de Ferro", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "650 HP", "spawn": "Guarda dos portões da cidadela", "drops": [10, 16, 20, 21], "col": Color("#546e7a")},
+	{"name": "Comandante Vaelen, o Traidor (Boss)", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "3200 HP", "spawn": "Trono da Cidadela nas Ruínas", "drops": [10, 15, 20, 28], "col": Color("#ff9800")},
+	{"name": "Golem de Gelo Antigo", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "720 HP", "spawn": "Setor norte nevado da ZoneID 2", "drops": [50, 10], "col": Color("#4fc3f7")},
+	{"name": "Draco de Geada Selvagem", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "950 HP", "spawn": "Penhascos e cumes gélidos", "drops": [51, 4], "col": Color("#29b6f6")},
+	{"name": "★ Ymir, o Patriarca Gigante de Gelo [BOSS] ★", "zone": "Ruínas da Vigília", "zone_id": 2, "hp": "5200 HP", "spawn": "❄️ Trono de Gelo em (0, 150)", "drops": [50, 52], "col": Color("#00e5ff")},
+
+	# ZoneID 3 — Santuário do Eclipse (600x600m)
+	{"name": "Cultista Sombrio", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "400 HP", "spawn": "Círculos rituais do templo", "drops": [3, 14, 17, 28], "col": Color("#8e24aa")},
+	{"name": "Gárgula de Pedra", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "580 HP", "spawn": "Empoleiradas nas colunatas", "drops": [9, 24, 26, 28], "col": Color("#607d8b")},
+	{"name": "Inquisidor Vex (Mini-Boss)", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "1400 HP", "spawn": "Pátio dos Sacrifícios no Santuário", "drops": [10, 17, 20, 28], "col": Color("#d32f2f")},
+	{"name": "★ Malakor, o Arauto do Eclipse [RAID BOSS] ★", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "7500 HP", "spawn": "Câmara Central do Santuário", "drops": [14, 17, 20, 28, 30], "col": Color("#d500f9")},
+	{"name": "Guarda Sanguinário de Vesperian", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "680 HP", "spawn": "Entrada da Cripta Carmesim a Noroeste", "drops": [53, 10], "col": Color("#ef5350")},
+	{"name": "★ LORDE VESPERIAN, O PROGENITOR VAMPIRO [RAID BOSS SECRETO] ★", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "8500 HP", "spawn": "🩸 Cripta Carmesim em (-140, 140) — Desperta à Noite, Lua de Sangue ou Eclipse!", "drops": [55, 17, 54], "col": Color("#b71c1c")}
+]
+
+const DEV_TELEPORTS := [
+	{"name": "🏛️ Praça Central da Vila", "val": 0, "col": Color(0.2, 0.35, 0.55)},
+	{"name": "⛪ Igreja da Luz", "val": 1, "col": Color(0.55, 0.5, 0.2)},
+	{"name": "🔮 Torre do Mago", "val": 2, "col": Color(0.45, 0.25, 0.6)},
+	{"name": "🐀 Entrada dos Esgotos", "val": 3, "col": Color(0.35, 0.4, 0.3)},
+	{"name": "🌲 Floresta / Bosque", "val": 4, "col": Color(0.25, 0.5, 0.3)},
+	{"name": "⚔️ Ruínas da Vigília", "val": 5, "col": Color(0.6, 0.35, 0.2)},
+	{"name": "🌑 Santuário do Eclipse", "val": 6, "col": Color(0.65, 0.15, 0.35)},
+	{"name": "🏴 Mercado Negro", "val": 7, "col": Color(0.4, 0.2, 0.5)}
+]
+
+func _build_dev_manager_ui() -> void:
+	if dev_canvas_layer and is_instance_valid(dev_canvas_layer):
+		return
+
+	dev_canvas_layer = CanvasLayer.new()
+	dev_canvas_layer.name = "DevCanvasLayer"
+	dev_canvas_layer.layer = 120
+	add_child(dev_canvas_layer)
+
+	# 1. Botão fixo no topo direito [🛠️ DEV (F9)]
+	dev_btn_top = Button.new()
+	dev_btn_top.name = "DevBtnTop"
+	dev_btn_top.text = "🛠️ DEV (F9)"
+	dev_btn_top.focus_mode = Control.FOCUS_NONE
+	dev_btn_top.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	dev_btn_top.custom_minimum_size = Vector2(105, 30)
+	dev_btn_top.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	dev_btn_top.offset_left = -120
+	dev_btn_top.offset_top = 10
+	dev_btn_top.offset_right = -15
+	dev_btn_top.offset_bottom = 40
+
+	var top_btn_style := StyleBoxFlat.new()
+	top_btn_style.bg_color = Color(0.12, 0.22, 0.38, 0.92)
+	top_btn_style.border_width_left = 1
+	top_btn_style.border_width_top = 1
+	top_btn_style.border_width_right = 1
+	top_btn_style.border_width_bottom = 1
+	top_btn_style.border_color = Color(0.3, 0.65, 1.0, 0.8)
+	top_btn_style.corner_radius_top_left = 6
+	top_btn_style.corner_radius_top_right = 6
+	top_btn_style.corner_radius_bottom_left = 6
+	top_btn_style.corner_radius_bottom_right = 6
+	dev_btn_top.add_theme_stylebox_override("normal", top_btn_style)
+	dev_btn_top.add_theme_font_size_override("font_size", 12)
+	dev_btn_top.pressed.connect(_toggle_dev_manager)
+	dev_canvas_layer.add_child(dev_btn_top)
+
+	# 2. Painel Principal de 920x600 centralizado
+	dev_manager_panel = PanelContainer.new()
+	dev_manager_panel.name = "DevManagerPanel"
+	dev_manager_panel.set_anchors_preset(Control.PRESET_CENTER)
+	dev_manager_panel.custom_minimum_size = Vector2(920, 600)
+	dev_manager_panel.size = Vector2(920, 600)
+	dev_manager_panel.offset_left = -460
+	dev_manager_panel.offset_top = -300
+	dev_manager_panel.offset_right = 460
+	dev_manager_panel.offset_bottom = 300
+	dev_manager_panel.visible = false
+
+	var pnl_style := StyleBoxFlat.new()
+	pnl_style.bg_color = Color(0.08, 0.09, 0.14, 0.96)
+	pnl_style.border_width_left = 2
+	pnl_style.border_width_top = 2
+	pnl_style.border_width_right = 2
+	pnl_style.border_width_bottom = 2
+	pnl_style.border_color = Color(0.25, 0.45, 0.75, 0.8)
+	pnl_style.corner_radius_top_left = 8
+	pnl_style.corner_radius_top_right = 8
+	pnl_style.corner_radius_bottom_left = 8
+	pnl_style.corner_radius_bottom_right = 8
+	pnl_style.content_margin_left = 14
+	pnl_style.content_margin_top = 12
+	pnl_style.content_margin_right = 14
+	pnl_style.content_margin_bottom = 12
+	dev_manager_panel.add_theme_stylebox_override("panel", pnl_style)
+	dev_canvas_layer.add_child(dev_manager_panel)
+
+	# 3. Layout vertical principal
+	var main_vb := VBoxContainer.new()
+	main_vb.add_theme_constant_override("separation", 8)
+	dev_manager_panel.add_child(main_vb)
+
+	# Top Bar com Título e Botão Fechar
+	var top_bar := HBoxContainer.new()
+	main_vb.add_child(top_bar)
+
+	var title_lbl := Label.new()
+	title_lbl.text = "🛠️ PAINEL UNIFICADO DE DESENVOLVIMENTO (F9 / F10)"
+	title_lbl.add_theme_font_size_override("font_size", 15)
+	title_lbl.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
+	top_bar.add_child(title_lbl)
+
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_bar.add_child(spacer)
+
+	var close_btn := Button.new()
+	close_btn.text = "✕ Fechar (F9)"
+	close_btn.focus_mode = Control.FOCUS_NONE
+	close_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	close_btn.pressed.connect(_toggle_dev_manager)
+	top_bar.add_child(close_btn)
+
+	# Barra de Status
+	dev_status_label = Label.new()
+	dev_status_label.text = "Status: Pronto | Pressione F9 ou F10 para alternar este menu."
+	dev_status_label.add_theme_font_size_override("font_size", 11)
+	dev_status_label.add_theme_color_override("font_color", Color(0.7, 0.85, 0.95))
+	main_vb.add_child(dev_status_label)
+
+	# TabContainer com as 6 Abas
+	var tabs := TabContainer.new()
+	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main_vb.add_child(tabs)
+
+	_build_dev_tab_races(tabs)
+	_build_dev_tab_classes(tabs)
+	_build_dev_tab_world(tabs)
+	_build_dev_tab_items(tabs)
+	_build_dev_tab_bestiary(tabs)
+	_build_dev_tab_teleports(tabs)
+
+	dev_manager_node = dev_manager_panel
+	dev_manager_ui = dev_manager_panel
+	dev_race_menu_ui = dev_manager_panel
+
+func _dev_get_card_style(border_color: Color) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.10, 0.12, 0.18, 0.9)
+	sb.border_width_left = 1
+	sb.border_width_top = 1
+	sb.border_width_right = 1
+	sb.border_width_bottom = 1
+	sb.border_color = border_color
+	sb.corner_radius_top_left = 6
+	sb.corner_radius_top_right = 6
+	sb.corner_radius_bottom_left = 6
+	sb.corner_radius_bottom_right = 6
+	sb.content_margin_left = 8
+	sb.content_margin_top = 6
+	sb.content_margin_right = 8
+	sb.content_margin_bottom = 6
+	return sb
+
+func _dev_create_btn(text: String, col: Color, on_click: Callable) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	btn.pressed.connect(on_click)
+
+	var bsb := StyleBoxFlat.new()
+	bsb.bg_color = col.darkened(0.5)
+	bsb.border_width_left = 1
+	bsb.border_width_top = 1
+	bsb.border_width_right = 1
+	bsb.border_width_bottom = 1
+	bsb.border_color = col
+	bsb.corner_radius_top_left = 5
+	bsb.corner_radius_top_right = 5
+	bsb.corner_radius_bottom_left = 5
+	bsb.corner_radius_bottom_right = 5
+	bsb.content_margin_left = 8
+	bsb.content_margin_right = 8
+	bsb.content_margin_top = 4
+	bsb.content_margin_bottom = 4
+	btn.add_theme_stylebox_override("normal", bsb)
+
+	var hsb: StyleBoxFlat = bsb.duplicate()
+	hsb.bg_color = col.darkened(0.2)
+	btn.add_theme_stylebox_override("hover", hsb)
+
+	var psb: StyleBoxFlat = bsb.duplicate()
+	psb.bg_color = col
+	btn.add_theme_stylebox_override("pressed", psb)
+
+	btn.add_theme_font_size_override("font_size", 11)
+	return btn
+
+func _dev_update_tier_buttons() -> void:
+	for idx in range(dev_tier_buttons.size()):
+		var t_num: int = idx + 1
+		var btn: Button = dev_tier_buttons[idx]
+		if t_num == dev_selected_tier:
+			btn.modulate = Color(1.0, 0.9, 0.3)
 		else:
-			var any_other_open := false
-			if char_select_ui and char_select_ui.get("is_open"): any_other_open = true
-			if attributes_ui and attributes_ui.get("is_open"): any_other_open = true
-			if inventory_ui and inventory_ui.get("is_open"): any_other_open = true
-			if skills_ui and skills_ui.get("is_open"): any_other_open = true
-			if dev_drop_rates_ui and dev_drop_rates_ui.get("is_open"): any_other_open = true
-			if not any_other_open:
-				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-				if local_player and is_instance_valid(local_player):
-					local_player.set("is_menu_open", false)
+			btn.modulate = Color(0.8, 0.8, 0.8)
+
+var _active_class_or_race_modal: PanelContainer = null
+
+# Modal de Confirmação Obrigatória para Mudança de Classe ou Raça
+func request_class_or_race_change(is_race: bool, target_id: int, target_tier: int, target_name: String, source_desc: String) -> void:
+	if _active_class_or_race_modal and is_instance_valid(_active_class_or_race_modal):
+		_active_class_or_race_modal.queue_free()
+		_active_class_or_race_modal = null
+
+	if not dev_canvas_layer or not is_instance_valid(dev_canvas_layer):
+		dev_canvas_layer = CanvasLayer.new()
+		dev_canvas_layer.name = "DevCanvasLayer"
+		dev_canvas_layer.layer = 125
+		add_child(dev_canvas_layer)
+
+	var modal := PanelContainer.new()
+	modal.name = "ClassOrRaceConfirmationModal"
+	modal.set_anchors_preset(Control.PRESET_CENTER)
+	modal.custom_minimum_size = Vector2(580, 260)
+	modal.offset_left = -290
+	modal.offset_top = -130
+	modal.offset_right = 290
+	modal.offset_bottom = 130
+	modal.z_index = 150
+
+	var modal_style := StyleBoxFlat.new()
+	modal_style.bg_color = Color(0.06, 0.07, 0.12, 0.98)
+	modal_style.set_border_width_all(3)
+	modal_style.set_corner_radius_all(10)
+	modal_style.content_margin_left = 24
+	modal_style.content_margin_top = 20
+	modal_style.content_margin_right = 24
+	modal_style.content_margin_bottom = 20
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 14)
+	modal.add_child(vb)
+
+	var title_lbl := Label.new()
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 16)
+
+	var body_lbl := Label.new()
+	body_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body_lbl.add_theme_font_size_override("font_size", 13)
+	body_lbl.add_theme_color_override("font_color", Color(0.92, 0.94, 0.97))
+
+	var is_secret_class: bool = (not is_race and target_tier >= 5)
+
+	if not is_secret_class:
+		modal_style.border_color = Color(1.0, 0.85, 0.1, 0.95)
+		title_lbl.text = "⚠️ ATENÇÃO: MUDANÇA DE CLASSE / RAÇA"
+		title_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
+		var category_name: String = "raça" if is_race else "classe"
+		var desc_tag: String = source_desc if source_desc != "" else (TIER_NAMES[target_tier] if target_tier < TIER_NAMES.size() else "Comum")
+		body_lbl.text = "Você está prestes a mudar sua %s atual para [%s] (%s).\nSuas habilidades atuais serão substituídas.\nVocê sabe o que está fazendo e deseja confirmar?" % [category_name, target_name, desc_tag]
+	else:
+		modal_style.border_color = Color(1.0, 0.2, 0.2, 0.98)
+		var tier_title_str: String = "ÚNICA" if target_tier == 5 else "LENDÁRIA"
+		title_lbl.text = "🩸 AVISO CRÍTICO: CLASSE %s (RESET PARA O NÍVEL 1!)" % tier_title_str
+		title_lbl.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+		body_lbl.text = "Você está prestes a despertar a Classe Secreta [%s]!\n\n❗ CONSEQUÊNCIA PERMANENTE: Seu personagem VOLTARÁ PARA O NÍVEL 1 imediatamente para reconstruir seus atributos com o novo crescimento superior (+11 a +15 pts/nível).\n\nVocê tem plena consciência do que está fazendo?" % target_name
+
+	modal.add_theme_stylebox_override("panel", modal_style)
+	vb.add_child(title_lbl)
+	vb.add_child(body_lbl)
+
+	var btn_hb := HBoxContainer.new()
+	btn_hb.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_hb.add_theme_constant_override("separation", 18)
+	vb.add_child(btn_hb)
+
+	var confirm_btn := Button.new()
+	confirm_btn.text = "✅ Sim, sei o que estou fazendo (Confirmar)"
+	confirm_btn.focus_mode = Control.FOCUS_NONE
+	confirm_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	confirm_btn.custom_minimum_size = Vector2(260, 36)
+	var c_style := StyleBoxFlat.new()
+	c_style.bg_color = Color(0.12, 0.55, 0.25, 0.95)
+	c_style.border_color = Color(0.35, 0.9, 0.45)
+	c_style.set_border_width_all(2)
+	c_style.set_corner_radius_all(6)
+	confirm_btn.add_theme_stylebox_override("normal", c_style)
+	var c_hover: StyleBoxFlat = c_style.duplicate()
+	c_hover.bg_color = Color(0.18, 0.7, 0.32, 1.0)
+	confirm_btn.add_theme_stylebox_override("hover", c_hover)
+
+	confirm_btn.pressed.connect(func():
+		_execute_class_or_race_change(is_race, target_id, target_tier, target_name, source_desc)
+		modal.queue_free()
+		_active_class_or_race_modal = null
+	)
+	btn_hb.add_child(confirm_btn)
+
+	var cancel_btn := Button.new()
+	cancel_btn.text = "❌ Cancelar"
+	cancel_btn.focus_mode = Control.FOCUS_NONE
+	cancel_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	cancel_btn.custom_minimum_size = Vector2(130, 36)
+	var x_style := StyleBoxFlat.new()
+	x_style.bg_color = Color(0.5, 0.15, 0.15, 0.9)
+	x_style.border_color = Color(0.9, 0.3, 0.3)
+	x_style.set_border_width_all(2)
+	x_style.set_corner_radius_all(6)
+	cancel_btn.add_theme_stylebox_override("normal", x_style)
+	var x_hover: StyleBoxFlat = x_style.duplicate()
+	x_hover.bg_color = Color(0.7, 0.2, 0.2, 1.0)
+	cancel_btn.add_theme_stylebox_override("hover", x_hover)
+
+	cancel_btn.pressed.connect(func():
+		modal.queue_free()
+		_active_class_or_race_modal = null
+	)
+	btn_hb.add_child(cancel_btn)
+
+	dev_canvas_layer.add_child(modal)
+	_active_class_or_race_modal = modal
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: int, target_name: String, source_desc: String) -> void:
+	if is_race:
+		var current_cid: int = 1
+		if local_player and is_instance_valid(local_player) and local_player.get("current_class_id") != null:
+			current_cid = local_player.current_class_id
+		var act_mode: int = 99 if source_desc.begins_with("DEV") else 0
+		if NetworkManager:
+			NetworkManager.send_select_identity(target_id, current_cid, act_mode)
+		if source_desc.begins_with("ITEM:"):
+			var item_id_val: int = int(source_desc.replace("ITEM:", ""))
+			if NetworkManager:
+				NetworkManager.send_use_item(item_id_val)
+		if dev_status_label:
+			dev_status_label.text = "Raça confirmada: #%d %s" % [target_id, target_name]
+		show_loot_toast("Raça [%s] confirmada!" % target_name)
+	else:
+		var current_rid: int = 1
+		if local_player and is_instance_valid(local_player) and local_player.get("current_race_id") != null:
+			current_rid = local_player.current_race_id
+		var act_mode: int = 0
+		if source_desc.begins_with("DEV"):
+			act_mode = 98
+		elif target_tier >= 5:
+			act_mode = 2 # IdentityModeSecretReset
+		else:
+			act_mode = 0 # IdentityModeInitialChange
+		if NetworkManager:
+			NetworkManager.send_select_identity(current_rid, target_id, act_mode)
+		if source_desc.begins_with("ITEM:"):
+			var item_id_val: int = int(source_desc.replace("ITEM:", ""))
+			if NetworkManager:
+				NetworkManager.send_use_item(item_id_val)
+		if dev_status_label:
+			dev_status_label.text = "Classe confirmada: #%d %s (Tier %d)" % [target_id, target_name, target_tier]
+		show_loot_toast("Classe [%s] confirmada!" % target_name)
+
+func _on_dev_activate_race(race_id: int, race_name: String) -> void:
+	request_class_or_race_change(true, race_id, 1, race_name, "DEV F9")
+
+func _on_dev_activate_class(class_id: int, target_class_name: String) -> void:
+	request_class_or_race_change(false, class_id, dev_selected_tier, target_class_name, "DEV F9")
+
+func _build_dev_tab_races(tabs: TabContainer) -> void:
+	var tab := VBoxContainer.new()
+	tab.name = "🧬 Raças"
+	tabs.add_child(tab)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab.add_child(scroll)
+
+	var vb := VBoxContainer.new()
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vb.add_theme_constant_override("separation", 6)
+	scroll.add_child(vb)
+
+	for race in DEV_RACES:
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _dev_get_card_style(race["col"]))
+		vb.add_child(card)
+
+		var hb := HBoxContainer.new()
+		hb.add_theme_constant_override("separation", 10)
+		card.add_child(hb)
+
+		var info_vb := VBoxContainer.new()
+		info_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hb.add_child(info_vb)
+
+		var name_lbl := Label.new()
+		name_lbl.text = "#%d %s [%s]" % [race["id"], race["name"], race["badge"]]
+		name_lbl.add_theme_font_size_override("font_size", 12)
+		name_lbl.add_theme_color_override("font_color", race["col"])
+		info_vb.add_child(name_lbl)
+
+		var desc_lbl := Label.new()
+		desc_lbl.text = race["desc"]
+		desc_lbl.add_theme_font_size_override("font_size", 10)
+		desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
+		info_vb.add_child(desc_lbl)
+
+		var rid: int = race["id"]
+		var rname: String = race["name"]
+		var btn := _dev_create_btn("Ativar Raça", race["col"], func():
+			_on_dev_activate_race(rid, rname)
+		)
+		btn.custom_minimum_size = Vector2(110, 28)
+		hb.add_child(btn)
+
+func _build_dev_tab_classes(tabs: TabContainer) -> void:
+	var tab := VBoxContainer.new()
+	tab.name = "⚔️ Classes & Nível"
+	tab.add_theme_constant_override("separation", 8)
+	tabs.add_child(tab)
+
+	# 1. Painel de Nível & Atributos (Cmd 8 via 0x22)
+	var lvl_card := PanelContainer.new()
+	lvl_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.2, 0.65, 0.4)))
+	tab.add_child(lvl_card)
+
+	var lvl_vb := VBoxContainer.new()
+	lvl_vb.add_theme_constant_override("separation", 6)
+	lvl_card.add_child(lvl_vb)
+
+	var lvl_title := Label.new()
+	lvl_title.text = "📈 1. CONTROLE DE NÍVEL & ATRIBUTOS (0x22 Cmd 8):"
+	lvl_title.add_theme_font_size_override("font_size", 12)
+	lvl_title.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5))
+	lvl_vb.add_child(lvl_title)
+
+	var lvl_hb := HBoxContainer.new()
+	lvl_hb.add_theme_constant_override("separation", 6)
+	lvl_vb.add_child(lvl_hb)
+
+	lvl_hb.add_child(_dev_create_btn("[+1 Nível]", Color(0.25, 0.6, 0.35), func():
+		NetworkManager.send_dev_level_control(1)
+		if dev_status_label: dev_status_label.text = "+1 Nível solicitado ao servidor!"
+		show_loot_toast("+1 Nível!")
+	))
+	lvl_hb.add_child(_dev_create_btn("[+5 Níveis]", Color(0.25, 0.6, 0.35), func():
+		NetworkManager.send_dev_level_control(5)
+		if dev_status_label: dev_status_label.text = "+5 Níveis solicitados ao servidor!"
+		show_loot_toast("+5 Níveis!")
+	))
+	lvl_hb.add_child(_dev_create_btn("[Nível 50 (Máx)]", Color(0.8, 0.65, 0.1), func():
+		NetworkManager.send_dev_level_control(50)
+		if dev_status_label: dev_status_label.text = "Nível 50 solicitado ao servidor!"
+		show_loot_toast("Nível 50 (Máx)!")
+	))
+	lvl_hb.add_child(_dev_create_btn("[Resetar Nv.1]", Color(0.7, 0.25, 0.25), func():
+		NetworkManager.send_dev_level_control(0)
+		if dev_status_label: dev_status_label.text = "Reset para Nível 1 solicitado!"
+		show_loot_toast("Resetado para Nível 1")
+	))
+	lvl_hb.add_child(_dev_create_btn("[Full HP/Mana + 20 Pts]", Color(0.2, 0.7, 0.8), func():
+		NetworkManager.send_dev_level_control(99)
+		if dev_status_label: dev_status_label.text = "Full HP/Mana e +20 Pontos solicitados!"
+		show_loot_toast("Full HP + 20 Pontos!")
+	))
+
+	# 2. Seletor de Tier (1..6)
+	var tier_card := PanelContainer.new()
+	tier_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.3, 0.5, 0.7)))
+	tab.add_child(tier_card)
+
+	var tier_vb := VBoxContainer.new()
+	tier_vb.add_theme_constant_override("separation", 4)
+	tier_card.add_child(tier_vb)
+
+	var tier_title := Label.new()
+	tier_title.text = "⭐ 2. SELETOR DE TIER DE CLASSE (1 a 6):"
+	tier_title.add_theme_font_size_override("font_size", 12)
+	tier_title.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
+	tier_vb.add_child(tier_title)
+
+	var tier_hb := HBoxContainer.new()
+	tier_hb.add_theme_constant_override("separation", 6)
+	tier_vb.add_child(tier_hb)
+
+	dev_tier_buttons.clear()
+	for t in range(1, 7):
+		var t_idx: int = t
+		var t_btn := Button.new()
+		t_btn.text = "Tier %d (%s)" % [t, TIER_NAMES[t] if t < TIER_NAMES.size() else ""]
+		t_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		t_btn.pressed.connect(func():
+			dev_selected_tier = t_idx
+			_dev_update_tier_buttons()
+			if dev_status_label:
+				dev_status_label.text = "Tier selecionado: Tier %d (%s)" % [t_idx, TIER_NAMES[t_idx]]
+		)
+		dev_tier_buttons.append(t_btn)
+		tier_hb.add_child(t_btn)
+	_dev_update_tier_buttons()
+
+	# 3. Lista das 15 Classes
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab.add_child(scroll)
+
+	var vb := VBoxContainer.new()
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vb.add_theme_constant_override("separation", 6)
+	scroll.add_child(vb)
+
+	for c in DEV_CLASSES:
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _dev_get_card_style(c["col"]))
+		vb.add_child(card)
+
+		var hb := HBoxContainer.new()
+		hb.add_theme_constant_override("separation", 10)
+		card.add_child(hb)
+
+		var info_vb := VBoxContainer.new()
+		info_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hb.add_child(info_vb)
+
+		var name_lbl := Label.new()
+		name_lbl.text = "#%d %s" % [c["id"], c["name"]]
+		name_lbl.add_theme_font_size_override("font_size", 12)
+		name_lbl.add_theme_color_override("font_color", c["col"])
+		info_vb.add_child(name_lbl)
+
+		var desc_lbl := Label.new()
+		desc_lbl.text = c["desc"]
+		desc_lbl.add_theme_font_size_override("font_size", 10)
+		desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
+		info_vb.add_child(desc_lbl)
+
+		var cid: int = c["id"]
+		var cname: String = c["name"]
+		var btn := _dev_create_btn("Ativar Classe", c["col"], func():
+			_on_dev_activate_class(cid, cname)
+		)
+		btn.custom_minimum_size = Vector2(110, 28)
+		hb.add_child(btn)
+
+func _build_dev_tab_world(tabs: TabContainer) -> void:
+	var tab := VBoxContainer.new()
+	tab.name = "🌙 Mundo, Lua & Clima"
+	tab.add_theme_constant_override("separation", 12)
+	tabs.add_child(tab)
+
+	# 1. Horários Diretos (Cmd 4 via 0x22)
+	var time_card := PanelContainer.new()
+	time_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.2, 0.5, 0.8)))
+	tab.add_child(time_card)
+
+	var time_vb := VBoxContainer.new()
+	time_vb.add_theme_constant_override("separation", 6)
+	time_card.add_child(time_vb)
+
+	var time_title := Label.new()
+	time_title.text = "⏰ 1. HORÁRIO DO MUNDO (0x22 Cmd 4):"
+	time_title.add_theme_font_size_override("font_size", 12)
+	time_title.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0))
+	time_vb.add_child(time_title)
+
+	var time_hb := HBoxContainer.new()
+	time_hb.add_theme_constant_override("separation", 6)
+	time_vb.add_child(time_hb)
+
+	var hours := [
+		{"name": "03:00 Madrugada", "h": 3, "col": Color(0.2, 0.25, 0.45)},
+		{"name": "06:00 Dia", "h": 6, "col": Color(0.6, 0.55, 0.2)},
+		{"name": "12:00 Meio-Dia", "h": 12, "col": Color(0.7, 0.65, 0.25)},
+		{"name": "18:00 Noite", "h": 18, "col": Color(0.5, 0.3, 0.55)},
+		{"name": "00:00 Meia-Noite", "h": 0, "col": Color(0.25, 0.2, 0.4)}
+	]
+	for h_data in hours:
+		var exact_h: int = h_data["h"]
+		var h_name: String = h_data["name"]
+		var btn := _dev_create_btn(h_name, h_data["col"], func():
+			NetworkManager.send_set_hour(exact_h)
+			if dev_status_label:
+				dev_status_label.text = "Horário definido para %02d:00!" % exact_h
+			show_loot_toast("Horário ajustado para %02d:00" % exact_h)
+		)
+		time_hb.add_child(btn)
+
+	time_hb.add_child(_dev_create_btn("+1h", Color(0.3, 0.4, 0.5), func():
+		NetworkManager.send_skip_time(1)
+		if dev_status_label: dev_status_label.text = "Avançado +1 hora!"
+	))
+	time_hb.add_child(_dev_create_btn("+6h", Color(0.3, 0.4, 0.5), func():
+		NetworkManager.send_skip_time(6)
+		if dev_status_label: dev_status_label.text = "Avançado +6 horas!"
+	))
+
+	# 2. Fases da Lua (Cmd 5 via 0x22)
+	var moon_card := PanelContainer.new()
+	moon_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.4, 0.3, 0.7)))
+	tab.add_child(moon_card)
+
+	var moon_vb := VBoxContainer.new()
+	moon_vb.add_theme_constant_override("separation", 6)
+	moon_card.add_child(moon_vb)
+
+	var moon_title := Label.new()
+	moon_title.text = "🌙 2. FASES DA LUA (0x22 Cmd 5):"
+	moon_title.add_theme_font_size_override("font_size", 12)
+	moon_title.add_theme_color_override("font_color", Color(0.7, 0.6, 1.0))
+	moon_vb.add_child(moon_title)
+
+	var moon_grid := GridContainer.new()
+	moon_grid.columns = 5
+	moon_grid.add_theme_constant_override("h_separation", 6)
+	moon_grid.add_theme_constant_override("v_separation", 6)
+	moon_vb.add_child(moon_grid)
+
+	var moons := [
+		"🌑 Lua Nova", "🌒 Lua Crescente", "🌓 Quarto Crescente", "🌔 Gibosa Crescente", "🌕 Lua Cheia",
+		"🌖 Gibosa Minguante", "🌗 Quarto Minguante", "🌘 Lua Minguante", "🩸 LUA DE SANGUE", "🌑 ECLIPSE TOTAL"
+	]
+	for m_idx in range(moons.size()):
+		var idx: int = m_idx
+		var m_name: String = moons[m_idx]
+		var col := Color(0.3, 0.25, 0.5)
+		if idx == 8: col = Color(0.7, 0.15, 0.15)
+		elif idx == 9: col = Color(0.6, 0.1, 0.6)
+		var btn := _dev_create_btn(m_name, col, func():
+			NetworkManager.send_set_moon(idx)
+			if dev_status_label: dev_status_label.text = "Fase da Lua definida: %s (%d)" % [m_name, idx]
+			show_loot_toast("Lua: %s" % m_name)
+		)
+		moon_grid.add_child(btn)
+
+	var pass_moon_btn := _dev_create_btn("⏭ Passar Lua (+1)", Color(0.4, 0.35, 0.6), func():
+		NetworkManager.send_cycle_moon()
+		if dev_status_label: dev_status_label.text = "Fase da Lua ciclada!"
+	)
+	moon_grid.add_child(pass_moon_btn)
+
+	# 3. Clima (Cmd 6 via 0x22)
+	var weather_card := PanelContainer.new()
+	weather_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.2, 0.6, 0.5)))
+	tab.add_child(weather_card)
+
+	var weather_vb := VBoxContainer.new()
+	weather_vb.add_theme_constant_override("separation", 6)
+	weather_card.add_child(weather_vb)
+
+	var weather_title := Label.new()
+	weather_title.text = "🌧️ 3. CLIMA (0x22 Cmd 6):"
+	weather_title.add_theme_font_size_override("font_size", 12)
+	weather_title.add_theme_color_override("font_color", Color(0.3, 0.9, 0.7))
+	weather_vb.add_child(weather_title)
+
+	var weather_hb := HBoxContainer.new()
+	weather_hb.add_theme_constant_override("separation", 6)
+	weather_vb.add_child(weather_hb)
+
+	var weathers := [
+		{"name": "☀️ Limpo", "w": 0, "col": Color(0.4, 0.5, 0.3)},
+		{"name": "🌧️ Chuva", "w": 1, "col": Color(0.2, 0.4, 0.6)},
+		{"name": "🌫️ Neblina Densa", "w": 2, "col": Color(0.35, 0.4, 0.45)},
+		{"name": "🩸 Névoa Carmesim", "w": 3, "col": Color(0.6, 0.2, 0.25)}
+	]
+	for w_data in weathers:
+		var w_idx: int = w_data["w"]
+		var w_name: String = w_data["name"]
+		var btn := _dev_create_btn(w_name, w_data["col"], func():
+			NetworkManager.send_set_weather(w_idx)
+			if dev_status_label: dev_status_label.text = "Clima definido: %s (%d)" % [w_name, w_idx]
+			show_loot_toast("Clima: %s" % w_name)
+		)
+		weather_hb.add_child(btn)
+
+	weather_hb.add_child(_dev_create_btn("⏭ Ciclar Clima", Color(0.25, 0.5, 0.4), func():
+		NetworkManager.send_cycle_weather()
+		if dev_status_label: dev_status_label.text = "Clima ciclado no servidor!"
+	))
+
+func _build_dev_tab_items(tabs: TabContainer) -> void:
+	var tab := VBoxContainer.new()
+	tab.name = "🎒 Drops & Itens"
+	tab.add_theme_constant_override("separation", 8)
+	tabs.add_child(tab)
+
+	var top_hb := HBoxContainer.new()
+	top_hb.add_theme_constant_override("separation", 10)
+	tab.add_child(top_hb)
+
+	var kit_btn := _dev_create_btn("📦 Kit Completo 12 Equipamentos (Cmd 7, Val 255)", Color(0.9, 0.6, 0.1), func():
+		NetworkManager.send_world_control(7, 255)
+		if dev_status_label: dev_status_label.text = "Kit Completo de 12 Equipamentos solicitado!"
+		show_loot_toast("Kit 12 Equipamentos recebido!")
+	)
+	kit_btn.custom_minimum_size = Vector2(0, 32)
+	kit_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_hb.add_child(kit_btn)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab.add_child(scroll)
+
+	var vb := VBoxContainer.new()
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vb.add_theme_constant_override("separation", 6)
+	scroll.add_child(vb)
+
+	for item in DEV_ITEMS:
+		var is_secret: bool = item["rate"].contains("SECRETO")
+		var col := Color(0.85, 0.35, 0.9) if is_secret else Color(0.3, 0.6, 0.8)
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _dev_get_card_style(col))
+		vb.add_child(card)
+
+		var hb := HBoxContainer.new()
+		hb.add_theme_constant_override("separation", 10)
+		card.add_child(hb)
+
+		var info_vb := VBoxContainer.new()
+		info_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hb.add_child(info_vb)
+
+		var name_lbl := Label.new()
+		name_lbl.text = "#%d %s [%s — %s]" % [item["id"], item["name"], item["cat"], item["rate"]]
+		name_lbl.add_theme_font_size_override("font_size", 12)
+		name_lbl.add_theme_color_override("font_color", col)
+		info_vb.add_child(name_lbl)
+
+		var desc_lbl := Label.new()
+		desc_lbl.text = item["desc"]
+		desc_lbl.add_theme_font_size_override("font_size", 10)
+		desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
+		info_vb.add_child(desc_lbl)
+
+		var item_id: int = item["id"]
+		var item_name: String = item["name"]
+		var btn := _dev_create_btn("+ Pegar Item", col, func():
+			NetworkManager.send_give_item(item_id)
+			if dev_status_label: dev_status_label.text = "Item adicionado: #%d %s" % [item_id, item_name]
+			show_loot_toast("+ %s" % item_name)
+		)
+		btn.custom_minimum_size = Vector2(100, 26)
+		hb.add_child(btn)
+
+func _build_dev_tab_bestiary(tabs: TabContainer) -> void:
+	var tab := VBoxContainer.new()
+	tab.name = "🐉 Bestiário"
+	tab.add_theme_constant_override("separation", 8)
+	tabs.add_child(tab)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab.add_child(scroll)
+
+	var vb := VBoxContainer.new()
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vb.add_theme_constant_override("separation", 6)
+	scroll.add_child(vb)
+
+	for mob in DEV_BESTIARY:
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _dev_get_card_style(mob["col"]))
+		vb.add_child(card)
+
+		var hb := HBoxContainer.new()
+		hb.add_theme_constant_override("separation", 10)
+		card.add_child(hb)
+
+		var info_vb := VBoxContainer.new()
+		info_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hb.add_child(info_vb)
+
+		var title_lbl := Label.new()
+		title_lbl.text = "%s — %s (%s)" % [mob["name"], mob["hp"], mob["zone"]]
+		title_lbl.add_theme_font_size_override("font_size", 12)
+		title_lbl.add_theme_color_override("font_color", mob["col"])
+		info_vb.add_child(title_lbl)
+
+		var spawn_lbl := Label.new()
+		spawn_lbl.text = "Condição: %s" % mob["spawn"]
+		spawn_lbl.add_theme_font_size_override("font_size", 10)
+		spawn_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
+		info_vb.add_child(spawn_lbl)
+
+		var btn_vb := VBoxContainer.new()
+		btn_vb.add_theme_constant_override("separation", 4)
+		hb.add_child(btn_vb)
+
+		var drops_arr: Array = mob["drops"]
+		var mob_name: String = mob["name"]
+		var drop_btn := _dev_create_btn("📦 Pegar Drops", Color(0.3, 0.7, 0.4), func():
+			for item_id in drops_arr:
+				NetworkManager.send_give_item(item_id)
+			if dev_status_label:
+				dev_status_label.text = "Drops de %s adicionados ao inventário!" % mob_name
+			show_loot_toast("Drops de %s coletados!" % mob_name)
+		)
+		btn_vb.add_child(drop_btn)
+
+		var zid: int = mob["zone_id"]
+		var zname: String = mob["zone"]
+		var tp_btn := _dev_create_btn("⚡ Ir para Zona", Color(0.3, 0.5, 0.8), func():
+			NetworkManager.send_dev_teleport(zid)
+			if dev_status_label:
+				dev_status_label.text = "Teleportando para %s (Zona #%d)..." % [zname, zid]
+			show_loot_toast("Teleportando para %s..." % zname)
+		)
+		btn_vb.add_child(tp_btn)
+
+func _build_dev_tab_teleports(tabs: TabContainer) -> void:
+	var tab := VBoxContainer.new()
+	tab.name = "⚡ Teleportes & Zonas"
+	tab.add_theme_constant_override("separation", 10)
+	tabs.add_child(tab)
+
+	var desc_lbl := Label.new()
+	desc_lbl.text = "Teleporte instantâneo seguro (0x22 Cmd 9 via 0x36 RESPAWN com I-Frames):"
+	desc_lbl.add_theme_font_size_override("font_size", 12)
+	desc_lbl.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	tab.add_child(desc_lbl)
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 8)
+	tab.add_child(grid)
+
+	for tp in DEV_TELEPORTS:
+		var tp_name: String = tp["name"]
+		var tp_val: int = tp["val"]
+		var btn := _dev_create_btn(tp_name, tp["col"], func():
+			NetworkManager.send_dev_teleport(tp_val)
+			if dev_status_label:
+				dev_status_label.text = "Teleportando para %s..." % tp_name
+			show_loot_toast("Teleportado para %s!" % tp_name)
+		)
+		btn.custom_minimum_size = Vector2(240, 36)
+		grid.add_child(btn)
+
+	var extra_card := PanelContainer.new()
+	extra_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.85, 0.4, 0.2)))
+	tab.add_child(extra_card)
+
+	var extra_vb := VBoxContainer.new()
+	extra_vb.add_theme_constant_override("separation", 6)
+	extra_card.add_child(extra_vb)
+
+	var extra_title := Label.new()
+	extra_title.text = "🔬 SIMULAÇÃO DE AUTOPSIA & PUZZLE ANATÔMICO:"
+	extra_title.add_theme_font_size_override("font_size", 12)
+	extra_title.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+	extra_vb.add_child(extra_title)
+
+	var sim_btn := _dev_create_btn("🔬 Abrir Autópsia de Teste (Simular Cadáver #999)", Color(0.65, 0.25, 0.35), func():
+		if autopsy_ui and autopsy_ui.has_method("open_autopsy"):
+			autopsy_ui.open_autopsy(999, 1, 100)
+			if dev_status_label:
+				dev_status_label.text = "Simulação de Autópsia iniciada no cliente!"
+	)
+	sim_btn.custom_minimum_size = Vector2(0, 32)
+	extra_vb.add_child(sim_btn)
 
 func _on_skip_time_pressed() -> void:
 	print("[World] F6: Solicitando avanço de +6 horas ao servidor...")
@@ -1091,6 +2260,9 @@ func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int
 		npc_inst.npc_name = p_name
 		npc_inst.npc_id = nid
 
+	if npc_inst.has_method("set_friendship"):
+		npc_inst.set_friendship(get_npc_friendship(nid))
+
 	if npcs_container:
 		npcs_container.add_child(npc_inst)
 	else:
@@ -1145,6 +2317,22 @@ func _on_npc_spoke(npc_id: int, message: String) -> void:
 func _on_dialogue_clear_timeout() -> void:
 	if dialogue_label:
 		dialogue_label.visible = false
+
+func get_npc_friendship(npc_id: int) -> int:
+	return npc_friendships.get(npc_id, 0)
+
+func set_npc_friendship(npc_id: int, points: int) -> void:
+	var clamped_pts := clampi(points, 0, 100)
+	npc_friendships[npc_id] = clamped_pts
+	if npcs.has(npc_id) and is_instance_valid(npcs[npc_id]):
+		if npcs[npc_id].has_method("set_friendship"):
+			npcs[npc_id].set_friendship(clamped_pts)
+	if class_master_ui and class_master_ui.has_method("update_friendship_display"):
+		if class_master_ui.get("current_npc_id") == npc_id:
+			class_master_ui.update_friendship_display()
+
+func _on_npc_friendship_received(npc_id: int, points: int, _level: int) -> void:
+	set_npc_friendship(npc_id, points)
 
 func _get_lighting_targets(time_val: float) -> Dictionary:
 	# Parâmetros de iluminação por período:
@@ -1449,78 +2637,258 @@ func _spawn_player_floating_damage(target_node: Node3D, damage: int) -> void:
 	tw.tween_property(dmg_label, "modulate:a", 0.0, 0.9).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(dmg_label.queue_free)
 
-func _create_zone_landmarks() -> void:
-	zone_marker_nodes.clear()
+# =============================================================================
+# SISTEMA DE GERENCIAMENTO DINÂMICO DE ZONAS & PORTAIS (PARTE 1B)
+# =============================================================================
 
-	# 1. Bosque Sussurrante (55, 2, -45)
-	var bosque_marker := Node3D.new()
-	bosque_marker.position = Vector3(55.0, 0.0, -45.0)
-	add_child(bosque_marker)
-	zone_marker_nodes.append(bosque_marker)
+func _on_zone_change_received(target_zone_id: int, portal_id: int) -> void:
+	print("[World] Confirmação de mudança de zona do servidor: Zona %d (Portal %d)" % [target_zone_id, portal_id])
+	if target_zone_id != current_zone_id or current_map_root == null:
+		_load_zone_map(target_zone_id)
 
-	var b_pilar := MeshInstance3D.new()
-	var bp_mesh := BoxMesh.new()
-	bp_mesh.size = Vector3(1.0, 2.4, 1.0)
-	b_pilar.mesh = bp_mesh
-	var bp_mat := StandardMaterial3D.new()
-	bp_mat.albedo_color = Color(0.2, 0.38, 0.22, 1.0)
-	bp_mat.roughness = 0.85
-	b_pilar.material_override = bp_mat
-	b_pilar.position = Vector3(0, 1.2, 0)
-	bosque_marker.add_child(b_pilar)
+func _trigger_zone_fade() -> void:
+	if not screen_fade_rect or not is_instance_valid(screen_fade_rect):
+		var canvas := CanvasLayer.new()
+		canvas.layer = 120
+		add_child(canvas)
+		screen_fade_rect = ColorRect.new()
+		screen_fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		screen_fade_rect.color = Color(0.04, 0.05, 0.08, 0.0)
+		screen_fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		canvas.add_child(screen_fade_rect)
 
-	var b_lbl := Label3D.new()
-	b_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	b_lbl.outline_size = 8
-	b_lbl.outline_modulate = Color(0, 0, 0, 1)
-	b_lbl.font_size = 24
-	b_lbl.modulate = Color(0.65, 0.95, 0.7, 1.0)
-	b_lbl.text = "🌲 Bosque Sussurrante\n[Área de Caça: Lobos da Bruma, Lobo Alfa & Licantropo Alfa]"
-	b_lbl.position = Vector3(0, 2.0, 0)
-	bosque_marker.add_child(b_lbl)
+	var tween := create_tween()
+	tween.tween_property(screen_fade_rect, "color:a", 0.95, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(0.08)
+	tween.tween_property(screen_fade_rect, "color:a", 0.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
-	# 2. Ruínas da Vigília (0, 2, 70)
-	var ruinas_marker := Node3D.new()
-	ruinas_marker.position = Vector3(0.0, 0.0, 70.0)
-	add_child(ruinas_marker)
-	zone_marker_nodes.append(ruinas_marker)
+func _cleanup_zone_entities(_target_zone_id: int) -> void:
+	# 1. Remove cadáveres da zona anterior
+	for cid in corpses.keys():
+		var c = corpses[cid]
+		if is_instance_valid(c):
+			c.queue_free()
+	corpses.clear()
 
-	var r_pilar := MeshInstance3D.new()
-	var rp_mesh := BoxMesh.new()
-	rp_mesh.size = Vector3(1.2, 2.6, 1.2)
-	r_pilar.mesh = rp_mesh
-	var rp_mat := StandardMaterial3D.new()
-	rp_mat.albedo_color = Color(0.35, 0.28, 0.24, 1.0)
-	rp_mat.roughness = 0.9
-	r_pilar.material_override = rp_mat
-	r_pilar.position = Vector3(0, 1.3, 0)
-	ruinas_marker.add_child(r_pilar)
+	# 2. Remove monstros da zona anterior
+	for mid in mobs.keys():
+		var m = mobs[mid]
+		if is_instance_valid(m):
+			m.queue_free()
+	mobs.clear()
 
-	var r_lbl := Label3D.new()
-	r_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	r_lbl.outline_size = 8
-	r_lbl.outline_modulate = Color(0, 0, 0, 1)
-	r_lbl.font_size = 24
-	r_lbl.modulate = Color(1.0, 0.75, 0.45, 1.0)
-	r_lbl.text = "🏰 Ruínas da Vigília\n[Saqueadores, Besteiros, Acólitos, Executor & Comandante Vaelen]"
-	r_lbl.position = Vector3(0, 2.0, 0)
-	ruinas_marker.add_child(r_lbl)
+	# 3. Remove projéteis ativos
+	for pid in active_projectiles.keys():
+		var p_entry = active_projectiles[pid]
+		if p_entry and is_instance_valid(p_entry.get("node")):
+			p_entry["node"].queue_free()
+	active_projectiles.clear()
 
-	# 3. Santuário do Eclipse (-85, 2, 85)
-	var sanctuary_root := Node3D.new()
-	sanctuary_root.position = Vector3(-85.0, 0.0, 85.0)
-	add_child(sanctuary_root)
-	zone_marker_nodes.append(sanctuary_root)
+	# 4. Remove jogadores remotos da zona anterior (o servidor reenviará apenas os da nova zona)
+	for rpid in remote_players.keys():
+		var rp = remote_players[rpid]
+		if is_instance_valid(rp):
+			rp.queue_free()
+	remote_players.clear()
 
-	var s_lbl := Label3D.new()
-	s_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	s_lbl.outline_size = 9
-	s_lbl.outline_modulate = Color(0, 0, 0, 1)
-	s_lbl.font_size = 26
-	s_lbl.modulate = Color(0.9, 0.45, 1.0, 1.0)
-	s_lbl.text = "🌑 Santuário do Eclipse (Arena de Raid)\n[Cultistas, Gárgula, Inquisidor Vex & Raid Boss Malakor]"
-	s_lbl.position = Vector3(0.0, 2.0, 0.0)
-	sanctuary_root.add_child(s_lbl)
+	# 5. Remove NPCs antigos (o servidor reenviará apenas os da nova zona via snapshot 30Hz)
+	for nid in npcs.keys():
+		var n = npcs[nid]
+		if is_instance_valid(n):
+			n.queue_free()
+	npcs.clear()
+
+func _load_zone_map(zone_id: int) -> void:
+	print("[World] Carregando Zona %d com Unload total da zona anterior..." % zone_id)
+	current_zone_id = zone_id
+
+	# 1. Destruição do mapa anterior (Unload total de geometria, colisores e luzes)
+	if current_map_root and is_instance_valid(current_map_root):
+		current_map_root.queue_free()
+
+	# 2. Criação do novo nó container limpo
+	current_map_root = Node3D.new()
+	current_map_root.name = "ZoneMapRoot_Zone%d" % zone_id
+	add_child(current_map_root)
+
+	# 3. Limpeza de entidades visuais da zona anterior
+	_cleanup_zone_entities(zone_id)
+
+	# 4. Efeito de fade cinematográfico rápido
+	_trigger_zone_fade()
+
+	# 5. Construção modular da geometria exclusiva da zona atual
+	match zone_id:
+		0:
+			_build_zone_0_village(current_map_root)
+		1:
+			_build_zone_1_forest(current_map_root)
+		2:
+			_build_zone_2_ruins(current_map_root)
+		3:
+			_build_zone_3_sanctuary(current_map_root)
+		4:
+			_build_zone_4_ashlands(current_map_root)
+		5:
+			_build_zone_5_church(current_map_root)
+		6:
+			_build_zone_6_mage_tower(current_map_root)
+		7:
+			_build_zone_7_black_market(current_map_root)
+		8:
+			_build_zone_8_sewers(current_map_root)
+		_:
+			_build_zone_0_village(current_map_root)
+
+func _create_zone_floor(parent: Node3D, size: Vector3, col: Color, roughness: float = 0.85, uv_scale: Vector3 = Vector3(1, 1, 1)) -> StaticBody3D:
+	var floor_body := StaticBody3D.new()
+	floor_body.name = "ZoneFloor"
+	floor_body.collision_layer = 1
+	floor_body.collision_mask = 0
+	parent.add_child(floor_body)
+
+	var col_shape := CollisionShape3D.new()
+	var box_shape := BoxShape3D.new()
+	box_shape.size = size
+	col_shape.shape = box_shape
+	col_shape.position = Vector3(0, -size.y / 2.0, 0)
+	floor_body.add_child(col_shape)
+
+	var mesh_inst := MeshInstance3D.new()
+	var bmesh := BoxMesh.new()
+	bmesh.size = size
+	mesh_inst.mesh = bmesh
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = col
+	mat.roughness = roughness
+	mat.uv1_scale = uv_scale
+	mesh_inst.material_override = mat
+	mesh_inst.position = Vector3(0, -size.y / 2.0, 0)
+	floor_body.add_child(mesh_inst)
+
+	return floor_body
+
+func _create_portal_area(parent: Node3D, pos: Vector3, label_text: String, color: Color, target_zone: int, portal_id: int, night_only: bool = false) -> Area3D:
+	var portal := Area3D.new()
+	portal.name = "Portal_%d_to_%d" % [portal_id, target_zone]
+	portal.position = pos
+	portal.collision_layer = 0
+	portal.collision_mask = 2 | 1
+	parent.add_child(portal)
+
+	var col := CollisionShape3D.new()
+	var cylinder := CylinderShape3D.new()
+	cylinder.radius = 2.4
+	cylinder.height = 3.2
+	col.shape = cylinder
+	col.position = Vector3(0, 1.6, 0)
+	portal.add_child(col)
+
+	# Base circular luminosa no chão
+	var pad := MeshInstance3D.new()
+	var pad_mesh := CylinderMesh.new()
+	pad_mesh.top_radius = 2.2
+	pad_mesh.bottom_radius = 2.4
+	pad_mesh.height = 0.15
+	pad.mesh = pad_mesh
+	var pad_mat := StandardMaterial3D.new()
+	pad_mat.albedo_color = color
+	pad_mat.emission_enabled = true
+	pad_mat.emission = color
+	pad_mat.emission_energy_multiplier = 3.2
+	pad_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pad_mat.albedo_color.a = 0.85
+	pad.material_override = pad_mat
+	pad.position = Vector3(0, 0.08, 0)
+	portal.add_child(pad)
+
+	# Coluna de feixe de luz / vórtice translúcido
+	var beam := MeshInstance3D.new()
+	var beam_mesh := CylinderMesh.new()
+	beam_mesh.top_radius = 1.8
+	beam_mesh.bottom_radius = 2.0
+	beam_mesh.height = 3.0
+	beam.mesh = beam_mesh
+	var beam_mat := StandardMaterial3D.new()
+	beam_mat.albedo_color = Color(color.r, color.g, color.b, 0.35)
+	beam_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	beam_mat.emission_enabled = true
+	beam_mat.emission = color
+	beam_mat.emission_energy_multiplier = 2.2
+	beam.material_override = beam_mat
+	beam.position = Vector3(0, 1.5, 0)
+	portal.add_child(beam)
+
+	# Luz pontual
+	var p_light := OmniLight3D.new()
+	p_light.light_color = color
+	p_light.light_energy = 3.0
+	p_light.omni_range = 8.5
+	p_light.position = Vector3(0, 1.8, 0)
+	portal.add_child(p_light)
+
+	# Placa flutuante Billboard
+	var lbl := Label3D.new()
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.text = label_text
+	lbl.font_size = 22
+	lbl.outline_size = 8
+	lbl.outline_modulate = Color.BLACK
+	lbl.modulate = color
+	lbl.position = Vector3(0, 3.4, 0)
+	portal.add_child(lbl)
+
+	portal.body_entered.connect(func(body: Node3D):
+		if body == local_player:
+			_on_portal_body_entered(target_zone, portal_id, night_only)
+	)
+
+	return portal
+
+func _on_portal_body_entered(target_zone: int, portal_id: int, night_only: bool) -> void:
+	if portal_cooldown > 0.0:
+		return
+
+	if night_only:
+		if current_world_hour >= 6 and current_world_hour < 18:
+			var warning_msg := "O Beco está deserto à luz do sol. O Mercado Negro só abre suas portas à noite (18h às 06h)!"
+			show_loot_toast(warning_msg)
+			if dialogue_label and dialogue_clear_timer:
+				dialogue_label.text = "[Mercado Negro] " + warning_msg
+				dialogue_label.visible = true
+				dialogue_clear_timer.start(4.0)
+			return
+
+	portal_cooldown = 2.5
+	print("[World] Atravessando portal %d para Zona %d..." % [portal_id, target_zone])
+	NetworkManager.send_portal_travel(target_zone, portal_id)
+
+func _create_shop_counter_area(parent: Node3D, pos: Vector3, shop_name: String) -> Area3D:
+	var area := Area3D.new()
+	area.name = shop_name.replace(" ", "_") + "_CounterArea"
+	area.position = pos
+	area.collision_layer = 0
+	area.collision_mask = 2 | 1
+	parent.add_child(area)
+
+	var col := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(4.5, 2.8, 3.5)
+	col.shape = box
+	col.position = Vector3(0, 1.4, 0)
+	area.add_child(col)
+
+	area.body_entered.connect(func(body: Node3D):
+		if body == local_player:
+			if current_world_hour < 6 or current_world_hour >= 18:
+				var warning_text := "🔒 A Loja está fechada no momento! O Mestre saiu para a Taverna/Descanso (Horário de funcionamento: 06h às 18h)."
+				show_loot_toast(warning_text)
+				if dialogue_label and dialogue_clear_timer:
+					dialogue_label.text = "[%s] %s" % [shop_name, warning_text]
+					dialogue_label.visible = true
+					dialogue_clear_timer.start(5.0)
+	)
+	return area
 
 func _on_projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_pos: Vector3, dir_xz: Vector2, speed: float, max_range: float) -> void:
 	if not projectiles_container:
@@ -2047,11 +3415,14 @@ func _spawn_lightning_impact(pos: Vector3) -> void:
 	tw.tween_property(light, "light_energy", 0.0, 0.28)
 	tw.chain().tween_callback(root.queue_free)
 
-func _create_rebirth_crystal() -> void:
+func _create_rebirth_crystal(parent: Node3D = null) -> void:
 	var crystal_root := Node3D.new()
 	crystal_root.name = "RebirthCrystalAltar"
 	crystal_root.position = Vector3(0.0, 0.0, 0.0)
-	add_child(crystal_root)
+	if parent:
+		parent.add_child(crystal_root)
+	else:
+		add_child(crystal_root)
 
 	# Pedestal de Pedra / Obsidiana
 	var base_pedestal := MeshInstance3D.new()
@@ -2119,148 +3490,6 @@ func _create_rebirth_crystal() -> void:
 	lbl.text = "Cristal de Renascimento (Zona Segura)"
 	lbl.position = Vector3(0, 2.9, 0)
 	crystal_root.add_child(lbl)
-
-func _create_perimeter_walls() -> void:
-	var walls_node := Node3D.new()
-	walls_node.name = "PerimeterWalls"
-	add_child(walls_node)
-
-	var stone_mat := StandardMaterial3D.new()
-	stone_mat.albedo_color = Color(0.16, 0.18, 0.21, 1.0) # Rocha escura
-	stone_mat.roughness = 0.9
-	stone_mat.metallic = 0.15
-
-	var wall_height: float = 6.0
-	var wall_thick: float = 3.0
-	var map_limit: float = 122.0
-
-	# 1. Muralha Norte (Z = -122)
-	var north_wall := StaticBody3D.new()
-	north_wall.name = "NorthWall"
-	north_wall.position = Vector3(0.0, wall_height / 2.0, -map_limit)
-	walls_node.add_child(north_wall)
-
-	var n_col := CollisionShape3D.new()
-	var n_box := BoxShape3D.new()
-	n_box.size = Vector3(250.0, wall_height, wall_thick)
-	n_col.shape = n_box
-	north_wall.add_child(n_col)
-
-	var n_mesh := MeshInstance3D.new()
-	var n_bmesh := BoxMesh.new()
-	n_bmesh.size = Vector3(250.0, wall_height, wall_thick)
-	n_mesh.mesh = n_bmesh
-	n_mesh.material_override = stone_mat
-	north_wall.add_child(n_mesh)
-
-	# 2. Muralha Sul (Z = +122)
-	var south_wall := StaticBody3D.new()
-	south_wall.name = "SouthWall"
-	south_wall.position = Vector3(0.0, wall_height / 2.0, map_limit)
-	walls_node.add_child(south_wall)
-
-	var s_col := CollisionShape3D.new()
-	var s_box := BoxShape3D.new()
-	s_box.size = Vector3(250.0, wall_height, wall_thick)
-	s_col.shape = s_box
-	south_wall.add_child(s_col)
-
-	var s_mesh := MeshInstance3D.new()
-	var s_bmesh := BoxMesh.new()
-	s_bmesh.size = Vector3(250.0, wall_height, wall_thick)
-	s_mesh.mesh = s_bmesh
-	s_mesh.material_override = stone_mat
-	south_wall.add_child(s_mesh)
-
-	# 3. Muralha Oeste (X = -122)
-	var west_wall := StaticBody3D.new()
-	west_wall.name = "WestWall"
-	west_wall.position = Vector3(-map_limit, wall_height / 2.0, 0.0)
-	walls_node.add_child(west_wall)
-
-	var w_col := CollisionShape3D.new()
-	var w_box := BoxShape3D.new()
-	w_box.size = Vector3(wall_thick, wall_height, 250.0)
-	w_col.shape = w_box
-	west_wall.add_child(w_col)
-
-	var w_mesh := MeshInstance3D.new()
-	var w_bmesh := BoxMesh.new()
-	w_bmesh.size = Vector3(wall_thick, wall_height, 250.0)
-	w_mesh.mesh = w_bmesh
-	w_mesh.material_override = stone_mat
-	west_wall.add_child(w_mesh)
-
-	# 4. Muralha Leste (X = +122) dividida em 2 seções com Fenda do Abismo no centro (Z = 0)
-	# Seção Norte do Leste: de Z = -122 a Z = -5 (comprimento 117m, centro Z = -63.5)
-	var east_n := StaticBody3D.new()
-	east_n.name = "EastWall_North"
-	east_n.position = Vector3(map_limit, wall_height / 2.0, -63.5)
-	walls_node.add_child(east_n)
-
-	var en_col := CollisionShape3D.new()
-	var en_box := BoxShape3D.new()
-	en_box.size = Vector3(wall_thick, wall_height, 117.0)
-	en_col.shape = en_box
-	east_n.add_child(en_col)
-
-	var en_mesh := MeshInstance3D.new()
-	var en_bmesh := BoxMesh.new()
-	en_bmesh.size = Vector3(wall_thick, wall_height, 117.0)
-	en_mesh.mesh = en_bmesh
-	en_mesh.material_override = stone_mat
-	east_n.add_child(en_mesh)
-
-	# Seção Sul do Leste: de Z = +5 a Z = +122 (comprimento 117m, centro Z = +63.5)
-	var east_s := StaticBody3D.new()
-	east_s.name = "EastWall_South"
-	east_s.position = Vector3(map_limit, wall_height / 2.0, 63.5)
-	walls_node.add_child(east_s)
-
-	var es_col := CollisionShape3D.new()
-	var es_box := BoxShape3D.new()
-	es_box.size = Vector3(wall_thick, wall_height, 117.0)
-	es_col.shape = es_box
-	east_s.add_child(es_col)
-
-	var es_mesh := MeshInstance3D.new()
-	var es_bmesh := BoxMesh.new()
-	es_bmesh.size = Vector3(wall_thick, wall_height, 117.0)
-	es_mesh.mesh = es_bmesh
-	es_mesh.material_override = stone_mat
-	east_s.add_child(es_mesh)
-
-	# Marcadores e Placa da Fenda do Void (Z = 0 em X = 122)
-	var gap_marker := Node3D.new()
-	gap_marker.position = Vector3(map_limit, 0.0, 0.0)
-	walls_node.add_child(gap_marker)
-
-	for z_off in [-5.0, 5.0]:
-		var obelisk := MeshInstance3D.new()
-		var ob_box := BoxMesh.new()
-		ob_box.size = Vector3(1.2, 4.0, 1.2)
-		obelisk.mesh = ob_box
-		obelisk.material_override = stone_mat
-		obelisk.position = Vector3(0.0, 2.0, z_off)
-		gap_marker.add_child(obelisk)
-
-		var fire := OmniLight3D.new()
-		fire.light_color = Color(1.0, 0.35, 0.1)
-		fire.light_energy = 3.5
-		fire.omni_range = 7.0
-		fire.position = Vector3(-0.6, 3.8, z_off)
-		gap_marker.add_child(fire)
-
-	var gap_lbl := Label3D.new()
-	gap_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	gap_lbl.outline_size = 8
-	gap_lbl.outline_modulate = Color(0, 0, 0, 1)
-	gap_lbl.font_size = 26
-	gap_lbl.modulate = Color(1.0, 0.75, 0.2)
-	gap_lbl.text = "⚠️ FENDA DO ABISMO / VOID ⚠️\n[Salto de Teste: Queda no Abismo & Respawn no Centro]"
-	gap_lbl.position = Vector3(-1.5, 3.2, 0.0)
-	gap_marker.add_child(gap_lbl)
-
 
 func _setup_xp_hud() -> void:
 	var hud_node: CanvasLayer = get_node_or_null("HUD")
@@ -2469,59 +3698,72 @@ func _show_fire_burn_damage(target_node: Node3D, damage: int) -> void:
 
 	_flash_character_red(target_node)
 
-func _build_symmetric_village() -> void:
+# =============================================================================
+# ZONA 0: VILA DO REFÚGIO & ARREDORES (600x600m)
+# =============================================================================
+func _build_zone_0_village(root: Node3D) -> void:
 	house_doors.clear()
-	# Limpa ou cria o container Structures para a Vila Simétrica
-	var village_root := get_node_or_null("Structures") as Node3D
-	if not village_root:
-		village_root = Node3D.new()
-		village_root.name = "Structures"
-		add_child(village_root)
-	else:
-		for c in village_root.get_children():
-			c.queue_free()
+
+	# 1. Chão Gigante de 600x600m
+	_create_zone_floor(root, Vector3(600.0, 1.0, 600.0), Color(0.18, 0.22, 0.16), 0.85, Vector3(300, 300, 1))
 
 	# Materiais medievais compartilhados
 	var stone_mat := StandardMaterial3D.new()
-	stone_mat.albedo_color = Color(0.28, 0.3, 0.34, 1.0) # Pedra medieval
+	stone_mat.albedo_color = Color(0.28, 0.3, 0.34, 1.0)
 	stone_mat.roughness = 0.85
 	stone_mat.metallic = 0.15
 
-	var cobblestone_mat := StandardMaterial3D.new()
-	cobblestone_mat.albedo_color = Color(0.42, 0.44, 0.48, 1.0) # Calçamento cinza-claro
-	cobblestone_mat.roughness = 0.8
-
 	var dark_cobble_mat := StandardMaterial3D.new()
-	dark_cobble_mat.albedo_color = Color(0.24, 0.25, 0.28, 1.0) # Pedra da praça central
+	dark_cobble_mat.albedo_color = Color(0.24, 0.25, 0.28, 1.0)
 	dark_cobble_mat.roughness = 0.85
 
 	var wood_beam_mat := StandardMaterial3D.new()
-	wood_beam_mat.albedo_color = Color(0.25, 0.16, 0.1, 1.0) # Vigas de madeira
+	wood_beam_mat.albedo_color = Color(0.25, 0.16, 0.1, 1.0)
 	wood_beam_mat.roughness = 0.75
 
-	# -------------------------------------------------------------
-	# 1. CENTRO DA VILA (0, 0, 0) — PRAÇA PAVIMENTADA & CRISTAL DE RENASCIMENTO
-	# -------------------------------------------------------------
+	# 2. Perímetro da Vila Ampliado para 160x160m (de -80m a +80m em X e Z)
+	# Muro Norte (Z = 80m)
+	_create_wall_segment(root, Vector3(-43.0, 3.0, 80.0), Vector3(74.0, 6.0, 2.4), stone_mat)
+	_create_wall_segment(root, Vector3(43.0, 3.0, 80.0), Vector3(74.0, 6.0, 2.4), stone_mat)
+	_create_gate_portal(root, Vector3(0.0, 0.0, 80.0), true, "Portão Norte (Ruínas da Vigília)", Color(0.3, 0.7, 1.0), stone_mat)
+
+	# Muro Sul (Z = -80m)
+	_create_wall_segment(root, Vector3(-43.0, 3.0, -80.0), Vector3(74.0, 6.0, 2.4), stone_mat)
+	_create_wall_segment(root, Vector3(43.0, 3.0, -80.0), Vector3(74.0, 6.0, 2.4), stone_mat)
+	_create_gate_portal(root, Vector3(0.0, 0.0, -80.0), true, "Portão Sul (Bosque Sussurrante)", Color(0.2, 0.9, 0.4), stone_mat)
+
+	# Muro Oeste (X = -80m)
+	_create_wall_segment(root, Vector3(-80.0, 3.0, -43.0), Vector3(2.4, 6.0, 74.0), stone_mat)
+	_create_wall_segment(root, Vector3(-80.0, 3.0, 43.0), Vector3(2.4, 6.0, 74.0), stone_mat)
+	_create_gate_portal(root, Vector3(-80.0, 0.0, 0.0), false, "Portão Oeste (Santuário do Eclipse)", Color(0.9, 0.1, 0.2), stone_mat)
+
+	# Muro Leste (X = +80m)
+	_create_wall_segment(root, Vector3(80.0, 3.0, -43.0), Vector3(2.4, 6.0, 74.0), stone_mat)
+	_create_wall_segment(root, Vector3(80.0, 3.0, 43.0), Vector3(2.4, 6.0, 74.0), stone_mat)
+	_create_gate_portal(root, Vector3(80.0, 0.0, 0.0), false, "Portão Leste (Fronteira das Cinzas)", Color(1.0, 0.7, 0.1), stone_mat)
+
+	# 3. Praça Central e Fonte Lunar / Cristal de Renascimento (0, 0, 0)
 	var plaza_mesh := MeshInstance3D.new()
 	var p_box := BoxMesh.new()
-	p_box.size = Vector3(14.0, 0.02, 14.0)
+	p_box.size = Vector3(18.0, 0.04, 18.0)
 	plaza_mesh.mesh = p_box
 	plaza_mesh.material_override = dark_cobble_mat
-	plaza_mesh.position = Vector3(0.0, 0.015, 0.0)
-	village_root.add_child(plaza_mesh)
+	plaza_mesh.position = Vector3(0.0, 0.02, 0.0)
+	root.add_child(plaza_mesh)
 
-	# 4 Postes de Luz ornamentais nos cantos da Praça Central
-	for corner_pos in [Vector3(-6.2, 0, -6.2), Vector3(6.2, 0, -6.2), Vector3(-6.2, 0, 6.2), Vector3(6.2, 0, 6.2)]:
+	_create_rebirth_crystal(root)
+
+	for cpos in [Vector3(-7.2, 0, -7.2), Vector3(7.2, 0, -7.2), Vector3(-7.2, 0, 7.2), Vector3(7.2, 0, 7.2)]:
 		var lamp := Node3D.new()
-		lamp.position = corner_pos
-		village_root.add_child(lamp)
+		lamp.position = cpos
+		root.add_child(lamp)
 
 		var post := MeshInstance3D.new()
-		var post_mesh := CylinderMesh.new()
-		post_mesh.top_radius = 0.08
-		post_mesh.bottom_radius = 0.12
-		post_mesh.height = 3.2
-		post.mesh = post_mesh
+		var pmesh := CylinderMesh.new()
+		pmesh.top_radius = 0.08
+		pmesh.bottom_radius = 0.12
+		pmesh.height = 3.2
+		post.mesh = pmesh
 		post.material_override = wood_beam_mat
 		post.position = Vector3(0, 1.6, 0)
 		lamp.add_child(post)
@@ -2529,383 +3771,266 @@ func _build_symmetric_village() -> void:
 		var lantern := OmniLight3D.new()
 		lantern.light_color = Color(1.0, 0.85, 0.55)
 		lantern.light_energy = 2.4
-		lantern.omni_range = 7.5
-		lantern.position = Vector3(0, 3.2, 0)
+		lantern.omni_range = 8.0
+		lantern.position = Vector3(0, 3.0, 0)
 		lamp.add_child(lantern)
 
-	# -------------------------------------------------------------
-	# 2. RUAS PRINCIPAIS SIMÉTRICAS (AVENIDAS NORTE-SUL E LESTE-OESTE)
-	# -------------------------------------------------------------
-	# Avenida Norte-Sul: X = 0, de Z = -26 a +26 (largura 6m, y = 0.02, sem colisão para não travar o passo)
-	var ave_ns := MeshInstance3D.new()
-	var ns_box := BoxMesh.new()
-	ns_box.size = Vector3(6.0, 0.02, 52.0)
-	ave_ns.mesh = ns_box
-	ave_ns.material_override = cobblestone_mat
-	ave_ns.position = Vector3(0.0, 0.01, 0.0)
-	village_root.add_child(ave_ns)
+	# 4. Construções da Vila Ampliada (Coordenadas bem espaçadas sem NENHUMA sobreposição)
 
-	# Avenida Leste-Oeste: Z = 0, de X = -26 a +26 (largura 6m, y = 0.02)
-	var ave_ew := MeshInstance3D.new()
-	var ew_box := BoxMesh.new()
-	ew_box.size = Vector3(52.0, 0.02, 6.0)
-	ave_ew.mesh = ew_box
-	ave_ew.material_override = cobblestone_mat
-	ave_ew.position = Vector3(0.0, 0.01, 0.0)
-	village_root.add_child(ave_ew)
+	# A. Forja do Garrick (30, 0, 25)
+	_create_solid_building(root, "GarrickForgeBuilding", Vector3(30.0, 0.0, 25.0), Vector3(9.0, 4.5, 6.5), Color(0.35, 0.32, 0.3), Color(0.38, 0.2, 0.12), "A Forja de Garrick", Color(1.0, 0.85, 0.4), "south")
+	var forge_fire := OmniLight3D.new()
+	forge_fire.light_color = Color(1.0, 0.45, 0.1)
+	forge_fire.light_energy = 3.5
+	forge_fire.omni_range = 7.0
+	forge_fire.position = Vector3(30.0, 1.5, 22.0)
+	root.add_child(forge_fire)
+	_create_shop_counter_area(root, Vector3(30.0, 0.5, 21.8), "A Forja de Garrick")
 
-	# -------------------------------------------------------------
-	# 3. MURALHA SIMÉTRICA DA VILA (±26m) COM 4 PORTÕES ABERTOS DE 8m
-	# -------------------------------------------------------------
-	var wall_h: float = 4.5
-	var wall_t: float = 1.6
-	var w_flank_len: float = 22.0 # (52m - 8m abertura) / 2 = 22m por flanco
+	# B. Taverna do Javali Dourado (-30, 0, 25)
+	_create_solid_building(root, "TavernBuilding", Vector3(-30.0, 0.0, 25.0), Vector3(10.0, 5.0, 8.0), Color(0.32, 0.24, 0.18), Color(0.45, 0.22, 0.14), "Taverna do Javali Dourado", Color(1.0, 0.85, 0.5), "south")
 
-	# Muralha Norte (Z = -26): Flanco Oeste (-15) e Flanco Leste (+15)
-	_create_wall_segment(village_root, Vector3(-15.0, wall_h / 2.0, -26.0), Vector3(w_flank_len, wall_h, wall_t), stone_mat)
-	_create_wall_segment(village_root, Vector3(15.0, wall_h / 2.0, -26.0), Vector3(w_flank_len, wall_h, wall_t), stone_mat)
+	# C. Laboratório de Alquimia da Lyra (30, 0, -20)
+	_create_solid_building(root, "LyraAlchemyLab", Vector3(30.0, 0.0, -20.0), Vector3(8.5, 4.5, 7.0), Color(0.32, 0.28, 0.36), Color(0.4, 0.2, 0.45), "Laboratório de Alquimia da Lyra", Color(0.85, 0.7, 1.0), "north")
+	_create_shop_counter_area(root, Vector3(30.0, 0.5, -16.5), "Laboratório de Alquimia da Lyra")
 
-	# Muralha Sul (Z = +26): Flanco Oeste (-15) e Flanco Leste (+15)
-	_create_wall_segment(village_root, Vector3(-15.0, wall_h / 2.0, 26.0), Vector3(w_flank_len, wall_h, wall_t), stone_mat)
-	_create_wall_segment(village_root, Vector3(15.0, wall_h / 2.0, 26.0), Vector3(w_flank_len, wall_h, wall_t), stone_mat)
+	# D. Quartel da Guarda Real (0, 0, 48)
+	_create_solid_building(root, "GuardBarracks", Vector3(0.0, 0.0, 48.0), Vector3(11.0, 5.2, 8.5), Color(0.28, 0.3, 0.35), Color(0.15, 0.25, 0.45), "Quartel da Guarda Real", Color(0.85, 0.95, 1.0), "north")
 
-	# Muralha Oeste (X = -26): Flanco Norte (-15) e Flanco Sul (+15)
-	_create_wall_segment(village_root, Vector3(-26.0, wall_h / 2.0, -15.0), Vector3(wall_t, wall_h, w_flank_len), stone_mat)
-	_create_wall_segment(village_root, Vector3(-26.0, wall_h / 2.0, 15.0), Vector3(wall_t, wall_h, w_flank_len), stone_mat)
+	# E. Igreja da Luz Sagrada (-50, 0, -45)
+	var church_body := _create_solid_building(root, "HolyLightChurch", Vector3(-50.0, 0.0, -45.0), Vector3(12.0, 7.0, 16.0), Color(0.92, 0.90, 0.85), Color(0.85, 0.70, 0.22), "Igreja da Luz Sagrada", Color(1.0, 0.88, 0.25), "south")
+	var church_tower := MeshInstance3D.new()
+	var c_tmesh := BoxMesh.new()
+	c_tmesh.size = Vector3(4.0, 14.0, 4.0)
+	church_tower.mesh = c_tmesh
+	church_tower.position = Vector3(0, 7.0, 9.0)
+	church_body.add_child(church_tower)
 
-	# Muralha Leste (X = +26): Flanco Norte (-15) e Flanco Sul (+15)
-	_create_wall_segment(village_root, Vector3(26.0, wall_h / 2.0, -15.0), Vector3(wall_t, wall_h, w_flank_len), stone_mat)
-	_create_wall_segment(village_root, Vector3(26.0, wall_h / 2.0, 15.0), Vector3(wall_t, wall_h, w_flank_len), stone_mat)
+	var cross_light := OmniLight3D.new()
+	cross_light.light_color = Color(1.0, 0.9, 0.45)
+	cross_light.light_energy = 4.0
+	cross_light.omni_range = 15.0
+	cross_light.position = Vector3(0, 14.5, 9.0)
+	church_body.add_child(cross_light)
 
-	# Torres de vigia e arcos dos 4 Portões abertos (8m)
-	_create_gate_portal(village_root, Vector3(0.0, 0.0, -26.0), true, "Portão Norte\n[Ao Norte: Ruínas da Vigília]", Color(1.0, 0.85, 0.45), stone_mat)
-	_create_gate_portal(village_root, Vector3(0.0, 0.0, 26.0), true, "Portão Sul\n[A Sudeste: Bosque Sussurrante]", Color(0.65, 0.95, 0.7), stone_mat)
-	_create_gate_portal(village_root, Vector3(-26.0, 0.0, 0.0), false, "Portão Oeste\n[A Noroeste: Acampamento Desertor]", Color(1.0, 0.75, 0.5), stone_mat)
-	_create_gate_portal(village_root, Vector3(26.0, 0.0, 0.0), false, "Portão Leste\n[Terras Selvagens]", Color(0.85, 0.9, 1.0), stone_mat)
+	# Portal Area3D dourado na porta da Igreja levando à Zona 5 (Portal ID 9)
+	_create_portal_area(root, Vector3(-50.0, 0.0, -36.0), "⛪ Entrar na Igreja da Luz Sagrada", Color(1.0, 0.85, 0.2), 5, 9)
 
-	# -------------------------------------------------------------
-	# 4. OS 4 QUADRANTES SIMÉTRICOS, CASAS, BECOS E SEGREDOS COM StaticBody3D
-	# -------------------------------------------------------------
+	# F. Torre do Mago / Torre Arcana (50, 0, -45)
+	var tower_mesh := MeshInstance3D.new()
+	var tm_cyl := CylinderMesh.new()
+	tm_cyl.top_radius = 4.0
+	tm_cyl.bottom_radius = 4.4
+	tm_cyl.height = 16.0
+	tower_mesh.mesh = tm_cyl
+	var mage_mat := StandardMaterial3D.new()
+	mage_mat.albedo_color = Color(0.11, 0.15, 0.24, 1.0)
+	mage_mat.metallic = 0.3
+	mage_mat.roughness = 0.6
+	tower_mesh.material_override = mage_mat
+	tower_mesh.position = Vector3(50.0, 8.0, -45.0)
+	root.add_child(tower_mesh)
 
-	# --- QUADRANTE NORDESTE (14, 0, 14) — A FORJA DO GARRICK & FORNALHA DE FOGO ---
-	# Prédio da Oficina de Forja
-	_create_solid_building(village_root, "GarrickForgeBuilding", Vector3(16.0, 0, 9.5), Vector3(8.0, 4.2, 5.5), Color(0.35, 0.32, 0.3), Color(0.38, 0.2, 0.12), "A Forja de Garrick", Color(1.0, 0.85, 0.4), "south")
-	_create_interactive_door(village_root, "forge", "A Forja e Residência de Garrick", Vector3(16.0, 0.0, 6.75), Vector3(16.0, 0.0, 5.8), Vector3(16.0, 0.0, 8.0), true)
+	var t_col_body := StaticBody3D.new()
+	t_col_body.position = Vector3(50.0, 0.0, -45.0)
+	t_col_body.collision_layer = 1
+	t_col_body.collision_mask = 0
+	root.add_child(t_col_body)
+	var t_cshape := CollisionShape3D.new()
+	var t_cyl_shape := CylinderShape3D.new()
+	t_cyl_shape.radius = 4.2
+	t_cyl_shape.height = 16.0
+	t_cshape.shape = t_cyl_shape
+	t_cshape.position = Vector3(0, 8.0, 0)
+	t_col_body.add_child(t_cshape)
 
-	# Móveis e Interior da Forja
-	_create_furniture_piece(village_root, Vector3(18.5, 0.55, 10.5), Vector3(1.2, 1.1, 2.4), Color(0.28, 0.18, 0.12))
-	_create_furniture_piece(village_root, Vector3(18.8, 1.2, 8.2), Vector3(0.6, 2.4, 1.8), Color(0.22, 0.15, 0.1))
-	_create_furniture_piece(village_root, Vector3(13.2, 0.35, 10.8), Vector3(1.4, 0.7, 2.2), Color(0.35, 0.28, 0.22))
-	_create_furniture_piece(village_root, Vector3(16.0, 1.0, 11.8), Vector3(2.0, 2.0, 0.8), Color(0.2, 0.2, 0.22))
+	var spire := MeshInstance3D.new()
+	var sm_cone := CylinderMesh.new()
+	sm_cone.top_radius = 0.1
+	sm_cone.bottom_radius = 4.5
+	sm_cone.height = 5.0
+	spire.mesh = sm_cone
+	spire.material_override = mage_mat
+	spire.position = Vector3(50.0, 18.5, -45.0)
+	root.add_child(spire)
 
-	var forge_int_light := OmniLight3D.new()
-	forge_int_light.light_color = Color(1.0, 0.75, 0.4)
-	forge_int_light.light_energy = 2.4
-	forge_int_light.omni_range = 8.0
-	forge_int_light.position = Vector3(16.0, 2.6, 9.5)
-	village_root.add_child(forge_int_light)
+	# Portal Area3D azul na porta da Torre levando à Zona 6 (Portal ID 11)
+	_create_portal_area(root, Vector3(50.0, 0.0, -38.0), "🔮 Entrar na Torre Arcana", Color(0.1, 0.9, 1.0), 6, 11)
 
-	# Bigorna Sólida de Aço
-	var anvil_body := StaticBody3D.new()
-	anvil_body.name = "ForgeAnvil"
-	anvil_body.position = Vector3(11.5, 0.4, 11.5)
-	anvil_body.collision_layer = 1
-	village_root.add_child(anvil_body)
+	# G. Entrada do Beco Sombrio (-50, 0, 48)
+	_create_solid_building(root, "AlleyWallArch", Vector3(-50.0, 0.0, 48.0), Vector3(5.0, 4.5, 6.0), Color(0.2, 0.18, 0.22), Color(0.15, 0.12, 0.18), "Beco Sombrio", Color(0.7, 0.4, 0.9), "south")
+	# Portal Area3D roxo levando ao Mercado Negro Zona 7 (Apenas entre 18h e 06h - Portal ID 13)
+	_create_portal_area(root, Vector3(-50.0, 0.0, 54.0), "🗡️ Entrada do Mercado Negro (18h às 06h)", Color(0.7, 0.2, 0.9), 7, 13, true)
 
-	var anvil_col := CollisionShape3D.new()
-	var av_shape := BoxShape3D.new()
-	av_shape.size = Vector3(0.9, 0.8, 0.6)
-	anvil_col.shape = av_shape
-	anvil_body.add_child(anvil_col)
+	# H. Entrada dos Esgotos Antigos (-65, 0, -65)
+	var sewer_gate := MeshInstance3D.new()
+	var sg_box := BoxMesh.new()
+	sg_box.size = Vector3(4.0, 0.2, 4.0)
+	sewer_gate.mesh = sg_box
+	var sg_mat := StandardMaterial3D.new()
+	sg_mat.albedo_color = Color(0.15, 0.16, 0.18)
+	sg_mat.metallic = 0.8
+	sewer_gate.material_override = sg_mat
+	sewer_gate.position = Vector3(-65.0, 0.1, -65.0)
+	root.add_child(sewer_gate)
+	# Portal Area3D verde levando aos Esgotos Zona 8 (Portal ID 15)
+	_create_portal_area(root, Vector3(-65.0, 0.0, -65.0), "🕳️ Descer para os Esgotos Antigos", Color(0.2, 0.9, 0.4), 8, 15)
 
-	var anvil_mesh := MeshInstance3D.new()
-	var av_mesh := BoxMesh.new()
-	av_mesh.size = Vector3(0.9, 0.8, 0.6)
-	anvil_mesh.mesh = av_mesh
-	var av_mat := StandardMaterial3D.new()
-	av_mat.albedo_color = Color(0.18, 0.19, 0.22, 1.0)
-	av_mat.metallic = 0.92
-	av_mat.roughness = 0.22
-	anvil_mesh.material_override = av_mat
-	anvil_body.add_child(anvil_mesh)
+	# I. Posto do Caçador (25, 0, -95)
+	_create_solid_building(root, "HunterCabin", Vector3(25.0, 0.0, -95.0), Vector3(7.5, 3.8, 6.5), Color(0.32, 0.20, 0.12), Color(0.20, 0.14, 0.08), "Posto do Caçador", Color(0.9, 0.8, 0.4), "north")
 
-	# A FORNALHA INCANDESCENTE EM (14, 0, 14) — Cuidado: Queima!
-	var furnace_body := StaticBody3D.new()
-	furnace_body.name = "IncandescentFurnace"
-	furnace_body.position = Vector3(14.0, 0.0, 14.0)
-	furnace_body.collision_layer = 1
-	village_root.add_child(furnace_body)
+	# 5. Novas Estruturas das Raças nos Arredores da Vila (Entre ±90m e ±220m)
 
-	# Colisão física sólida da Fornalha (jogador bate e não atravessa)
-	var fn_col := CollisionShape3D.new()
-	var fn_shape := BoxShape3D.new()
-	fn_shape.size = Vector3(2.6, 3.4, 2.6)
-	fn_col.shape = fn_shape
-	fn_col.position = Vector3(0, 1.7, 0)
-	furnace_body.add_child(fn_col)
+	# A. Acampamento de Guerra Orc & Arena Tribal (130, 0, 80)
+	var orc_root := Node3D.new()
+	orc_root.position = Vector3(130.0, 0.0, 80.0)
+	root.add_child(orc_root)
+	var orc_tent := MeshInstance3D.new()
+	var ot_cyl := CylinderMesh.new()
+	ot_cyl.top_radius = 0.3
+	ot_cyl.bottom_radius = 5.0
+	ot_cyl.height = 4.2
+	orc_tent.mesh = ot_cyl
+	var tent_mat := StandardMaterial3D.new()
+	tent_mat.albedo_color = Color(0.38, 0.22, 0.15, 1.0)
+	orc_tent.material_override = tent_mat
+	orc_tent.position = Vector3(0, 2.1, 0)
+	orc_root.add_child(orc_tent)
 
-	# Chaminé / Estrutura de Pedra Refratária
-	var fn_mesh := MeshInstance3D.new()
-	var fn_bmesh := BoxMesh.new()
-	fn_bmesh.size = Vector3(2.6, 3.4, 2.6)
-	fn_mesh.mesh = fn_bmesh
-	fn_mesh.position = Vector3(0, 1.7, 0)
-	var fn_mat := StandardMaterial3D.new()
-	fn_mat.albedo_color = Color(0.2, 0.18, 0.19, 1.0)
-	fn_mat.roughness = 0.9
-	fn_mesh.material_override = fn_mat
-	furnace_body.add_child(fn_mesh)
+	var orc_fire := OmniLight3D.new()
+	orc_fire.light_color = Color(1.0, 0.4, 0.1)
+	orc_fire.light_energy = 3.8
+	orc_fire.omni_range = 10.0
+	orc_fire.position = Vector3(0, 1.2, 7.0)
+	orc_root.add_child(orc_fire)
+	var orc_lbl := Label3D.new()
+	orc_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	orc_lbl.text = "⛺ Acampamento de Guerra Orc & Arena Tribal"
+	orc_lbl.font_size = 24
+	orc_lbl.outline_size = 8
+	orc_lbl.modulate = Color(1.0, 0.45, 0.2)
+	orc_lbl.position = Vector3(0, 5.0, 0)
+	orc_root.add_child(orc_lbl)
 
-	# Abertura incandescente de brasas ardentes
-	var ember_mesh := MeshInstance3D.new()
-	var em_box := BoxMesh.new()
-	em_box.size = Vector3(1.8, 1.2, 1.8)
-	ember_mesh.mesh = em_box
-	ember_mesh.position = Vector3(0, 0.9, 0)
-	var ember_mat := StandardMaterial3D.new()
-	ember_mat.albedo_color = Color(1.0, 0.45, 0.05, 1.0)
-	ember_mat.emission_enabled = true
-	ember_mat.emission = Color(1.0, 0.45, 0.05, 1.0)
-	ember_mat.emission_energy_multiplier = 4.8
-	ember_mesh.material_override = ember_mat
-	furnace_body.add_child(ember_mesh)
+	# B. Salão de Pedra dos Anões & Mina Rúnica (120, 0, 140)
+	var dwarf_root := Node3D.new()
+	dwarf_root.position = Vector3(120.0, 0.0, 140.0)
+	root.add_child(dwarf_root)
+	_create_solid_building(dwarf_root, "DwarfHall", Vector3.ZERO, Vector3(14.0, 6.0, 12.0), Color(0.25, 0.26, 0.28), Color(0.4, 0.35, 0.25), "Salão de Pedra dos Anões", Color(1.0, 0.75, 0.3), "north")
+	var dwarf_lbl := Label3D.new()
+	dwarf_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	dwarf_lbl.text = "⛏️ Entrada da Mina Rúnica dos Anões"
+	dwarf_lbl.font_size = 24
+	dwarf_lbl.outline_size = 8
+	dwarf_lbl.modulate = Color(1.0, 0.8, 0.3)
+	dwarf_lbl.position = Vector3(0, 7.2, 0)
+	dwarf_root.add_child(dwarf_lbl)
 
-	# Partículas de Fogo ardente
-	var fire_cpu := CPUParticles3D.new()
-	fire_cpu.name = "FireParticles"
-	fire_cpu.position = Vector3(0, 1.5, 0)
-	fire_cpu.amount = 50
-	fire_cpu.lifetime = 0.9
-	fire_cpu.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	fire_cpu.emission_box_extents = Vector3(0.7, 0.2, 0.7)
-	fire_cpu.direction = Vector3(0, 1, 0)
-	fire_cpu.spread = 15.0
-	fire_cpu.initial_velocity_min = 2.2
-	fire_cpu.initial_velocity_max = 4.0
-	fire_cpu.scale_amount_min = 0.15
-	fire_cpu.scale_amount_max = 0.35
-	fire_cpu.color = Color(1.0, 0.55, 0.1, 0.95)
-	var fire_pmat := StandardMaterial3D.new()
-	fire_pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	fire_pmat.albedo_color = Color(1.0, 0.5, 0.08, 1.0)
-	fire_pmat.emission_enabled = true
-	fire_pmat.emission = Color(1.0, 0.45, 0.05, 1.0)
-	fire_pmat.emission_energy_multiplier = 4.0
-	var f_smesh := SphereMesh.new()
-	f_smesh.radius = 0.14
-	f_smesh.height = 0.28
-	f_smesh.material = fire_pmat
-	fire_cpu.mesh = f_smesh
-	furnace_body.add_child(fire_cpu)
+	# C. Santuário das Árvores Élficas & Clareira das Fadas (-130, 0, -120)
+	var elf_root := Node3D.new()
+	elf_root.position = Vector3(-130.0, 0.0, -120.0)
+	root.add_child(elf_root)
+	for ep_i in range(4):
+		var ang := ep_i * (PI / 2.0)
+		var tree_pos := Vector3(cos(ang) * 9.0, 0.0, sin(ang) * 9.0)
+		var trunk := MeshInstance3D.new()
+		var tr_cyl := CylinderMesh.new()
+		tr_cyl.top_radius = 0.5
+		tr_cyl.bottom_radius = 0.9
+		tr_cyl.height = 7.0
+		trunk.mesh = tr_cyl
+		var t_mat := StandardMaterial3D.new()
+		t_mat.albedo_color = Color(0.85, 0.88, 0.92)
+		trunk.material_override = t_mat
+		trunk.position = tree_pos + Vector3(0, 3.5, 0)
+		elf_root.add_child(trunk)
 
-	# Luz intensa da fornalha
-	var fn_light := OmniLight3D.new()
-	fn_light.light_color = Color(1.0, 0.5, 0.1)
-	fn_light.light_energy = 4.5
-	fn_light.omni_range = 10.0
-	fn_light.position = Vector3(0, 2.0, 0)
-	furnace_body.add_child(fn_light)
+		var canopy := MeshInstance3D.new()
+		var cn_sph := SphereMesh.new()
+		cn_sph.radius = 2.8
+		cn_sph.height = 4.2
+		canopy.mesh = cn_sph
+		var c_mat := StandardMaterial3D.new()
+		c_mat.albedo_color = Color(0.4, 0.95, 0.8)
+		c_mat.emission_enabled = true
+		c_mat.emission = Color(0.3, 0.85, 0.7)
+		c_mat.emission_energy_multiplier = 1.5
+		canopy.material_override = c_mat
+		canopy.position = tree_pos + Vector3(0, 7.0, 0)
+		elf_root.add_child(canopy)
 
-	# Label3D de Alerta da Fornalha
-	var fn_lbl := Label3D.new()
-	fn_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	fn_lbl.outline_size = 9
-	fn_lbl.outline_modulate = Color(0, 0, 0, 1)
-	fn_lbl.font_size = 28
-	fn_lbl.modulate = Color(1.0, 0.45, 0.05)
-	fn_lbl.text = "🔥 Fornalha Ardente (Cuidado: Queima!)"
-	fn_lbl.position = Vector3(0, 3.8, 0)
-	furnace_body.add_child(fn_lbl)
+	var elf_light := OmniLight3D.new()
+	elf_light.light_color = Color(0.4, 0.9, 0.95)
+	elf_light.light_energy = 3.5
+	elf_light.omni_range = 14.0
+	elf_light.position = Vector3(0, 2.5, 0)
+	elf_root.add_child(elf_light)
 
-	# --- QUADRANTE NOROESTE (-14, 0, 14) — TAVERNA & BECO DO CONTRABANDISTA ---
-	# Prédio grande da Taverna em (-14, 0, 12)
-	_create_solid_building(village_root, "TavernBuilding", Vector3(-14.0, 0, 12.0), Vector3(9.0, 5.0, 7.0), Color(0.32, 0.24, 0.18), Color(0.45, 0.22, 0.14), "Taverna do Crepúsculo", Color(1.0, 0.85, 0.5), "south")
-	_create_interactive_door(village_root, "tavern", "Taverna do Crepúsculo", Vector3(-14.0, 0.0, 8.5), Vector3(-14.0, 0.0, 7.5), Vector3(-14.0, 0.0, 9.8), true)
+	var elf_lbl := Label3D.new()
+	elf_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	elf_lbl.text = "🌿 Santuário das Árvores Élficas & Clareira das Fadas"
+	elf_lbl.font_size = 24
+	elf_lbl.outline_size = 8
+	elf_lbl.modulate = Color(0.4, 0.95, 0.85)
+	elf_lbl.position = Vector3(0, 4.0, 0)
+	elf_root.add_child(elf_lbl)
 
-	# Móveis e Interior da Taverna
-	_create_furniture_piece(village_root, Vector3(-15.2, 0.55, 13.5), Vector3(4.4, 1.1, 0.8), Color(0.26, 0.16, 0.1))
-	_create_furniture_piece(village_root, Vector3(-13.0, 0.55, 14.2), Vector3(0.8, 1.1, 2.0), Color(0.26, 0.16, 0.1))
-	_create_furniture_piece(village_root, Vector3(-16.8, 0.65, 14.5), Vector3(1.8, 1.3, 1.0), Color(0.35, 0.22, 0.12))
-	_create_furniture_piece(village_root, Vector3(-17.8, 1.2, 11.5), Vector3(0.8, 2.4, 2.2), Color(0.22, 0.22, 0.24))
-	_create_furniture_piece(village_root, Vector3(-11.5, 0.45, 11.2), Vector3(1.6, 0.9, 1.6), Color(0.3, 0.2, 0.14))
-	_create_furniture_piece(village_root, Vector3(-15.2, 0.45, 10.0), Vector3(1.8, 0.9, 1.4), Color(0.3, 0.2, 0.14))
+	# D. Altar dos Quatro Elementos Dracônicos (140, 0, -130)
+	var draco_root := Node3D.new()
+	draco_root.position = Vector3(140.0, 0.0, -130.0)
+	root.add_child(draco_root)
+	var elem_colors := [Color(0.2, 0.8, 0.3), Color(0.2, 0.5, 1.0), Color(1.0, 0.85, 0.1), Color(0.7, 0.2, 1.0)]
+	for d_idx in range(4):
+		var rad_d := d_idx * (PI / 2.0)
+		var ob_pos := Vector3(cos(rad_d) * 8.0, 0.0, sin(rad_d) * 8.0)
+		var obelisk := MeshInstance3D.new()
+		var ob_box := BoxMesh.new()
+		ob_box.size = Vector3(1.4, 6.0, 1.4)
+		obelisk.mesh = ob_box
+		var ob_mat := StandardMaterial3D.new()
+		ob_mat.albedo_color = elem_colors[d_idx]
+		ob_mat.emission_enabled = true
+		ob_mat.emission = elem_colors[d_idx]
+		ob_mat.emission_energy_multiplier = 2.0
+		obelisk.material_override = ob_mat
+		obelisk.position = ob_pos + Vector3(0, 3.0, 0)
+		draco_root.add_child(obelisk)
 
-	var tavern_int_light := OmniLight3D.new()
-	tavern_int_light.light_color = Color(1.0, 0.8, 0.45)
-	tavern_int_light.light_energy = 3.2
-	tavern_int_light.omni_range = 9.5
-	tavern_int_light.position = Vector3(-14.0, 3.2, 12.0)
-	village_root.add_child(tavern_int_light)
+	var draco_lbl := Label3D.new()
+	draco_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	draco_lbl.text = "🐉 Altar dos Quatro Elementos Dracônicos"
+	draco_lbl.font_size = 24
+	draco_lbl.outline_size = 8
+	draco_lbl.modulate = Color(1.0, 0.6, 0.2)
+	draco_lbl.position = Vector3(0, 4.0, 0)
+	draco_root.add_child(draco_lbl)
 
-	# Casa Medieval ao lado em (-21, 0, 14)
-	_create_solid_building(village_root, "AlleyHouse", Vector3(-21.0, 0, 14.0), Vector3(6.0, 4.2, 6.0), Color(0.35, 0.3, 0.25), Color(0.28, 0.18, 0.12), "Residência dos Fundos", Color(0.85, 0.85, 0.85), "south")
+	# E. Favela de Engrenagens Goblin (-120, 0, 90)
+	var gob_root := Node3D.new()
+	gob_root.position = Vector3(-120.0, 0.0, 90.0)
+	root.add_child(gob_root)
+	_create_solid_building(gob_root, "GoblinShack", Vector3.ZERO, Vector3(6.5, 3.2, 6.5), Color(0.3, 0.28, 0.22), Color(0.4, 0.35, 0.15), "Favela Goblin", Color(0.6, 0.9, 0.2), "south")
+	var gob_lbl := Label3D.new()
+	gob_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	gob_lbl.text = "⚙️ Favela de Engrenagens Goblin"
+	gob_lbl.font_size = 24
+	gob_lbl.outline_size = 8
+	gob_lbl.modulate = Color(0.65, 0.9, 0.25)
+	gob_lbl.position = Vector3(0, 4.5, 0)
+	gob_root.add_child(gob_lbl)
 
-	# Beco Estreito e Escuro em (-19, 0, 17) onde Varis se esconde
-	var alley_crates := StaticBody3D.new()
-	alley_crates.name = "AlleyCrates"
-	alley_crates.position = Vector3(-17.5, 0.6, 17.5)
-	alley_crates.collision_layer = 1
-	village_root.add_child(alley_crates)
+	# 6. 4 Portais Cardeais nas Bordas 600x600m da Zona 0
+	# Sul (0, 0, -285) -> Bosque Sussurrante (Zona 1, Portal ID 1)
+	_create_portal_area(root, Vector3(0.0, 0.0, -285.0), "🌲 Portal: Bosque Sussurrante (Sul)", Color(0.2, 0.9, 0.4), 1, 1)
 
-	var ac_col := CollisionShape3D.new()
-	var ac_shape := BoxShape3D.new()
-	ac_shape.size = Vector3(1.4, 1.2, 1.4)
-	ac_col.shape = ac_shape
-	alley_crates.add_child(ac_col)
+	# Norte (0, 0, 285) -> Ruínas da Vigília & Norte Gelado (Zona 2, Portal ID 3)
+	_create_portal_area(root, Vector3(0.0, 0.0, 285.0), "❄️ Portal: Ruínas da Vigília & Norte Gelado (Norte)", Color(0.3, 0.7, 1.0), 2, 3)
 
-	var ac_mesh := MeshInstance3D.new()
-	var ac_mesh_res := BoxMesh.new()
-	ac_mesh_res.size = Vector3(1.4, 1.2, 1.4)
-	ac_mesh.mesh = ac_mesh_res
-	ac_mesh.material_override = wood_beam_mat
-	alley_crates.add_child(ac_mesh)
+	# Oeste (-285, 0, 0) -> Santuário do Eclipse (Zona 3, Portal ID 5)
+	_create_portal_area(root, Vector3(-285.0, 0.0, 0.0), "🌑 Portal: Santuário do Eclipse (Oeste)", Color(0.9, 0.1, 0.2), 3, 5)
 
-	var alley_light := OmniLight3D.new()
-	alley_light.light_color = Color(0.9, 0.2, 0.25)
-	alley_light.light_energy = 1.4
-	alley_light.omni_range = 5.5
-	alley_light.position = Vector3(-19.0, 1.8, 17.0)
-	village_root.add_child(alley_light)
-
-	var alley_lbl := Label3D.new()
-	alley_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	alley_lbl.outline_size = 8
-	alley_lbl.outline_modulate = Color(0, 0, 0, 1)
-	alley_lbl.font_size = 24
-	alley_lbl.modulate = Color(1.0, 0.35, 0.35)
-	alley_lbl.text = "Beco Sombrio\n[Esconderijo de Varis]"
-	alley_lbl.position = Vector3(-19.0, 2.6, 17.0)
-	village_root.add_child(alley_lbl)
-
-	# --- QUADRANTE SUDESTE (14, 0, -14) — ALQUIMIA DA LYRA & CASAS SIMÉTRICAS ---
-	# Laboratório da Lyra em (14, 0, -10)
-	_create_solid_building(village_root, "LyraAlchemyLab", Vector3(14.0, 0, -10.0), Vector3(7.5, 4.2, 6.0), Color(0.32, 0.28, 0.36), Color(0.4, 0.2, 0.45), "Laboratório Alquímico da Lyra", Color(0.85, 0.7, 1.0), "north")
-
-	# Duas Casas Residenciais simétricas formando vielas
-	_create_solid_building(village_root, "HouseSE_East", Vector3(20.0, 0, -8.0), Vector3(6.0, 4.0, 5.5), Color(0.33, 0.32, 0.3), Color(0.35, 0.18, 0.12), "Casa Residencial Leste", Color(0.85, 0.85, 0.85), "west")
-	_create_solid_building(village_root, "HouseSE_LyraHome", Vector3(14.0, 0, -21.0), Vector3(6.5, 4.2, 6.0), Color(0.34, 0.3, 0.35), Color(0.38, 0.18, 0.35), "Casa da Lyra", Color(0.85, 0.7, 1.0), "north")
-	_create_interactive_door(village_root, "lyra_home", "Casa da Alquimista Lyra", Vector3(14.0, 0.0, -18.0), Vector3(14.0, 0.0, -17.0), Vector3(14.0, 0.0, -19.2), true)
-
-	# Móveis e Interior da Casa da Lyra
-	_create_furniture_piece(village_root, Vector3(15.8, 0.55, -22.5), Vector3(1.8, 1.1, 1.2), Color(0.24, 0.18, 0.28))
-	_create_furniture_piece(village_root, Vector3(12.0, 1.3, -22.5), Vector3(1.8, 2.6, 0.8), Color(0.22, 0.16, 0.12))
-	_create_furniture_piece(village_root, Vector3(12.0, 0.4, -19.5), Vector3(1.6, 0.8, 2.2), Color(0.38, 0.2, 0.4))
-	_create_furniture_piece(village_root, Vector3(15.8, 0.35, -19.5), Vector3(1.2, 0.7, 1.0), Color(0.28, 0.2, 0.15))
-
-	var lyra_int_light := OmniLight3D.new()
-	lyra_int_light.light_color = Color(0.85, 0.5, 1.0)
-	lyra_int_light.light_energy = 2.6
-	lyra_int_light.omni_range = 7.5
-	lyra_int_light.position = Vector3(14.0, 2.5, -21.0)
-	village_root.add_child(lyra_int_light)
-
-	# Lanterna mística na viela de Lyra
-	var lyra_light := OmniLight3D.new()
-	lyra_light.light_color = Color(0.75, 0.45, 1.0)
-	lyra_light.light_energy = 2.2
-	lyra_light.omni_range = 6.5
-	lyra_light.position = Vector3(14.0, 2.0, -15.5)
-	village_root.add_child(lyra_light)
-
-	# --- QUADRANTE SUDOESTE (-14, 0, -14) — QUARTEL DA GUARDA & ENTRADA DOS ESGOTOS ---
-	# Quartel em (-14, 0, -12) próximo aos Bonecos de Treino 101 e 102
-	_create_solid_building(village_root, "GuardBarracks", Vector3(-14.0, 0, -12.0), Vector3(9.0, 4.8, 7.0), Color(0.28, 0.3, 0.35), Color(0.15, 0.25, 0.45), "Quartel da Guarda Real", Color(0.85, 0.95, 1.0), "north")
-	_create_interactive_door(village_root, "barracks", "Quartel da Guarda Real", Vector3(-14.0, 0.0, -8.5), Vector3(-14.0, 0.0, -7.5), Vector3(-14.0, 0.0, -9.8), true)
-
-	# Móveis e Interior do Quartel
-	_create_furniture_piece(village_root, Vector3(-14.0, 0.5, -12.0), Vector3(2.6, 1.0, 2.0), Color(0.22, 0.16, 0.12))
-	_create_furniture_piece(village_root, Vector3(-17.5, 1.2, -11.0), Vector3(0.7, 2.4, 2.2), Color(0.18, 0.19, 0.22), 0.3)
-	_create_furniture_piece(village_root, Vector3(-11.5, 1.0, -13.5), Vector3(1.4, 2.0, 2.4), Color(0.25, 0.18, 0.12))
-	_create_furniture_piece(village_root, Vector3(-11.5, 1.0, -10.5), Vector3(1.4, 2.0, 2.4), Color(0.25, 0.18, 0.12))
-	_create_furniture_piece(village_root, Vector3(-16.8, 0.4, -14.2), Vector3(1.8, 0.8, 1.0), Color(0.16, 0.18, 0.2), 0.25)
-
-	var barracks_int_light := OmniLight3D.new()
-	barracks_int_light.light_color = Color(1.0, 0.82, 0.5)
-	barracks_int_light.light_energy = 2.6
-	barracks_int_light.omni_range = 8.5
-	barracks_int_light.position = Vector3(-14.0, 3.0, -12.0)
-	village_root.add_child(barracks_int_light)
-
-	# ENTRADA SECRETA DOS ESGOTOS no canto escuro em (-21, 0, -21)
-	var sewer_pit := StaticBody3D.new()
-	sewer_pit.name = "SecretSewerEntrance"
-	sewer_pit.position = Vector3(-21.0, 0.2, -21.0)
-	sewer_pit.collision_layer = 1
-	village_root.add_child(sewer_pit)
-
-	var sp_col := CollisionShape3D.new()
-	var sp_shape := BoxShape3D.new()
-	sp_shape.size = Vector3(2.8, 0.4, 2.8)
-	sp_col.shape = sp_shape
-	sewer_pit.add_child(sp_col)
-
-	# Bocal de pedra escura do bueiro
-	var sp_mesh := MeshInstance3D.new()
-	var sp_bmesh := BoxMesh.new()
-	sp_bmesh.size = Vector3(2.8, 0.4, 2.8)
-	sp_mesh.mesh = sp_bmesh
-	var sp_mat := StandardMaterial3D.new()
-	sp_mat.albedo_color = Color(0.12, 0.14, 0.16, 1.0)
-	sp_mat.roughness = 0.95
-	sp_mesh.material_override = sp_mat
-	sewer_pit.add_child(sp_mesh)
-
-	# Grades de ferro do bueiro
-	var grate := MeshInstance3D.new()
-	var gr_box := BoxMesh.new()
-	gr_box.size = Vector3(2.4, 0.05, 2.4)
-	grate.mesh = gr_box
-	grate.position = Vector3(0, 0.21, 0)
-	var gr_mat := StandardMaterial3D.new()
-	gr_mat.albedo_color = Color(0.08, 0.09, 0.11, 1.0)
-	gr_mat.metallic = 0.95
-	gr_mat.roughness = 0.3
-	grate.material_override = gr_mat
-	sewer_pit.add_child(grate)
-
-	# Névoa verde misteriosa subindo dos esgotos
-	var mist_cpu := CPUParticles3D.new()
-	mist_cpu.name = "SewerMist"
-	mist_cpu.position = Vector3(0, 0.3, 0)
-	mist_cpu.amount = 35
-	mist_cpu.lifetime = 2.0
-	mist_cpu.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	mist_cpu.emission_box_extents = Vector3(1.1, 0.1, 1.1)
-	mist_cpu.direction = Vector3(0, 1, 0)
-	mist_cpu.spread = 20.0
-	mist_cpu.initial_velocity_min = 0.4
-	mist_cpu.initial_velocity_max = 0.9
-	mist_cpu.scale_amount_min = 0.2
-	mist_cpu.scale_amount_max = 0.5
-	var mist_mat := StandardMaterial3D.new()
-	mist_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mist_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mist_mat.albedo_color = Color(0.15, 0.85, 0.35, 0.4)
-	var m_smesh := SphereMesh.new()
-	m_smesh.radius = 0.22
-	m_smesh.height = 0.44
-	m_smesh.material = mist_mat
-	mist_cpu.mesh = m_smesh
-	sewer_pit.add_child(mist_cpu)
-
-	# Brilho verde subterrâneo
-	var sewer_light := OmniLight3D.new()
-	sewer_light.light_color = Color(0.2, 0.9, 0.35)
-	sewer_light.light_energy = 2.4
-	sewer_light.omni_range = 6.0
-	sewer_light.position = Vector3(0, 0.8, 0)
-	sewer_pit.add_child(sewer_light)
-
-	# Label Secreto 3D
-	var sewer_lbl := Label3D.new()
-	sewer_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sewer_lbl.outline_size = 8
-	sewer_lbl.outline_modulate = Color(0, 0, 0, 1)
-	sewer_lbl.font_size = 26
-	sewer_lbl.modulate = Color(0.3, 1.0, 0.5)
-	sewer_lbl.text = "Entrada dos Esgotos Antigos (Segredo)"
-	sewer_lbl.position = Vector3(0, 2.0, 0)
-	sewer_pit.add_child(sewer_lbl)
+	# Leste (285, 0, 0) -> Fronteira das Cinzas (Zona 4, Portal ID 7)
+	_create_portal_area(root, Vector3(285.0, 0.0, 0.0), "🔥 Portal: Fronteira das Cinzas (Leste - Próxima Expansão)", Color(1.0, 0.7, 0.1), 4, 7)
 
 func _create_wall_segment(parent: Node3D, pos: Vector3, size: Vector3, stone_mat: Material) -> StaticBody3D:
 	var wall := StaticBody3D.new()
@@ -3194,709 +4319,523 @@ func _create_interactive_door(parent: Node3D, house_id: String, house_name: Stri
 		"label_node": door_lbl
 	})
 
-func _build_new_landmarks() -> void:
-	var landmarks_root := Node3D.new()
-	landmarks_root.name = "NewLandmarks"
-	add_child(landmarks_root)
+# =============================================================================
+# ZONA 1: BOSQUE SUSSURRANTE / FLORESTA (600x600m)
+# =============================================================================
+func _build_zone_1_forest(root: Node3D) -> void:
+	# Chão da floresta de 600x600m
+	_create_zone_floor(root, Vector3(600.0, 1.0, 600.0), Color(0.12, 0.24, 0.14), 0.9, Vector3(300, 300, 1))
 
-	# =========================================================================
-	# 1. ⛪ IGREJA DA LUZ SAGRADA EM (-20, 0, -18)
-	# =========================================================================
-	var church_root := Node3D.new()
-	church_root.name = "HolyLightChurch"
-	church_root.position = Vector3(-20.0, 0.0, -18.0)
-	landmarks_root.add_child(church_root)
+	# 1. Árvore-Mãe Sylvari no centro (0, 0, 0)
+	var mother_tree := Node3D.new()
+	mother_tree.position = Vector3(0, 0, 0)
+	root.add_child(mother_tree)
 
-	var church_stone_mat := StandardMaterial3D.new()
-	church_stone_mat.albedo_color = Color(0.92, 0.90, 0.85, 1.0) # Pedra marfim / branca
-	church_stone_mat.roughness = 0.85
+	var trunk := MeshInstance3D.new()
+	var tr_mesh := CylinderMesh.new()
+	tr_mesh.top_radius = 5.0
+	tr_mesh.bottom_radius = 6.5
+	tr_mesh.height = 28.0
+	trunk.mesh = tr_mesh
+	var wood_mat := StandardMaterial3D.new()
+	wood_mat.albedo_color = Color(0.24, 0.18, 0.12)
+	trunk.material_override = wood_mat
+	trunk.position = Vector3(0, 14.0, 0)
+	mother_tree.add_child(trunk)
 
-	var church_gold_mat := StandardMaterial3D.new()
-	church_gold_mat.albedo_color = Color(0.85, 0.70, 0.22, 1.0) # Telhado dourado
-	church_gold_mat.metallic = 0.6
-	church_gold_mat.roughness = 0.35
+	var canopy := MeshInstance3D.new()
+	var can_mesh := SphereMesh.new()
+	can_mesh.radius = 16.0
+	can_mesh.height = 22.0
+	canopy.mesh = can_mesh
+	var leaf_mat := StandardMaterial3D.new()
+	leaf_mat.albedo_color = Color(0.15, 0.65, 0.35)
+	leaf_mat.emission_enabled = true
+	leaf_mat.emission = Color(0.1, 0.5, 0.25)
+	leaf_mat.emission_energy_multiplier = 1.8
+	canopy.material_override = leaf_mat
+	canopy.position = Vector3(0, 30.0, 0)
+	mother_tree.add_child(canopy)
 
-	var church_solar_mat := StandardMaterial3D.new()
-	church_solar_mat.albedo_color = Color(1.0, 0.88, 0.25, 1.0)
-	church_solar_mat.emission_enabled = true
-	church_solar_mat.emission = Color(1.0, 0.88, 0.25)
-	church_solar_mat.emission_energy_multiplier = 4.5
+	var tree_light := OmniLight3D.new()
+	tree_light.light_color = Color(0.3, 0.9, 0.5)
+	tree_light.light_energy = 4.0
+	tree_light.omni_range = 25.0
+	tree_light.position = Vector3(0, 10.0, 0)
+	mother_tree.add_child(tree_light)
 
-	# Nave Principal (Templo de Pedra Marfim 10m x 6m x 14m)
-	var church_body := StaticBody3D.new()
-	church_body.name = "ChurchStructure"
-	church_body.collision_layer = 1
-	church_body.collision_mask = 0
-	church_root.add_child(church_body)
+	var tree_lbl := Label3D.new()
+	tree_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	tree_lbl.text = "🌳 Árvore-Mãe Sylvari (Coração da Floresta)"
+	tree_lbl.font_size = 28
+	tree_lbl.outline_size = 8
+	tree_lbl.modulate = Color(0.4, 1.0, 0.6)
+	tree_lbl.position = Vector3(0, 16.0, 0)
+	mother_tree.add_child(tree_lbl)
 
-	var c_wall_t := 0.5
-	var c_size := Vector3(10.0, 6.0, 14.0)
-	var c_door_w := 2.4
-	var c_door_h := 3.0
+	# 2. Ninho da Rainha Aranha a Sudeste (120, 0, -120)
+	var spider_root := Node3D.new()
+	spider_root.position = Vector3(120.0, 0.0, -120.0)
+	root.add_child(spider_root)
 
-	# Piso de mármore interno
-	var c_floor := MeshInstance3D.new()
-	var c_fmesh := BoxMesh.new()
-	c_fmesh.size = Vector3(c_size.x - 0.2, 0.02, c_size.z - 0.2)
-	c_floor.mesh = c_fmesh
-	var c_fmat := StandardMaterial3D.new()
-	c_fmat.albedo_color = Color(0.82, 0.82, 0.85, 1.0)
-	c_fmat.roughness = 0.5
-	c_floor.material_override = c_fmat
-	c_floor.position = Vector3(0, 0.015, 0)
-	church_body.add_child(c_floor)
+	for s_i in range(5):
+		var ang := s_i * (2.0 * PI / 5.0)
+		var sp_pillar := MeshInstance3D.new()
+		var p_mesh := CylinderMesh.new()
+		p_mesh.top_radius = 0.8
+		p_mesh.bottom_radius = 1.4
+		p_mesh.height = 8.0
+		sp_pillar.mesh = p_mesh
+		var web_mat := StandardMaterial3D.new()
+		web_mat.albedo_color = Color(0.9, 0.92, 0.95, 0.75)
+		web_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		sp_pillar.material_override = web_mat
+		sp_pillar.position = Vector3(cos(ang) * 12.0, 4.0, sin(ang) * 12.0)
+		spider_root.add_child(sp_pillar)
 
-	# Parede Norte (Fundos / Atrás do Altar - Sólida em Z = -7.0)
-	_add_wall_piece(church_body, Vector3(0, c_size.y / 2.0, -c_size.z / 2.0 + c_wall_t / 2.0), Vector3(c_size.x, c_size.y, c_wall_t), church_stone_mat)
-	# Parede Oeste (Lateral Esquerda em X = -5.0)
-	_add_wall_piece(church_body, Vector3(-c_size.x / 2.0 + c_wall_t / 2.0, c_size.y / 2.0, 0), Vector3(c_wall_t, c_size.y, c_size.z), church_stone_mat)
-	# Parede Leste (Lateral Direita em X = +5.0)
-	_add_wall_piece(church_body, Vector3(c_size.x / 2.0 - c_wall_t / 2.0, c_size.y / 2.0, 0), Vector3(c_wall_t, c_size.y, c_size.z), church_stone_mat)
-	# Parede Sul (Frente com abertura de porta voltada para Z = +7.0)
-	var c_side_w := (c_size.x - c_door_w) / 2.0
-	_add_wall_piece(church_body, Vector3(-(c_size.x + c_door_w) / 4.0, c_size.y / 2.0, c_size.z / 2.0 - c_wall_t / 2.0), Vector3(c_side_w, c_size.y, c_wall_t), church_stone_mat)
-	_add_wall_piece(church_body, Vector3((c_size.x + c_door_w) / 4.0, c_size.y / 2.0, c_size.z / 2.0 - c_wall_t / 2.0), Vector3(c_side_w, c_size.y, c_wall_t), church_stone_mat)
-	var c_lintel_h := c_size.y - c_door_h
-	if c_lintel_h > 0.1:
-		_add_wall_piece(church_body, Vector3(0, c_door_h + c_lintel_h / 2.0, c_size.z / 2.0 - c_wall_t / 2.0), Vector3(c_door_w, c_lintel_h, c_wall_t), church_stone_mat)
+	var spider_lbl := Label3D.new()
+	spider_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	spider_lbl.text = "🕷️ Ninho de Teias da Rainha Aranha"
+	spider_lbl.font_size = 24
+	spider_lbl.outline_size = 8
+	spider_lbl.modulate = Color(0.9, 0.95, 1.0)
+	spider_lbl.position = Vector3(0, 5.0, 0)
+	spider_root.add_child(spider_lbl)
 
-	# Telhado Dourado
-	var church_roof := MeshInstance3D.new()
-	var cr_mesh := BoxMesh.new()
-	cr_mesh.size = Vector3(c_size.x + 0.8, 1.4, c_size.z + 0.8)
-	church_roof.mesh = cr_mesh
-	church_roof.position = Vector3(0, c_size.y + 0.6, 0)
-	church_roof.material_override = church_gold_mat
-	church_body.add_child(church_roof)
+	# 3. Lago Profundo dos Dracos de Água a Oeste (-100, 0, 40)
+	var lake_root := Node3D.new()
+	lake_root.position = Vector3(-100.0, 0.0, 40.0)
+	root.add_child(lake_root)
 
-	# Vitrais Laterais Coloridos nas paredes Leste e Oeste
-	for side_x in [-c_size.x / 2.0 - 0.05, c_size.x / 2.0 + 0.05]:
-		for z_offset in [-3.5, 0.0, 3.5]:
-			var glass := MeshInstance3D.new()
-			var gm := BoxMesh.new()
-			gm.size = Vector3(0.12, 2.6, 1.4)
-			glass.mesh = gm
-			var glass_mat := StandardMaterial3D.new()
-			if z_offset < -1.0:
-				glass_mat.albedo_color = Color(0.15, 0.55, 1.0, 0.9)
-				glass_mat.emission = Color(0.15, 0.55, 1.0)
-			elif z_offset > 1.0:
-				glass_mat.albedo_color = Color(0.95, 0.2, 0.3, 0.9)
-				glass_mat.emission = Color(0.95, 0.2, 0.3)
-			else:
-				glass_mat.albedo_color = Color(1.0, 0.85, 0.2, 0.9)
-				glass_mat.emission = Color(1.0, 0.85, 0.2)
-			glass_mat.emission_enabled = true
-			glass_mat.emission_energy_multiplier = 2.4
-			glass.material_override = glass_mat
-			glass.position = Vector3(side_x, 3.2, z_offset)
-			church_root.add_child(glass)
+	var lake_mesh := MeshInstance3D.new()
+	var l_cyl := CylinderMesh.new()
+	l_cyl.top_radius = 20.0
+	l_cyl.bottom_radius = 20.0
+	l_cyl.height = 0.2
+	lake_mesh.mesh = l_cyl
+	var water_mat := StandardMaterial3D.new()
+	water_mat.albedo_color = Color(0.1, 0.45, 0.75, 0.85)
+	water_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	water_mat.roughness = 0.1
+	water_mat.metallic = 0.3
+	lake_mesh.material_override = water_mat
+	lake_mesh.position = Vector3(0, 0.1, 0)
+	lake_root.add_child(lake_mesh)
 
-	# Torre de Sino Alta (Frente da Igreja, altura 12m)
-	var tower_body := StaticBody3D.new()
-	tower_body.name = "ChurchBellTower"
-	tower_body.position = Vector3(0.0, 0.0, c_size.z / 2.0 + 1.2)
-	tower_body.collision_layer = 1
-	tower_body.collision_mask = 0
-	church_root.add_child(tower_body)
+	var lake_light := OmniLight3D.new()
+	lake_light.light_color = Color(0.2, 0.7, 1.0)
+	lake_light.light_energy = 3.0
+	lake_light.omni_range = 16.0
+	lake_light.position = Vector3(0, 2.0, 0)
+	lake_root.add_child(lake_light)
 
-	var t_col := CollisionShape3D.new()
-	var t_box := BoxShape3D.new()
-	t_box.size = Vector3(3.6, 12.0, 3.6)
-	t_col.shape = t_box
-	t_col.position = Vector3(0, 6.0, 0)
-	tower_body.add_child(t_col)
+	var lake_lbl := Label3D.new()
+	lake_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lake_lbl.text = "🌊 Lago Profundo dos Dracos de Água"
+	lake_lbl.font_size = 24
+	lake_lbl.outline_size = 8
+	lake_lbl.modulate = Color(0.3, 0.8, 1.0)
+	lake_lbl.position = Vector3(0, 4.0, 0)
+	lake_root.add_child(lake_lbl)
 
-	var t_mesh := MeshInstance3D.new()
-	var t_bmesh := BoxMesh.new()
-	t_bmesh.size = Vector3(3.6, 12.0, 3.6)
-	t_mesh.mesh = t_bmesh
-	t_mesh.position = Vector3(0, 6.0, 0)
-	t_mesh.material_override = church_stone_mat
-	tower_body.add_child(t_mesh)
+	# 4. Portal de Volta para a Vila ao Norte (0, 0, 285)
+	_create_portal_area(root, Vector3(0.0, 0.0, 285.0), "🏛️ Portal: Retornar à Vila do Refúgio", Color(0.2, 0.9, 0.4), 0, 2)
 
-	# Topo da Torre com Sino de Bronze e Telhado Dourado
-	var bell_roof := MeshInstance3D.new()
-	var br_mesh := BoxMesh.new()
-	br_mesh.size = Vector3(4.2, 1.2, 4.2)
-	bell_roof.mesh = br_mesh
-	bell_roof.position = Vector3(0, 12.6, 0)
-	bell_roof.material_override = church_gold_mat
-	tower_body.add_child(bell_roof)
+# =============================================================================
+# ZONA 2: RUÍNAS DA VIGÍLIA & PICOS GELADOS (600x600m)
+# =============================================================================
+func _build_zone_2_ruins(root: Node3D) -> void:
+	# Chão de gelo e rocha nevada de 600x600m
+	_create_zone_floor(root, Vector3(600.0, 1.0, 600.0), Color(0.76, 0.82, 0.88), 0.7, Vector3(300, 300, 1))
 
-	var bell := MeshInstance3D.new()
-	var b_mesh := CylinderMesh.new()
-	b_mesh.top_radius = 0.3
-	b_mesh.bottom_radius = 0.75
-	b_mesh.height = 1.1
-	bell.mesh = b_mesh
-	var bell_mat := StandardMaterial3D.new()
-	bell_mat.albedo_color = Color(0.8, 0.6, 0.2, 1.0)
-	bell_mat.metallic = 0.9
-	bell_mat.roughness = 0.3
-	bell.material_override = bell_mat
-	bell.position = Vector3(0, 11.2, 0)
-	tower_body.add_child(bell)
+	var ice_stone_mat := StandardMaterial3D.new()
+	ice_stone_mat.albedo_color = Color(0.4, 0.45, 0.52)
+	ice_stone_mat.roughness = 0.8
 
-	# Cruz Solar Brilhante no topo da Torre
-	var cross_v := MeshInstance3D.new()
-	var cv_mesh := BoxMesh.new()
-	cv_mesh.size = Vector3(0.35, 2.6, 0.35)
-	cross_v.mesh = cv_mesh
-	cross_v.material_override = church_solar_mat
-	cross_v.position = Vector3(0, 14.5, 0)
-	tower_body.add_child(cross_v)
+	# 1. Fortaleza de Vaelen no centro (0, 0, 0)
+	var fortress := Node3D.new()
+	fortress.position = Vector3.ZERO
+	root.add_child(fortress)
 
-	var cross_h := MeshInstance3D.new()
-	var ch_mesh := BoxMesh.new()
-	ch_mesh.size = Vector3(1.7, 0.35, 0.35)
-	cross_h.mesh = ch_mesh
-	cross_h.material_override = church_solar_mat
-	cross_h.position = Vector3(0, 15.0, 0)
-	tower_body.add_child(cross_h)
+	_create_solid_building(fortress, "VaelenFortress", Vector3.ZERO, Vector3(22.0, 9.0, 22.0), Color(0.35, 0.4, 0.48), Color(0.2, 0.25, 0.35), "Fortaleza do Comandante Vaelen", Color(0.5, 0.85, 1.0), "south")
 
-	var cross_light := OmniLight3D.new()
-	cross_light.light_color = Color(1.0, 0.9, 0.45)
-	cross_light.light_energy = 3.6
-	cross_light.omni_range = 14.0
-	cross_light.position = Vector3(0, 15.0, 0)
-	tower_body.add_child(cross_light)
+	var blue_fire := OmniLight3D.new()
+	blue_fire.light_color = Color(0.3, 0.7, 1.0)
+	blue_fire.light_energy = 4.5
+	blue_fire.omni_range = 18.0
+	blue_fire.position = Vector3(0, 4.0, 14.0)
+	fortress.add_child(blue_fire)
 
-	# Altar Dourado no Interior da Igreja
-	var altar_body := StaticBody3D.new()
-	altar_body.name = "ChurchGoldenAltar"
-	altar_body.position = Vector3(0.0, 0.0, -c_size.z / 2.0 + 2.2)
-	altar_body.collision_layer = 1
-	altar_body.collision_mask = 0
-	church_root.add_child(altar_body)
+	# 2. Trono de Gelo dos Gigantes de Gelo ao Norte (0, 0, 150)
+	var throne_root := Node3D.new()
+	throne_root.position = Vector3(0.0, 0.0, 150.0)
+	root.add_child(throne_root)
 
-	var a_col := CollisionShape3D.new()
-	var a_box := BoxShape3D.new()
-	a_box.size = Vector3(3.4, 1.2, 1.6)
-	a_col.shape = a_box
-	a_col.position = Vector3(0, 0.6, 0)
-	altar_body.add_child(a_col)
+	for t_i in range(6):
+		var rad_t := t_i * (PI / 5.0) - (PI / 2.0)
+		var shard := MeshInstance3D.new()
+		var sh_cyl := CylinderMesh.new()
+		sh_cyl.top_radius = 0.1
+		sh_cyl.bottom_radius = 1.2
+		sh_cyl.height = 10.0
+		shard.mesh = sh_cyl
+		var ice_mat := StandardMaterial3D.new()
+		ice_mat.albedo_color = Color(0.65, 0.88, 1.0, 0.85)
+		ice_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		ice_mat.roughness = 0.2
+		ice_mat.emission_enabled = true
+		ice_mat.emission = Color(0.3, 0.7, 1.0)
+		ice_mat.emission_energy_multiplier = 1.5
+		shard.material_override = ice_mat
+		shard.position = Vector3(cos(rad_t) * 9.0, 5.0, sin(rad_t) * 9.0)
+		throne_root.add_child(shard)
 
-	var a_mesh := MeshInstance3D.new()
-	var a_bmesh := BoxMesh.new()
-	a_bmesh.size = Vector3(3.4, 1.2, 1.6)
-	a_mesh.mesh = a_bmesh
-	a_mesh.position = Vector3(0, 0.6, 0)
-	a_mesh.material_override = church_gold_mat
-	altar_body.add_child(a_mesh)
+	var throne_lbl := Label3D.new()
+	throne_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	throne_lbl.text = "👑 Trono Glacial dos Gigantes de Gelo"
+	throne_lbl.font_size = 26
+	throne_lbl.outline_size = 8
+	throne_lbl.modulate = Color(0.5, 0.85, 1.0)
+	throne_lbl.position = Vector3(0, 6.0, 0)
+	throne_root.add_child(throne_lbl)
 
-	# Relíquia Solar Sagrada sobre o Altar
-	var sacred_relic := MeshInstance3D.new()
-	var sr_mesh := SphereMesh.new()
-	sr_mesh.radius = 0.32
-	sr_mesh.height = 0.64
-	sacred_relic.mesh = sr_mesh
-	sacred_relic.material_override = church_solar_mat
-	sacred_relic.position = Vector3(0, 1.5, 0)
-	altar_body.add_child(sacred_relic)
+	# 3. Portal de Volta para a Vila ao Sul (0, 0, -285)
+	_create_portal_area(root, Vector3(0.0, 0.0, -285.0), "🏛️ Portal: Retornar à Vila do Refúgio", Color(0.3, 0.7, 1.0), 0, 4)
 
-	var altar_light := OmniLight3D.new()
-	altar_light.light_color = Color(1.0, 0.85, 0.35)
-	altar_light.light_energy = 3.2
-	altar_light.omni_range = 9.0
-	altar_light.position = Vector3(0, 2.2, 0)
-	altar_body.add_child(altar_light)
-
-	# Bancos de Oração de Madeira
-	for b_z in [-1.5, 1.2, 3.8]:
-		_create_furniture_piece(church_root, Vector3(-2.4, 0.45, b_z), Vector3(2.4, 0.8, 0.7), Color(0.3, 0.2, 0.12))
-		_create_furniture_piece(church_root, Vector3(2.4, 0.45, b_z), Vector3(2.4, 0.8, 0.7), Color(0.3, 0.2, 0.12))
-
-	# Porta Interativa da Igreja (Tecla E)
-	_create_interactive_door(landmarks_root, "holy_light_church", "Igreja da Luz Sagrada", Vector3(-20.0, 0.0, -11.0), Vector3(-20.0, 0.0, -8.8), Vector3(-20.0, 0.0, -13.5), true)
-
-	# =========================================================================
-	# 2. 🔮 TORRE ARCANA (TORRE DO MAGO) EM (20, 0, -18)
-	# =========================================================================
-	var tower_root := Node3D.new()
-	tower_root.name = "ArcaneMageTower"
-	tower_root.position = Vector3(20.0, 0.0, -18.0)
-	landmarks_root.add_child(tower_root)
-
-	var mage_stone_mat := StandardMaterial3D.new()
-	mage_stone_mat.albedo_color = Color(0.106, 0.149, 0.231, 1.0) # #1B263B Azul-escuro
-	mage_stone_mat.roughness = 0.65
-	mage_stone_mat.metallic = 0.25
-
-	var mage_gold_mat := StandardMaterial3D.new()
-	mage_gold_mat.albedo_color = Color(1.0, 0.84, 0.1, 1.0) # Anéis mágicos dourados
-	mage_gold_mat.emission_enabled = true
-	mage_gold_mat.emission = Color(1.0, 0.84, 0.1)
-	mage_gold_mat.emission_energy_multiplier = 3.5
-
-	var mage_cyan_mat := StandardMaterial3D.new()
-	mage_cyan_mat.albedo_color = Color(0.0, 0.94, 1.0, 1.0) # Cristais ciano luminosos
-	mage_cyan_mat.emission_enabled = true
-	mage_cyan_mat.emission = Color(0.0, 0.94, 1.0)
-	mage_cyan_mat.emission_energy_multiplier = 4.2
-
-	# Corpo Cilíndrico Alto (14 metros de altura)
-	var tower_mesh := MeshInstance3D.new()
-	var tm_cyl := CylinderMesh.new()
-	tm_cyl.top_radius = 3.6
-	tm_cyl.bottom_radius = 4.0
-	tm_cyl.height = 14.0
-	tower_mesh.mesh = tm_cyl
-	tower_mesh.material_override = mage_stone_mat
-	tower_mesh.position = Vector3(0, 7.0, 0)
-	tower_root.add_child(tower_mesh)
-
-	# Colisão Sólida Perimetral (StaticBody3D com BoxShape3D em formato octogonal)
-	var tower_col_body := StaticBody3D.new()
-	tower_col_body.name = "MageTowerCollision"
-	tower_col_body.collision_layer = 1
-	tower_col_body.collision_mask = 0
-	tower_root.add_child(tower_col_body)
-
-	for angle_deg in [45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0]:
-		var rad := deg_to_rad(angle_deg)
-		var c_col := CollisionShape3D.new()
-		var c_box := BoxShape3D.new()
-		c_box.size = Vector3(3.0, 14.0, 1.0)
-		c_col.shape = c_box
-		c_col.position = Vector3(sin(rad) * 3.7, 7.0, cos(rad) * 3.7)
-		c_col.rotation.y = rad
-		tower_col_body.add_child(c_col)
-
-	# Telhado Cônico / Pináculo Arcano no topo (Y = 14m a 18.5m)
-	var spire_mesh := MeshInstance3D.new()
-	var sm_cone := CylinderMesh.new()
-	sm_cone.top_radius = 0.1
-	sm_cone.bottom_radius = 4.1
-	sm_cone.height = 4.5
-	spire_mesh.mesh = sm_cone
-	spire_mesh.material_override = mage_stone_mat
-	spire_mesh.position = Vector3(0, 16.25, 0)
-	tower_root.add_child(spire_mesh)
-
-	# 2 Anéis Dourados Mágicos flutuando no topo
-	# Anel 1 em Y = 15.0m
-	var ring_1 := MeshInstance3D.new()
-	var r1_mesh := CylinderMesh.new()
-	r1_mesh.top_radius = 4.4
-	r1_mesh.bottom_radius = 4.4
-	r1_mesh.height = 0.22
-	ring_1.mesh = r1_mesh
-	ring_1.material_override = mage_gold_mat
-	ring_1.position = Vector3(0, 15.0, 0)
-	ring_1.rotation.x = deg_to_rad(12.0)
-	tower_root.add_child(ring_1)
-
-	# Anel 2 em Y = 16.5m
-	var ring_2 := MeshInstance3D.new()
-	var r2_mesh := CylinderMesh.new()
-	r2_mesh.top_radius = 3.6
-	r2_mesh.bottom_radius = 3.6
-	r2_mesh.height = 0.22
-	ring_2.mesh = r2_mesh
-	ring_2.material_override = mage_gold_mat
-	ring_2.position = Vector3(0, 16.5, 0)
-	ring_2.rotation.z = deg_to_rad(-14.0)
-	tower_root.add_child(ring_2)
-
-	# Cristais Ciano Luminosos (4 cristais orbitando a torre em Y = 7.0m)
-	for c_angle in [0.0, 90.0, 180.0, 270.0]:
-		var cr_rad := deg_to_rad(c_angle)
-		var c_pos := Vector3(sin(cr_rad) * 4.9, 7.0, cos(cr_rad) * 4.9)
-
-		var crystal := MeshInstance3D.new()
-		var cm := CylinderMesh.new()
-		cm.top_radius = 0.08
-		cm.bottom_radius = 0.42
-		cm.height = 1.9
-		crystal.mesh = cm
-		crystal.material_override = mage_cyan_mat
-		crystal.position = c_pos
-		tower_root.add_child(crystal)
-
-		var c_light := OmniLight3D.new()
-		c_light.light_color = Color(0.1, 0.95, 1.0)
-		c_light.light_energy = 2.6
-		c_light.omni_range = 8.0
-		c_light.position = c_pos
-		tower_root.add_child(c_light)
-
-	# Interior Arcano: Bancada de Poções, Estante de Livros e Orbe Místico
-	_create_furniture_piece(tower_root, Vector3(-1.8, 0.8, -1.5), Vector3(1.2, 1.6, 2.4), Color(0.2, 0.15, 0.25))
-	_create_furniture_piece(tower_root, Vector3(1.8, 0.8, -1.5), Vector3(1.2, 1.6, 2.4), Color(0.15, 0.2, 0.3))
-
-	var orb := MeshInstance3D.new()
-	var om := SphereMesh.new()
-	om.radius = 0.4
-	om.height = 0.8
-	orb.mesh = om
-	var orb_mat := StandardMaterial3D.new()
-	orb_mat.albedo_color = Color(0.8, 0.2, 1.0, 1.0)
-	orb_mat.emission_enabled = true
-	orb_mat.emission = Color(0.8, 0.2, 1.0)
-	orb_mat.emission_energy_multiplier = 4.0
-	orb.material_override = orb_mat
-	orb.position = Vector3(0, 1.6, 0)
-	tower_root.add_child(orb)
-
-	var orb_light := OmniLight3D.new()
-	orb_light.light_color = Color(0.7, 0.3, 1.0)
-	orb_light.light_energy = 3.2
-	orb_light.omni_range = 7.5
-	orb_light.position = Vector3(0, 2.0, 0)
-	tower_root.add_child(orb_light)
-
-	# Porta Interativa da Torre do Mago (Tecla E)
-	_create_interactive_door(landmarks_root, "mage_tower", "Torre Arcana do Mago", Vector3(20.0, 0.0, -14.2), Vector3(20.0, 0.0, -12.4), Vector3(20.0, 0.0, -16.2), true)
-
-	# =========================================================================
-	# 3. 🏹 POSTO DO CAÇADOR EM (34, 0, -30)
-	# =========================================================================
-	var hunter_root := Node3D.new()
-	hunter_root.name = "HunterPost"
-	hunter_root.position = Vector3(34.0, 0.0, -30.0)
-	landmarks_root.add_child(hunter_root)
-
-	var wood_cabin_mat := StandardMaterial3D.new()
-	wood_cabin_mat.albedo_color = Color(0.32, 0.20, 0.12, 1.0) # Madeira rústica
-	wood_cabin_mat.roughness = 0.85
-
-	var roof_bark_mat := StandardMaterial3D.new()
-	roof_bark_mat.albedo_color = Color(0.20, 0.14, 0.08, 1.0) # Telhado rústico
-	roof_bark_mat.roughness = 0.9
-
-	# Cabana Rústica de Madeira (7.4m x 3.8m x 6.4m)
-	_create_solid_building(hunter_root, "HunterCabin", Vector3.ZERO, Vector3(7.4, 3.8, 6.4), wood_cabin_mat.albedo_color, roof_bark_mat.albedo_color, "Posto do Caçador", Color(0.9, 0.8, 0.4), "north")
-
-	# Alvos de Treino de Tiro com Arco em (38, 0, -28) e (38, 0, -32)
-	for t_offset_z in [2.0, -2.0]:
-		var target_body := StaticBody3D.new()
-		target_body.position = Vector3(5.2, 0.0, t_offset_z)
-		target_body.collision_layer = 1
-		target_body.collision_mask = 0
-		hunter_root.add_child(target_body)
-
-		var tgt_col := CollisionShape3D.new()
-		var tgt_box := BoxShape3D.new()
-		tgt_box.size = Vector3(0.6, 2.2, 1.6)
-		tgt_col.shape = tgt_box
-		tgt_col.position = Vector3(0, 1.1, 0)
-		target_body.add_child(tgt_col)
-
-		# Cavalete de Madeira
-		var stand := MeshInstance3D.new()
-		var st_mesh := BoxMesh.new()
-		st_mesh.size = Vector3(0.4, 2.0, 0.15)
-		stand.mesh = st_mesh
-		stand.material_override = wood_cabin_mat
-		stand.position = Vector3(0, 1.0, 0)
-		target_body.add_child(stand)
-
-		# Alvo Circular com círculos concêntricos
-		var disc := MeshInstance3D.new()
-		var dc_mesh := CylinderMesh.new()
-		dc_mesh.top_radius = 0.75
-		dc_mesh.bottom_radius = 0.75
-		dc_mesh.height = 0.12
-		disc.mesh = dc_mesh
-		var disc_mat := StandardMaterial3D.new()
-		disc_mat.albedo_color = Color(0.9, 0.85, 0.7, 1.0) # Palha clara
-		disc.material_override = disc_mat
-		disc.position = Vector3(0, 1.4, 0)
-		disc.rotation.z = deg_to_rad(90.0)
-		target_body.add_child(disc)
-
-		# Bullseye Vermelho
-		var bullseye := MeshInstance3D.new()
-		var be_mesh := CylinderMesh.new()
-		be_mesh.top_radius = 0.3
-		be_mesh.bottom_radius = 0.3
-		be_mesh.height = 0.14
-		bullseye.mesh = be_mesh
-		var be_mat := StandardMaterial3D.new()
-		be_mat.albedo_color = Color(0.85, 0.15, 0.15, 1.0)
-		bullseye.material_override = be_mat
-		bullseye.position = Vector3(-0.02, 1.4, 0)
-		bullseye.rotation.z = deg_to_rad(90.0)
-		target_body.add_child(bullseye)
-
-	# Fogueira Acesa em frente ao Posto (Z = +4.2m relativo à cabana)
-	var campfire_body := StaticBody3D.new()
-	campfire_body.name = "HunterCampfire"
-	campfire_body.position = Vector3(-3.2, 0.0, 4.2)
-	campfire_body.collision_layer = 1
-	campfire_body.collision_mask = 0
-	hunter_root.add_child(campfire_body)
-
-	var cf_col := CollisionShape3D.new()
-	var cf_box := BoxShape3D.new()
-	cf_box.size = Vector3(1.6, 0.5, 1.6)
-	cf_col.shape = cf_box
-	cf_col.position = Vector3(0, 0.25, 0)
-	campfire_body.add_child(cf_col)
-
-	# Anel de Pedras da Fogueira
-	var stones_mesh := MeshInstance3D.new()
-	var st_cyl := CylinderMesh.new()
-	st_cyl.top_radius = 0.85
-	st_cyl.bottom_radius = 0.95
-	st_cyl.height = 0.3
-	stones_mesh.mesh = st_cyl
-	var st_mat := StandardMaterial3D.new()
-	st_mat.albedo_color = Color(0.3, 0.3, 0.32, 1.0)
-	stones_mesh.material_override = st_mat
-	stones_mesh.position = Vector3(0, 0.15, 0)
-	campfire_body.add_child(stones_mesh)
-
-	# Brasas e Madeira Ardente
-	var embers_mesh := MeshInstance3D.new()
-	var emb_box := BoxMesh.new()
-	emb_box.size = Vector3(0.9, 0.25, 0.9)
-	embers_mesh.mesh = emb_box
-	var emb_mat := StandardMaterial3D.new()
-	emb_mat.albedo_color = Color(1.0, 0.45, 0.05, 1.0)
-	emb_mat.emission_enabled = true
-	emb_mat.emission = Color(1.0, 0.45, 0.05)
-	emb_mat.emission_energy_multiplier = 4.0
-	embers_mesh.material_override = emb_mat
-	embers_mesh.position = Vector3(0, 0.2, 0)
-	campfire_body.add_child(embers_mesh)
-
-	# Partículas de Fogo
-	var fire_cpu := CPUParticles3D.new()
-	fire_cpu.position = Vector3(0, 0.35, 0)
-	fire_cpu.amount = 25
-	fire_cpu.lifetime = 0.8
-	fire_cpu.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	fire_cpu.emission_box_extents = Vector3(0.3, 0.1, 0.3)
-	fire_cpu.direction = Vector3(0, 1, 0)
-	fire_cpu.spread = 15.0
-	fire_cpu.initial_velocity_min = 1.4
-	fire_cpu.initial_velocity_max = 2.4
-	fire_cpu.scale_amount_min = 0.1
-	fire_cpu.scale_amount_max = 0.25
-	fire_cpu.color = Color(1.0, 0.6, 0.1, 0.9)
-	var cf_pmat := StandardMaterial3D.new()
-	cf_pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	cf_pmat.albedo_color = Color(1.0, 0.5, 0.1, 1.0)
-	var cf_smesh := SphereMesh.new()
-	cf_smesh.radius = 0.1
-	cf_smesh.height = 0.2
-	cf_smesh.material = cf_pmat
-	fire_cpu.mesh = cf_smesh
-	campfire_body.add_child(fire_cpu)
-
-	var cf_light := OmniLight3D.new()
-	cf_light.light_color = Color(1.0, 0.58, 0.15)
-	cf_light.light_energy = 3.5
-	cf_light.omni_range = 8.5
-	cf_light.position = Vector3(0, 0.9, 0)
-	campfire_body.add_child(cf_light)
-
-	# Porta Interativa da Cabana do Caçador (Tecla E)
-	_create_interactive_door(landmarks_root, "hunter_post", "Posto do Caçador", Vector3(34.0, 0.0, -26.8), Vector3(34.0, 0.0, -25.2), Vector3(34.0, 0.0, -28.8), true)
-
-	# =========================================================================
-	# 4. 🌑 SANTUÁRIO DO ECLIPSE EM (-85, 0, 85)
-	# =========================================================================
-	var sanctuary_root := Node3D.new()
-	sanctuary_root.name = "EclipseSanctuaryLandmark"
-	sanctuary_root.position = Vector3(-85.0, 0.0, 85.0)
-	landmarks_root.add_child(sanctuary_root)
+# =============================================================================
+# ZONA 3: SANTUÁRIO DO ECLIPSE (600x600m)
+# =============================================================================
+func _build_zone_3_sanctuary(root: Node3D) -> void:
+	# Chão vulcânico / obsidiana de 600x600m
+	_create_zone_floor(root, Vector3(600.0, 1.0, 600.0), Color(0.08, 0.06, 0.09), 0.3, Vector3(300, 300, 1))
 
 	var obs_mat := StandardMaterial3D.new()
-	obs_mat.albedo_color = Color(0.08, 0.06, 0.10, 1.0) # Obsidiana negra
-	obs_mat.metallic = 0.88
-	obs_mat.roughness = 0.22
+	obs_mat.albedo_color = Color(0.08, 0.06, 0.10, 1.0)
+	obs_mat.metallic = 0.85
+	obs_mat.roughness = 0.25
 
-	var crimson_rune_mat := StandardMaterial3D.new()
-	crimson_rune_mat.albedo_color = Color(1.0, 0.05, 0.12, 1.0) # Runas vermelhas brilhantes
-	crimson_rune_mat.emission_enabled = true
-	crimson_rune_mat.emission = Color(1.0, 0.05, 0.12)
-	crimson_rune_mat.emission_energy_multiplier = 4.8
-
-	var black_void_mat := StandardMaterial3D.new()
-	black_void_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	black_void_mat.albedo_color = Color(0.01, 0.01, 0.01, 1.0) # Sol Negro Absoluto
-
-	var halo_crimson_mat := StandardMaterial3D.new()
-	halo_crimson_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	halo_crimson_mat.albedo_color = Color(1.0, 0.08, 0.15, 1.0) # Halo Carmesim do Eclipse
-	halo_crimson_mat.emission_enabled = true
-	halo_crimson_mat.emission = Color(1.0, 0.08, 0.15)
-	halo_crimson_mat.emission_energy_multiplier = 5.5
-
-	# Arena Gótica de Obsidiana Negra (28x28m)
-	var arena_floor_body := StaticBody3D.new()
-	arena_floor_body.name = "SanctuaryArenaFloor"
-	arena_floor_body.collision_layer = 1
-	arena_floor_body.collision_mask = 0
-	sanctuary_root.add_child(arena_floor_body)
-
-	var af_col := CollisionShape3D.new()
-	var af_box := BoxShape3D.new()
-	af_box.size = Vector3(28.0, 0.4, 28.0)
-	af_col.shape = af_box
-	af_col.position = Vector3(0, 0.2, 0)
-	arena_floor_body.add_child(af_col)
-
-	var af_mesh := MeshInstance3D.new()
-	var af_bmesh := BoxMesh.new()
-	af_bmesh.size = Vector3(28.0, 0.4, 28.0)
-	af_mesh.mesh = af_bmesh
-	af_mesh.material_override = obs_mat
-	af_mesh.position = Vector3(0, 0.2, 0)
-	arena_floor_body.add_child(af_mesh)
-
-	# Muretas góticas de borda da Arena (28x28m) com entrada aberta de 6m em Z = -14.0
-	# Mureta Leste (X = +14.0)
-	_add_wall_piece(arena_floor_body, Vector3(14.0, 1.0, 0.0), Vector3(1.0, 1.6, 28.0), obs_mat)
-	# Mureta Oeste (X = -14.0)
-	_add_wall_piece(arena_floor_body, Vector3(-14.0, 1.0, 0.0), Vector3(1.0, 1.6, 28.0), obs_mat)
-	# Mureta Sul (Z = +14.0)
-	_add_wall_piece(arena_floor_body, Vector3(0.0, 1.0, 14.0), Vector3(28.0, 1.6, 1.0), obs_mat)
-	# Mureta Norte (Z = -14.0) com abertura de 6m
-	_add_wall_piece(arena_floor_body, Vector3(-8.5, 1.0, -14.0), Vector3(11.0, 1.6, 1.0), obs_mat)
-	_add_wall_piece(arena_floor_body, Vector3(8.5, 1.0, -14.0), Vector3(11.0, 1.6, 1.0), obs_mat)
-
-	# 8 Pilares Monolíticos com Runas Vermelhas Brilhantes (Raio de 11.5m em volta do centro)
-	for p_idx in range(8):
-		var p_angle := p_idx * (PI / 4.0)
-		var p_pos := Vector3(cos(p_angle) * 11.5, 0.0, sin(p_angle) * 11.5)
-
-		var pillar_body := StaticBody3D.new()
-		pillar_body.name = "EclipsePillar_%d" % p_idx
-		pillar_body.position = p_pos
-		pillar_body.collision_layer = 1
-		pillar_body.collision_mask = 0
-		sanctuary_root.add_child(pillar_body)
-
-		var p_col := CollisionShape3D.new()
-		var p_shape := BoxShape3D.new()
-		p_shape.size = Vector3(1.6, 7.5, 1.6)
-		p_col.shape = p_shape
-		p_col.position = Vector3(0, 3.75, 0)
-		pillar_body.add_child(p_col)
-
-		var p_mesh := MeshInstance3D.new()
-		var p_bmesh := BoxMesh.new()
-		p_bmesh.size = Vector3(1.6, 7.5, 1.6)
-		p_mesh.mesh = p_bmesh
-		p_mesh.material_override = obs_mat
-		p_mesh.position = Vector3(0, 3.75, 0)
-		pillar_body.add_child(p_mesh)
-
-		# Runas Vermelhas Brilhantes gravadas no pilar
-		var rune_1 := MeshInstance3D.new()
-		var r1_b := BoxMesh.new()
-		r1_b.size = Vector3(0.3, 5.2, 1.64)
-		rune_1.mesh = r1_b
-		rune_1.material_override = crimson_rune_mat
-		rune_1.position = Vector3(0, 3.75, 0)
-		pillar_body.add_child(rune_1)
-
-		var rune_2 := MeshInstance3D.new()
-		var r2_b := BoxMesh.new()
-		r2_b.size = Vector3(1.64, 5.2, 0.3)
-		rune_2.mesh = r2_b
-		rune_2.material_override = crimson_rune_mat
-		rune_2.position = Vector3(0, 3.75, 0)
-		pillar_body.add_child(rune_2)
-
-		var p_light := OmniLight3D.new()
-		p_light.light_color = Color(1.0, 0.1, 0.15)
-		p_light.light_energy = 2.4
-		p_light.omni_range = 6.5
-		p_light.position = Vector3(0, 7.6, 0)
-		pillar_body.add_child(p_light)
-
-	# Altar do Sacrifício em (-88, 0, 88) -> Relativo ao centro (-85, 0, 85) é (-3.0, 0, 3.0)
-	var sac_altar := StaticBody3D.new()
-	sac_altar.name = "SacrificialAltar"
-	sac_altar.position = Vector3(-3.0, 0.0, 3.0)
-	sac_altar.collision_layer = 1
-	sac_altar.collision_mask = 0
-	sanctuary_root.add_child(sac_altar)
-
-	var sa_col := CollisionShape3D.new()
-	var sa_box := BoxShape3D.new()
-	sa_box.size = Vector3(3.2, 1.2, 2.0)
-	sa_col.shape = sa_box
-	sa_col.position = Vector3(0, 0.6, 0)
-	sac_altar.add_child(sa_col)
-
-	var sa_mesh := MeshInstance3D.new()
-	var sa_bmesh := BoxMesh.new()
-	sa_bmesh.size = Vector3(3.2, 1.2, 2.0)
-	sa_mesh.mesh = sa_bmesh
-	sa_mesh.material_override = obs_mat
-	sa_mesh.position = Vector3(0, 0.6, 0)
-	sac_altar.add_child(sa_mesh)
-
-	# Inlay de sangue rúnico no topo do altar
-	var blood_rune := MeshInstance3D.new()
-	var br_box := BoxMesh.new()
-	br_box.size = Vector3(2.6, 0.05, 1.4)
-	blood_rune.mesh = br_box
-	blood_rune.material_override = crimson_rune_mat
-	blood_rune.position = Vector3(0, 1.23, 0)
-	sac_altar.add_child(blood_rune)
-
-	var sa_light := OmniLight3D.new()
-	sa_light.light_color = Color(1.0, 0.05, 0.1)
-	sa_light.light_energy = 3.6
-	sa_light.omni_range = 7.5
-	sa_light.position = Vector3(0, 1.8, 0)
-	sac_altar.add_child(sa_light)
-
-	# Sol Negro Eclipsado flutuando no céu em (-85, 18, 85) -> Relativo: (0, 18, 0)
-	# SphereMesh negra de raio 3.5m (altura 7.0m)
+	# 1. Sol Negro Eclipsado no céu (0, 32, 0)
 	var black_sun := MeshInstance3D.new()
-	black_sun.name = "BlackSunEclipsed"
-	var bs_sphere := SphereMesh.new()
-	bs_sphere.radius = 3.5
-	bs_sphere.height = 7.0
-	black_sun.mesh = bs_sphere
-	black_sun.material_override = black_void_mat
-	black_sun.position = Vector3(0, 18.0, 0)
-	sanctuary_root.add_child(black_sun)
+	var bs_sph := SphereMesh.new()
+	bs_sph.radius = 6.0
+	bs_sph.height = 12.0
+	black_sun.mesh = bs_sph
+	var bs_mat := StandardMaterial3D.new()
+	bs_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bs_mat.albedo_color = Color(0.01, 0.01, 0.01)
+	black_sun.material_override = bs_mat
+	black_sun.position = Vector3(0, 32.0, 0)
+	root.add_child(black_sun)
 
-	# Halo Vermelho-Carmesim Brilhante em volta do Sol Negro
 	var sun_halo := MeshInstance3D.new()
-	sun_halo.name = "SunCrimsonHalo"
 	var sh_cyl := CylinderMesh.new()
-	sh_cyl.top_radius = 4.4
-	sh_cyl.bottom_radius = 4.4
-	sh_cyl.height = 0.25
+	sh_cyl.top_radius = 8.0
+	sh_cyl.bottom_radius = 8.0
+	sh_cyl.height = 0.3
 	sun_halo.mesh = sh_cyl
-	sun_halo.material_override = halo_crimson_mat
-	sun_halo.position = Vector3(0, 18.0, 0)
-	sanctuary_root.add_child(sun_halo)
+	var sh_mat := StandardMaterial3D.new()
+	sh_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	sh_mat.albedo_color = Color(1.0, 0.08, 0.15)
+	sun_halo.material_override = sh_mat
+	sun_halo.position = Vector3(0, 32.0, 0)
+	root.add_child(sun_halo)
 
-	# Halo Externo Difuso Carmesim
-	var sun_halo_outer := MeshInstance3D.new()
-	var sho_cyl := CylinderMesh.new()
-	sho_cyl.top_radius = 5.2
-	sho_cyl.bottom_radius = 5.2
-	sho_cyl.height = 0.15
-	sun_halo_outer.mesh = sho_cyl
-	var sho_mat := StandardMaterial3D.new()
-	sho_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	sho_mat.albedo_color = Color(0.8, 0.05, 0.15, 0.6)
-	sho_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	sun_halo_outer.material_override = sho_mat
-	sun_halo_outer.position = Vector3(0, 18.0, 0)
-	sanctuary_root.add_child(sun_halo_outer)
+	var sky_red_light := OmniLight3D.new()
+	sky_red_light.light_color = Color(1.0, 0.08, 0.15)
+	sky_red_light.light_energy = 5.0
+	sky_red_light.omni_range = 50.0
+	sky_red_light.position = Vector3(0, 30.0, 0)
+	root.add_child(sky_red_light)
 
-	# Luz imensa carmesim do eclipse sobre toda a arena
-	var sun_light := OmniLight3D.new()
-	sun_light.light_color = Color(1.0, 0.08, 0.12)
-	sun_light.light_energy = 5.0
-	sun_light.omni_range = 38.0
-	sun_light.position = Vector3(0, 18.0, 0)
-	sanctuary_root.add_child(sun_light)
+	# 2. Catedral de Malakor no centro (0, 0, 0)
+	var cathedral := Node3D.new()
+	cathedral.position = Vector3.ZERO
+	root.add_child(cathedral)
 
-	# Portal e Entrada Interativa do Santuário (Tecla E)
-	_create_interactive_door(landmarks_root, "eclipse_sanctuary", "Santuário do Eclipse (Arena de Raid)", Vector3(-85.0, 0.0, 71.0), Vector3(-85.0, 0.0, 68.0), Vector3(-85.0, 0.0, 74.0), true)
+	var c_floor := MeshInstance3D.new()
+	var cf_box := BoxMesh.new()
+	cf_box.size = Vector3(32.0, 0.4, 32.0)
+	c_floor.mesh = cf_box
+	c_floor.material_override = obs_mat
+	c_floor.position = Vector3(0, 0.2, 0)
+	cathedral.add_child(c_floor)
 
+	for p_i in range(8):
+		var p_ang := p_i * (PI / 4.0)
+		var pilar := MeshInstance3D.new()
+		var p_box := BoxMesh.new()
+		p_box.size = Vector3(1.8, 8.0, 1.8)
+		pilar.mesh = p_box
+		pilar.material_override = obs_mat
+		pilar.position = Vector3(cos(p_ang) * 14.0, 4.0, sin(p_ang) * 14.0)
+		cathedral.add_child(pilar)
 
+	var malakor_lbl := Label3D.new()
+	malakor_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	malakor_lbl.text = "🌑 Catedral do Eclipse Supremo (Raid de Malakor)"
+	malakor_lbl.font_size = 28
+	malakor_lbl.outline_size = 9
+	malakor_lbl.modulate = Color(1.0, 0.15, 0.2)
+	malakor_lbl.position = Vector3(0, 6.0, 0)
+	cathedral.add_child(malakor_lbl)
+
+	# 3. Cripta Carmesim do Rei Vampiro a Noroeste (-140, 0, 140)
+	var crypt := Node3D.new()
+	crypt.position = Vector3(-140.0, 0.0, 140.0)
+	root.add_child(crypt)
+
+	_create_solid_building(crypt, "VampireCrypt", Vector3.ZERO, Vector3(16.0, 7.0, 16.0), Color(0.12, 0.08, 0.12), Color(0.25, 0.05, 0.08), "Cripta Carmesim do Rei Vampiro", Color(1.0, 0.1, 0.2), "south")
+
+	# 4. Portal de Volta para a Vila a Leste (285, 0, 0)
+	_create_portal_area(root, Vector3(285.0, 0.0, 0.0), "🏛️ Portal: Retornar à Vila do Refúgio", Color(0.9, 0.1, 0.2), 0, 6)
+
+# =============================================================================
+# ZONA 4: FRONTEIRA DAS CINZAS / ZONA FUTURA (600x600m)
+# =============================================================================
+func _build_zone_4_ashlands(root: Node3D) -> void:
+	# Chão de cinzas vulcânicas de 600x600m
+	_create_zone_floor(root, Vector3(600.0, 1.0, 600.0), Color(0.14, 0.13, 0.15), 0.9, Vector3(300, 300, 1))
+
+	var ash_lbl := Label3D.new()
+	ash_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	ash_lbl.text = "🔥 Fronteira das Cinzas — Terras Inexploradas\n[Próxima Grande Expansão de Lunaria]"
+	ash_lbl.font_size = 30
+	ash_lbl.outline_size = 9
+	ash_lbl.modulate = Color(1.0, 0.65, 0.15)
+	ash_lbl.position = Vector3(0, 5.0, 0)
+	root.add_child(ash_lbl)
+
+	var magma_light := OmniLight3D.new()
+	magma_light.light_color = Color(1.0, 0.45, 0.1)
+	magma_light.light_energy = 4.0
+	magma_light.omni_range = 20.0
+	magma_light.position = Vector3(0, 1.5, 0)
+	root.add_child(magma_light)
+
+	# Portal de Volta para a Vila a Oeste (-285, 0, 0)
+	_create_portal_area(root, Vector3(-285.0, 0.0, 0.0), "🏛️ Portal: Retornar à Vila do Refúgio", Color(1.0, 0.7, 0.1), 0, 8)
+
+# =============================================================================
+# ZONA 5: INTERIOR DA IGREJA DA LUZ SAGRADA (60x60m)
+# =============================================================================
+func _build_zone_5_church(root: Node3D) -> void:
+	# Chão de mármore polido 60x60m
+	_create_zone_floor(root, Vector3(60.0, 1.0, 60.0), Color(0.88, 0.86, 0.82), 0.4, Vector3(30, 30, 1))
+
+	var church_stone := StandardMaterial3D.new()
+	church_stone.albedo_color = Color(0.92, 0.90, 0.85)
+
+	# Paredes do Templo
+	_create_wall_segment(root, Vector3(0, 5.0, 29.0), Vector3(58.0, 10.0, 1.5), church_stone)
+	_create_wall_segment(root, Vector3(-29.0, 5.0, 0), Vector3(1.5, 10.0, 58.0), church_stone)
+	_create_wall_segment(root, Vector3(29.0, 5.0, 0), Vector3(1.5, 10.0, 58.0), church_stone)
+	_create_wall_segment(root, Vector3(-16.0, 5.0, -29.0), Vector3(26.0, 10.0, 1.5), church_stone)
+	_create_wall_segment(root, Vector3(16.0, 5.0, -29.0), Vector3(26.0, 10.0, 1.5), church_stone)
+
+	# Tapete central dourado
+	var carpet := MeshInstance3D.new()
+	var c_box := BoxMesh.new()
+	c_box.size = Vector3(6.0, 0.02, 44.0)
+	carpet.mesh = c_box
+	var c_mat := StandardMaterial3D.new()
+	c_mat.albedo_color = Color(0.7, 0.15, 0.2)
+	carpet.material_override = c_mat
+	carpet.position = Vector3(0, 0.015, -2.0)
+	root.add_child(carpet)
+
+	# Grande Altar Dourado Solar no fundo (0, 0, 18)
+	var altar := MeshInstance3D.new()
+	var a_box := BoxMesh.new()
+	a_box.size = Vector3(8.0, 1.8, 3.0)
+	altar.mesh = a_box
+	var gold_mat := StandardMaterial3D.new()
+	gold_mat.albedo_color = Color(0.9, 0.75, 0.25)
+	gold_mat.metallic = 0.8
+	gold_mat.roughness = 0.3
+	altar.material_override = gold_mat
+	altar.position = Vector3(0, 0.9, 18.0)
+	root.add_child(altar)
+
+	var solar_light := OmniLight3D.new()
+	solar_light.light_color = Color(1.0, 0.9, 0.5)
+	solar_light.light_energy = 4.5
+	solar_light.omni_range = 22.0
+	solar_light.position = Vector3(0, 4.0, 18.0)
+	root.add_child(solar_light)
+
+	var altar_lbl := Label3D.new()
+	altar_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	altar_lbl.text = "☀️ Grande Altar da Luz Sagrada"
+	altar_lbl.font_size = 28
+	altar_lbl.outline_size = 8
+	altar_lbl.modulate = Color(1.0, 0.88, 0.3)
+	altar_lbl.position = Vector3(0, 3.5, 18.0)
+	root.add_child(altar_lbl)
+
+	# Portal Area3D de Saída na porta sul (0, 0, -26)
+	_create_portal_area(root, Vector3(0.0, 0.0, -26.0), "🚪 Sair para a Vila do Refúgio", Color(1.0, 0.85, 0.2), 0, 10)
+
+# =============================================================================
+# ZONA 6: INTERIOR DA TORRE DO MAGO (60x60m)
+# =============================================================================
+func _build_zone_6_mage_tower(root: Node3D) -> void:
+	# Chão arcano de 60x60m
+	_create_zone_floor(root, Vector3(60.0, 1.0, 60.0), Color(0.09, 0.12, 0.18), 0.5, Vector3(30, 30, 1))
+
+	var mage_stone := StandardMaterial3D.new()
+	mage_stone.albedo_color = Color(0.12, 0.16, 0.25)
+
+	# Paredes da Torre
+	_create_wall_segment(root, Vector3(0, 5.0, 29.0), Vector3(58.0, 10.0, 1.5), mage_stone)
+	_create_wall_segment(root, Vector3(-29.0, 5.0, 0), Vector3(1.5, 10.0, 58.0), mage_stone)
+	_create_wall_segment(root, Vector3(29.0, 5.0, 0), Vector3(1.5, 10.0, 58.0), mage_stone)
+	_create_wall_segment(root, Vector3(-16.0, 5.0, -29.0), Vector3(26.0, 10.0, 1.5), mage_stone)
+	_create_wall_segment(root, Vector3(16.0, 5.0, -29.0), Vector3(26.0, 10.0, 1.5), mage_stone)
+
+	# Orbe Cósmico Arcano Flutuante no centro (0, 3.0, 0)
+	var cosmic_orb := MeshInstance3D.new()
+	var orb_sph := SphereMesh.new()
+	orb_sph.radius = 1.4
+	orb_sph.height = 2.8
+	cosmic_orb.mesh = orb_sph
+	var orb_mat := StandardMaterial3D.new()
+	orb_mat.albedo_color = Color(0.1, 0.9, 1.0)
+	orb_mat.emission_enabled = true
+	orb_mat.emission = Color(0.1, 0.85, 1.0)
+	orb_mat.emission_energy_multiplier = 4.0
+	cosmic_orb.material_override = orb_mat
+	cosmic_orb.position = Vector3(0, 3.0, 0)
+	root.add_child(cosmic_orb)
+
+	var orb_light := OmniLight3D.new()
+	orb_light.light_color = Color(0.15, 0.85, 1.0)
+	orb_light.light_energy = 4.5
+	orb_light.omni_range = 20.0
+	orb_light.position = Vector3(0, 3.5, 0)
+	root.add_child(orb_light)
+
+	var orb_lbl := Label3D.new()
+	orb_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	orb_lbl.text = "🔮 Orbe Arcano Cósmico de Lunaria"
+	orb_lbl.font_size = 28
+	orb_lbl.outline_size = 8
+	orb_lbl.modulate = Color(0.2, 0.9, 1.0)
+	orb_lbl.position = Vector3(0, 5.2, 0)
+	root.add_child(orb_lbl)
+
+	# Portal Area3D de Saída na porta sul (0, 0, -26)
+	_create_portal_area(root, Vector3(0.0, 0.0, -26.0), "🚪 Sair para a Vila do Refúgio", Color(0.1, 0.9, 1.0), 0, 12)
+
+# =============================================================================
+# ZONA 7: MERCADO NEGRO DO BECO (80x80m)
+# =============================================================================
+func _build_zone_7_black_market(root: Node3D) -> void:
+	# Chão de paralelepípedos escuros 80x80m
+	_create_zone_floor(root, Vector3(80.0, 1.0, 80.0), Color(0.14, 0.15, 0.17), 0.7, Vector3(40, 40, 1))
+
+	var alley_brick := StandardMaterial3D.new()
+	alley_brick.albedo_color = Color(0.18, 0.16, 0.2)
+
+	_create_wall_segment(root, Vector3(0, 4.0, 39.0), Vector3(78.0, 8.0, 1.5), alley_brick)
+	_create_wall_segment(root, Vector3(-39.0, 4.0, 0), Vector3(1.5, 8.0, 78.0), alley_brick)
+	_create_wall_segment(root, Vector3(39.0, 4.0, 0), Vector3(1.5, 8.0, 78.0), alley_brick)
+	_create_wall_segment(root, Vector3(-22.0, 4.0, -39.0), Vector3(34.0, 8.0, 1.5), alley_brick)
+	_create_wall_segment(root, Vector3(22.0, 4.0, -39.0), Vector3(34.0, 8.0, 1.5), alley_brick)
+
+	# Tochas roxas de contrabando
+	for tpos in [Vector3(-14, 2.5, -10), Vector3(14, 2.5, -10), Vector3(-14, 2.5, 15), Vector3(14, 2.5, 15)]:
+		var torch := OmniLight3D.new()
+		torch.light_color = Color(0.75, 0.2, 0.95)
+		torch.light_energy = 3.6
+		torch.omni_range = 14.0
+		torch.position = tpos
+		root.add_child(torch)
+
+	var market_lbl := Label3D.new()
+	market_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	market_lbl.text = "🗡️ Mercado Negro do Beco Sombrio\n[Bazar Clandestino — Aberto Apenas das 18h às 06h]"
+	market_lbl.font_size = 28
+	market_lbl.outline_size = 9
+	market_lbl.modulate = Color(0.85, 0.35, 1.0)
+	market_lbl.position = Vector3(0, 4.5, 5.0)
+	root.add_child(market_lbl)
+
+	# Portal Area3D de Saída (0, 0, -35)
+	_create_portal_area(root, Vector3(0.0, 0.0, -35.0), "🚪 Sair para a Vila do Refúgio", Color(0.7, 0.2, 0.9), 0, 14)
+
+# =============================================================================
+# ZONA 8: ESGOTOS ANTIGOS SUBTERRÂNEOS (600x600m)
+# =============================================================================
+func _build_zone_8_sewers(root: Node3D) -> void:
+	# Chão de pedra úmida escura de 600x600m
+	_create_zone_floor(root, Vector3(600.0, 1.0, 600.0), Color(0.12, 0.14, 0.13), 0.85, Vector3(300, 300, 1))
+
+	# Teto abobadado subterrâneo em Y = 7.0m
+	var roof_body := StaticBody3D.new()
+	roof_body.collision_layer = 1
+	roof_body.collision_mask = 0
+	root.add_child(roof_body)
+
+	var r_col := CollisionShape3D.new()
+	var r_shape := BoxShape3D.new()
+	r_shape.size = Vector3(600.0, 1.0, 600.0)
+	r_col.shape = r_shape
+	r_col.position = Vector3(0, 7.5, 0)
+	roof_body.add_child(r_col)
+
+	var r_mesh := MeshInstance3D.new()
+	var rm_box := BoxMesh.new()
+	rm_box.size = Vector3(600.0, 1.0, 600.0)
+	r_mesh.mesh = rm_box
+	var roof_mat := StandardMaterial3D.new()
+	roof_mat.albedo_color = Color(0.1, 0.11, 0.1)
+	r_mesh.material_override = roof_mat
+	r_mesh.position = Vector3(0, 7.5, 0)
+	roof_body.add_child(r_mesh)
+
+	# Canal de Lodo Tóxico Verde central
+	var canal := MeshInstance3D.new()
+	var c_box := BoxMesh.new()
+	c_box.size = Vector3(10.0, 0.1, 580.0)
+	canal.mesh = c_box
+	var tox_mat := StandardMaterial3D.new()
+	tox_mat.albedo_color = Color(0.15, 0.85, 0.35, 0.85)
+	tox_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tox_mat.emission_enabled = true
+	tox_mat.emission = Color(0.12, 0.75, 0.3)
+	tox_mat.emission_energy_multiplier = 2.0
+	canal.material_override = tox_mat
+	canal.position = Vector3(0, 0.05, 0)
+	root.add_child(canal)
+
+	# Luzes verdes ao longo do esgoto
+	for z_i in [-150.0, -75.0, 0.0, 75.0, 150.0]:
+		var g_light := OmniLight3D.new()
+		g_light.light_color = Color(0.2, 0.9, 0.35)
+		g_light.light_energy = 2.8
+		g_light.omni_range = 15.0
+		g_light.position = Vector3(0, 3.0, z_i)
+		root.add_child(g_light)
+
+	# Ninho dos Escorpiões Abissais a Sudeste (100, 0, -100)
+	var scorp_lbl := Label3D.new()
+	scorp_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	scorp_lbl.text = "🦂 Ninho dos Escorpiões Abissais"
+	scorp_lbl.font_size = 26
+	scorp_lbl.outline_size = 8
+	scorp_lbl.modulate = Color(0.3, 1.0, 0.5)
+	scorp_lbl.position = Vector3(100.0, 3.5, -100.0)
+	root.add_child(scorp_lbl)
+
+	# Laboratório Secreto do Alquimista Fantasma a Noroeste (-110, 0, 110)
+	var ghost_lbl := Label3D.new()
+	ghost_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	ghost_lbl.text = "🧪 Laboratório Clandestino do Alquimista Fantasma"
+	ghost_lbl.font_size = 26
+	ghost_lbl.outline_size = 8
+	ghost_lbl.modulate = Color(0.4, 0.95, 0.7)
+	ghost_lbl.position = Vector3(-110.0, 3.5, 110.0)
+	root.add_child(ghost_lbl)
+
+	# Escada / Portal Area3D de Volta para a Vila (0, 0, 0)
+	_create_portal_area(root, Vector3(0.0, 0.0, 0.0), "🪜 Subir para a Vila do Refúgio", Color(0.2, 0.9, 0.4), 0, 16)

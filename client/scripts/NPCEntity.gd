@@ -39,6 +39,39 @@ var max_hp: int = 1000
 var is_dummy: bool = false
 var is_varis: bool = false
 var time_accum: float = 0.0
+var friendship_points: int = 0
+
+static func get_hearts_string(points: int) -> String:
+	if points >= 100:
+		return "❤️❤️❤️❤️❤️"
+	elif points >= 80:
+		return "❤️❤️❤️❤️♡"
+	elif points >= 60:
+		return "❤️❤️❤️♡♡"
+	elif points >= 40:
+		return "❤️❤️♡♡♡"
+	elif points >= 20:
+		return "❤️♡♡♡♡"
+	else:
+		return "♡♡♡♡♡"
+
+static func get_hearts_level_text(points: int) -> String:
+	if points >= 100:
+		return "❤️❤️❤️❤️❤️ (Nível Máximo: Alma Irmã — 20% Desconto + Receitas Secretas)"
+	elif points >= 80:
+		return "❤️❤️❤️❤️♡ (Nível 5: Leal — 15% Desconto)"
+	elif points >= 60:
+		return "❤️❤️❤️♡♡ (Nível 4: Confidente — 10% Desconto + Segredos)"
+	elif points >= 40:
+		return "❤️❤️♡♡♡ (Nível 3: Amigo — 5% Desconto)"
+	elif points >= 20:
+		return "❤️♡♡♡♡ (Nível 2: Conhecido)"
+	else:
+		return "♡♡♡♡♡ (Nível 1: Desconhecido)"
+
+func set_friendship(points: int) -> void:
+	friendship_points = clampi(points, 0, 100)
+	_update_tags()
 
 const INTERPOLATION_SPEED: float = 15.0
 
@@ -957,10 +990,17 @@ func _update_tags() -> void:
 		_: # Garrick
 			name_tag.modulate = Color(1.0, 0.85, 0.4)
 
-	if state_text != "":
-		name_tag.text = "%s\n%s" % [npc_name, state_text]
+	if not is_dummy:
+		var hearts_str := get_hearts_string(friendship_points)
+		if state_text != "":
+			name_tag.text = "%s\n%s\n%s" % [npc_name, state_text, hearts_str]
+		else:
+			name_tag.text = "%s\n%s" % [npc_name, hearts_str]
 	else:
-		name_tag.text = npc_name
+		if state_text != "":
+			name_tag.text = "%s\n%s" % [npc_name, state_text]
+		else:
+			name_tag.text = npc_name
 
 func show_dialogue(text: String) -> void:
 	_ensure_node_refs()

@@ -173,7 +173,7 @@ const ITEM_CATALOG := {
 	17: {
 		"name": "Tomo da Foice do Eclipse",
 		"category": "Artefato Proibido",
-		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 7 — Ceifador do Eclipse!",
+		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 13 — Ceifador do Eclipse!",
 		"color": Color("#aa00ff"),
 		"usable": true,
 		"btn_text": "[Consumir (Despertar Ceifador)]"
@@ -181,7 +181,7 @@ const ITEM_CATALOG := {
 	18: {
 		"name": "Núcleo de Forja Estelar",
 		"category": "Artefato Arcano",
-		"desc": "Fragmento de estrela pulsante com energia rúnica. Entregue ao ferreiro Garrick para despertar a Classe Secreta 8 — Artífice Rúnico!",
+		"desc": "Fragmento de estrela pulsante com energia rúnica. Entregue ao ferreiro Garrick para despertar a Classe Secreta 14 — Artífice Rúnico!",
 		"color": Color("#ffab00"),
 		"usable": true,
 		"btn_text": "[Ativar / Entregar a Garrick]"
@@ -731,6 +731,37 @@ func _create_item_row(item_id: int, qty: int) -> PanelContainer:
 
 func _on_item_used(item_id: int) -> void:
 	print("[InventoryUI] Utilizando/equipando Item ID %d..." % item_id)
+	var world := get_parent()
+	if world and world.has_method("request_class_or_race_change"):
+		match item_id:
+			16: # Sangue do Progenitor Bestial -> Raça 5 Dhampir
+				world.request_class_or_race_change(true, 5, 1, "Dhampir", "ITEM:16")
+				return
+			17: # Tomo da Foice do Eclipse -> Classe 13 Ceifador do Eclipse (Tier 5)
+				world.request_class_or_race_change(false, 13, 5, "Ceifador do Eclipse", "ITEM:17")
+				return
+			18: # Núcleo de Forja Estelar -> Classe 14 Artífice Rúnico (Tier 5)
+				world.request_class_or_race_change(false, 14, 5, "Artífice Rúnico", "ITEM:18")
+				return
+			29: # Ampulheta Rúnica -> Raça 28 Errante Temporal
+				world.request_class_or_race_change(true, 28, 1, "Errante Temporal", "ITEM:29")
+				return
+			30: # Casulo de Seda Prateada -> Raça 21 Aracne
+				world.request_class_or_race_change(true, 21, 1, "Aracne", "ITEM:30")
+				return
+			44: # Olho Multifacetado de Arachna -> Raça 21 Aracne
+				world.request_class_or_race_change(true, 21, 1, "Aracne", "ITEM:44")
+				return
+			47: # Ferrão de Escorpião Abissal -> Raça 43 Demi-Humano Escorpião
+				world.request_class_or_race_change(true, 43, 1, "Demi-Humano Escorpião", "ITEM:47")
+				return
+			52: # Coração de Geada Eterna -> Raça 31 Gigante de Gelo
+				world.request_class_or_race_change(true, 31, 1, "Gigante de Gelo", "ITEM:52")
+				return
+			54: # Sangue Puro do Progenitor -> Raça 5 Dhampir / Vampiro
+				world.request_class_or_race_change(true, 5, 1, "Dhampir / Vampiro", "ITEM:54")
+				return
+
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
 		nm.send_use_item(item_id)

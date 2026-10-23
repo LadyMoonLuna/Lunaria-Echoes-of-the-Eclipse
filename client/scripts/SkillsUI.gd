@@ -9,7 +9,7 @@ const RACIAL_DETAILS := {
 		"name": "Valeriano (Humano Solar)",
 		"skill_z_name": "Ímpeto Valeriano [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "O sangue solar ferve em suas veias! Restaura imediatamente +40 de Stamina, cura +25 de Vida e concede um bônus de +25% de dano em todos os ataques e habilidades por 10 segundos.",
+		"skill_z_desc": "O sangue solar ferve em suas veias! Restaura imediatamente +40 de Stamina, cura +25 de Vida e concede um bônus de +25% de dano por 10s.",
 		"passive_name": "Fôlego Real (Passiva Inata)",
 		"passive_desc": "+15% de regeneração contínua de Stamina mesmo durante a execução de ataques e esquivas.",
 		"color": Color("#ffd700"),
@@ -19,9 +19,9 @@ const RACIAL_DETAILS := {
 		"name": "Noctari (Elfo da Lua)",
 		"skill_z_name": "Explosão Lunar / Umbral [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Libera uma detonação mágica estelar em um raio de 5.5m ao redor do jogador, causando dano arcano massivo baseado em Inteligência e curando +30 de Vida instantaneamente.",
+		"skill_z_desc": "Libera detonação mágica estelar em 5.5m ao redor, causando dano arcano massivo baseado em Inteligência e curando +30 de Vida.",
 		"passive_name": "Passo Astral (Passiva Inata)",
-		"passive_desc": "+25% de dano mágico e físico sob o luar noturno. Durante a Lua Cheia, o bônus é dobrado (+50%).",
+		"passive_desc": "+25% de dano mágico e físico sob a noite (dobrado na Lua Cheia).",
 		"color": Color("#b388ff"),
 		"status": "Linhagem Base — Pronta para Despertar no Nível 10"
 	},
@@ -29,9 +29,9 @@ const RACIAL_DETAILS := {
 		"name": "Kharad (Anão de Pedra & Magma)",
 		"skill_z_name": "Baluarte Rúnico / Erupção [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Bate com força telúrica no chão, desferindo uma erupção de magma em raio de 4.5m e ativando um escudo que reduz 70% de todo dano recebido durante 5 segundos.",
+		"skill_z_desc": "Bate com força telúrica no chão, desferindo erupção de magma em 4.5m e ativando escudo que reduz 70% de todo dano por 5s.",
 		"passive_name": "Postura de Rocha (Passiva Inata)",
-		"passive_desc": "Reduz passivamente 20% de todo dano recebido de Monstros e concede imunidade a perda de equilíbrio por golpes pesados.",
+		"passive_desc": "Reduz passivamente 20% de dano recebido e concede imunidade a perda de equilíbrio.",
 		"color": Color("#ff9800"),
 		"status": "Linhagem Base — Pronta para Despertar no Nível 10"
 	},
@@ -39,15 +39,75 @@ const RACIAL_DETAILS := {
 		"name": "Varkai (Sangue Dracônico / Lupino)",
 		"skill_z_name": "Sopro Dracônico / Rugido Predatório [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Expele um cone devastador de fogo e garras frontais (5.5m) que despedaça as armaduras inimigas e rouba +20 de Vida para cada alvo atingido pelo ataque.",
+		"skill_z_desc": "Expele um cone devastador de fogo e garras frontais (5.5m) que despedaça armaduras e rouba +20 de Vida por inimigo.",
 		"passive_name": "Sangue Fervilhante (Passiva Inata)",
-		"passive_desc": "Quando sua vida cai abaixo de 35%, seus sentidos primordiais entram em hiperatividade, concedendo +20% de dano aumentado e 30% de velocidade de movimento.",
+		"passive_desc": "Abaixo de 35% de vida, ganha +20% de dano aumentado e 30% de velocidade de movimento.",
 		"color": Color("#ff1744"),
 		"status": "Linhagem Base — Pronta para Despertar no Nível 10"
 	},
+	5: {
+		"name": "Dhampir (Vampírico)",
+		"skill_z_name": "Sede de Sangue [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Drena 45 HP do alvo num estalo sombrio, restaurando sua própria vida e concedendo bônus de velocidade.",
+		"passive_name": "Vampirismo Inato (Passiva Inata)",
+		"passive_desc": "+10% de Roubo de Vida passivo permanente em todos os ataques corporais e habilidades.",
+		"color": Color("#e91e63"),
+		"status": "Linhagem Secreta Nobre"
+	},
+	6: {
+		"name": "Licantropo Primordial",
+		"skill_z_name": "Uivo da Fera Ancestral [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Uivo estarrecedor que aterroriza monstros em 8m e aumenta a velocidade de ataque em 40%.",
+		"passive_name": "Fúria Lupina (Passiva Inata)",
+		"passive_desc": "+25% de dano e velocidade durante a noite ou Luas especiais.",
+		"color": Color("#ff6f00"),
+		"status": "Linhagem Feral Ancestral"
+	},
+	7: {
+		"name": "Revenant (Amaldiçoado das Cinzas)",
+		"skill_z_name": "Pacto das Cinzas [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Explosão espectral de cinzas em 5m, prendendo inimigos e drenando essência etérea.",
+		"passive_name": "Tenacidade Fúnebre (Passiva Inata)",
+		"passive_desc": "Ao receber dano letal, sobrevive por 4s com 1 HP para lutar.",
+		"color": Color("#a7ffeb"),
+		"status": "Linhagem Espectral da Cripta"
+	},
+	8: {
+		"name": "Celestino (Natus Solaris)",
+		"skill_z_name": "Chama Sagrada [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Feixe purificador solar que queima inimigos e cura aliados no trajeto.",
+		"passive_name": "Aura Radiante (Passiva Inata)",
+		"passive_desc": "Inimigos próximos sofrem dano contínuo de calor sagrado durante o dia.",
+		"color": Color("#fff176"),
+		"status": "Linhagem Celestial Divina"
+	},
+	9: {
+		"name": "Abissal (Umbralis)",
+		"skill_z_name": "Mergulho Abissal [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Desaparece no éter abissal e surge adiante detonando ondas de vácuo gravitacional.",
+		"passive_name": "Corpo de Éter (Passiva Inata)",
+		"passive_desc": "12% de chance constante de esquivar totalmente de qualquer impacto recebido.",
+		"color": Color("#7c4dff"),
+		"status": "Linhagem Abissal Cósmica"
+	},
+	10: {
+		"name": "Autômato Rúnico",
+		"skill_z_name": "Sobrecarga Arcana [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Detona descarga elétrica em anel de 6m atordoando monstros mecânicos e orgânicos.",
+		"passive_name": "Blindagem de Adamante (Passiva Inata)",
+		"passive_desc": "-20% de dano físico e imunidade permanente a efeitos de veneno.",
+		"color": Color("#00e5ff"),
+		"status": "Linhagem Rúnica Ancestral"
+	},
 	11: {
 		"name": "Alto Valeriano (Ordem Solar)",
-		"skill_z_name": "Estandarte Dourado da Coroa [Z]",
+		"skill_z_name": "Estandarte Real [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Ergue o estandarte sagrado imperial, curando +50 HP em aliados, restaurando +60 Stamina e energizando armas com dano solar divino (+35% de dano por 12s).",
 		"passive_name": "Soberania da Coroa (Passiva Ascendida)",
@@ -65,9 +125,9 @@ const RACIAL_DETAILS := {
 		"color": Color("#ba68c8"),
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
 	},
-	21: {
+	13: {
 		"name": "Arconte Lunar (Ordem de Selene)",
-		"skill_z_name": "Luz Purificadora de Selene [Z]",
+		"skill_z_name": "Luz de Selene [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Invoca um pilar de luz lunar concentrada (6.0m) que purifica aliados curando +70 HP e cega monstros desferindo dano sagrado estelar.",
 		"passive_name": "Coração Estelar (Passiva Ascendida)",
@@ -75,55 +135,335 @@ const RACIAL_DETAILS := {
 		"color": Color("#00e5ff"),
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
-	22: {
+	14: {
 		"name": "Espectro Umbral (Caos de Nyx)",
 		"skill_z_name": "Manto de Nyx [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Dissolve seu corpo nas sombras tornando-se invisível por 4 segundos. O próximo ataque desferido após a quebra do manto causa +120% de Dano Crítico garantido.",
+		"skill_z_desc": "Dissolve seu corpo nas sombras tornando-se invisível por 4 segundos. O próximo ataque causa +120% de Dano Crítico garantido.",
 		"passive_name": "Assassino das Trevas (Passiva Ascendida)",
 		"passive_desc": "+35% de velocidade de movimento e +30% de dano crítico permanente.",
 		"color": Color("#7c4dff"),
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
 	},
-	31: {
+	15: {
 		"name": "Guardião Rúnico (Ordem da Bigorna)",
-		"skill_z_name": "Muralha Rúnica Ancestral [Z]",
+		"skill_z_name": "Muralha Rúnica [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
 		"skill_z_desc": "Grava runas sagradas de proteção na pele, absorvendo 85% de dano por 6s e refletindo 50% de volta aos atacantes.",
 		"passive_name": "Baluarte Inabalável (Passiva Ascendida)",
-		"passive_desc": "Imune a qualquer efeito de controle de grupo e bônus de +400 HP Máximo.",
+		"passive_desc": "Imune a qualquer controle de grupo e bônus de +400 HP Máximo.",
 		"color": Color("#ffb74d"),
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
-	32: {
+	16: {
 		"name": "Titã de Obsidiana (Caos de Magma)",
-		"skill_z_name": "Geiser de Magma Profundo [Z]",
+		"skill_z_name": "Erupção Magma [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Racha o solo liberando uma geiser vulcânica de 5.5m que incendeia inimigos causando dano de queimação contínua e repulsão violenta.",
+		"skill_z_desc": "Racha o solo liberando uma geiser vulcânica de 5.5m que incendeia inimigos causando dano contínuo e repulsão.",
 		"passive_name": "Corpo Magmático (Passiva Ascendida)",
-		"passive_desc": "Atacantes corpo-a-corpo sofrem retaliação de dano de fogo constante.",
+		"passive_desc": "Atacantes corpo-a-corpo sofrem retaliação constante de dano de fogo.",
 		"color": Color("#ff3d00"),
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
 	},
-	41: {
+	17: {
 		"name": "Soberano Dracônico (Ordem Dracônica)",
-		"skill_z_name": "Sopro Real do Dragão Ancestral [Z]",
+		"skill_z_name": "Chamas Reais [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Dispara um sopro colunar de chamas ancestrais de 7.0m que incinera tudo em seu caminho e rouba vida em massa.",
+		"skill_z_desc": "Dispara um sopro colunar de chamas ancestrais de 7.0m que incinera tudo e rouba vida em massa.",
 		"passive_name": "Escamas do Soberano (Passiva Ascendida)",
 		"passive_desc": "Reduz 35% do dano mágico recebido e amplifica dano elemental em 30%.",
 		"color": Color("#e53935"),
 		"status": "Linhagem Cósmica Ascendida (Caminho da Ordem)"
 	},
-	42: {
+	18: {
 		"name": "Fera do Frenesi (Caos Sangrento)",
-		"skill_z_name": "Frenesi Voraz Sangrento [Z]",
+		"skill_z_name": "Frenesi Destruidor [Z]",
 		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
-		"skill_z_desc": "Dispara um salto devastador desferindo 4 garras cortantes rápidas; cada golpe restaura +20 HP e aumenta sua velocidade em 50%.",
+		"skill_z_desc": "Salto devastador com 4 garras cortantes rápidas; cada golpe restaura +20 HP e aumenta sua velocidade em 50%.",
 		"passive_name": "Carnificina Feral (Passiva Ascendida)",
 		"passive_desc": "Abates concedem +20% de cura total instantânea.",
 		"color": Color("#ad1457"),
 		"status": "Linhagem Cósmica Ascendida (Caminho do Caos)"
+	},
+	19: {
+		"name": "Sylvari (Nascido da Seiva)",
+		"skill_z_name": "Raízes Vivas [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Raízes retorcidas brotam do solo em 6m prendendo e drenando vida de todos os inimigos.",
+		"passive_name": "Vínculo com a Seiva (Passiva Inata)",
+		"passive_desc": "Regenera continuamente +3 HP por segundo enquanto permanecer em terreno natural.",
+		"color": Color("#81c784"),
+		"status": "Linhagem Silvestre"
+	},
+	20: {
+		"name": "Esporiano (Myconid)",
+		"skill_z_name": "Nuvem de Esporos [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Libera uma densa nuvem fúngica de veneno e confusão cegando atacantes em 5m.",
+		"passive_name": "Simbiose Fúngica (Passiva Inata)",
+		"passive_desc": "Imunidade total a venenos e toxinas corrosivas com regeneração quando envenenado.",
+		"color": Color("#9c27b0"),
+		"status": "Linhagem Fúngica"
+	},
+	21: {
+		"name": "Aracne (Tecelã)",
+		"skill_z_name": "Teia Prateada [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Dispara projétil de teia que imobiliza o alvo por 3 segundos causando lentidão extrema.",
+		"passive_name": "Pernas de Seda (Passiva Inata)",
+		"passive_desc": "Velocidade nunca é reduzida por teias, lama, estrepes ou lentidões externas.",
+		"color": Color("#eceff1"),
+		"status": "Linhagem Aracnídea"
+	},
+	22: {
+		"name": "Draconato de Cinzas",
+		"skill_z_name": "Sopro de Cinzas [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Cone frontal de brasas incandescentes e fumaça vulcânica causando queima cumulativa.",
+		"passive_name": "Escama-Negra (Passiva Inata)",
+		"passive_desc": "Imunidade a fogo e +15% de armadura física permanente.",
+		"color": Color("#ff6d00"),
+		"status": "Linhagem Dracônica de Cinzas"
+	},
+	23: {
+		"name": "Quimera",
+		"skill_z_name": "Mutação Bioquímica [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Onda de choque bio-ácida frontal adaptativa com dano massivo.",
+		"passive_name": "Corpo Reativo (Passiva Inata)",
+		"passive_desc": "Adaptação celular concedendo +25% de resistência ao último tipo de dano sofrido.",
+		"color": Color("#76ff03"),
+		"status": "Linhagem Quimérica"
+	},
+	24: {
+		"name": "Boreal",
+		"skill_z_name": "Crio-Armadura [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Envolve o corpo em cristal de gelo puro absorvendo dano e congelando atacantes próximos.",
+		"passive_name": "Coração Glacial (Passiva Inata)",
+		"passive_desc": "+25% de dano de gelo e imunidade absoluta a congelamento e hipotermia.",
+		"color": Color("#80d8ff"),
+		"status": "Linhagem Glacial"
+	},
+	25: {
+		"name": "Thalassiano",
+		"skill_z_name": "Maré Abissal [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Erupção de gêiser d'água sob pressão arrastando alvos em cone amplo.",
+		"passive_name": "Filho do Oceano (Passiva Inata)",
+		"passive_desc": "+30% de velocidade e regeneração contínua de vida em zonas aquáticas e chuva.",
+		"color": Color("#006064"),
+		"status": "Linhagem Oceânica"
+	},
+	26: {
+		"name": "Cambion",
+		"skill_z_name": "Correntes Infernais [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Correntes do tártaro prendem alvos queimando suas almas com chamas negras.",
+		"passive_name": "Sangue de Enxofre (Passiva Inata)",
+		"passive_desc": "Ataques convertem 5% da vida máxima em poder ofensivo dobrado.",
+		"color": Color("#c62828"),
+		"status": "Linhagem Infernal"
+	},
+	27: {
+		"name": "Nephilim",
+		"skill_z_name": "Julgamento Nephilim [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Feixe bipartido de luz celestial e vácuo umbral desintegrando defesas inimigas.",
+		"passive_name": "Dualidade Cósmica (Passiva Inata)",
+		"passive_desc": "Alterna bônus de dano sagrado e necrótico a cada golpe executado.",
+		"color": Color("#ffd700"),
+		"status": "Linhagem Crepuscular"
+	},
+	28: {
+		"name": "Errante Temporal (Cronomante)",
+		"skill_z_name": "Reversão Temporal [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Rebobina o tempo do seu corpo para a posição e integridade física de 3 segundos atrás.",
+		"passive_name": "Fios do Tempo (Passiva Inata)",
+		"passive_desc": "-15% no tempo de recarga de todas as habilidades de classe ativas.",
+		"color": Color("#ffd54f"),
+		"status": "Linhagem Temporal"
+	},
+	29: {
+		"name": "Meio-Celestial",
+		"skill_z_name": "Asas de Luz [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Abre asas divinas curando +65 HP, restaurando +40 Stamina e banindo debuffs.",
+		"passive_name": "Graça Divina (Passiva Inata)",
+		"passive_desc": "+15% de cura recebida e dano sagrado radiante passivo.",
+		"color": Color("#fff59d"),
+		"status": "Linhagem Celestial Divina"
+	},
+	30: {
+		"name": "Pyromante",
+		"skill_z_name": "Combustão [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Detona uma explosão de fogo em raio de 6m desferindo 2.8x de dano elemental.",
+		"passive_name": "Chama da Vida (Passiva Inata)",
+		"passive_desc": "Revive automaticamente uma vez por combate com 50% de HP ao receber dano fatal.",
+		"color": Color("#ff3d00"),
+		"status": "Linhagem Elemental Ígnea"
+	},
+	31: {
+		"name": "Gigante de Gelo (1.45x)",
+		"skill_z_name": "Memória Molecular [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Esmaga o solo liberando estalagmites de gelo e recebendo +350 HP Máximo por 15s.",
+		"passive_name": "Massa Glacial (Passiva Inata)",
+		"passive_desc": "Escala colossal de 1.45x, alta tenacidade e +25% de absorção contra frio.",
+		"color": Color("#80deea"),
+		"status": "Linhagem Glacial Gigantesca"
+	},
+	32: {
+		"name": "Drago Terra",
+		"skill_z_name": "Insulto Sísmico [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Provoca todos os monstros num raio de 10m forçando seu foco e quebrando posturas.",
+		"passive_name": "Carapaça Telúrica (Passiva Inata)",
+		"passive_desc": "Reduz passivamente 35% de todo dano físico sofrido de qualquer fonte.",
+		"color": Color("#8d6e63"),
+		"status": "Linhagem Dracônica Telúrica"
+	},
+	33: {
+		"name": "Drago Água",
+		"skill_z_name": "Bênção de Netuno [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Dispara uma violenta onda marinha em cone empurrando e atordoando inimigos.",
+		"passive_name": "Correnteza (Passiva Inata)",
+		"passive_desc": "Recupera continuamente +2.5 HP/s na água ou sob chuva torrencial.",
+		"color": Color("#29b6f6"),
+		"status": "Linhagem Dracônica Marinha"
+	},
+	34: {
+		"name": "Drago Raio",
+		"skill_z_name": "Descarga Elétrica [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Raio elétrico fulminante de longo alcance que perfura e eletrifica oponentes.",
+		"passive_name": "Condutor de Alta Tensão (Passiva Inata)",
+		"passive_desc": "+20% de velocidade de movimento e chance de choque estático em contra-ataques.",
+		"color": Color("#ffd600"),
+		"status": "Linhagem Dracônica Eletrostática"
+	},
+	35: {
+		"name": "Drago Místico",
+		"skill_z_name": "Infusão Arcana [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Círculo rúnico protetor de 6m concedendo +40% de dano mágico em habilidades por 10s.",
+		"passive_name": "Sangue Rúnico (Passiva Inata)",
+		"passive_desc": "+30% de mana e amplificação constante de magias elementais.",
+		"color": Color("#ab47bc"),
+		"status": "Linhagem Dracônica Arcana"
+	},
+	36: {
+		"name": "Orc",
+		"skill_z_name": "Ataque Devastador [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Golpe esmagador brutal com força tripla (3.2x dano) rompendo defesas blindadas.",
+		"passive_name": "Fisiologia Brutal (Passiva Inata)",
+		"passive_desc": "-20% de dano passivo e capacidade de ingerir qualquer resíduo orgânico para cura.",
+		"color": Color("#558b2f"),
+		"status": "Linhagem Brutal Marcial"
+	},
+	37: {
+		"name": "Anão (0.82x)",
+		"skill_z_name": "Martelo Ancestral [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Pancada ancestral de bigorna que atordoa todos os oponentes em raio de 5.5m.",
+		"passive_name": "Resistência da Montanha (Passiva Inata)",
+		"passive_desc": "Estatura compacta de 0.82x com +30% de firmeza e mestria superior na forja.",
+		"color": Color("#d7ccc8"),
+		"status": "Linhagem da Bigorna Ancestral"
+	},
+	38: {
+		"name": "Elfo",
+		"skill_z_name": "Disparo Élfico [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Disparo veloz de éter que atravessa múltiplos alvos causando dano crítico.",
+		"passive_name": "Graça da Floresta (Passiva Inata)",
+		"passive_desc": "+15% de precisão de disparo e custo reduzido em rolamentos evasivos.",
+		"color": Color("#aed581"),
+		"status": "Linhagem Silvestre Esguia"
+	},
+	39: {
+		"name": "Elfo Solar (Azgher)",
+		"skill_z_name": "Espada Solar de Azgher [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Incendeia lâmina com fogo solar sagrado, causando corte colunar de chamas radiantes.",
+		"passive_name": "Bênção de Azgher (Passiva Inata)",
+		"passive_desc": "+25% de dano solar durante as horas de sol sob céu limpo.",
+		"color": Color("#ffb300"),
+		"status": "Linhagem Solar de Azgher"
+	},
+	40: {
+		"name": "Elfo Lunar (Tenebra)",
+		"skill_z_name": "Manto de Tenebra [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Mergulha no véu escuro de Tenebra obtendo invisibilidade e bônus letal de emboscada.",
+		"passive_name": "Véu de Tenebra (Passiva Inata)",
+		"passive_desc": "+30% de chance crítica e passos sem som durante a noite.",
+		"color": Color("#5c6bc0"),
+		"status": "Linhagem Noturna de Tenebra"
+	},
+	41: {
+		"name": "Fadinha (0.55x)",
+		"skill_z_name": "Pó de Fada Estelar [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Espalha pó de fada cintilante curando +50 HP em aliados e cegando monstros.",
+		"passive_name": "Forma Minúscula (Passiva Inata)",
+		"passive_desc": "Estatura minúscula de 0.55x com voo levitante e hitbox significativamente menor.",
+		"color": Color("#f48fb1"),
+		"status": "Linhagem Fada Alada"
+	},
+	42: {
+		"name": "Goblin (0.75x)",
+		"skill_z_name": "Truque Sujo Goblin [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Arremessa bomba de pólvora e fumaça que cega, atordoa e rouba moedas de monstros.",
+		"passive_name": "Trapaceiro Nato (Passiva Inata)",
+		"passive_desc": "Estatura de 0.75x com +20% de drop de ouro e chance de golpe sorrateiro pelas costas.",
+		"color": Color("#7cb342"),
+		"status": "Linhagem Goblinóide Astuta"
+	},
+	43: {
+		"name": "Demi-Humano Escorpião",
+		"skill_z_name": "Aguilhão de Toxina Vorpal [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Estocada rápida com ferrão traseiro injetando peçonha corrosiva que dissolve resistências.",
+		"passive_name": "Quitina Vorpal (Passiva Inata)",
+		"passive_desc": "+20% de dano contra alvos envenenados e resistência alta a toxinas.",
+		"color": Color("#6a1b9a"),
+		"status": "Linhagem Demi-Humana Aracnídea"
+	},
+	44: {
+		"name": "Demi-Humano Tartaruga (1.35x)",
+		"skill_z_name": "Lar Doce Casca [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Encolhe na carapaça impenetrável por 4s, absorvendo 85% de dano e repelindo atacantes.",
+		"passive_name": "Casco de Titã (Passiva Inata)",
+		"passive_desc": "Escala robusta de 1.35x com -45% de todo dano recebido permanentemente.",
+		"color": Color("#33691e"),
+		"status": "Linhagem Demi-Humana Quelônia"
+	},
+	45: {
+		"name": "Meio-Demônio (Succubus)",
+		"skill_z_name": "Drenar Força Vital [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Sifão demoníaco que drena 55 HP do oponente e transfere diretamente para o jogador.",
+		"passive_name": "Charme Demoníaco (Passiva Inata)",
+		"passive_desc": "25% de chance passiva de anular completamente ataques de inimigos deslumbrados.",
+		"color": Color("#c2185b"),
+		"status": "Linhagem Demoníaca"
+	},
+	46: {
+		"name": "Demi-Humano Lobo",
+		"skill_z_name": "Despertar Forma Bestial [Z]",
+		"skill_z_cost": "Sem custo de Stamina | Recarga: 10.0s",
+		"skill_z_desc": "Uivo primal liberando velocidade furiosa (+35%), garras estendidas e roubo de vida por 8s.",
+		"passive_name": "Instinto Lupino (Passiva Inata)",
+		"passive_desc": "+15% de dano físico e rastreamento instintivo de monstros com baixa integridade.",
+		"color": Color("#78909c"),
+		"status": "Linhagem Demi-Humana Lupina"
 	}
 }
 
@@ -132,7 +472,7 @@ const CLASS_ACTIVE_SKILLS := {
 	0: { # Viajante
 		"name": "Viajante (Sem Classe)",
 		"tier_name": "Tier 0 — Aventureiro Iniciante",
-		"desc": "Você ainda não escolheu um caminho marcial. Visite os Mestres Garrick, Lyra ou Capitão Randel na Vila do Refúgio para aprender uma Classe Básica!",
+		"desc": "Você ainda não escolheu um caminho marcial. Visite os Mestres de Classe na Vila do Refúgio para aprender uma Classe Básica!",
 		"color": Color("#cfd8dc"),
 		"evolved_titles": {
 			0: "Aventureiro Iniciante",
@@ -153,145 +493,259 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Respirar Fundo [R]", "desc": "Postura defensiva temporária que recupera +15 de Stamina.", "range": "Pessoal", "cost": "0 Stamina", "cd": "6.0s"},
 		"f": {"name": "Instinto de Sobrevivência [F]", "desc": "Salto para trás e foco aumentado reduzindo dano recebido por 2s.", "range": "Pessoal", "cost": "20 Stamina", "cd": "12.0s"}
 	},
-	1: { # Espadachim
-		"name": "Espadachim",
-		"tier_name": "Tier 1 a Tier 6 (Vanguarda Celestial)",
-		"desc": "Combatente corpo a corpo balanceado, mestre de espada e escudo com foco em cortes rápidos, defesas perfeitas e impactos sísmicos.",
-		"color": Color("#64b5f6"),
+	1: { # Guerreiro
+		"name": "Guerreiro",
+		"tier_name": "Tier 1 a Tier 4 (Mestre das Lâminas)",
+		"desc": "Combatente resoluto armado com espada longa afiada. [Passiva: Sangue de Batalha] +15% Defesa Física e +10% Dano com Espadas.",
+		"color": Color("#4fc3f7"),
 		"evolved_titles": {
-			1: "Espadachim Comum",
+			1: "Guerreiro Comum",
 			2: "Guarda Valente (Incomum)",
 			3: "Cavaleiro Rúnico (Rara)",
-			4: "Mestre de Armas (Épica)",
-			5: "Senhor da Guerra (Única)",
-			6: "Vanguarda Celestial (Lendária)"
+			4: "Mestre de Armas (Épica)"
 		},
 		"passive": {
-			"name": "Determinação Inquebrável",
-			"desc": "Reduz passivamente todo dano físico recebido em +10% a +26% e amplifica a taxa de regeneração de Stamina em +15% a +39% enquanto estiver em postura de combate.",
-			"tier_scaling": "T1 Comum: 1.0x (10% Red / 15% Regen) | T2 Incomum: 1.20x (12% / 18%) | T3 Rara: 1.45x (14.5% / 21.8%) | T4 Épica: 1.75x (17.5% / 26.3%) | T5 Única: 2.15x (21.5% / 32.3%) | T6 Lendária: 2.60x (26% / 39%)"
+			"name": "Sangue de Batalha",
+			"desc": "+15% de Defesa Física e +10% de amplificação de dano ao empunhar espadas.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
 		},
-		"basic": {"name": "Corte da Lâmina [LMB]", "desc": "Golpe rápido de espada em arco frontal (1.0x dano base).", "range": "3.8m", "cost": "0 Stamina", "cd": "0.35s"},
-		"q": {"name": "Corte Crescente [Q]", "desc": "Talho ascendente poderoso que corta alvos em cone amplo (1.75x dano).", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
-		"r": {"name": "Postura de Ferro [R]", "desc": "Parry impenetrável que reduz 70% de dano por 2.5s e causa choque nos inimigos.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.0s"},
-		"f": {"name": "Impacto Sísmico [F]", "desc": "Salto esmagador cravando a lâmina no solo, liberando onda sísmica de 4.5m (2.4x dano).", "range": "4.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
+		"basic": {"name": "Corte de Espada [LMB]", "desc": "Golpe veloz de espada com +15% Defesa Física e +10% Dano com Espadas.", "range": "3.8m", "cost": "0 Stamina", "cd": "0.35s"},
+		"q": {"name": "Corte Duplo [Q]", "desc": "1.8x dano em arco frontal aplicando sangramento contínuo.", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Investida Imparável [R]", "desc": "Dash frontal de 6m que empurra inimigos e quebra postura.", "range": "6.0m Dash", "cost": "20 Stamina", "cd": "6.5s"},
+		"f": {"name": "Julgamento da Espada [F]", "desc": "2.6x dano sísmico em área de 4.5m (+40% dano em alvos com <35% HP).", "range": "4.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	2: { # Batedor
-		"name": "Batedor",
-		"tier_name": "Tier 1 a Tier 6 (Predador Lunar)",
-		"desc": "Atirador veloz de longo alcance armado com arco composto e flechas táticas de controle e perfuração.",
-		"color": Color("#69f0ae"),
+	2: { # Mago
+		"name": "Mago",
+		"tier_name": "Tier 1 a Tier 4 (Arquimago do Éter)",
+		"desc": "Mestre arcano armado com cajado de foco e orbes radiantes. [Passiva: Ressonância Arcana] +20% Dano Mágico e regeneração de Mana.",
+		"color": Color("#ba68c8"),
 		"evolved_titles": {
-			1: "Batedor Comum",
-			2: "Rastreador Silvestre (Incomum)",
-			3: "Atirador Furtivo (Rara)",
-			4: "Patrulheiro Mestre (Épica)",
-			5: "Falcão da Noite (Única)",
-			6: "Predador Lunar (Lendária)"
+			1: "Mago Comum",
+			2: "Mago Arcano (Incomum)",
+			3: "Arquimago (Rara)",
+			4: "Sábio Elemental (Épica)"
 		},
 		"passive": {
-			"name": "Olho de Lince & Disparo Fatal",
-			"desc": "Concede bônus passivo de +12% a +31% de Chance Crítica e +15% a +39% de Velocidade de Movimento permanente.",
-			"tier_scaling": "T1 Comum: 1.0x (12% Crítico / 15% Vel) | T2 Incomum: 1.20x (14.4% / 18%) | T3 Rara: 1.45x (17.4% / 21.8%) | T4 Épica: 1.75x (21% / 26.3%) | T5 Única: 2.15x (25.8% / 32.3%) | T6 Lendária: 2.60x (31.2% / 39%)"
+			"name": "Ressonância Arcana",
+			"desc": "+20% de Dano Mágico puro e regeneração contínua de Mana/Stamina após feitiços.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
 		},
-		"basic": {"name": "Disparo Rápido [LMB]", "desc": "Flecha balística veloz de longo alcance (1.0x dano).", "range": "16.0m", "cost": "0 Stamina", "cd": "0.30s"},
-		"q": {"name": "Disparo Perfurante [Q]", "desc": "Flecha pontiaguda de alta velocidade que atravessa múltiplos alvos (1.75x dano).", "range": "22.0m", "cost": "15 Stamina", "cd": "3.0s"},
-		"r": {"name": "Chuva de Estrepes [R]", "desc": "Dispara armadilhas de espinhos que reduzem a movimentação dos monstros em 40% por 3s.", "range": "14.0m", "cost": "20 Stamina", "cd": "6.0s"},
-		"f": {"name": "Saraivada Estelar [F]", "desc": "Dispara 3 flechas encantadas simultâneas em cone frontal aberto (2.4x dano total).", "range": "18.0m", "cost": "25 Stamina", "cd": "12.0s"}
+		"basic": {"name": "Orbe Arcano [LMB]", "desc": "Projétil arcano (+20% Dano Mágico e regeneração contínua de Mana).", "range": "14.0m", "cost": "0 Stamina", "cd": "0.38s"},
+		"q": {"name": "Orbe de Magma [Q]", "desc": "Projétil explosivo a 18m causando 1.9x dano de fogo em área.", "range": "18.0m", "cost": "15 Stamina", "cd": "3.2s"},
+		"r": {"name": "Prisão Glacial [R]", "desc": "Congela e empurra inimigos em 5m por 2s.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Chuva de Meteoros [F]", "desc": "2.8x dano arcano/fogo devastador em raio de 6m.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	3: { # Iniciado Arcano
-		"name": "Iniciado Arcano",
-		"tier_name": "Tier 1 a Tier 6 (Feiticeiro do Infinito)",
-		"desc": "Conjurador de magias elementais do cosmos, capaz de explodir esferas arcanas e congelar inimigos em área.",
-		"color": Color("#ea80fc"),
+	3: { # Arqueiro
+		"name": "Arqueiro",
+		"tier_name": "Tier 1 a Tier 4 (Sentinela Noturno)",
+		"desc": "Atirador ágil e letal com arco longo e disparos penetrantes. [Passiva: Olho de Falcão] +20% Taxa Crítica e +12% Velocidade.",
+		"color": Color("#81c784"),
 		"evolved_titles": {
-			1: "Iniciado Arcano Comum",
-			2: "Aprendiz Elemental (Incomum)",
-			3: "Mago Rúnico (Rara)",
-			4: "Arquimago das Estrelas (Épica)",
-			5: "Sábio Celestial (Única)",
-			6: "Feiticeiro do Infinito (Lendária)"
+			1: "Arqueiro Comum",
+			2: "Caçador Silvestre (Incomum)",
+			3: "Franco-Atirador (Rara)",
+			4: "Sentinela Noturno (Épica)"
 		},
 		"passive": {
-			"name": "Ressonância Arcana Cósmica",
-			"desc": "Amplifica o dano mágico arcano em +15% a +39% e concede regeneração contínua de +20% a +52% de mana/stamina após conjurações.",
-			"tier_scaling": "T1 Comum: 1.0x (15% Dano / 20% Regen) | T2 Incomum: 1.20x (18% / 24%) | T3 Rara: 1.45x (21.8% / 29%) | T4 Épica: 1.75x (26.3% / 35%) | T5 Única: 2.15x (32.3% / 43%) | T6 Lendária: 2.60x (39% / 52%)"
+			"name": "Olho de Falcão",
+			"desc": "+20% de Taxa Crítica à distância e +12% de Velocidade de Movimento permanente.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
 		},
-		"basic": {"name": "Orbe Arcano [LMB]", "desc": "Projétil de energia cósmica concentrada com velocidade de 16m/s (1.0x dano).", "range": "14.0m", "cost": "0 Stamina", "cd": "0.38s"},
-		"q": {"name": "Cometa Elemental [Q]", "desc": "Grande esfera de fogo estelar que explode em um raio de 2.8m (1.75x dano).", "range": "18.0m", "cost": "15 Stamina", "cd": "3.2s"},
-		"r": {"name": "Nova de Gelo [R]", "desc": "Onda congelante de 5.0m radial que paralisa e desacelera monstros por 1.5s.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
-		"f": {"name": "Maelstrom Cósmico [F]", "desc": "Tempestade arcana colossal de devastação massiva em raio de 6.5m (2.4x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
+		"basic": {"name": "Disparo Preciso [LMB]", "desc": "Flecha balística com +20% Taxa Crítica à distância e +12% Velocidade.", "range": "16.0m", "cost": "0 Stamina", "cd": "0.30s"},
+		"q": {"name": "Tiro Perfurante [Q]", "desc": "Flecha veloz a 24m que atravessa alvos causando 1.85x dano.", "range": "24.0m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Salto Acrobático [R]", "desc": "Mortal para trás disparando flecha que prende o inimigo por 2s.", "range": "12.0m", "cost": "20 Stamina", "cd": "6.0s"},
+		"f": {"name": "Tempestade de Mil Flechas [F]", "desc": "2.6x dano em chuva de flechas numa área de 6m.", "range": "18.0m", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	4: { # Acólito da Aurora
-		"name": "Acólito da Aurora",
-		"tier_name": "Tier 1 a Tier 6 (Santo da Aurora Cósmica)",
-		"desc": "Guerreiro sagrado empunhando maça e talismã, alternando entre ataques de contusão divina e orações curativas.",
-		"color": Color("#ffd54f"),
+	4: { # Assassino
+		"name": "Assassino",
+		"tier_name": "Tier 1 a Tier 4 (Lâmina Sombria)",
+		"desc": "Executor veloz empunhando duas adagas venenosas. [Passiva: Lâmina Silenciosa] +35% Crítico costas e +15% Esquiva.",
+		"color": Color("#e57373"),
 		"evolved_titles": {
-			1: "Acólito da Aurora Comum",
-			2: "Clérigo Solene (Incomum)",
-			3: "Templário Sagrado (Rara)",
-			4: "Bispo Radiante (Épica)",
-			5: "Sumo Pontífice (Única)",
-			6: "Santo da Aurora Cósmica (Lendária)"
+			1: "Assassino Comum",
+			2: "Espreitador (Incomum)",
+			3: "Lâmina Sombria (Rara)",
+			4: "Mestre da Morte (Épica)"
 		},
 		"passive": {
-			"name": "Graça Divina Radiante",
-			"desc": "Aumenta a eficácia de todas as curas sagradas em +20% a +52% e cria uma aura protetora que reduz 15% do dano de Trevas sofrido.",
-			"tier_scaling": "T1 Comum: 1.0x (20% Cura) | T2 Incomum: 1.20x (24% Cura) | T3 Rara: 1.45x (29% Cura) | T4 Épica: 1.75x (35% Cura) | T5 Única: 2.15x (43% Cura) | T6 Lendária: 2.60x (52% Cura)"
+			"name": "Lâmina Silenciosa",
+			"desc": "+35% de Dano Crítico ao golpear pelas costas e +15% de Esquiva inata permanente.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
 		},
-		"basic": {"name": "Golpe da Fé [LMB]", "desc": "Pancada de maça abençoada causando dano sagrado puro (1.0x dano).", "range": "4.0m", "cost": "0 Stamina", "cd": "0.36s"},
-		"q": {"name": "Círculo de Luz [Q]", "desc": "Impacto sagrado que causa dano aos monstros e cura +40 HP em aliados em 6.0m.", "range": "6.0m", "cost": "15 Stamina", "cd": "3.5s"},
-		"r": {"name": "Lança do Julgamento [R]", "desc": "Feixe divino perfurante lançado a até 15m que purifica os alvos.", "range": "15.0m", "cost": "20 Stamina", "cd": "6.5s"},
-		"f": {"name": "Égide Sagrada [F]", "desc": "Explosão celestial restaurando +65 HP no grupo e desferindo 2.4x dano sagrado.", "range": "7.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+		"basic": {"name": "Talho Duplo [LMB]", "desc": "Golpes letais com +35% Dano Crítico pelas costas e +15% Esquiva.", "range": "3.6m", "cost": "0 Stamina", "cd": "0.28s"},
+		"q": {"name": "Passo das Sombras [Q]", "desc": "Teleporta para as costas do alvo cortando com 1.9x dano + veneno.", "range": "8.0m Teleporte", "cost": "15 Stamina", "cd": "3.5s"},
+		"r": {"name": "Cortina de Fumaça [R]", "desc": "Fica furtivo/intangível por 2.5s e ganha +30% velocidade.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Lótus de Sangue [F]", "desc": "Desfere 8 cortes letais em 4m causando 2.7x dano e hemorragia.", "range": "4.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	5: { # Ferreiro Combatente
-		"name": "Ferreiro Combatente",
-		"tier_name": "Tier 1 a Tier 6 (Titã Vulcânico)",
-		"desc": "Força bruta com martelo colossal de forja, capaz de forjar armas de guerra e esmagar couraças.",
+	5: { # Lutador
+		"name": "Lutador",
+		"tier_name": "Tier 1 a Tier 4 (Punho de Dragão)",
+		"desc": "Mestre marcial que luta com manoplas pesadas de ferro e Chi canalizado. [Passiva: Punhos de Ferro & Chi].",
+		"color": Color("#ffb74d"),
+		"evolved_titles": {
+			1: "Lutador Comum",
+			2: "Pugilista de Ferro (Incomum)",
+			3: "Mestre de Chi (Rara)",
+			4: "Punho de Dragão (Épica)"
+		},
+		"passive": {
+			"name": "Punhos de Ferro & Chi",
+			"desc": "Ignora 25% da armadura do oponente e ganha escudo protetor de Chi a cada 3 socos consecutivos.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
+		},
+		"basic": {"name": "Golpe de Chi [LMB]", "desc": "Punhos pesados que ignoram 25% da armadura e ganham escudo a cada 3 socos.", "range": "3.5m", "cost": "0 Stamina", "cd": "0.32s"},
+		"q": {"name": "Gancho Demolidor [Q]", "desc": "Soco explosivo de Chi causando 1.85x dano e atordoamento curto.", "range": "3.8m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Postura do Lótus Marcial [R]", "desc": "Purifica debuffs, cura +40 HP e reduz dano em 50% por 3s.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Meteoro de Um Punho [F]", "desc": "Salta e soca o chão abrindo cratera de 5.5m com 2.75x dano.", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
+	},
+	6: { # Escudeiro
+		"name": "Escudeiro",
+		"tier_name": "Tier 1 a Tier 4 (Paladino da Fortaleza)",
+		"desc": "Bastião inabalável com escudo colossal e maça. [Passiva: Fortaleza Viva] +35% Defesa, reflete 20% do dano.",
+		"color": Color("#fff176"),
+		"evolved_titles": {
+			1: "Escudeiro Comum",
+			2: "Guardião da Torre (Incomum)",
+			3: "Baluarte Implacável (Rara)",
+			4: "Paladino da Fortaleza (Épica)"
+		},
+		"passive": {
+			"name": "Fortaleza Viva",
+			"desc": "+35% de Defesa Total, reflete 20% do dano sofrido e converte Defesa em Poder de Ataque.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
+		},
+		"basic": {"name": "Pancada de Bastião [LMB]", "desc": "+35% Defesa Total, reflete 20% do dano e converte Defesa em Ataque.", "range": "3.8m", "cost": "0 Stamina", "cd": "0.38s"},
+		"q": {"name": "Esmagamento de Bastião [Q]", "desc": "Golpe de escudo com 1.7x dano que provoca/Taunt monstros em 8m.", "range": "8.0m Taunt", "cost": "15 Stamina", "cd": "3.5s"},
+		"r": {"name": "Formação Impenetrável [R]", "desc": "Bloqueia 80% do dano por 4s e concede escudo aos aliados próximos.", "range": "Grupo 8m", "cost": "20 Stamina", "cd": "8.0s"},
+		"f": {"name": "Cidadela Inabalável [F]", "desc": "Crava o escudo no solo criando cúpula dourada que cura +70 HP e impede mortes por 4s.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "14.0s"}
+	},
+	7: { # Ferreiro
+		"name": "Ferreiro",
+		"tier_name": "Tier 1 a Tier 4 (Artesão Supremo — Estilo Overgeared)",
+		"desc": "Forjador lendário com martelo colossal de forja. [Passiva: Orgulho do Criador] Equipamentos nunca quebram e +25% Dano com armas forjadas.",
 		"color": Color("#ff9800"),
 		"evolved_titles": {
-			1: "Ferreiro Combatente Comum",
-			2: "Forjador de Guerra (Incomum)",
-			3: "Armeiro Blindado (Rara)",
-			4: "Grão-Forjador (Épica)",
-			5: "Mestre das Bigornas (Única)",
-			6: "Titã Vulcânico (Lendária)"
+			1: "Ferreiro Comum",
+			2: "Forjador de Batalha (Incomum)",
+			3: "Mestre da Forja (Rara)",
+			4: "Artesão Supremo (Épica)"
 		},
 		"passive": {
-			"name": "Pancada Incandescente & Couraça de Forja",
-			"desc": "Concede +15% a +39% de dano de contusão/atordoamento contra couraças pesadas e adiciona +20% a +52% de Armadura base aos equipamentos equipados.",
-			"tier_scaling": "T1 Comum: 1.0x (15% Dano / 20% Armadura) | T2 Incomum: 1.20x (18% / 24%) | T3 Rara: 1.45x (21.8% / 29%) | T4 Épica: 1.75x (26.3% / 35%) | T5 Única: 2.15x (32.3% / 43%) | T6 Lendária: 2.60x (39% / 52%)"
+			"name": "Orgulho do Criador",
+			"desc": "Equipamentos nunca quebram, +25% de dano com armas forjadas e ignora restrições de empunhadura.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
 		},
-		"basic": {"name": "Martelada Pesada [LMB]", "desc": "Golpe esmagador contundente que atordoa armaduras leves (1.0x dano).", "range": "4.0m", "cost": "0 Stamina", "cd": "0.40s"},
-		"q": {"name": "Golpe de Bigorna [Q]", "desc": "Impacto pesado concentrado no topo do crânio do alvo (1.75x dano).", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
-		"r": {"name": "Afiação de Combate [R]", "desc": "Martela a bigorna conferindo um buff de +25% de dano para o grupo por 10s.", "range": "Grupo 12m", "cost": "20 Stamina", "cd": "10.0s"},
-		"f": {"name": "Fúria do Vulcão [F]", "desc": "Impacto sísmico frontal telegrafado de 4.5m abrindo fendas incandescentes (2.4x dano).", "range": "4.5m Frontal", "cost": "25 Stamina", "cd": "13.0s"}
+		"basic": {"name": "Martelada da Forja [LMB]", "desc": "Pancada de martelo incandescente forjando impacto de 1.0x dano contundente.", "range": "4.0m", "cost": "0 Stamina", "cd": "0.38s"},
+		"q": {"name": "Golpe da Bigorna Incandescente [Q]", "desc": "1.85x dano de fogo/físico que racha 30% da armadura do alvo.", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Afiação & Têmpera em Campo [R]", "desc": "Repara armas e concede +25% Ataque e Defesa ao grupo por 10s.", "range": "Grupo 12m", "cost": "20 Stamina", "cd": "10.0s"},
+		"f": {"name": "Dança do Arsenal Forjado [F]", "desc": "Invoca 4 armas espectrais forjadas que giram cortando tudo em 5.5m com 2.7x dano!", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	6: { # Alquimista
+	8: { # Alquimista
 		"name": "Alquimista",
-		"tier_name": "Tier 1 a Tier 6 (Alquimista do Éter Cósmico)",
-		"desc": "Manipulador de frascos químicos, elixires curativos e bombas cáusticas de ácido.",
-		"color": Color("#00e676"),
+		"tier_name": "Tier 1 a Tier 4 (Grão-Alquimista do Éter)",
+		"desc": "Cientista bélico armado com catalisadores e frascos químicos. [Passiva: Reação Sintética] +35% potência de poções.",
+		"color": Color("#69f0ae"),
 		"evolved_titles": {
 			1: "Alquimista Comum",
-			2: "Boticário Rebelde (Incomum)",
-			3: "Químico Cáustico (Rara)",
-			4: "Grão-Quimicista (Épica)",
-			5: "Transmutador Mestre (Única)",
-			6: "Alquimista do Éter Cósmico (Lendária)"
+			2: "Boticário Bélico (Incomum)",
+			3: "Bioquímico Transmutador (Rara)",
+			4: "Grão-Alquimista do Éter (Épica)"
 		},
 		"passive": {
-			"name": "Catalisador Tóxico & Transmutação Vital",
-			"desc": "Ácidos, elixires e compostos químicos causam +25% a +65% de dano corrosivo contínuo ao longo do tempo. Abates transmutam +15 a +39 HP instantâneos.",
-			"tier_scaling": "T1 Comum: 1.0x (25% Ácido / +15 HP) | T2 Incomum: 1.20x (30% / +18 HP) | T3 Rara: 1.45x (36.3% / +21.8 HP) | T4 Épica: 1.75x (43.8% / +26.3 HP) | T5 Única: 2.15x (53.8% / +32.3 HP) | T6 Lendária: 2.60x (65% / +39 HP)"
+			"name": "Reação Sintética",
+			"desc": "+35% na potência de poções/frascos e ataques normais aplicam camadas de ácido corrosivo cumulativo.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
 		},
-		"basic": {"name": "Frasco Cáustico [LMB]", "desc": "Arremesso de ampola corrosiva com alcance médio (1.0x dano).", "range": "13.0m", "cost": "0 Stamina", "cd": "0.36s"},
-		"q": {"name": "Frasco de Éter [Q]", "desc": "Frasco que detona causando dano em área e curando +40 HP em aliados em 6.0m.", "range": "14.0m", "cost": "15 Stamina", "cd": "3.2s"},
-		"r": {"name": "Bomba de Ácido [R]", "desc": "Arremessa poça corrosiva de 3.5m que reduz armaduras dos inimigos por 4s.", "range": "12.0m", "cost": "20 Stamina", "cd": "7.0s"},
-		"f": {"name": "Detonação Catalítica [F]", "desc": "Reação química em cadeia que explode violentamente em área de 5.5m (2.4x dano).", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+		"basic": {"name": "Frasco Cáustico [LMB]", "desc": "Arremesso de frasco químico corrosivo aplicando ácido contínuo (1.0x dano).", "range": "13.0m", "cost": "0 Stamina", "cd": "0.36s"},
+		"q": {"name": "Frasco de Fogo Grego & Cura [Q]", "desc": "Explode curando +45 HP nos aliados e queimando inimigos com 1.8x dano.", "range": "14.0m", "cost": "15 Stamina", "cd": "3.2s"},
+		"r": {"name": "Bomba de Ácido Corrosivo [R]", "desc": "Poça química que derrete 35% da defesa inimiga e desacelera por 4s.", "range": "12.0m", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Transmutação do Behemoth Químico [F]", "desc": "Detona megabomba de 2.6x dano e transforma o corpo com +30% status por 8s.", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	7: { # Ceifador do Eclipse (Classe Secreta 7)
+	9: { # Escultor
+		"name": "Escultor",
+		"tier_name": "Tier 1 a Tier 4 (Mestre do Luar — Estilo Moonlight Sculptor)",
+		"desc": "Artista do entalhe com cinzel afiado e adaga prateada. [Passiva: Olho da Escultura & Estátua Viva] +25% Crítico e Estátua Guardiã leal.",
+		"color": Color("#80deea"),
+		"evolved_titles": {
+			1: "Escultor Comum",
+			2: "Lapidador de Mármore (Incomum)",
+			3: "Escultor da Alvorada (Rara)",
+			4: "Mestre da Luz e Sombra (Épica)"
+		},
+		"passive": {
+			"name": "Olho da Escultura & Estátua Viva",
+			"desc": "+25% de Dano Crítico enxergando falhas na matéria e mantém uma Estátua Guardiã auxiliando em combate.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
+		},
+		"basic": {"name": "Entalhe Prateado [LMB]", "desc": "Cortes precisos com cinzel e adaga lapidando os pontos fracos dos oponentes.", "range": "3.8m", "cost": "0 Stamina", "cd": "0.32s"},
+		"q": {"name": "Entalhe em Velocidade [Q]", "desc": "5 cortes precisos com 1.9x dano que reduzem a defesa do alvo.", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Estátua Explosiva / Pele de Mármore [R]", "desc": "Deixa uma escultura que explode nos inimigos e concede 50% de redução de dano.", "range": "4.5m Área", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Técnica Secreta: Escultura do Luar [F]", "desc": "Feixe de cortes prateados em 6m causando 2.8x Dano Verdadeiro e despertando o Colosso!", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+	},
+	10: { # Domador
+		"name": "Domador",
+		"tier_name": "Tier 1 a Tier 4 (Senhor dos Predadores — Estilo Taming Master)",
+		"desc": "Mestre das feras com chicote bestial de couro trançado. [Passiva: Senhor da Matilha] Luta com Fera Domada que divide dano.",
+		"color": Color("#ffd740"),
+		"evolved_titles": {
+			1: "Domador Comum",
+			2: "Adestrador de Feras (Incomum)",
+			3: "Comandante da Matilha (Rara)",
+			4: "Senhor dos Predadores (Épica)"
+		},
+		"passive": {
+			"name": "Senhor da Matilha",
+			"desc": "Luta acompanhado permanentemente por uma Fera Domada que ataca a cada 1.8s e absorve parte do seu dano.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
+		},
+		"basic": {"name": "Estalo de Chicote [LMB]", "desc": "Ataque rítmico com chicote estalando a média distância com dano de corte contundente.", "range": "5.5m", "cost": "0 Stamina", "cd": "0.34s"},
+		"q": {"name": "Estalo do Chicote: Investida! [Q]", "desc": "Chicoteia a 9m e ordena que a fera salte rasgando o alvo com 1.9x dano.", "range": "9.0m", "cost": "15 Stamina", "cd": "3.2s"},
+		"r": {"name": "Fusão & Uivo Bestial [R]", "desc": "Cura +50 HP seu e da fera, concedendo +30% de velocidade e garras vorazes.", "range": "Pessoal", "cost": "20 Stamina", "cd": "7.5s"},
+		"f": {"name": "Debandada das Feras Primordiais [F]", "desc": "Invoca feras domadas que atropelam toda a área em 7m com 2.8x dano!", "range": "7.0m Área", "cost": "25 Stamina", "cd": "13.0s"}
+	},
+	11: { # Alfaiate de Guerra
+		"name": "Alfaiate de Guerra",
+		"tier_name": "Tier 1 a Tier 4 (Mestre do Tear Fatal)",
+		"desc": "Manipulador tático de fios de aço monofilamento e agulhas rúnicas blindadas. [Passiva: Fios & Seda Blindada].",
+		"color": Color("#ce93d8"),
+		"evolved_titles": {
+			1: "Alfaiate de Guerra Comum",
+			2: "Costureiro de Malha (Incomum)",
+			3: "Tecelão da Vigília (Rara)",
+			4: "Mestre do Tear Fatal (Épica)"
+		},
+		"passive": {
+			"name": "Fios Monofilamento & Seda Blindada",
+			"desc": "Ataques cortam a até 10m de distância e trajes leves conferem a mesma proteção de armaduras pesadas.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
+		},
+		"basic": {"name": "Ponto de Agulha [LMB]", "desc": "Fios cortantes invisíveis cruzando o ar à média distância fatiando armaduras.", "range": "8.0m", "cost": "0 Stamina", "cd": "0.32s"},
+		"q": {"name": "Teia de Fios Retalhadores [Q]", "desc": "Cruza os dedos fatiando todos os inimigos em cone de 8m com 1.85x dano.", "range": "8.0m Cone", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Costurar Sombras / Marionete [R]", "desc": "Prende os inimigos no chão por 2.5s com fios de aço e concede esquiva ao grupo.", "range": "6.0m", "cost": "20 Stamina", "cd": "7.0s"},
+		"f": {"name": "Gaiola de Fios Carmesins [F]", "desc": "Fecha uma redoma de fios de aço que tritura todos os alvos em 6m causando 2.7x dano.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
+	},
+	12: { # Chef de Caça
+		"name": "Chef de Caça",
+		"tier_name": "Tier 1 a Tier 4 (Grão-Chef dos Ermos)",
+		"desc": "Açougueiro de monstros com cutelo colossal e wok de ferro. [Passiva: Células Gourmet & Mestre Açougueiro].",
+		"color": Color("#ff7043"),
+		"evolved_titles": {
+			1: "Chef de Caça Comum",
+			2: "Cozinheiro de Bordo (Incomum)",
+			3: "Mestre Gourmet (Rara)",
+			4: "Grão-Chef dos Ermos (Épica)"
+		},
+		"passive": {
+			"name": "Células Gourmet & Mestre Açougueiro",
+			"desc": "Zona Verde da Autópsia +50% maior; devorar carnes e órgãos concede bônus temporários e permanentes.",
+			"tier_scaling": "T1 Comum (+5 pts/nv) | T2 Incomum (+6 pts/nv) | T3 Rara (+7 pts/nv) | T4 Épica (+8 pts/nv)"
+		},
+		"basic": {"name": "Corte de Açougue [LMB]", "desc": "Golpe pesado com cutelo arrancando partes anatômicas de criaturas vivas.", "range": "3.8m", "cost": "0 Stamina", "cd": "0.36s"},
+		"q": {"name": "Desossar a Vivo! [Q]", "desc": "Golpe pesado de cutelo com 1.9x dano que arranca um bife curativo (+35 HP) do inimigo!", "range": "4.2m", "cost": "15 Stamina", "cd": "3.0s"},
+		"r": {"name": "Banquete na Wok Flamejante [R]", "desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
+		"f": {"name": "Trinchar o Behemoth [F]", "desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade!", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
+	},
+	13: { # Ceifador do Eclipse (Classe Secreta 13)
 		"name": "Ceifador do Eclipse",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano da Meia-Noite)",
 		"desc": "Espírito das sombras portando uma foice colossal. Cada golpe ceifa as almas e o sangue dos inimigos.",
@@ -308,7 +762,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Ceifa de Almas & Lifesteal Sombrio",
 			"desc": "Converte de 15% (Tier 5) a 25% (Tier 6) de todo o dano infligido em regeneração imediata de Vida, e ganha +20% de bônus de dano durante a Noite ou Eclipse.",
-			"tier_scaling": "Tier 5 Única (Base): 15% Lifesteal + 20% Dano Noturno | Tier 6 Lendária: 25% Lifesteal + 35% Dano Noturno"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): 15% Lifesteal + 20% Dano Noturno | Tier 6 Lendária (+15 pts/nv): 25% Lifesteal + 35% Dano Noturno"
 		},
 		"unlock_hint": "Falar com Varis (NPC 104) à noite possuindo Essência da Noite e Nível 15+, ou consumir o Frasco do Eclipse sob a Lua Cheia.",
 		"basic": {"name": "Foice das Sombras [LMB]", "desc": "Varredura ampla de longo melee de 4.8m com lifesteal embutido (1.0x dano).", "range": "4.8m", "cost": "0 Stamina", "cd": "0.38s"},
@@ -316,7 +770,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Drenagem Abissal [R]", "desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.", "range": "Pessoal 5m", "cost": "20 Stamina", "cd": "6.5s"},
 		"f": {"name": "Dança do Eclipse Total [F]", "desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida pleno (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	8: { # Artífice Rúnico (Classe Secreta 8)
+	14: { # Artífice Rúnico (Classe Secreta 14)
 		"name": "Artífice Rúnico",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Engenheiro Arcano Supremo)",
 		"desc": "Híbrido mecânico armado com martelo-canhão movido a núcleos de forja estelar.",
@@ -333,15 +787,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Sobrecarga de Pólvora & Canhão Arcano",
 			"desc": "O canhão de mão ganha +25% (Tier 5) a +40% (Tier 6) de dano em área e reduz o tempo de recarga de todas as habilidades de longo alcance em 20%.",
-			"tier_scaling": "Tier 5 Única (Base): +25% Dano em Área | Tier 6 Lendária: +40% Dano em Área + Pulso Eletrostático Crítico"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): +25% Dano em Área | Tier 6 Lendária (+15 pts/nv): +40% Dano em Área + Pulso Eletrostático Crítico"
 		},
-		"unlock_hint": "Forjar a Liga Rúnica Estelar na Bigorna de Garrick (NPC 100) com Força >= 20 e Constituição >= 15 durante Neblina ou à Noite.",
+		"unlock_hint": "Forjar a Liga Rúnica Estelar na Bigorna de Garrick com Força >= 20 e Constituição >= 15 durante Neblina ou à Noite.",
 		"basic": {"name": "Canhonada Rúnica [LMB]", "desc": "Pancada física e detonação de pólvora simultâneas (1.0x dano).", "range": "15.0m", "cost": "0 Stamina", "cd": "0.38s"},
 		"q": {"name": "Salva Rúnica [Q]", "desc": "Três cartuchos energizados disparados em rápida sucessão frontal (1.75x dano).", "range": "16.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Sobrecarga Eletrostática [R]", "desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Bombardeio Titanomecânico [F]", "desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	9: { # Criador de Homúnculos (Classe Secreta 9)
+	15: { # Criador de Homúnculos (Classe Secreta 15)
 		"name": "Criador de Homúnculos",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Demiurgo da Vida Sintética)",
 		"desc": "Mestre da vida sintética acompanhado por uma quimera flutuante transmissora de elixires.",
@@ -358,15 +812,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Sintonia Biótica Quimérica",
 			"desc": "O homúnculo companheiro herda +30% (Tier 5) a +50% (Tier 6) de todos os atributos do criador, regenerando periodicamente a vida do mestre em combate.",
-			"tier_scaling": "Tier 5 Única (Base): +30% Atributos herdados + Cura contínua | Tier 6 Lendária: +50% Atributos herdados + Pulso Biótico Duplo"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): +30% Atributos herdados + Cura contínua | Tier 6 Lendária (+15 pts/nv): +50% Atributos herdados + Pulso Biótico Duplo"
 		},
-		"unlock_hint": "Combinar Órgão Perfeito de Aberração (extraído via autópsia bem-sucedida) com os Frascos de Lyra (NPC 103) durante a Chuva.",
+		"unlock_hint": "Combinar Órgão Perfeito de Aberração (extraído via autópsia bem-sucedida) com os Frascos de Lyra durante a Chuva.",
 		"basic": {"name": "Pulso Quimérico [LMB]", "desc": "Onda biótica disparada pelo homúnculo que causa dano e regenera o mestre (1.0x dano).", "range": "14.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Infusão Mutagênica [Q]", "desc": "Elixir abissal corrosivo que dissolve resistências inimigas (1.75x dano).", "range": "15.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Névoa de Bioplasma [R]", "desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.", "range": "4.5m Área", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Frenesi do Quimera Supremo [F]", "desc": "O homúnculo cresce e desfere uma explosão de garras e ácido colossais (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	10: { # Dançarino Astral (Classe Secreta 10)
+	16: { # Dançarino Astral (Classe Secreta 16)
 		"name": "Dançarino Astral",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano das Constelações)",
 		"desc": "Duelista cósmico mestre de esquivas fluidas e cortes críticos que brilham como cometas estelares.",
@@ -383,15 +837,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Dança Intocável dos Cometas",
 			"desc": "Esquivas custam apenas 10 Stamina, concedem +25% (Tier 5) a +45% (Tier 6) de Dano Crítico após cada evasão e garantem +15% de chance de Esquiva Perfeita.",
-			"tier_scaling": "Tier 5 Única (Base): Esquiva 10 Stamina + 25% Dano Crítico | Tier 6 Lendária: Esquiva 8 Stamina + 45% Dano Crítico + I-Frames estendidos"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): Esquiva 10 Stamina + 25% Dano Crítico | Tier 6 Lendária (+15 pts/nv): Esquiva 8 Stamina + 45% Dano Crítico + I-Frames estendidos"
 		},
-		"unlock_hint": "Realizar 10 abates consecutivos de monstros sem sofrer nenhum dano (Untouched Kills >= 10) e falar com Mestre Aurelius (NPC 108) à Noite.",
+		"unlock_hint": "Realizar 10 abates consecutivos de monstros sem sofrer nenhum dano (Untouched Kills >= 10) e falar com Mestre Aurelius à Noite.",
 		"basic": {"name": "Corte Astral [LMB]", "desc": "Corte rápido com +25% de chance crítica permanente e esquiva barata de 10 stamina.", "range": "3.8m", "cost": "0 Stamina", "cd": "0.32s"},
 		"q": {"name": "Corte Cadente [Q]", "desc": "Salto veloz que corta o espaço desferindo dano massivo (2.0x dano).", "range": "4.5m", "cost": "15 Stamina", "cd": "3.0s"},
 		"r": {"name": "Valsa dos Espelhos [R]", "desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.", "range": "Pessoal", "cost": "20 Stamina", "cd": "6.0s"},
 		"f": {"name": "Constelação de Mil Lâminas [F]", "desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano).", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	11: { # Inquisidor das Cinzas (Classe Secreta 11)
+	17: { # Inquisidor das Cinzas (Classe Secreta 17)
 		"name": "Inquisidor das Cinzas",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Grão-Inquisidor das Chamas)",
 		"desc": "Executor fanático cuja força cresce exponencialmente quanto mais próximo estiver da morte.",
@@ -408,15 +862,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Fúria Penitente na Beira da Morte",
 			"desc": "Quando sua vida cai abaixo de 50%, seu dano é amplificado de +60% (Tier 5) até +100% (Tier 6), tornando-se completamente imune a atordoamento e medo.",
-			"tier_scaling": "Tier 5 Única (Base): Até +60% Dano com HP baixo + Imunidade a Stun | Tier 6 Lendária: Até +100% Dano com HP baixo + Fogo Sagrado puro"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): Até +60% Dano com HP baixo + Imunidade a Stun | Tier 6 Lendária (+15 pts/nv): Até +100% Dano com HP baixo + Fogo Sagrado puro"
 		},
-		"unlock_hint": "Realizar 3 abates de monstros à beira da morte (com HP <= 30%) e conversar com a Irmã Seraphina (NPC 107) estando com menos de 30% de Vida.",
+		"unlock_hint": "Realizar 3 abates de monstros à beira da morte (com HP <= 30%) e conversar com a Irmã Seraphina estando com menos de 30% de Vida.",
 		"basic": {"name": "Chama Penitente [LMB]", "desc": "Golpe ardente que ganha até +60% de dano conforme o HP diminui.", "range": "4.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Chicote de Penitência [Q]", "desc": "Chicote de fogo sagrado de 8.0m que causa 2.2x dano e rouba vida.", "range": "8.0m", "cost": "15 Stamina", "cd": "3.5s"},
 		"r": {"name": "Selo de Excomunhão [R]", "desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Crucificação de Cinzas [F]", "desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	12: { # Necromante de Ossos (Classe Secreta 12)
+	18: { # Necromante de Ossos (Classe Secreta 18)
 		"name": "Necromante de Ossos",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Lorde do Ossuário Eterno)",
 		"desc": "Manipulador anatômico que canaliza a essência dos ossos e extrai vitalidade de cada abate (+20 HP).",
@@ -433,15 +887,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Ceifa do Ossuário & Toque Esmeralda",
 			"desc": "Cada criatura abatida restaura instantaneamente +20 HP (Tier 5) a +40 HP (Tier 6) e ergue uma farpa óssea ao redor que reduz o próximo dano sofrido em 50%.",
-			"tier_scaling": "Tier 5 Única (Base): +20 HP por abate + Farpa Óssea 50% | Tier 6 Lendária: +40 HP por abate + Barreira de Ossos Completa"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): +20 HP por abate + Farpa Óssea 50% | Tier 6 Lendária (+15 pts/nv): +40 HP por abate + Barreira de Ossos Completa"
 		},
-		"unlock_hint": "Completar 5 autópsias perfeitas consecutivas na Zona Verde (Streak >= 5) e conversar com o Alquimista Fantasma (NPC 110) nos esgotos entre 00:00 e 04:00.",
+		"unlock_hint": "Completar 5 autópsias perfeitas consecutivas na Zona Verde (Streak >= 5) e conversar com o Alquimista Fantasma nos esgotos entre 00:00 e 04:00.",
 		"basic": {"name": "Toque do Sepulcro [LMB]", "desc": "Projétil de ossos fragmentados. Cada abate regenera +20 HP instantâneos.", "range": "14.0m", "cost": "0 Stamina", "cd": "0.36s"},
 		"q": {"name": "Lança de Fêmur [Q]", "desc": "Dispara uma lança de fêmur calcificado que perfura a 16m causando 2.0x dano.", "range": "16.0m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Explosão Óssea & Escudo [R]", "desc": "Detona fragmentos ósseos em 5.0m e ergue uma barreira de ossos protetora.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.5s"},
 		"f": {"name": "Legião do Ossuário [F]", "desc": "Ergue um vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	13: { # Domador Primordial (Classe Secreta 13)
+	19: { # Domador Primordial (Classe Secreta 19)
 		"name": "Domador Primordial",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Avatar da Fera Ancestral)",
 		"desc": "Guerreiro feral possuído pelo Espírito Alfa, infligindo +25% de dano constante com garras devastadoras.",
@@ -458,15 +912,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Espírito Lupino Primal",
 			"desc": "Um Lobo Espiritual Prateado translúcido acompanha seus passos e desfere patadas sincronizadas causando +25% (Tier 5) a +45% (Tier 6) de dano físico e fareja monstros de elite.",
-			"tier_scaling": "Tier 5 Única (Base): Lobo Espiritual +25% Dano + Faro de Elites | Tier 6 Lendária: Lobo Ancestral +45% Dano + Uivo de Cura Duplo"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): Lobo Espiritual +25% Dano + Faro de Elites | Tier 6 Lendária (+15 pts/nv): Lobo Ancestral +45% Dano + Uivo de Cura Duplo"
 		},
-		"unlock_hint": "Derrotar o Lobo Alfa sozinho sem usar armadura de peito sob a Lua Cheia, ou conversar com Kaelen (NPC 109) possuindo Força >= 15 e Espírito >= 15.",
+		"unlock_hint": "Derrotar o Lobo Alfa sozinho sem usar armadura de peito sob a Lua Cheia, ou conversar com Kaelen possuindo Força >= 15 e Espírito >= 15.",
 		"basic": {"name": "Patada Selvagem [LMB]", "desc": "Ataque corporal com ferocidade primal e dano aumentado em +25% permanentemente.", "range": "4.2m", "cost": "0 Stamina", "cd": "0.34s"},
 		"q": {"name": "Investida do Alfa [Q]", "desc": "Avanço bestial rompendo as linhas inimigas com impacto violento (2.1x dano).", "range": "5.5m", "cost": "15 Stamina", "cd": "3.2s"},
 		"r": {"name": "Uivo da Alcateia [R]", "desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Fúria do Behemoth [F]", "desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano).", "range": "5.0m Frontal", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	14: { # Cavaleiro da Ruptura (Classe Secreta 14)
+	20: { # Cavaleiro da Ruptura (Classe Secreta 20)
 		"name": "Cavaleiro da Ruptura",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Guardião da Singularidade)",
 		"desc": "Colosso dimensional envolto em malha espacial. Reduz 30% de todo o dano recebido e dobra a gravidade.",
@@ -483,15 +937,15 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Colosso da Singularidade",
 			"desc": "Reduz passivamente 30% (Tier 5) a 50% (Tier 6) de todo o dano recebido e reflete 20% do impacto com um pulso de vácuo gravitacional que atrai inimigos para o corte.",
-			"tier_scaling": "Tier 5 Única (Base): 30% Redução de Dano + 20% Reflexão Vácuo | Tier 6 Lendária: 50% Redução de Dano + Singularidade Gravitacional Total"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): 30% Redução de Dano + 20% Reflexão Vácuo | Tier 6 Lendária (+15 pts/nv): 50% Redução de Dano + Singularidade Gravitacional Total"
 		},
-		"unlock_hint": "Bloquear/Parryar o golpe devastador de um Chefe de Elite (Executor ou Lobo Alfa) com Constituição >= 20 durante Eclipse ou Lua de Sangue e falar com Capitão Randel (NPC 105).",
+		"unlock_hint": "Bloquear/Parryar o golpe devastador de um Chefe de Elite com Constituição >= 20 durante Eclipse ou Lua de Sangue e falar com Capitão Randel.",
 		"basic": {"name": "Golpe de Fenda [LMB]", "desc": "Golpe pesado imbuído de gravidade e resistência passiva de -30% a danos.", "range": "4.2m", "cost": "0 Stamina", "cd": "0.40s"},
 		"q": {"name": "Esmagamento Gravitacional [Q]", "desc": "Atrai todos os monstros em 5.0m para junto de si e esmaga o solo (1.9x dano).", "range": "5.0m Puxão", "cost": "15 Stamina", "cd": "3.5s"},
 		"r": {"name": "Singularidade Reversa [R]", "desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.", "range": "4.5m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Colapso Estelar [F]", "desc": "Cria um buraco negro em 6.5m que atordoa todos os inimigos e desintegra matéria (2.8x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	15: { # Arauto da Tempestade (Classe Secreta 15)
+	21: { # Arauto da Tempestade (Classe Secreta 21)
 		"name": "Arauto da Tempestade",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano dos Relâmpagos)",
 		"desc": "Avatar dos trovões cuja fúria cresce em +35% durante chuvas, empunhando dardos de relâmpago puro.",
@@ -508,9 +962,9 @@ const CLASS_ACTIVE_SKILLS := {
 		"passive": {
 			"name": "Condutividade Celestial",
 			"desc": "Ataques e feitiços elétricos causam +35% (Tier 5) a +60% (Tier 6) de dano durante Clima de Chuva e Tempestade. Golpes básicos têm chance de liberar arcos de choque em cadeia.",
-			"tier_scaling": "Tier 5 Única (Base): +35% Dano Elétrico na Chuva + Choque | Tier 6 Lendária: +60% Dano Elétrico + Relâmpagos Celestiais Contínuos"
+			"tier_scaling": "Tier 5 Única (+11 pts/nv): +35% Dano Elétrico na Chuva + Choque | Tier 6 Lendária (+15 pts/nv): +60% Dano Elétrico + Relâmpagos Celestiais Contínuos"
 		},
-		"unlock_hint": "Conjurar a Habilidade Suprema [F] nas proximidades da Torre Arcana (coords 20, -18) durante uma Chuva/Tempestade intensa (Weather == 1).",
+		"unlock_hint": "Conjurar a Habilidade Suprema [F] nas proximidades da Torre Arcana durante uma Chuva/Tempestade intensa (Weather == 1).",
 		"basic": {"name": "Faísca Elétrica [LMB]", "desc": "Dardos elétricos estáticos que causam +35% de dano durante climas chuvosos.", "range": "15.0m", "cost": "0 Stamina", "cd": "0.34s"},
 		"q": {"name": "Lança do Trovão [Q]", "desc": "Arremessa um raio concentrado a 18m que detona ao impacto (2.1x dano).", "range": "18.0m", "cost": "15 Stamina", "cd": "3.0s"},
 		"r": {"name": "Passo de Relâmpago [R]", "desc": "Surto elétrico que concede velocidade e eletrocuta/atordoa monstros próximos.", "range": "4.0m Radial", "cost": "20 Stamina", "cd": "6.5s"},
@@ -1003,7 +1457,7 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 	pvbox.add_child(p_desc)
 
 	# Se for Classe Única (Tier 5): Exibe a Provação Especial Lendária!
-	if class_tier >= 5 or class_id in [7, 8, 9, 10, 11, 12, 13, 14, 15]:
+	if class_tier >= 5 or class_id in [13, 14, 15, 16, 17, 18, 19, 20, 21]:
 		var trial_panel := PanelContainer.new()
 		var t_style := StyleBoxFlat.new()
 		t_style.bg_color = Color(0.12, 0.06, 0.16, 0.98)
@@ -1025,10 +1479,10 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 
 		var quest_name: String = "As Três Colheitas sob o Sol Negro"
 		var quest_lore: String = "Abata 3 Criaturas de Elite ou Chefes (Lobo Alfa, Licantropo Alfa, Executor) sem tombar em batalha para provar seu valor perante o cosmos e ascender ao TIER 6 LENDÁRIO."
-		if class_id == 8:
+		if class_id == 14:
 			quest_name = "O Metal que Caiu do Céu"
 			quest_lore = "Colete a liga divina do cosmos abatendo 3 Monstros de Elite sem morrer para ascender a Engenheiro Arcano Supremo (Tier 6)."
-		elif class_id == 9:
+		elif class_id == 15:
 			quest_name = "Magnum Opus Transmutacional"
 			quest_lore = "Transmute a centelha da vida sintética definitiva com a essência de 3 Criaturas de Elite para despertar como Demiurgo (Tier 6)."
 
@@ -1108,14 +1562,14 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 	ch_vbox.add_child(cat_title)
 
 	var cat_sub := Label.new()
-	cat_sub.text = "As 9 Classes Secretas (7 a 15) iniciam no Tier 5 Única, resetam o personagem para o Nível 1 concedendo +10 Pontos de Atributo por nível (ao invés de 5), e podem ascender ao Tier 6 Lendária (+12 pontos por nível) superando a Provação das Colheitas Cósmicas. Abaixo estão todas as pistas e requisitos para desbloquear cada uma no mundo de Lunaria:"
+	cat_sub.text = "As 9 Classes Secretas (13 a 21) iniciam no Tier 5 Única, resetam o personagem para o Nível 1 concedendo +11 Pontos de Atributo por nível (ao invés de 5), e podem ascender ao Tier 6 Lendária (+15 pontos por nível) superando a Provação das Colheitas Cósmicas. Abaixo estão todas as pistas e requisitos para desbloquear cada uma no mundo de Lunaria:"
 	cat_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	cat_sub.add_theme_font_size_override("font_size", 11)
 	cat_sub.add_theme_color_override("font_color", Color(0.8, 0.85, 0.95))
 	ch_vbox.add_child(cat_sub)
 
-	# Itera pelas 9 Classes Secretas (7 a 15)
-	for sec_id in range(7, 16):
+	# Itera pelas 9 Classes Secretas (13 a 21)
+	for sec_id in range(13, 22):
 		var s_info: Dictionary = CLASS_ACTIVE_SKILLS.get(sec_id)
 		if not s_info:
 			continue

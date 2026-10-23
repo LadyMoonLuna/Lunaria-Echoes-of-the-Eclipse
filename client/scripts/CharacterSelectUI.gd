@@ -13,10 +13,7 @@ const RACES_DATA := {
 		"lore": "Descendentes do império solar dourado de Valéria. Disciplinados, honrados e equilibrados em corpo e mente.",
 		"color": Color("#4fc3f7"),
 		"accent": Color("#ffd54f"),
-		"stats": {
-			"FOR": 6, "DES": 6, "CON": 6, "AGI": 6,
-			"INT": 6, "ESP": 6, "PER": 7, "SOR": 7
-		},
+		"stats": {"FOR": 6, "DES": 6, "CON": 6, "AGI": 6, "INT": 6, "ESP": 6, "PER": 7, "SOR": 7},
 		"skill_z_name": "Ímpeto Valeriano",
 		"skill_z_desc": "Restaura +40 Stamina, cura +25 HP e concede +25% de dano bônus por 10s (Recarga: 10s).",
 		"passive_name": "Fôlego Real",
@@ -31,10 +28,7 @@ const RACES_DATA := {
 		"lore": "Filhos da Noite Eterna e das estrelas cadentes. Canalizadores naturais de energias astrais e magias lunares.",
 		"color": Color("#b388ff"),
 		"accent": Color("#ea80fc"),
-		"stats": {
-			"FOR": 4, "DES": 8, "CON": 4, "AGI": 9,
-			"INT": 8, "ESP": 8, "PER": 8, "SOR": 5
-		},
+		"stats": {"FOR": 4, "DES": 8, "CON": 4, "AGI": 8, "INT": 9, "ESP": 7, "PER": 5, "SOR": 5},
 		"skill_z_name": "Explosão Lunar / Umbral",
 		"skill_z_desc": "Onda estelar radial (5.5m) que causa dano mágico elevado e cura +30 HP (Recarga: 10s).",
 		"passive_name": "Passo Astral",
@@ -49,10 +43,7 @@ const RACES_DATA := {
 		"lore": "Nascidos nas forjas profundas e fortalezas subterrâneas. Sua pele é dura como granito e seu coração arde como magma.",
 		"color": Color("#ffb74d"),
 		"accent": Color("#ff9800"),
-		"stats": {
-			"FOR": 9, "DES": 4, "CON": 9, "AGI": 4,
-			"INT": 5, "ESP": 6, "PER": 5, "SOR": 8
-		},
+		"stats": {"FOR": 9, "DES": 4, "CON": 10, "AGI": 3, "INT": 4, "ESP": 6, "PER": 9, "SOR": 5},
 		"skill_z_name": "Baluarte Rúnico / Erupção",
 		"skill_z_desc": "Onda de choque vulcânica (4.5m) de dano sísmico e escudo de 70% de redução por 5s (Recarga: 10s).",
 		"passive_name": "Postura de Rocha",
@@ -67,10 +58,7 @@ const RACES_DATA := {
 		"lore": "Descendentes de linhagens draconianas e lupinas ancestrais. Dotados de sentidos apurados e ferocidade selvagem.",
 		"color": Color("#ff5252"),
 		"accent": Color("#ff1744"),
-		"stats": {
-			"FOR": 8, "DES": 7, "CON": 8, "AGI": 8,
-			"INT": 3, "ESP": 4, "PER": 7, "SOR": 5
-		},
+		"stats": {"FOR": 8, "DES": 7, "CON": 7, "AGI": 8, "INT": 3, "ESP": 4, "PER": 6, "SOR": 7},
 		"skill_z_name": "Sopro Dracônico / Rugido Predatório",
 		"skill_z_desc": "Cone frontal feroz (5.5m) de alto impacto com roubo de vida por inimigo atingido (Recarga: 10s).",
 		"passive_name": "Sangue Fervilhante",
@@ -78,6 +66,426 @@ const RACES_DATA := {
 		"order_evo": "Soberano Dracônico (Ordem: Chamas reais ancestrais, nobreza e asas de dragão)",
 		"chaos_evo": "Fera do Frenesi (Caos: Instinto sanguinário incontrolável e fúria devastadora)",
 		"npc_reaction": "Capitão Randel: 'Controle seus instintos ferozes dentro das muralhas, Varkai, e você será um grande trunfo!'"
+	},
+	5: {
+		"name": "Dhampir",
+		"title": "Linhagem Sanguínea — Vampiro Crepuscular",
+		"lore": "Híbridos entre a mortalidade e a maldição dos vampiros nobres, sedentos por essência vital.",
+		"color": Color("#e91e63"), "accent": Color("#ad1457"),
+		"stats": {"FOR": 8, "DES": 9, "CON": 6, "AGI": 9, "INT": 8, "ESP": 3, "PER": 6, "SOR": 6},
+		"skill_z_name": "Sede de Sangue", "skill_z_desc": "Drena 45 HP do alvo num estalo sombrio.",
+		"passive_name": "Vampirismo Inato", "passive_desc": "+10% de Roubo de Vida passivo.",
+		"order_evo": "Lorde Noturno", "chaos_evo": "Vampiro Carmesim", "npc_reaction": "Lyra: 'Cuidado para não morder nossos cidadãos!'"
+	},
+	6: {
+		"name": "Licantropo Primordial",
+		"title": "Fera da Lua — Alfa Ancestral",
+		"lore": "Lobisomens puros despertados pela energia da lua cheia, dotados de força esmagadora.",
+		"color": Color("#ff6f00"), "accent": Color("#e65100"),
+		"stats": {"FOR": 12, "DES": 9, "CON": 11, "AGI": 10, "INT": 2, "ESP": 3, "PER": 7, "SOR": 6},
+		"skill_z_name": "Uivo da Fera Ancestral", "skill_z_desc": "Aterroriza inimigos em 8m e ganha velocidade de ataque.",
+		"passive_name": "Fúria Lupina", "passive_desc": "+25% dano sob a noite.",
+		"order_evo": "Guardião da Matilha", "chaos_evo": "Lupino Devorador", "npc_reaction": "Garrick: 'Um verdadeiro titã da floresta!'"
+	},
+	7: {
+		"name": "Revenant",
+		"title": "Espectro da Cripta — Retornado das Cinzas",
+		"lore": "Espíritos guerreiros amaldiçoados que rejeitaram os portões do além.",
+		"color": Color("#a7ffeb"), "accent": Color("#00bfa5"),
+		"stats": {"FOR": 7, "DES": 6, "CON": 9, "AGI": 5, "INT": 9, "ESP": 10, "PER": 6, "SOR": 3},
+		"skill_z_name": "Pacto das Cinzas", "skill_z_desc": "Explosão de cinzas em 5m prendendo inimigos.",
+		"passive_name": "Tenacidade Fúnebre", "passive_desc": "Sobrevive por 4s com 1 HP ao receber dano letal.",
+		"order_evo": "Cavaleiro do Túmulo", "chaos_evo": "Arauto da Desolação", "npc_reaction": "Capitão Randel: 'Ele respira... mas parece que veio da cripta.'"
+	},
+	8: {
+		"name": "Celestino",
+		"title": "Natus Solaris — Emissário do Sol Divino",
+		"lore": "Abordados por chamas sagradas dos arcontes celestes que purificam corrupções.",
+		"color": Color("#fff176"), "accent": Color("#ffd700"),
+		"stats": {"FOR": 6, "DES": 6, "CON": 7, "AGI": 7, "INT": 10, "ESP": 12, "PER": 6, "SOR": 8},
+		"skill_z_name": "Chama Sagrada", "skill_z_desc": "Feixe purificador solar que queima inimigos e cura aliados.",
+		"passive_name": "Aura Radiante", "passive_desc": "Dano contínuo de calor sagrado ao redor de dia.",
+		"order_evo": "Serafim Dourado", "chaos_evo": "Chama da Purgação", "npc_reaction": "Lyra: 'Uma bênção viva dos céus!'"
+	},
+	9: {
+		"name": "Abissal",
+		"title": "Umbralis — Filho das Sombras Cósmicas",
+		"lore": "Seres que vagam entre o vácuo interdimensional e o espaço estelar.",
+		"color": Color("#7c4dff"), "accent": Color("#651fff"),
+		"stats": {"FOR": 6, "DES": 7, "CON": 8, "AGI": 6, "INT": 12, "ESP": 8, "PER": 6, "SOR": 5},
+		"skill_z_name": "Mergulho Abissal", "skill_z_desc": "Teleporta pelo éter detonando ondas de vácuo.",
+		"passive_name": "Corpo de Éter", "passive_desc": "12% de chance de evasão total.",
+		"order_evo": "Mago do Vácuo", "chaos_evo": "Singularidade Negra", "npc_reaction": "Garrick: 'Sua presença arrepia os pelos da forja.'"
+	},
+	10: {
+		"name": "Autômato Rúnico",
+		"title": "Gélido Mecânico — Colosso da Forja Ancestral",
+		"lore": "Construído por antigos artífices rúnicos, animado por um núcleo de éter eterno.",
+		"color": Color("#00e5ff"), "accent": Color("#00b0ff"),
+		"stats": {"FOR": 10, "DES": 5, "CON": 12, "AGI": 4, "INT": 8, "ESP": 6, "PER": 10, "SOR": 4},
+		"skill_z_name": "Sobrecarga Arcana", "skill_z_desc": "Descarga de alta voltagem atordoando oponentes em 6m.",
+		"passive_name": "Blindagem de Adamante", "passive_desc": "-20% de dano físico e imunidade a venenos.",
+		"order_evo": "Sentinela Rúnica", "chaos_evo": "Colosso de Sobrecarga", "npc_reaction": "Garrick: 'Arte mecânica incomparável!'"
+	},
+	11: {
+		"name": "Alto Valeriano",
+		"title": "Evolução da Ordem — Estandarte da Coroa",
+		"lore": "O apogeu da linhagem solar imperial valeriana com liderança e honra supremas.",
+		"color": Color("#ffd700"), "accent": Color("#ffea00"),
+		"stats": {"FOR": 10, "DES": 8, "CON": 9, "AGI": 8, "INT": 9, "ESP": 9, "PER": 9, "SOR": 9},
+		"skill_z_name": "Estandarte Real", "skill_z_desc": "Cura aliados (+50 HP) e concede +35% de dano solar.",
+		"passive_name": "Soberania da Coroa", "passive_desc": "+30% de Stamina máxima e fôlego ininterrupto.",
+		"order_evo": "Ascendido", "chaos_evo": "Nenhum", "npc_reaction": "Capitão Randel: 'Saudai o imperador da luz!'"
+	},
+	12: {
+		"name": "Andarilho do Éter",
+		"title": "Evolução do Caos — Rasgador da Tapeçaria",
+		"lore": "Valeriano que abraçou a distorção dimensional, dominando o espaço e a gravidade.",
+		"color": Color("#ba68c8"), "accent": Color("#e040fb"),
+		"stats": {"FOR": 8, "DES": 10, "CON": 7, "AGI": 12, "INT": 10, "ESP": 8, "PER": 10, "SOR": 10},
+		"skill_z_name": "Fenda Dimensional", "skill_z_desc": "Teleporta 6 metros liberando explosão de vácuo.",
+		"passive_name": "Forma Etérea", "passive_desc": "18% de chance de ignorar golpes recebidos.",
+		"order_evo": "Nenhum", "chaos_evo": "Ascendido", "npc_reaction": "Lyra: 'O espaço ao seu redor dobra-se!'"
+	},
+	13: {
+		"name": "Arconte Lunar",
+		"title": "Evolução da Ordem — Santidade de Selene",
+		"lore": "Noctari agraciado com a luz purificadora da Deusa Selene.",
+		"color": Color("#00e5ff"), "accent": Color("#80d8ff"),
+		"stats": {"FOR": 5, "DES": 11, "CON": 6, "AGI": 11, "INT": 14, "ESP": 11, "PER": 8, "SOR": 8},
+		"skill_z_name": "Luz de Selene", "skill_z_desc": "Pilar de luz lunar em 6m curando +70 HP e cegando inimigos.",
+		"passive_name": "Coração Estelar", "passive_desc": "+40% de poder mágico sob qualquer luar.",
+		"order_evo": "Ascendido", "chaos_evo": "Nenhum", "npc_reaction": "Lyra: 'A pureza de Selene caminha entre nós.'"
+	},
+	14: {
+		"name": "Espectro Umbral",
+		"title": "Evolução do Caos — Sombra de Nyx",
+		"lore": "Noctari consumido pelo manto das trevas absolutas e assassinatos noturnos.",
+		"color": Color("#7c4dff"), "accent": Color("#b388ff"),
+		"stats": {"FOR": 6, "DES": 13, "CON": 5, "AGI": 14, "INT": 12, "ESP": 9, "PER": 11, "SOR": 9},
+		"skill_z_name": "Manto de Nyx", "skill_z_desc": "Invisibilidade de 4s com +120% de dano crítico no primeiro golpe.",
+		"passive_name": "Assassino das Trevas", "passive_desc": "+35% de velocidade e +30% crítico permanente.",
+		"order_evo": "Nenhum", "chaos_evo": "Ascendido", "npc_reaction": "Capitão Randel: 'Fique onde posso ver seus olhos!'"
+	},
+	15: {
+		"name": "Guardião Rúnico",
+		"title": "Evolução da Ordem — Muralha de Adamante",
+		"lore": "Kharad abençoado com as runas sagradas de proteção inabalável.",
+		"color": Color("#ffb74d"), "accent": Color("#ffe082"),
+		"stats": {"FOR": 13, "DES": 6, "CON": 15, "AGI": 5, "INT": 7, "ESP": 9, "PER": 12, "SOR": 7},
+		"skill_z_name": "Muralha Rúnica", "skill_z_desc": "Absorve 85% de dano por 6s e reflete 50% de volta.",
+		"passive_name": "Baluarte Inabalável", "passive_desc": "Imune a controle de grupo e +400 HP Máximo.",
+		"order_evo": "Ascendido", "chaos_evo": "Nenhum", "npc_reaction": "Garrick: 'Uma fortaleza viva!'"
+	},
+	16: {
+		"name": "Titã de Obsidiana",
+		"title": "Evolução do Caos — Fogo do Centro da Terra",
+		"lore": "Kharad que canalizou o magma primitivo tornando seu corpo uma erupção contínua.",
+		"color": Color("#ff3d00"), "accent": Color("#ff6e40"),
+		"stats": {"FOR": 15, "DES": 5, "CON": 17, "AGI": 4, "INT": 6, "ESP": 7, "PER": 10, "SOR": 6},
+		"skill_z_name": "Erupção Magma", "skill_z_desc": "Gêiser vulcânico de 5.5m incendiando inimigos.",
+		"passive_name": "Corpo Magmático", "passive_desc": "Retaliação contínua de fogo contra atacantes.",
+		"order_evo": "Nenhum", "chaos_evo": "Ascendido", "npc_reaction": "Garrick: 'A terra treme sob seus passos!'"
+	},
+	17: {
+		"name": "Soberano Dracônico",
+		"title": "Evolução da Ordem — Majestade Dracônica",
+		"lore": "Varkai que refinou seu sangue draconiano para a dignidade de um dragão ancestral.",
+		"color": Color("#e53935"), "accent": Color("#ff1744"),
+		"stats": {"FOR": 13, "DES": 10, "CON": 11, "AGI": 11, "INT": 6, "ESP": 7, "PER": 9, "SOR": 10},
+		"skill_z_name": "Chamas Reais", "skill_z_desc": "Sopro colunar de 7m de chamas com roubo de vida massivo.",
+		"passive_name": "Escamas do Soberano", "passive_desc": "Reduz 35% do dano mágico recebido.",
+		"order_evo": "Ascendido", "chaos_evo": "Nenhum", "npc_reaction": "Capitão Randel: 'Uma força digna de liderar exércitos!'"
+	},
+	18: {
+		"name": "Fera do Frenesi",
+		"title": "Evolução do Caos — Carnificina Incontrolável",
+		"lore": "Varkai que sucumbiu completamente aos instintos predatórios assassinos.",
+		"color": Color("#ad1457"), "accent": Color("#c2185b"),
+		"stats": {"FOR": 14, "DES": 11, "CON": 10, "AGI": 13, "INT": 4, "ESP": 5, "PER": 10, "SOR": 11},
+		"skill_z_name": "Frenesi Destruidor", "skill_z_desc": "4 garras rápidas consecutivas com roubo de vida.",
+		"passive_name": "Carnificina Feral", "passive_desc": "Abates curam +20% de HP total instantaneamente.",
+		"order_evo": "Nenhum", "chaos_evo": "Ascendido", "npc_reaction": "Capitão Randel: 'Segure sua fúria, soldado!'"
+	},
+	19: {
+		"name": "Sylvari",
+		"title": "Nascido da Seiva — Espírito Vegetal",
+		"lore": "Filhos da Grande Árvore Ancestral em comunhão perfeita com a floresta.",
+		"color": Color("#81c784"), "accent": Color("#4caf50"),
+		"stats": {"FOR": 5, "DES": 7, "CON": 8, "AGI": 6, "INT": 8, "ESP": 10, "PER": 6, "SOR": 5},
+		"skill_z_name": "Raízes Vivas", "skill_z_desc": "Prende e drena vida de inimigos em 6m.",
+		"passive_name": "Vínculo com a Seiva", "passive_desc": "+3 HP/s contínuo na natureza.",
+		"order_evo": "Ancião da Seiva", "chaos_evo": "Brambler Feroz", "npc_reaction": "Lyra: 'Que aroma fresco de folhas!'"
+	},
+	20: {
+		"name": "Esporiano",
+		"title": "Myconid — Protetor dos Cogumelos",
+		"lore": "Seres fúngicos que habitam cavernas úmidas, manipuladores de toxinas e esporos.",
+		"color": Color("#9c27b0"), "accent": Color("#ba68c8"),
+		"stats": {"FOR": 4, "DES": 5, "CON": 10, "AGI": 4, "INT": 10, "ESP": 9, "PER": 8, "SOR": 5},
+		"skill_z_name": "Nuvem de Esporos", "skill_z_desc": "Nuvem venenosa que cega atacantes em 5m.",
+		"passive_name": "Simbiose Fúngica", "passive_desc": "Imunidade total a venenos.",
+		"order_evo": "Xamã Micótico", "chaos_evo": "Fungo Voraz", "npc_reaction": "Lyra: 'Cuidado onde espalha seus esporos!'"
+	},
+	21: {
+		"name": "Aracne",
+		"title": "Tecelã da Bruma — Fiação Mortal",
+		"lore": "Mestiços de aranha capazes de tecer fios de aço imperceptíveis.",
+		"color": Color("#eceff1"), "accent": Color("#cfd8dc"),
+		"stats": {"FOR": 6, "DES": 11, "CON": 5, "AGI": 10, "INT": 7, "ESP": 4, "PER": 12, "SOR": 5},
+		"skill_z_name": "Teia Prateada", "skill_z_desc": "Dispara teia imobilizante por 3s.",
+		"passive_name": "Pernas de Seda", "passive_desc": "Imune a reduções de velocidade.",
+		"order_evo": "Tecelã da Noite", "chaos_evo": "Aracne Predadora", "npc_reaction": "Capitão Randel: 'Não deixe fios pelo quartel!'"
+	},
+	22: {
+		"name": "Draconato de Cinzas",
+		"title": "Escama-Negra — Cria dos Vulcões",
+		"lore": "Draconianos nativos de caldeiras de magma com escamas de pura rocha negra.",
+		"color": Color("#ff6d00"), "accent": Color("#ff9e80"),
+		"stats": {"FOR": 12, "DES": 5, "CON": 12, "AGI": 5, "INT": 8, "ESP": 6, "PER": 6, "SOR": 4},
+		"skill_z_name": "Sopro de Cinzas", "skill_z_desc": "Cone frontal de brasas ardentes e fumaça.",
+		"passive_name": "Escama-Negra", "passive_desc": "Imunidade a chamas e +15% de armadura.",
+		"order_evo": "Dragão da Forja", "chaos_evo": "Cataclismo de Cinzas", "npc_reaction": "Garrick: 'Suas escamas dispensam avental de forja!'"
+	},
+	23: {
+		"name": "Quimera",
+		"title": "Costurado — Mutante Bio-Reativo",
+		"lore": "Criação alquímica combinando o melhor de diversas espécies predadoras.",
+		"color": Color("#76ff03"), "accent": Color("#b2ff59"),
+		"stats": {"FOR": 9, "DES": 8, "CON": 9, "AGI": 8, "INT": 6, "ESP": 2, "PER": 10, "SOR": 5},
+		"skill_z_name": "Mutação Bioquímica", "skill_z_desc": "Onda bio-ácida frontal adaptativa.",
+		"passive_name": "Corpo Reativo", "passive_desc": "+25% resistência ao último dano sofrido.",
+		"order_evo": "Quimera Perfeita", "chaos_evo": "Aberração Alfa", "npc_reaction": "Lyra: 'Fascinante resultado biológico!'"
+	},
+	24: {
+		"name": "Boreal",
+		"title": "Coração de Geada — Glacial Puro",
+		"lore": "Habitantes das geleiras eternas do norte com sangue de gelo inerte.",
+		"color": Color("#80d8ff"), "accent": Color("#40c4ff"),
+		"stats": {"FOR": 8, "DES": 6, "CON": 9, "AGI": 5, "INT": 9, "ESP": 8, "PER": 6, "SOR": 4},
+		"skill_z_name": "Crio-Armadura", "skill_z_desc": "Armadura de cristal de gelo com congelamento radial.",
+		"passive_name": "Coração Glacial", "passive_desc": "+25% dano de frio e imunidade a congelamento.",
+		"order_evo": "Guardião da Geada", "chaos_evo": "Nevasca Perpétua", "npc_reaction": "Garrick: 'Abaixe a temperatura ao lado da forja!'"
+	},
+	25: {
+		"name": "Thalassiano",
+		"title": "Maré Negra — Soberano dos Mares",
+		"lore": "Criaturas do abismo oceânico que comandam pressões marinhas violentas.",
+		"color": Color("#006064"), "accent": Color("#00b4d8"),
+		"stats": {"FOR": 7, "DES": 8, "CON": 7, "AGI": 9, "INT": 9, "ESP": 8, "PER": 5, "SOR": 5},
+		"skill_z_name": "Maré Abissal", "skill_z_desc": "Gêiser d'água sob pressão arrastando alvos.",
+		"passive_name": "Filho do Oceano", "passive_desc": "+30% velocidade e cura na chuva.",
+		"order_evo": "Lorde das Marés", "chaos_evo": "Monstro das Fossas", "npc_reaction": "Lyra: 'Traga água marinha para meus elixires!'"
+	},
+	26: {
+		"name": "Cambion",
+		"title": "Sangue de Enxofre — Herdeiro Infernal",
+		"lore": "Nascidos de pactos abissais com chamas negras e correntes incandescentes.",
+		"color": Color("#c62828"), "accent": Color("#ff5252"),
+		"stats": {"FOR": 11, "DES": 8, "CON": 8, "AGI": 7, "INT": 9, "ESP": 2, "PER": 5, "SOR": 6},
+		"skill_z_name": "Correntes Infernais", "skill_z_desc": "Correntes do tártaro prendem alvos.",
+		"passive_name": "Sangue de Enxofre", "passive_desc": "Converte vida em poder devastador.",
+		"order_evo": "Juiz do Inferno", "chaos_evo": "Demônio da Praga", "npc_reaction": "Capitão Randel: 'Sem pactos sombrios aqui!'"
+	},
+	27: {
+		"name": "Nephilim",
+		"title": "Híbrido Crepúsculo — Luz e Sombra",
+		"lore": "Fruto da união de um anjo e um demônio, equilibrando duas forças primordiais.",
+		"color": Color("#ffd700"), "accent": Color("#1a237e"),
+		"stats": {"FOR": 9, "DES": 9, "CON": 8, "AGI": 8, "INT": 10, "ESP": 10, "PER": 7, "SOR": 7},
+		"skill_z_name": "Julgamento Nephilim", "skill_z_desc": "Feixe duplo divino e sombrio desintegrando defesas.",
+		"passive_name": "Dualidade Cósmica", "passive_desc": "Alterna bônus sagrado e necrótico.",
+		"order_evo": "Avatar Cósmico", "chaos_evo": "Crepúsculo Eterno", "npc_reaction": "Lyra: 'Que equilíbrio impressionante de auras!'"
+	},
+	28: {
+		"name": "Errante Temporal",
+		"title": "Cronomante — Manipulador dos Fios do Tempo",
+		"lore": "Místicos que aprenderam a desacelerar e rebobinar o fluxo da ampulheta cósmica.",
+		"color": Color("#ffd54f"), "accent": Color("#ffb300"),
+		"stats": {"FOR": 5, "DES": 10, "CON": 5, "AGI": 12, "INT": 12, "ESP": 9, "PER": 8, "SOR": 9},
+		"skill_z_name": "Reversão Temporal", "skill_z_desc": "Rebobina posição e vida de 3 segundos atrás.",
+		"passive_name": "Fios do Tempo", "passive_desc": "-15% no cooldown de habilidades ativas.",
+		"order_evo": "Senhor das Linhas Temporais", "chaos_evo": "Anomalia Cronológica", "npc_reaction": "Garrick: 'Espero que não rebobine o ferro da bigorna!'"
+	},
+	29: {
+		"name": "Meio-Celestial",
+		"title": "Descendência Divina — Asas de Luz",
+		"lore": "Herdeiros de anjos celestes emanando luz dourada e restauração sagrada.",
+		"color": Color("#fff59d"), "accent": Color("#ffd700"),
+		"stats": {"FOR": 8, "DES": 8, "CON": 8, "AGI": 8, "INT": 9, "ESP": 11, "PER": 7, "SOR": 7},
+		"skill_z_name": "Asas de Luz", "skill_z_desc": "Cura +65 HP e restaura +40 Stamina.",
+		"passive_name": "Graça Divina", "passive_desc": "+15% de cura e dano sagrado passivo.",
+		"order_evo": "Arcanjo Guardião", "chaos_evo": "Solar Radiante", "npc_reaction": "Lyra: 'A bênção do sol brilha em você!'"
+	},
+	30: {
+		"name": "Pyromante",
+		"title": "Fogo Vivo — Renascido das Cinzas",
+		"lore": "Mestres da combustão que canalizam o elemento ígneo diretamente em seu sangue.",
+		"color": Color("#ff3d00"), "accent": Color("#ff6d00"),
+		"stats": {"FOR": 6, "DES": 8, "CON": 7, "AGI": 8, "INT": 12, "ESP": 6, "PER": 7, "SOR": 6},
+		"skill_z_name": "Combustão", "skill_z_desc": "Explosão de fogo em 6m desferindo 2.8x de dano.",
+		"passive_name": "Chama da Vida", "passive_desc": "Revive com 50% de HP uma vez ao receber dano fatal.",
+		"order_evo": "Arquimago das Chamas", "chaos_evo": "Fênix Incandescente", "npc_reaction": "Garrick: 'Cuidado para não queimar minha oficina!'"
+	},
+	31: {
+		"name": "Gigante de Gelo",
+		"title": "Colosso Glacial (1.45x) — Força das Geleiras",
+		"lore": "Estatura colossal e ossos forjados em permafrost indestrutível.",
+		"color": Color("#80deea"), "accent": Color("#00e5ff"),
+		"stats": {"FOR": 14, "DES": 4, "CON": 15, "AGI": 4, "INT": 6, "ESP": 6, "PER": 9, "SOR": 4},
+		"skill_z_name": "Memória Molecular", "skill_z_desc": "Pancada com estalagmites e +350 HP Máximo por 15s.",
+		"passive_name": "Massa Glacial", "passive_desc": "Escala de 1.45x e +25% de tenacidade e absorção a frio.",
+		"order_evo": "Titã do Inverno", "chaos_evo": "Avalanche Viva", "npc_reaction": "Capitão Randel: 'Abaixe a cabeça ao cruzar o portão!'"
+	},
+	32: {
+		"name": "Drago Terra",
+		"title": "Carapaça Telúrica — Muralha de Pedra",
+		"lore": "Draconianos telúricos com casca espessa impenetrável como montanhas.",
+		"color": Color("#8d6e63"), "accent": Color("#6d4c41"),
+		"stats": {"FOR": 12, "DES": 5, "CON": 14, "AGI": 4, "INT": 5, "ESP": 6, "PER": 10, "SOR": 5},
+		"skill_z_name": "Insulto Sísmico", "skill_z_desc": "Taunt forçando foco de todos os monstros em 10m.",
+		"passive_name": "Carapaça Telúrica", "passive_desc": "-35% de todo dano físico sofrido permanentemente.",
+		"order_evo": "Bastião Dracônico", "chaos_evo": "Fissura Vulcânica", "npc_reaction": "Garrick: 'Sua pele é mais dura que minha bigorna!'"
+	},
+	33: {
+		"name": "Drago Água",
+		"title": "Maré Dracônica — Soberano das Correntes",
+		"lore": "Draconianos fluídos mestres da hidrocinese e ondas marinhas.",
+		"color": Color("#29b6f6"), "accent": Color("#0277bd"),
+		"stats": {"FOR": 8, "DES": 9, "CON": 9, "AGI": 8, "INT": 9, "ESP": 9, "PER": 7, "SOR": 7},
+		"skill_z_name": "Bênção de Netuno", "skill_z_desc": "Onda marítima em cone empurrando e atordoando.",
+		"passive_name": "Correnteza", "passive_desc": "+2.5 HP/s na água ou sob chuva torrencial.",
+		"order_evo": "Leviatã Sagrado", "chaos_evo": "Tsunami Feral", "npc_reaction": "Lyra: 'A água responde ao seu comando!'"
+	},
+	34: {
+		"name": "Drago Raio",
+		"title": "Fulgor Tempestuoso — Eletricidade Áurea",
+		"lore": "Draconianos que armazenam megawatts de energia pura em suas escamas.",
+		"color": Color("#ffd600"), "accent": Color("#ffff00"),
+		"stats": {"FOR": 8, "DES": 11, "CON": 7, "AGI": 12, "INT": 10, "ESP": 5, "PER": 8, "SOR": 7},
+		"skill_z_name": "Descarga Elétrica", "skill_z_desc": "Feixe perfurante de choque rápido (1.85x).",
+		"passive_name": "Condutor de Alta Tensão", "passive_desc": "+20% de velocidade de movimento.",
+		"order_evo": "Relâmpago Dourado", "chaos_evo": "Sobrecarga Tempestuosa", "npc_reaction": "Garrick: 'Faíscas saltam da sua ponta dos dedos!'"
+	},
+	35: {
+		"name": "Drago Místico",
+		"title": "Infusão Arcana — Guardião das Runas",
+		"lore": "Draconianos com chifres arcanos em espiral e veias pulsando mana.",
+		"color": Color("#ab47bc"), "accent": Color("#e1bee7"),
+		"stats": {"FOR": 6, "DES": 8, "CON": 8, "AGI": 7, "INT": 13, "ESP": 10, "PER": 6, "SOR": 6},
+		"skill_z_name": "Infusão Arcana", "skill_z_desc": "Círculo rúnico concedendo +40% dano mágico por 10s.",
+		"passive_name": "Sangue Rúnico", "passive_desc": "+30% de mana e amplificação mágica.",
+		"order_evo": "Arquidrago Rúnico", "chaos_evo": "Emanador do Éter", "npc_reaction": "Lyra: 'Runas antigas brilham em seus chifres!'"
+	},
+	36: {
+		"name": "Orc",
+		"title": "Fúria Verde — Poder Marcial Implacável",
+		"lore": "Guerreiros musculosos que suportam dor extrema e devoram resíduos para cura.",
+		"color": Color("#558b2f"), "accent": Color("#76ff03"),
+		"stats": {"FOR": 13, "DES": 6, "CON": 13, "AGI": 6, "INT": 3, "ESP": 3, "PER": 9, "SOR": 5},
+		"skill_z_name": "Ataque Devastador", "skill_z_desc": "Golpe triplo esmagador (3.2x dano).",
+		"passive_name": "Fisiologia Brutal", "passive_desc": "-20% dano sofrido e digestão de carcaças orgânicas.",
+		"order_evo": "Chefe de Guerra", "chaos_evo": "Berserker de Sangue", "npc_reaction": "Capitão Randel: 'Use essa força contra os monstros das muralhas!'"
+	},
+	37: {
+		"name": "Anão",
+		"title": "Aço e Forja (0.82x) — Mestre da Bigorna",
+		"lore": "Ferreiros natos compactos, inabaláveis contra golpes e mestres do martelo.",
+		"color": Color("#d7ccc8"), "accent": Color("#8d6e63"),
+		"stats": {"FOR": 11, "DES": 5, "CON": 13, "AGI": 4, "INT": 6, "ESP": 7, "PER": 12, "SOR": 5},
+		"skill_z_name": "Martelo Ancestral", "skill_z_desc": "Choque de bigorna com atordoamento em 5.5m.",
+		"passive_name": "Resistência da Montanha", "passive_desc": "Estatura de 0.82x com firmeza e maestria na forja.",
+		"order_evo": "Grão-Forjador", "chaos_evo": "Demolidor Sísmico", "npc_reaction": "Garrick: 'Irmão de barba e aço! A forja é sua casa!'"
+	},
+	38: {
+		"name": "Elfo",
+		"title": "Silvestre Esguio — Graça das Copas",
+		"lore": "Arqueiros ágeis com passos velozes e comunhão com a brisa florestal.",
+		"color": Color("#aed581"), "accent": Color("#c5e1a5"),
+		"stats": {"FOR": 5, "DES": 11, "CON": 5, "AGI": 12, "INT": 10, "ESP": 8, "PER": 7, "SOR": 6},
+		"skill_z_name": "Disparo Élfico", "skill_z_desc": "Disparo perfurante luminoso de longo alcance.",
+		"passive_name": "Graça da Floresta", "passive_desc": "+15% precisão e custo reduzido em rolamentos.",
+		"order_evo": "Sentinela Élfica", "chaos_evo": "Rastreador Fantasma", "npc_reaction": "Lyra: 'A leveza élfica é incomparável.'"
+	},
+	39: {
+		"name": "Elfo Solar (Azgher)",
+		"title": "Devoto do Sol — Espada Dourada de Azgher",
+		"lore": "Elfos desérticos jurados ao Deus Azgher, empunhando lâminas solares sagradas.",
+		"color": Color("#ffb300"), "accent": Color("#ffd54f"),
+		"stats": {"FOR": 6, "DES": 10, "CON": 6, "AGI": 10, "INT": 11, "ESP": 10, "PER": 7, "SOR": 7},
+		"skill_z_name": "Espada Solar de Azgher", "skill_z_desc": "Lâmina incandescente em fogo sagrado purificador.",
+		"passive_name": "Bênção de Azgher", "passive_desc": "+25% dano sob sol e céu limpo.",
+		"order_evo": "Paladino de Azgher", "chaos_evo": "Labareda Dourada", "npc_reaction": "Lyra: 'Que o sol de Azgher ilumine sua jornada!'"
+	},
+	40: {
+		"name": "Elfo Lunar (Tenebra)",
+		"title": "Devoto da Noite — Manto de Tenebra",
+		"lore": "Elfos da escuridão jurados à Deusa Tenebra, movendo-se pelas sombras.",
+		"color": Color("#5c6bc0"), "accent": Color("#9fa8da"),
+		"stats": {"FOR": 5, "DES": 11, "CON": 5, "AGI": 12, "INT": 10, "ESP": 8, "PER": 8, "SOR": 8},
+		"skill_z_name": "Manto de Tenebra", "skill_z_desc": "Mergulho nas sombras com ataque crítico garantido.",
+		"passive_name": "Véu de Tenebra", "passive_desc": "+30% crítico e passos sem som à noite.",
+		"order_evo": "Sacerdote de Tenebra", "chaos_evo": "Lâmina da Penumbra", "npc_reaction": "Capitão Randel: 'Tenebra vela por você nas sombras.'"
+	},
+	41: {
+		"name": "Fadinha",
+		"title": "Pó Estelar Alado (0.55x) — Minúscula e Ágil",
+		"lore": "Fadas diminutas com asas de borboleta reluzentes, rápidas e curativas.",
+		"color": Color("#f48fb1"), "accent": Color("#f8bbd0"),
+		"stats": {"FOR": 3, "DES": 10, "CON": 4, "AGI": 13, "INT": 11, "ESP": 11, "PER": 5, "SOR": 10},
+		"skill_z_name": "Pó de Fada Estelar", "skill_z_desc": "Nuvem de pó de fada curando aliados e cegando monstros.",
+		"passive_name": "Forma Minúscula", "passive_desc": "Escala diminuta de 0.55x e voo leve.",
+		"order_evo": "Fada Rainha", "chaos_evo": "Fada Travessa", "npc_reaction": "Lyra: 'Que criaturinha adorável!'"
+	},
+	42: {
+		"name": "Goblin",
+		"title": "Trapaceiro Astuto (0.75x) — Mestre das Bombas",
+		"lore": "Pequenos e velozes, especialistas em truques sujos, bombas de fumaça e ouro.",
+		"color": Color("#7cb342"), "accent": Color("#cddc39"),
+		"stats": {"FOR": 6, "DES": 12, "CON": 5, "AGI": 13, "INT": 6, "ESP": 3, "PER": 10, "SOR": 12},
+		"skill_z_name": "Truque Sujo Goblin", "skill_z_desc": "Bomba de fumaça e pólvora cegando oponentes.",
+		"passive_name": "Trapaceiro Nato", "passive_desc": "Escala de 0.75x e +20% drop de ouro.",
+		"order_evo": "Engenheiro Trapaceiro", "chaos_evo": "Gatuno Voraz", "npc_reaction": "Garrick: 'Mantenha as mãos longe dos meus lingotes!'"
+	},
+	43: {
+		"name": "Demi-Humano Escorpião",
+		"title": "Aguilhão Peçonhento — Quitina Vorpal",
+		"lore": "Híbridos com cauda articulada de escorpião e ferrão venenoso mortal.",
+		"color": Color("#6a1b9a"), "accent": Color("#ba68c8"),
+		"stats": {"FOR": 9, "DES": 10, "CON": 8, "AGI": 10, "INT": 7, "ESP": 3, "PER": 11, "SOR": 6},
+		"skill_z_name": "Aguilhão de Toxina Vorpal", "skill_z_desc": "Estocada rápida de veneno corrosivo.",
+		"passive_name": "Quitina Vorpal", "passive_desc": "+20% dano contra alvos envenenados.",
+		"order_evo": "Escorpião Rei", "chaos_evo": "Peçonha Mortal", "npc_reaction": "Lyra: 'Seu veneno é valioso para a alquimia!'"
+	},
+	44: {
+		"name": "Demi-Humano Tartaruga",
+		"title": "Casco de Titã (1.35x) — Lar Doce Casca",
+		"lore": "Híbridos robustos com carapaça gigante impenetrável nas costas.",
+		"color": Color("#33691e"), "accent": Color("#81c784"),
+		"stats": {"FOR": 9, "DES": 4, "CON": 16, "AGI": 3, "INT": 6, "ESP": 8, "PER": 9, "SOR": 5},
+		"skill_z_name": "Lar Doce Casca", "skill_z_desc": "Encolhe na carapaça absorvendo 85% de dano por 4s.",
+		"passive_name": "Casco de Titã", "passive_desc": "Escala de 1.35x e -45% dano recebido permanente.",
+		"order_evo": "Mestre Quelônio", "chaos_evo": "Tartaruga Fortaleza", "npc_reaction": "Capitão Randel: 'Você é a própria barricada!'"
+	},
+	45: {
+		"name": "Meio-Demônio (Succubus)",
+		"title": "Sedução das Trevas — Drenar Força Vital",
+		"lore": "Descendentes demoníacos com chifres sedutores e asas de morcego que drenam a vitalidade.",
+		"color": Color("#c2185b"), "accent": Color("#f06292"),
+		"stats": {"FOR": 8, "DES": 10, "CON": 7, "AGI": 10, "INT": 11, "ESP": 4, "PER": 8, "SOR": 8},
+		"skill_z_name": "Drenar Força Vital", "skill_z_desc": "Sifão demoníaco drenando 55 HP do alvo.",
+		"passive_name": "Charme Demoníaco", "passive_desc": "25% chance de anular ataques recebidos.",
+		"order_evo": "Rainha das Trevas", "chaos_evo": "Succubus Abissal", "npc_reaction": "Lyra: 'Uma aura perigosamente atraente...'"
+	},
+	46: {
+		"name": "Demi-Humano Lobo",
+		"title": "Espírito Lupino — Predador da Matilha",
+		"lore": "Híbridos lupinos com orelhas e cauda felpuda, velozes e ferozes em combate.",
+		"color": Color("#78909c"), "accent": Color("#90a4ae"),
+		"stats": {"FOR": 12, "DES": 9, "CON": 10, "AGI": 11, "INT": 3, "ESP": 4, "PER": 8, "SOR": 7},
+		"skill_z_name": "Despertar Forma Bestial", "skill_z_desc": "Uivo brutal com +35% velocidade e garras vorazes.",
+		"passive_name": "Instinto Lupino", "passive_desc": "+15% dano físico e faro apurado.",
+		"order_evo": "Lobo Alfa Guardião", "chaos_evo": "Lobo Feral Devorador", "npc_reaction": "Capitão Randel: 'Um excelente farejador e batedor!'"
 	}
 }
 

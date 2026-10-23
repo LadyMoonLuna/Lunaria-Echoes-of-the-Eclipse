@@ -5,12 +5,40 @@ var current_npc_id: int = 0
 var current_npc_name: String = ""
 var view_mode: String = "main" # "main" ou "trade"
 
+static func get_hearts_string(points: int) -> String:
+	if points >= 100:
+		return "❤️❤️❤️❤️❤️"
+	elif points >= 80:
+		return "❤️❤️❤️❤️♡"
+	elif points >= 60:
+		return "❤️❤️❤️♡♡"
+	elif points >= 40:
+		return "❤️❤️♡♡♡"
+	elif points >= 20:
+		return "❤️♡♡♡♡"
+	else:
+		return "♡♡♡♡♡"
+
+static func get_hearts_level_text(points: int) -> String:
+	if points >= 100:
+		return "❤️❤️❤️❤️❤️ (Nível Máximo: Alma Irmã — 20% Desconto + Receitas Secretas)"
+	elif points >= 80:
+		return "❤️❤️❤️❤️♡ (Nível 5: Leal — 15% Desconto)"
+	elif points >= 60:
+		return "❤️❤️❤️♡♡ (Nível 4: Confidente — 10% Desconto + Segredos)"
+	elif points >= 40:
+		return "❤️❤️♡♡♡ (Nível 3: Amigo — 5% Desconto)"
+	elif points >= 20:
+		return "❤️♡♡♡♡ (Nível 2: Conhecido)"
+	else:
+		return "♡♡♡♡♡ (Nível 1: Desconhecido)"
+
 # Metadados de Treinamento, Diálogos e Comércio por Mestre NPC
 const MASTER_DATA := {
 	100: { # Garrick, o Ferreiro
 		"title": "Garrick, o Mestre Ferreiro",
 		"sub": "Forja da Bigorna Ancestral & Aço Temperado",
-		"class_id": 5,
+		"class_id": 7,
 		"class_name": "Ferreiro",
 		"greeting": "Pela bigorna sagrada! O fogo da forja purifica o aço e molda guerreiros imbatíveis. Quer afiar sua lâmina, reparar sua armadura ou aprender a arte do Ferreiro de Combate?",
 		"color": Color("#ff9800"),
@@ -30,7 +58,7 @@ const MASTER_DATA := {
 	103: { # Lyra, a Alquimista
 		"title": "Lyra, a Mestra Alquimista",
 		"sub": "Transmutação Elemental & Elixires da Vida",
-		"class_id": 6,
+		"class_id": 8,
 		"class_name": "Alquimista",
 		"greeting": "O equilíbrio dos elementos governa todo o universo! Quer aprender a manipular poções corrosivas de ácido e frascos curativos de éter? Junte-se à arte alquímica!",
 		"color": Color("#00e676"),
@@ -50,7 +78,7 @@ const MASTER_DATA := {
 	104: { # Varis, o Mercador Sombrio
 		"title": "Varis, o Mercador do Beco Sombrio",
 		"sub": "Ceifador do Eclipse & Pactos Proibidos",
-		"class_id": 7,
+		"class_id": 13,
 		"class_name": "Ceifador do Eclipse",
 		"greeting": "Pssiu... A luz da vila é fraca demais contra o que rasteja lá fora. Se você não tem medo de ceifar almas com uma foice colossal, as sombras o acolherão...",
 		"color": Color("#d500f9"),
@@ -71,8 +99,8 @@ const MASTER_DATA := {
 		"title": "Capitão Randel, Comandante da Guarda",
 		"sub": "Mestre da Lâmina & Vanguarda Real",
 		"class_id": 1,
-		"class_name": "Espadachim",
-		"greeting": "A vila precisa de escudos fortes e lâminas afiadas contra os monstros do eclipse! Venha recruta, jure lealdade à vanguarda e torne-se um nobre Espadachim!",
+		"class_name": "Guerreiro",
+		"greeting": "A vila precisa de escudos fortes e lâminas afiadas contra os monstros do eclipse! Venha recruta, jure lealdade à vanguarda e torne-se um nobre Guerreiro!",
 		"color": Color("#64b5f6"),
 		"talk_quotes": [
 			"A sentinela que dorme no posto condena toda a aldeia. Mantenha os olhos afiados no horizonte norte.",
@@ -90,9 +118,9 @@ const MASTER_DATA := {
 	106: { # Guarda Valen
 		"title": "Guarda Valen, Patrulheiro da Vila",
 		"sub": "Arquearia Silvana & Rastreamento Primordial",
-		"class_id": 2,
-		"class_name": "Batedor",
-		"greeting": "Passos silenciosos na mata e olhos afiados nas trevas. Quer dominar o arco, flechas perfurantes e armadilhas táticas? Aprenda as artes do Batedor!",
+		"class_id": 3,
+		"class_name": "Arqueiro",
+		"greeting": "Passos silenciosos na mata e olhos afiados nas trevas. Quer dominar o arco, flechas perfurantes e armadilhas táticas? Aprenda as artes do Arqueiro!",
 		"color": Color("#69f0ae"),
 		"talk_quotes": [
 			"O vento na relva entrega a aproximação de qualquer predador antes mesmo que você o veja.",
@@ -108,16 +136,16 @@ const MASTER_DATA := {
 		]
 	},
 	107: { # Irmã Seraphina
-		"title": "Irmã Seraphina, Mestra Acólita",
+		"title": "Irmã Seraphina, Mestra Guardiã",
 		"sub": "Igreja da Luz Solar & Bênçãos Lunares",
-		"class_id": 4,
-		"class_name": "Acólito",
-		"greeting": "A Luz celestial dissipa as sombras mais antigas. Se seu espírito busca conforto, purificação das feridas ou a vocação sagrada do Acólito, você encontrou seu refúgio.",
+		"class_id": 6,
+		"class_name": "Escudeiro",
+		"greeting": "A Luz celestial dissipa as sombras mais antigas. Se seu espírito busca conforto, purificação das feridas ou a vocação de escudo inabalável, você encontrou seu refúgio.",
 		"color": Color("#ffd54f"),
 		"talk_quotes": [
 			"Que a Chama Solar purifique sua alma contra os tormentos que habitam o Bosque e as Ruínas.",
 			"A Lua e o Sol são faces complementares da mesma divindade celestial. Em noites de eclipse, o equilíbrio se rompe.",
-			"A oração e o cântico dos acólitos já salvaram mais vidas na vanguarda do que uma dúzia de espadas afiadas.",
+			"A oração e o cântico dos protetores já salvaram mais vidas na vanguarda do que uma dúzia de espadas afiadas.",
 			"A doação de amuletos sagrados e anéis estelares ajuda a manter as chamas do altar sempre acesas."
 		],
 		"services": [
@@ -130,9 +158,9 @@ const MASTER_DATA := {
 	108: { # Mestre Aurelius
 		"title": "Mestre Aurelius, Arquimago das Luas",
 		"sub": "Observatório Astral & Cúpula Arcana",
-		"class_id": 3,
-		"class_name": "Iniciado",
-		"greeting": "As dez fases da lua regem as correntes do éter em Lunaria. Venha decifrar os mistérios do cosmos e despertar as energias do Iniciado!",
+		"class_id": 2,
+		"class_name": "Mago",
+		"greeting": "As dez fases da lua regem as correntes do éter em Lunaria. Venha decifrar os mistérios do cosmos e despertar as energias do Mago!",
 		"color": Color("#4fc3f7"),
 		"talk_quotes": [
 			"Observe atentamente as órbitas lunares. Na Lua Cheia o éter se expande, e na Lua de Sangue ele entra em fúria.",
@@ -150,8 +178,8 @@ const MASTER_DATA := {
 	109: { # Kaelen, o Mestre Caçador
 		"title": "Kaelen, Mestre Caçador de Feras",
 		"sub": "Posto da Fronteira & Rastreamento da Bruma",
-		"class_id": 2,
-		"class_name": "Batedor",
+		"class_id": 3,
+		"class_name": "Arqueiro",
 		"greeting": "A floresta não perdoa os imprudentes. Os Lobos da Bruma caçam em matilha, e sob a Lua Cheia o Alfa desperta. Quer aprender a ler os rastros ou precisa de equipamentos de caça?",
 		"color": Color("#81c784"),
 		"talk_quotes": [
@@ -193,6 +221,7 @@ const MASTER_DATA := {
 var main_panel: PanelContainer = null
 var master_title_label: Label = null
 var master_sub_label: Label = null
+var master_friendship_label: Label = null
 var master_greeting_label: Label = null
 var content_vbox: VBoxContainer = null
 var options_vbox: VBoxContainer = null
@@ -295,6 +324,13 @@ func _build_ui() -> void:
 	master_sub_label.add_theme_color_override("font_color", Color(0.7, 0.78, 0.9))
 	header_vbox.add_child(master_sub_label)
 
+	master_friendship_label = Label.new()
+	master_friendship_label.text = "Afiança: ♡♡♡♡♡ (Nível 1: Desconhecido)"
+	master_friendship_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	master_friendship_label.add_theme_font_size_override("font_size", 12)
+	master_friendship_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.55))
+	header_vbox.add_child(master_friendship_label)
+
 	root_vbox.add_child(HSeparator.new())
 
 	# Diálogo / Fala do Mestre
@@ -373,6 +409,8 @@ func _update_display() -> void:
 	if master_sub_label:
 		master_sub_label.text = m_info["sub"]
 
+	update_friendship_display()
+
 	for ch in options_vbox.get_children():
 		ch.queue_free()
 
@@ -380,6 +418,14 @@ func _update_display() -> void:
 		_render_trade_view(m_info)
 	else:
 		_render_main_view(m_info)
+
+func update_friendship_display() -> void:
+	var world := get_parent()
+	var f_pts: int = 0
+	if world and world.has_method("get_npc_friendship"):
+		f_pts = world.get_npc_friendship(current_npc_id)
+	if master_friendship_label:
+		master_friendship_label.text = "Afiança: %s [%d/100 pts]" % [get_hearts_level_text(f_pts), f_pts]
 
 # -------------------------------------------------------------
 # VISÃO PRINCIPAL: 3 OPÇÕES (CONVERSAR, COMÉRCIO, CLASSE)
@@ -422,19 +468,59 @@ func _render_main_view(m_info: Dictionary) -> void:
 	# -------------------------------------------------------------
 	# 2. BOTÃO ABRIR COMÉRCIO (COMPRAR / VENDER / REPARAR):
 	# -------------------------------------------------------------
-	var trade_btn := Button.new()
-	trade_btn.custom_minimum_size = Vector2(0, 44)
-	trade_btn.text = "🛒 Abrir Comércio & Serviços (Comprar / Vender / Reparar)"
-	trade_btn.add_theme_font_size_override("font_size", 12)
-	trade_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	var trade_style := StyleBoxFlat.new()
-	trade_style.bg_color = Color(0.25, 0.2, 0.1, 0.95)
-	trade_style.border_color = Color(1.0, 0.8, 0.3, 0.9)
-	trade_style.set_border_width_all(1)
-	trade_style.set_corner_radius_all(6)
-	trade_btn.add_theme_stylebox_override("normal", trade_style)
-	trade_btn.pressed.connect(_on_open_trade_pressed)
-	options_vbox.add_child(trade_btn)
+	var cur_hour: int = 12
+	if world and "current_world_hour" in world:
+		cur_hour = world.current_world_hour
+
+	var f_pts: int = 0
+	if world and world.has_method("get_npc_friendship"):
+		f_pts = world.get_npc_friendship(current_npc_id)
+
+	var is_shop_npc: bool = (current_npc_id == 100 or current_npc_id == 103)
+	var is_night: bool = (cur_hour >= 18 or cur_hour < 6)
+	var is_soulmate: bool = (f_pts >= 100) # Nível 5: Alma Irmã ❤️❤️❤️❤️❤️
+
+	if is_shop_npc and is_night and not is_soulmate:
+		var lock_pnl := PanelContainer.new()
+		var lp_style := StyleBoxFlat.new()
+		lp_style.bg_color = Color(0.18, 0.08, 0.08, 0.95)
+		lp_style.border_color = Color(0.85, 0.3, 0.2, 0.8)
+		lp_style.set_border_width_all(1)
+		lp_style.set_corner_radius_all(6)
+		lp_style.content_margin_left = 12
+		lp_style.content_margin_right = 12
+		lp_style.content_margin_top = 10
+		lp_style.content_margin_bottom = 10
+		lock_pnl.add_theme_stylebox_override("panel", lp_style)
+		options_vbox.add_child(lock_pnl)
+
+		var lock_lbl := Label.new()
+		lock_lbl.text = "🔒 Expediente encerrado (Aberto das 06:00 às 18:00). O NPC está em horário de descanso!"
+		lock_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lock_lbl.add_theme_font_size_override("font_size", 12)
+		lock_lbl.add_theme_color_override("font_color", Color(1.0, 0.65, 0.45))
+		lock_pnl.add_child(lock_lbl)
+	else:
+		var trade_btn := Button.new()
+		trade_btn.custom_minimum_size = Vector2(0, 44)
+		if is_shop_npc and is_night and is_soulmate:
+			trade_btn.text = "🛒 [Exceção de Alma Irmã ❤️❤️❤️❤️❤️] Abrir Loja / Forja Noturna"
+		else:
+			trade_btn.text = "🛒 Abrir Comércio & Serviços (Comprar / Vender / Reparar)"
+		trade_btn.add_theme_font_size_override("font_size", 12)
+		trade_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		var trade_style := StyleBoxFlat.new()
+		if is_shop_npc and is_night and is_soulmate:
+			trade_style.bg_color = Color(0.35, 0.15, 0.25, 0.95)
+			trade_style.border_color = Color(1.0, 0.45, 0.6, 0.9)
+		else:
+			trade_style.bg_color = Color(0.25, 0.2, 0.1, 0.95)
+			trade_style.border_color = Color(1.0, 0.8, 0.3, 0.9)
+		trade_style.set_border_width_all(1)
+		trade_style.set_corner_radius_all(6)
+		trade_btn.add_theme_stylebox_override("normal", trade_style)
+		trade_btn.pressed.connect(_on_open_trade_pressed)
+		options_vbox.add_child(trade_btn)
 
 	# Separador sutil antes do bloco de Classe
 	var class_sep := HSeparator.new()
@@ -636,6 +722,14 @@ func _on_talk_pressed() -> void:
 	print("[ClassMasterUI] Conversando com NPC #%d!" % current_npc_id)
 	NetworkManager.send_player_interact(current_npc_id)
 
+	var world := get_parent()
+	var cur_pts: int = 0
+	if world and world.has_method("get_npc_friendship"):
+		cur_pts = world.get_npc_friendship(current_npc_id)
+	cur_pts = mini(100, cur_pts + 5)
+	if world and world.has_method("set_npc_friendship"):
+		world.set_npc_friendship(current_npc_id, cur_pts)
+
 	var m_info: Dictionary = MASTER_DATA.get(current_npc_id, MASTER_DATA[105])
 	var quotes: Array = m_info.get("talk_quotes", [])
 	var quote: String = quotes[randi() % quotes.size()] if quotes.size() > 0 else m_info["greeting"]
@@ -643,11 +737,30 @@ func _on_talk_pressed() -> void:
 	if master_greeting_label:
 		master_greeting_label.text = "💬 \"%s\"\n\n✨ [Você fortaleceu sua afiança com %s! (+5 Pontos no Servidor)]" % [quote, m_info["title"]]
 
-	var world := get_parent()
+	update_friendship_display()
+
 	if world and world.has_method("show_loot_toast"):
-		world.show_loot_toast("✨ Afiança Aumentada: +5 pontos com %s!" % m_info["title"])
+		world.show_loot_toast("✨ Afiança Aumentada: +5 pontos com %s! (%s)" % [m_info["title"], get_hearts_string(cur_pts)])
 
 func _on_open_trade_pressed() -> void:
+	var world := get_parent()
+	var cur_hour: int = 12
+	if world and "current_world_hour" in world:
+		cur_hour = world.current_world_hour
+
+	var f_pts: int = 0
+	if world and world.has_method("get_npc_friendship"):
+		f_pts = world.get_npc_friendship(current_npc_id)
+
+	var is_shop_npc: bool = (current_npc_id == 100 or current_npc_id == 103)
+	var is_night: bool = (cur_hour >= 18 or cur_hour < 6)
+	var is_soulmate: bool = (f_pts >= 100)
+
+	if is_shop_npc and is_night and not is_soulmate:
+		if world and world.has_method("show_loot_toast"):
+			world.show_loot_toast("🔒 Expediente encerrado (Aberto das 06:00 às 18:00). O NPC está em horário de descanso!")
+		return
+
 	view_mode = "trade"
 	_update_display()
 
@@ -687,10 +800,19 @@ func _on_secret_knowledge_pressed() -> void:
 		world.show_loot_toast("🔮 Conhecimento Arcano Proibido revelado pelo Espírito dos Esgotos!")
 
 func _learn_class(race_id: int, new_class_id: int) -> void:
-	print("[ClassMasterUI] Aprendendo Classe %d com Mestre #%d!" % [new_class_id, current_npc_id])
-	var nm := get_node_or_null("/root/NetworkManager")
-	if nm and nm.get("my_player_id") and nm.my_player_id > 0:
-		nm.send_select_identity(race_id, new_class_id, 0)
+	print("[ClassMasterUI] Solicitando confirmação de Classe %d com Mestre #%d!" % [new_class_id, current_npc_id])
+	var world := get_parent()
+	var class_name_str := "Classe #%d" % new_class_id
+	var master_name := current_npc_name if current_npc_name != "" else ("Mestre #%d" % current_npc_id)
+	if MASTER_DATA.has(current_npc_id):
+		class_name_str = MASTER_DATA[current_npc_id].get("class_name", class_name_str)
+	if world and world.has_method("request_class_or_race_change"):
+		var target_tier: int = 5 if new_class_id >= 13 else 1
+		world.request_class_or_race_change(false, new_class_id, target_tier, class_name_str, master_name)
+	else:
+		var nm := get_node_or_null("/root/NetworkManager")
+		if nm and nm.get("my_player_id") and nm.my_player_id > 0:
+			nm.send_select_identity(race_id, new_class_id, 0)
 	close_menu()
 
 func _choose_path(path_id: int) -> void:
