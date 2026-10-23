@@ -118,3 +118,15 @@ func TestShopStatePacketLength(t *testing.T) {
 		t.Fatal("cabeçalho do SHOP_STATE inválido")
 	}
 }
+
+func TestOverheatedNPCSeeksFountain(t *testing.T) {
+	s := lifeTestServer()
+	g := addLifeNPC(s, 100, 10, 10)
+	g.WithLife(func(n *world.NPC) { n.Heat = 90 })
+	s.updateNPCLife(1)
+	g.Teleport(0, 0, 0)
+	s.updateNPCLife(1)
+	if g.Heat != 0 || g.Thirst != 100 {
+		t.Fatalf("na fonte deveria se refrescar: calor %.0f sede %.0f", g.Heat, g.Thirst)
+	}
+}

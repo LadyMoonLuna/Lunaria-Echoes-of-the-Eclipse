@@ -54,7 +54,9 @@ type NPC struct {
 	IsDead          bool    // Morte permanente: nunca renasce
 	Hunger          float32 // 0 a 100 (100 = saciado); cai 0,5/min
 	Thirst          float32 // 0 a 100 (100 = hidratado); cai 0,8/min
-	Cold            float32 // 0 a 100 (0 = aquecido); sobe no frio longe do fogo
+	Cold            float32 // 0 a 100 (0 = aquecido); sobe abaixo de 10 °C longe do fogo
+	Heat            float32 // 0 a 100 (0 = fresco); sobe acima de 26 °C (insolação em 100)
+	Temperature     float32 // temperatura sentida agora (°C)
 	Personality     string  // Honrado, Ambicioso, Cauteloso, Implacavel
 	Gold            uint32
 	RawMaterials    map[uint16]int // matérias-primas em mãos

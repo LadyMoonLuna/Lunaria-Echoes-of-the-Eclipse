@@ -2299,12 +2299,14 @@ type ShopState struct {
 	Gold                 uint32
 	HP, MaxHP            uint16
 	Hunger, Thirst, Cold uint8
+	Heat                 uint8
+	Temperature          int8 // °C sentidos
 	Activity             string
 	Stock                []ShopStockEntry
 	Orders               []ShopOrderEntry
 }
 
-// SerializeShopState: op | tamanho u16 | npc u32 | ouro u32 | hp u16 | maxhp u16 | fome | sede | frio |
+// SerializeShopState: op | tamanho u16 | npc u32 | ouro u32 | hp u16 | maxhp u16 | fome | sede | frio | calor | temp °C i8 |
 // lenAtividade u8 + texto | nEstoque u8 + (item u8, qtd u8, preço u32)* | nEncomendas u8 + (mat u16, qtd u8, preço u32)*
 func SerializeShopState(st ShopState) []byte {
 	act := []byte(st.Activity)
@@ -2323,7 +2325,7 @@ func SerializeShopState(st ShopState) []byte {
 	b = binary.LittleEndian.AppendUint32(b, st.Gold)
 	b = binary.LittleEndian.AppendUint16(b, st.HP)
 	b = binary.LittleEndian.AppendUint16(b, st.MaxHP)
-	b = append(b, st.Hunger, st.Thirst, st.Cold, uint8(len(act)))
+	b = append(b, st.Hunger, st.Thirst, st.Cold, st.Heat, uint8(st.Temperature), uint8(len(act)))
 	b = append(b, act...)
 	b = append(b, uint8(len(st.Stock)))
 	for _, e := range st.Stock {

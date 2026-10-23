@@ -30,11 +30,12 @@ type ResourceNode struct {
 	X, Z       float32
 	DepletedAt time.Time
 	RespawnIn  time.Duration
+	DriedUp    bool // poça/riacho que secou no calor; só volta com chuva ou tempo ameno
 }
 
 // Available informa se o nó já voltou a crescer.
 func (n *ResourceNode) Available() bool {
-	return n.DepletedAt.IsZero() || time.Since(n.DepletedAt) >= n.RespawnIn
+	return !n.DriedUp && (n.DepletedAt.IsZero() || time.Since(n.DepletedAt) >= n.RespawnIn)
 }
 
 // BaseYield: recursos por coleta (materiais raros rendem menos).
@@ -224,7 +225,7 @@ func (m *ResourceNodeManager) RespawnedZones() []uint8 {
 	defer m.mu.Unlock()
 	zones := map[uint8]bool{}
 	for _, n := range m.nodes {
-		if !n.DepletedAt.IsZero() && time.Since(n.DepletedAt) >= n.RespawnIn {
+		if !n.DriedUp && !n.DepletedAt.IsZero() && time.Since(n.DepletedAt) >= n.RespawnIn {
 			n.DepletedAt = time.Time{}
 			zones[n.ZoneID] = true
 		}
@@ -234,4 +235,32 @@ func (m *ResourceNodeManager) RespawnedZones() []uint8 {
 		out = append(out, z)
 	}
 	return out
+}
+
+// IsEvaporable: pequenos agrupamentos de água que secam no calor.
+func IsEvaporable(materialID uint16) bool {
+	return materialID == MatPureWater || materialID == MatToxicWater || materialID == MatLunarDew
+}
+
+// UpdateEvaporation seca ou reabastece as águas rasas de uma zona conforme a temperatura.
+// chance = probabilidade de cada poça secar nesta chamada. Retorna true se algo mudou.
+func (m *ResourceNodeManager) UpdateEvaporation(zone uint8, tempC float32, raining bool, roll func() float32) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	changed := false
+	for _, n := range m.nodes {
+		if n.ZoneID != zone || !IsEvaporable(n.MaterialID) {
+			continue
+		}
+		switch {
+		case n.DriedUp && (raining || tempC < WaterRefillTemp):
+			n.DriedUp = false
+			n.DepletedAt = time.Time{}
+			changed = true
+		case !n.DriedUp && !raining && tempC > WaterDryTemp && roll() < (tempC-WaterDryTemp)*EvaporationChancePerDegree:
+			n.DriedUp = true
+			changed = true
+		}
+	}
+	return changed
 }

@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"time"
 
 	"lunaria/server/internal/protocol"
@@ -42,7 +43,8 @@ func (s *Server) updateNPCLife(dt float32) {
 	}
 	s.mu.RUnlock()
 	for _, npc := range npcs {
-		s.tickNPCLife(npc, dt, hour, s.clock.GetZoneWeather(npc.GetZone()))
+		zone := npc.GetZone()
+		s.tickNPCLife(npc, dt, hour, world.AmbientTemp(zone, hour, s.clock.GetZoneWeather(zone)))
 	}
 }
 
@@ -55,7 +57,7 @@ type lifeEvents struct {
 	zoneChange bool
 }
 
-func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, weather uint8) {
+func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float32) {
 	var ev lifeEvents
 	tavern := s.tavernHasMeal()
 	villageNodes := s.resourceNodes.InZone(world.ZoneVillage)
@@ -66,7 +68,7 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, weather uint8
 		if !n.Life.Enabled || n.IsDead || !n.IsActive {
 			return
 		}
-		if n.TickNeeds(dt, hour, weather) {
+		if n.TickNeeds(dt, ambient) {
 			ev.died = true
 			return
 		}
@@ -87,7 +89,7 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, weather uint8
 				n.Life.WasPatrolling = false
 				n.CurrentActivity = world.ActivityWorking
 			}
-		} else if world.IsColdHour(hour) && hour < 6 {
+		} else if hour < 6 {
 			n.CurrentActivity = world.ActivitySleeping
 		} else {
 			n.CurrentActivity = world.ActivityWorking
@@ -151,6 +153,9 @@ func planNeeds(n *world.NPC, tavern bool, villageNodes []world.ResourceNode, ev 
 	case n.Cold > world.ColdThreshold:
 		n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFurnace[0], world.PlaceFurnace[1]+3, "warm")
 		ev.says = append(ev.says, "Brrr... este frio corta os ossos. Vou me aquecer na Fornalha.")
+	case n.Heat > world.HeatThreshold:
+		n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFountain[0], world.PlaceFountain[1], "cool")
+		ev.says = append(ev.says, "Que calor sufocante... vou me refrescar na Fonte.")
 	}
 }
 
@@ -280,6 +285,9 @@ func (s *Server) advanceErrand(n *world.NPC, ev *lifeEvents) {
 		ev.buyMeal = true
 	case "warm":
 		n.Cold = 0
+	case "cool":
+		n.Heat = 0
+		n.Thirst = 100
 	case "enter_zone":
 		n.ZoneID = st.EnterZone
 		n.PosX, n.PosZ = st.EnterX, st.EnterZ
@@ -385,7 +393,8 @@ func shopStateOf(npc *world.NPC) protocol.ShopState {
 	var st protocol.ShopState
 	npc.WithLife(func(n *world.NPC) {
 		st = protocol.ShopState{NPCID: n.ID, Gold: n.Gold, HP: uint16(max(n.HP, 0)), MaxHP: uint16(n.MaxHP),
-			Hunger: uint8(n.Hunger), Thirst: uint8(n.Thirst), Cold: uint8(n.Cold), Activity: n.CurrentActivity}
+			Hunger: uint8(n.Hunger), Thirst: uint8(n.Thirst), Cold: uint8(n.Cold), Heat: uint8(n.Heat),
+			Temperature: int8(max(min(n.Temperature, 127), -128)), Activity: n.CurrentActivity}
 		mult := world.SellPriceMult(n.Personality)
 		for item, qty := range n.ShopStock {
 			price := world.ShopPrice(n.ID, uint8(item))
@@ -525,4 +534,18 @@ func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty ui
 	})
 	p.AddGold(total)
 	return fmt.Sprintf("Negócio fechado: %d× %s por %d Sollares. Já vou trabalhar nisso!", sold, world.ItemName(item), total)
+}
+
+// evaporationZones: zonas abertas onde as águas rasas podem secar.
+var evaporationZones = []uint8{world.ZoneVillage, world.ZoneForest, world.ZoneRuins, world.ZoneSanctuary, world.ZoneAshFrontier}
+
+// updateWaterEvaporation (a cada 10 s): o calor seca poças e orvalho; chuva ou tempo ameno os reabastece.
+func (s *Server) updateWaterEvaporation(hour int) {
+	for _, zone := range evaporationZones {
+		weather := s.clock.GetZoneWeather(zone)
+		temp := world.AmbientTemp(zone, hour, weather)
+		if s.resourceNodes.UpdateEvaporation(zone, temp, world.IsRainyWeather(weather), rand.Float32) {
+			s.broadcastResourceNodes(zone)
+		}
+	}
 }

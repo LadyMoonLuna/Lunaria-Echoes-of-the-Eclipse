@@ -15,6 +15,7 @@ const (
 	ActivityEating    = "Comendo"
 	ActivityDrinking  = "Bebendo na Fonte"
 	ActivityWarming   = "Aquecendo no Fogo"
+	ActivityCooling   = "Refrescando na Fonte"
 	ActivityGathering = "Coletando Recursos"
 	ActivitySleeping  = "Dormindo"
 	ActivityFleeing   = "Fugindo"
@@ -46,6 +47,7 @@ const (
 	ColdFallPerMinute     float32 = 4.0
 	NeedThreshold         float32 = 35  // abaixo disso a necessidade vira prioridade
 	ColdThreshold         float32 = 70  // acima disso o NPC procura calor
+	HeatThreshold         float32 = 70  // acima disso o NPC procura a fonte para se refrescar
 	StarvationHPPerMinute         = 30  // fome/sede/frio extremos ferem
 	HeatRadius            float32 = 9.0 // distância da fornalha/fogueira que aquece
 	BuyOrderPatience              = 5 * time.Minute
@@ -271,18 +273,6 @@ func ShopPrice(npcID uint32, item uint8) uint32 {
 	return prof.SellExtra[item]
 }
 
-// IsColdWeather: climas que esfriam o corpo.
-func IsColdWeather(w uint8) bool {
-	switch w {
-	case WeatherRain, WeatherDrizzle, WeatherSnow, WeatherBlizzard, WeatherThunderstorm, WeatherHail, WeatherGale, WeatherAcidRain:
-		return true
-	}
-	return false
-}
-
-// IsColdHour: noite e madrugada.
-func IsColdHour(hour int) bool { return hour >= 20 || hour < 6 }
-
 func clampNeed(v float32) float32 {
 	if v < 0 {
 		return 0
@@ -293,25 +283,38 @@ func clampNeed(v float32) float32 {
 	return v
 }
 
-// TickNeeds avança fome, sede e frio por dt segundos e aplica dano. Retorna true se o NPC morreu agora.
-// Chamar com o NPC travado (dentro de WithLife).
-func (npc *NPC) TickNeeds(dt float32, hour int, weather uint8) bool {
-	m := dt / 60
-	npc.Hunger = clampNeed(npc.Hunger - HungerPerMinute*m)
-	npc.Thirst = clampNeed(npc.Thirst - ThirstPerMinute*m)
+// NearFire informa se o NPC está ao lado da Fornalha (chamar com o NPC travado).
+func (npc *NPC) NearFire() bool {
 	dx, dz := npc.PosX-PlaceFurnace[0], npc.PosZ-PlaceFurnace[1]
-	nearHeat := npc.ZoneID == ZoneVillage && dx*dx+dz*dz <= HeatRadius*HeatRadius
+	return npc.ZoneID == ZoneVillage && dx*dx+dz*dz <= HeatRadius*HeatRadius
+}
+
+// FeltTemp: temperatura que o corpo do NPC sente (ambiente + fogo próximo).
+func (npc *NPC) FeltTemp(ambient float32) float32 {
+	if npc.NearFire() {
+		return ambient + FireHeatBonus
+	}
+	return ambient
+}
+
+// TickNeeds avança fome, sede, frio e calor por dt segundos com a temperatura ambiente (°C) e aplica dano.
+// Retorna true se o NPC morreu agora. Chamar com o NPC travado (dentro de WithLife).
+func (npc *NPC) TickNeeds(dt float32, ambient float32) bool {
+	m := dt / 60
+	t := npc.FeltTemp(ambient)
+	npc.Temperature = t
+	npc.Hunger = clampNeed(npc.Hunger - HungerPerMinute*m)
+	npc.Thirst = clampNeed(npc.Thirst - ThirstPerMinute*ThirstMultiplier(t)*m)
 	switch {
-	case nearHeat:
+	case t < ComfortMinTemp: // esfria proporcional ao quanto está abaixo do conforto
+		npc.Cold = clampNeed(npc.Cold + ColdRisePerMinute*(ComfortMinTemp-t)/5*m)
+		npc.Heat = clampNeed(npc.Heat - ColdFallPerMinute*m)
+	case t > ComfortMaxTemp: // esquenta proporcional ao quanto está acima
+		npc.Heat = clampNeed(npc.Heat + ColdRisePerMinute*(t-ComfortMaxTemp)/5*m)
 		npc.Cold = clampNeed(npc.Cold - ColdFallPerMinute*m)
-	case IsColdWeather(weather) || IsColdHour(hour):
-		mult := float32(1)
-		if IsColdWeather(weather) && IsColdHour(hour) {
-			mult = 2
-		}
-		npc.Cold = clampNeed(npc.Cold + ColdRisePerMinute*mult*m)
 	default:
-		npc.Cold = clampNeed(npc.Cold - ColdFallPerMinute*0.5*m)
+		npc.Cold = clampNeed(npc.Cold - ColdFallPerMinute*m)
+		npc.Heat = clampNeed(npc.Heat - ColdFallPerMinute*m)
 	}
 	hurts := 0
 	if npc.Hunger <= 0 {
@@ -322,6 +325,9 @@ func (npc *NPC) TickNeeds(dt float32, hour int, weather uint8) bool {
 	}
 	if npc.Cold >= 100 {
 		hurts++ // hipotermia
+	}
+	if npc.Heat >= 100 {
+		hurts++ // insolação
 	}
 	if hurts > 0 {
 		dmg := int(float32(StarvationHPPerMinute*hurts) * m)
@@ -367,6 +373,8 @@ func ActivityFor(action string) string {
 		return ActivityEating
 	case "warm":
 		return ActivityWarming
+	case "cool":
+		return ActivityCooling
 	}
 	return ActivityGathering
 }

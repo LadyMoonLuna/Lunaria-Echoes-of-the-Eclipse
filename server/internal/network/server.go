@@ -4575,6 +4575,9 @@ func (s *Server) runGameLoop() {
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
 				s.updateNPCLife(1.0)
+				if s.serverTick%(GameTickRate*10) < GameTickRate {
+					s.updateWaterEvaporation(int(h))
+				}
 				s.updateClassMasterRoutines(int(h))
 				s.updatePlaceTrials()
 				s.expireGroundItems()
