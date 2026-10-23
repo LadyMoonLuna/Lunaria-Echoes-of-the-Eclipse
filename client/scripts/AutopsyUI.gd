@@ -217,6 +217,10 @@ func _execute_cut() -> void:
 
 	# Bônus de Perícia (MAS): +2.5% por ponto investido
 	var mas_bonus: float = float(player_mas_stat) * 0.025
+	# Passiva Células Gourmet (Mestre do Banquete / Doutor Corvo): Zona Verde 10% maior
+	var world := get_parent()
+	if world and world.get("my_class_id") != null and (world.my_class_id == 12 or world.my_class_id == 18):
+		mas_bonus += 0.10
 	var green_threshold: float = max(0.35, base_green - mas_bonus)
 	var yellow_threshold: float = max(0.15, base_yellow - (float(player_mas_stat) * 0.015))
 

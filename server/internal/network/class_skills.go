@@ -439,7 +439,7 @@ func (s *Server) applyBasicClassSkillEffects(attackerID uint32, classID, actionT
 		}
 	case protocol.ClassWorldTreeArchfairy:
 		if actionType == protocol.ActionSkillR { // Anel de Cogumelos: polimorfia (3s)
-			mob.ApplyStun(3 * time.Second)
+			mob.ApplyPolymorph(3 * time.Second)
 		}
 	case protocol.ClassCrimsonAristocrat:
 		if actionType == protocol.ActionSkillQ { // Lança de Sangue Congelado
@@ -542,7 +542,8 @@ func applyPathDamage(damage uint16, attacker *world.Player) uint16 {
 	if attacker == nil {
 		return damage
 	}
-	if m := attacker.PathDamageMult(); m != 1.0 {
+	m := attacker.PathDamageMult() * attacker.ConsumeAmbushMult() // Caminho Evolutivo e Emboscada
+	if m != 1.0 {
 		return uint16(float32(damage) * m)
 	}
 	return damage
@@ -636,6 +637,7 @@ func (s *Server) handleTranscendentPreEffects(player *world.Player, classID, act
 	case protocol.ClassVorpalExecutioner:
 		if r { // Ecdise Ácida: invisível por 2s e cura 30% (a casca explode no lugar antigo)
 			player.SetDodgeIFrame(2 * time.Second)
+			player.SetInvisible(2*time.Second, false)
 			player.Heal(player.MaxHP * 30 / 100)
 		}
 	case protocol.ClassCrimsonWebSovereign:

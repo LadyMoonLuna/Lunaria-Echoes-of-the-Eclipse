@@ -19,25 +19,26 @@ const (
 type Mob struct {
 	Mu sync.RWMutex
 
-	ID        uint32
-	ZoneID    uint8 // Zona instanciada onde o monstro reside (0 a 8)
-	Name      string
-	MobType   uint8
-	State     uint8
-	PosX      float32
-	PosY      float32
-	PosZ      float32
-	RotY      float32
-	SpawnX    float32
-	SpawnY    float32
-	SpawnZ    float32
-	HP        uint16
-	MaxHP     uint16
-	MoveSpeed float32
-	BaseSpeed float32
-	IsAlive   bool
-	IsActive  bool // Ativo no mundo (controlado por eventos como Fases da Lua)
-	DeadAt    time.Time
+	ID             uint32
+	ZoneID         uint8 // Zona instanciada onde o monstro reside (0 a 8)
+	Name           string
+	MobType        uint8
+	PolymorphUntil time.Time // Polimorfado: inofensivo e vulnerável
+	State          uint8
+	PosX           float32
+	PosY           float32
+	PosZ           float32
+	RotY           float32
+	SpawnX         float32
+	SpawnY         float32
+	SpawnZ         float32
+	HP             uint16
+	MaxHP          uint16
+	MoveSpeed      float32
+	BaseSpeed      float32
+	IsAlive        bool
+	IsActive       bool // Ativo no mundo (controlado por eventos como Fases da Lua)
+	DeadAt         time.Time
 
 	// Rastreamento de causadores de dano (para evolução solo Varkai)
 	DamageDealers map[uint32]int

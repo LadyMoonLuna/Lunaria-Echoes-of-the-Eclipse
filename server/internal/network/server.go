@@ -1612,6 +1612,18 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		return
 	}
 
+	// 0.1. Atacar revela quem está invisível/furtivo (a esquiva não revela)
+	if pkt.ActionType != protocol.ActionDodgeRoll && player.IsStealthed() {
+		player.BreakStealth()
+	}
+
+	// 0.2. Passiva Punhos de Ferro (Punho Celeste / Punho Fantasma): a cada 3 socos, escudo de 1.5s (-50% dano)
+	if pkt.ActionType == protocol.ActionBasicAttack && (player.ClassID == protocol.ClassFighter || player.ClassID == protocol.ClassShadowMonk) {
+		if player.RegisterPunch() {
+			player.SetParry(1500 * time.Millisecond)
+		}
+	}
+
 	// 1. Custo de Estamina por Tipo de Ação
 	var staminaCost float32
 	switch pkt.ActionType {
@@ -1797,6 +1809,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		} else if pkt.ActionType == protocol.ActionSkillR {
 			player.SetDodgeIFrame(2500 * time.Millisecond)
 			player.SetBuff(2500 * time.Millisecond)
+			player.SetInvisible(2500*time.Millisecond, true)
 			log.Printf("[CORTINA DE FUMAÇA] Lâmina Silente #%d ativou invisibilidade e intangibilidade por 2.5s!\n", player.ID)
 		} else if pkt.ActionType == protocol.ActionSkillF {
 			s.BroadcastAOETelegraph(player.ID, px, pz, 4.0, 300)
@@ -2366,6 +2379,8 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		attackRange = 4.5
 	} else if classID == protocol.ClassBlacksmith || classID == protocol.ClassRunicArtificer {
 		attackRange = 4.0
+	} else if (classID == protocol.ClassWarTailor || classID == protocol.ClassCrimsonWebSovereign) && pkt.ActionType == protocol.ActionBasicAttack {
+		attackRange = 10.0 // Passiva Fios Monofilamento: cortes a até 10m
 	} else if classID == protocol.ClassEclipseReaper {
 		attackRange = 4.8 // Foice Colossal
 	} else if classID == protocol.ClassAshInquisitor && pkt.ActionType == protocol.ActionSkillQ {
@@ -4362,6 +4377,9 @@ func (s *Server) runGameLoop() {
 						pdx := px - mx
 						pdz := pz - mz
 						dist := float32(math.Sqrt(float64(pdx*pdx + pdz*pdz)))
+						if !p.CanBeDetected(dist) {
+							continue // Invisível ou furtivo longe demais: o monstro não o percebe
+						}
 						if dist < minPlayerDist {
 							minPlayerDist = dist
 							nearestPID = pid
@@ -4449,6 +4467,9 @@ func (s *Server) runGameLoop() {
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
 				s.updateClassMasterRoutines(int(h))
+				if s.serverTick%(GameTickRate*2) < GameTickRate {
+					s.updateCompanions() // Companheiros atacam sozinhos a cada 2s
+				}
 				s.updateMoonPhaseCreatures(moon)
 
 				// Logging quando muda a hora cheia
@@ -4751,7 +4772,13 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 25, 0, 0, 0)
 		log.Printf("[RACIAL] Valeriano #%d ativou Ímpeto Valeriano (+40 Stamina, +25 HP, +25%% Dano)!\n", player.ID)
 
-	case protocol.RaceNoctari, protocol.RaceLunarArchon, protocol.RaceUmbralSpecter:
+	case protocol.RaceUmbralSpecter:
+		// Nyxara — Manto de Nyx: invisível por 4s; o primeiro golpe causa dano de emboscada (+120%)
+		player.SetInvisible(4*time.Second, true)
+		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
+		log.Printf("[RACIAL] Nyxara #%d ativou Manto de Nyx (invisível 4s, emboscada pronta)!\n", player.ID)
+
+	case protocol.RaceNoctari, protocol.RaceLunarArchon:
 		// Noctari / Selenarca / Nyxara:
 		// Dispara explosão de luz estelar/sombra ao redor (5.5m), alto dano mágico e cura +30 HP
 		player.Heal(30)
@@ -5052,6 +5079,7 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 	case protocol.RaceLunarElf: // 40 Lunarin (Tenebra)
 		// Manto de Tenebra: Envolve a área em escuridão lunar causando dano sombrio e ficando furtivo
 		player.SetDodgeIFrame(2 * time.Second)
+		player.SetStealth(4 * time.Second)
 		s.BroadcastAOETelegraph(player.ID, px, pz, 5.5, 300)
 		dmg := uint16(60 + int(pINT)*3 + int(pDEX)*3)
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
