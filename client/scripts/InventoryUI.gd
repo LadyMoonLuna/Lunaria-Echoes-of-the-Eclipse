@@ -389,6 +389,7 @@ const ITEM_CATALOG := {
 	72: {"name": "Catalisador Alquímico", "category": "Mão Secundária", "desc": "Aparelho de vidro e cobre que acelera reações químicas.", "color": Color("#4db6ac"), "usable": true, "btn_text": "[Equipar]"},
 	73: {"name": "Wok de Ferro", "category": "Mão Secundária", "desc": "Frigideira de ferro preto que também serve de escudo.", "color": Color("#424242"), "usable": true, "btn_text": "[Equipar]"},
 	74: {"name": "Aljava de Caçador", "category": "Mão Secundária", "desc": "Aljava de couro com flechas emplumadas.", "color": Color("#8d6e63"), "usable": true, "btn_text": "[Equipar]"},
+	76: {"name": "Placa de Chumbo", "category": "Material de Teste", "desc": "Placa maciça de chumbo (25 kg). Ótima para testar a sobrecarga — e péssima para carregar.", "color": Color("#78909c"), "usable": false, "btn_text": ""},
 	75: {"name": "Manopla Secundária", "category": "Mão Secundária", "desc": "Segunda manopla de ferro para combos com as duas mãos.", "color": Color("#78909c"), "usable": true, "btn_text": "[Equipar]"}
 }
 

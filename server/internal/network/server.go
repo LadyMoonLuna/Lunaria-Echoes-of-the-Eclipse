@@ -1090,6 +1090,23 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 			s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Item #%d (+%d) adicionado ao inventário do Jogador #%d!", val, qty, player.ID))
 		}
 
+	case protocol.DevCmdGiveMoney:
+		if player == nil {
+			return
+		}
+		g := player.AddGold(1000)
+		e := player.AddEclipseCoins(50)
+		s.sendInventorySync(player)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Jogador #%d recebeu +1.000 Sollares e +50 Eclipses (total: %d / %d).", player.ID, g, e))
+
+	case protocol.DevCmdClearHeavy:
+		if player == nil {
+			return
+		}
+		n := player.RemoveHeavyItems()
+		s.sendInventorySync(player)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] %d item(ns) pesado(s) removido(s) da mochila do Jogador #%d.", n, player.ID))
+
 	case 8:
 		// CommandType 8 (NOVO): Controle de Nível e Status Dev
 		if player == nil {
@@ -1657,6 +1674,9 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 	case protocol.ActionBasicAttack: // 1: Ataque Básico (sem custo de stamina)
 		staminaCost = 0.0
 	case protocol.ActionDodgeRoll: // 2: Esquiva (20 stamina, 10 para Thalassiano e Bailarino das Estrelas)
+		if !player.CanSprint() {
+			return // acima de 100% do peso não há esquiva/dash
+		}
 		staminaCost = 20.0
 		if player.RaceID == protocol.RaceThalassian || player.ClassID == protocol.ClassAstralDancer || player.ClassID == protocol.ClassAegisValkyrie {
 			staminaCost = 10.0

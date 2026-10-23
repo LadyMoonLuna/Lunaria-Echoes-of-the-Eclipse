@@ -25,6 +25,11 @@ var dodge_timer: float = 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 var attack_cooldown: float = 0.0
 var is_menu_open: bool = false
+
+# Peso carregado (atualizado pelo 0x38 via World.gd) e penalidade de velocidade
+var current_weight: float = 0.0
+var max_weight: float = 75.0
+var weight_speed_mult: float = 1.0
 var skill_slot_bindings: Dictionary = {
 	"LMB": 1,
 	"Q": 3,
@@ -1381,9 +1386,29 @@ func _animate_attack_visual(action_type: int) -> void:
 			tw.tween_property(weapon_pivot, "rotation", default_weapon_rot, 0.14)
 			tw.finished.connect(func(): is_attacking = false)
 
+## Curva de peso: até 70% normal | 70%–100% de 0.95 a 0.65 | 100%–129.9% de 0.60 a 0.25 (sem esquiva)
+## | 130%+ imóvel (SOBRECARREGADO).
+func get_weight_ratio() -> float:
+	return current_weight / max(1.0, max_weight)
+
+func get_weight_speed_mult() -> float:
+	var ratio: float = get_weight_ratio()
+	if ratio <= 0.70:
+		return 1.0
+	if ratio < 1.00:
+		return lerp(0.95, 0.65, (ratio - 0.70) / 0.30)
+	if ratio < 1.30:
+		return lerp(0.60, 0.25, (ratio - 1.00) / 0.30)
+	return 0.0
+
+func can_dash() -> bool:
+	return get_weight_ratio() < 1.00
+
 func _perform_dodge_roll() -> void:
 	if is_menu_open or is_dodging:
 		return
+	if not can_dash():
+		return # acima de 100% do peso a esquiva (Shift) fica bloqueada
 
 	is_dodging = true
 	dodge_timer = 0.35
@@ -3972,6 +3997,8 @@ func _create_emissive_mat(col: Color, energy: float) -> StandardMaterial3D:
 	return m
 
 func _physics_process(delta: float) -> void:
+	weight_speed_mult = get_weight_speed_mult()
+
 	# Proteção contra o Abismo / Void
 	if global_position.y < -10.0:
 		global_position = Vector3(0.0, 1.5, 0.0)
@@ -4030,7 +4057,7 @@ func _physics_process(delta: float) -> void:
 			var move_dir: Vector3 = (forward * -input_dir.y + right * input_dir.x).normalized()
 
 			if move_dir != Vector3.ZERO:
-				var move_speed: float = SPEED * _path_speed_mult()
+				var move_speed: float = SPEED * _path_speed_mult() * weight_speed_mult
 				velocity.x = move_dir.x * move_speed
 				velocity.z = move_dir.z * move_speed
 				if not is_attacking:

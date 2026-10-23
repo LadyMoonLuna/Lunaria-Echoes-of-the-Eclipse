@@ -81,6 +81,7 @@ const ITEMS := {
 	72: {"name": "Catalisador Alquímico", "weight": 1.6, "slot": 13, "bonus": {"int": 2, "mas": 2, "atk": 4}},
 	73: {"name": "Wok de Ferro", "weight": 4.0, "slot": 13, "bonus": {"con": 2, "def": 5}},
 	74: {"name": "Aljava de Caçador", "weight": 1.5, "slot": 13, "bonus": {"dex": 2, "atk": 4}},
+	76: {"name": "Placa de Chumbo", "weight": 25.0, "slot": -1, "bonus": {}},
 	75: {"name": "Manopla Secundária", "weight": 2.2, "slot": 13, "bonus": {"str": 1, "atk": 5, "def": 1}},
 }
 

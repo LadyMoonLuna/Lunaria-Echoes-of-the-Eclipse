@@ -525,6 +525,11 @@ var my_mana: int = 0
 var my_max_mana: int = 0
 var mana_bar: ProgressBar = null
 var mana_label: Label = null
+var weight_warning_label: Label = null
+var ground_items_nodes: Dictionary = {} # drop_id -> Node3D
+var ground_items_data: Dictionary = {} # drop_id -> {"id", "quantity", "x", "z"}
+const GROUND_PICKUP_RANGE := 3.5
+const ItemDataScript = preload("res://scripts/ItemData.gd")
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -590,6 +595,8 @@ func _ready() -> void:
 	NetworkManager.player_stats_received.connect(_on_player_stats_received)
 	NetworkManager.player_stats_full_received.connect(_on_player_stats_full_received)
 	NetworkManager.player_mana_received.connect(_on_player_mana_received)
+	NetworkManager.wallet_weight_updated.connect(_on_wallet_weight_updated)
+	NetworkManager.ground_items_received.connect(_on_ground_items_received)
 	NetworkManager.player_attributes_received.connect(_on_player_attributes_received)
 	NetworkManager.player_respawn_received.connect(_on_player_respawn_received)
 	NetworkManager.mob_state_received.connect(_on_mob_state_received)
@@ -609,6 +616,7 @@ func _ready() -> void:
 
 	_setup_burn_overlay()
 	_setup_mana_bar()
+	_setup_weight_warning()
 	_setup_action_bar()
 	_setup_xp_hud()
 	_setup_loot_toast()
@@ -621,7 +629,7 @@ func _ready() -> void:
 
 	var footer_lbl = get_node_or_null("HUD/FooterPanel/FooterLabel")
 	if footer_lbl:
-		footer_lbl.text = "[WASD] Mover | [LMB] Ataque | [Shift] Esquiva | [Q/R/F] Skills | [Z] Racial | [E] Interagir | [C] Linhagem | [K] Atributos | [I] Inventário | [H] Grimório | [F9/F10] Dev Manager"
+		footer_lbl.text = "[WASD] Mover | [LMB] Ataque | [Shift] Esquiva | [G] Pegar Item | [Q/R/F] Skills | [Z] Racial | [E] Interagir | [C] Linhagem | [K] Atributos | [I] Inventário | [H] Grimório | [F9/F10] Dev Manager"
 
 func _process(delta: float) -> void:
 	if portal_cooldown > 0.0:
@@ -716,8 +724,16 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Clique (com o cursor livre) sobre uma bolsa no chão para pegá-la
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT \
+			and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+		if _try_pickup_ground_item_at_screen(event.position):
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_E:
+		if event.keycode == KEY_G:
+			_try_pickup_nearest_ground_item()
+		elif event.keycode == KEY_E:
 			if not _try_interact_corpse():
 				if not _try_interact_door():
 					_try_interact_nearest_npc()
@@ -1747,6 +1763,23 @@ func _build_dev_tab_items(tabs: TabContainer) -> void:
 	kit_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_hb.add_child(kit_btn)
 
+	# Testes de dinheiro e peso
+	var test_hb := HBoxContainer.new()
+	test_hb.add_theme_constant_override("separation", 8)
+	tab.add_child(test_hb)
+	test_hb.add_child(_dev_create_btn("🪙 +1.000 Sollares & +50 Eclipses", Color(0.85, 0.7, 0.15), func():
+		NetworkManager.send_world_control(11, 0)
+		show_loot_toast("+1.000 Sollares e +50 Eclipses!")
+	))
+	test_hb.add_child(_dev_create_btn("⚖️ Adicionar Placa de Chumbo (25 kg) - Testar Sobrecarga", Color(0.45, 0.45, 0.5), func():
+		NetworkManager.send_world_control(7, 76)
+		show_loot_toast("Placa de Chumbo (25 kg) adicionada à mochila.")
+	))
+	test_hb.add_child(_dev_create_btn("🧹 Esvaziar Itens Pesados", Color(0.3, 0.55, 0.35), func():
+		NetworkManager.send_world_control(12, 0)
+		show_loot_toast("Itens pesados (10 kg+) removidos da mochila.")
+	))
+
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2225,6 +2258,231 @@ func _on_player_mana_received(player_id: int, mana: int, max_mana: int) -> void:
 		mana_label.text = "Mana: %d / %d" % [my_mana, my_max_mana]
 
 ## Barra de Mana (azul) logo abaixo da Stamina, no painel de status.
+# ---------------------------------------------------------------------------
+# Peso: HUD de carga e repasse para o LocalPlayer
+# ---------------------------------------------------------------------------
+
+func _setup_weight_warning() -> void:
+	var vbox := get_node_or_null("HUD/PlayerStatusPanel/VBox")
+	if not vbox:
+		return
+	weight_warning_label = Label.new()
+	weight_warning_label.name = "WeightWarning"
+	weight_warning_label.visible = false
+	weight_warning_label.add_theme_font_size_override("font_size", 13)
+	weight_warning_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	weight_warning_label.add_theme_constant_override("outline_size", 4)
+	vbox.add_child(weight_warning_label)
+
+func _on_wallet_weight_updated(_gold: int, _eclipse: int, cur_weight: float, p_max_weight: float, _speed: float) -> void:
+	if local_player and is_instance_valid(local_player):
+		local_player.set("current_weight", cur_weight)
+		local_player.set("max_weight", p_max_weight)
+	_update_weight_warning(cur_weight, p_max_weight)
+
+func _update_weight_warning(cur_weight: float, p_max_weight: float) -> void:
+	if weight_warning_label == null:
+		return
+	var ratio: float = cur_weight / max(1.0, p_max_weight)
+	var pct: int = int(round(ratio * 100.0))
+	if ratio < 0.70:
+		weight_warning_label.visible = false
+		return
+	weight_warning_label.visible = true
+	if ratio >= 1.30:
+		weight_warning_label.text = "🛑 SOBRECARREGADO (%d%%) - Descarte itens para andar!" % pct
+		weight_warning_label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+	elif ratio >= 1.00:
+		weight_warning_label.text = "⚠️ Muito Pesado (%d%%) - sem esquiva" % pct
+		weight_warning_label.add_theme_color_override("font_color", Color(1.0, 0.6, 0.2))
+	else:
+		weight_warning_label.text = "⚠️ Carga Pesada (%d%%)" % pct
+		weight_warning_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+
+# ---------------------------------------------------------------------------
+# Itens no chão (0x42 GROUND_ITEMS_SYNC / 0x43 PICKUP_GROUND_ITEM)
+# ---------------------------------------------------------------------------
+
+func _ground_item_name(item_id: int) -> String:
+	if inventory_ui and inventory_ui.get("ITEM_CATALOG") != null and inventory_ui.ITEM_CATALOG.has(item_id):
+		return inventory_ui.ITEM_CATALOG[item_id]["name"]
+	return ItemDataScript.info(item_id)["name"]
+
+func _on_ground_items_received(items: Array) -> void:
+	var seen: Dictionary = {}
+	for it in items:
+		var did: int = int(it["drop_id"])
+		seen[did] = true
+		ground_items_data[did] = it
+		if not ground_items_nodes.has(did):
+			var node := _create_ground_item_node(it)
+			ground_items_nodes[did] = node
+	for did in ground_items_nodes.keys():
+		if not seen.has(did):
+			var old = ground_items_nodes[did]
+			if is_instance_valid(old):
+				old.queue_free()
+			ground_items_nodes.erase(did)
+			ground_items_data.erase(did)
+
+# Bolsa de couro rústica (ou arma brilhante, se for equipável) com anel dourado e rótulo flutuante
+func _create_ground_item_node(it: Dictionary) -> Node3D:
+	var item_id: int = int(it["id"])
+	var qty: int = int(it["quantity"])
+	var root := StaticBody3D.new()
+	root.name = "GroundItem_%d" % int(it["drop_id"])
+	root.collision_layer = 8
+	root.collision_mask = 0
+	root.set_meta("drop_id", int(it["drop_id"]))
+	add_child(root)
+	root.global_position = Vector3(float(it["x"]), 0.0, float(it["z"]))
+
+	var shape := CollisionShape3D.new()
+	var sph := SphereShape3D.new()
+	sph.radius = 0.6
+	shape.shape = sph
+	shape.position = Vector3(0, 0.4, 0)
+	root.add_child(shape)
+
+	var is_gear: bool = ItemDataScript.slot_of(item_id) >= 0
+	var model := Node3D.new()
+	model.name = "Model"
+	root.add_child(model)
+	if is_gear:
+		# Arma/equipamento: lâmina deitada e brilhante
+		var blade := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = Vector3(0.12, 0.05, 1.0)
+		blade.mesh = bm
+		var bmat := StandardMaterial3D.new()
+		bmat.albedo_color = Color(0.85, 0.88, 0.95)
+		bmat.metallic = 0.9
+		bmat.roughness = 0.2
+		bmat.emission_enabled = true
+		bmat.emission = Color(1.0, 0.85, 0.4)
+		bmat.emission_energy_multiplier = 0.6
+		blade.material_override = bmat
+		blade.position = Vector3(0, 0.25, 0)
+		blade.rotation_degrees = Vector3(0, 35, 0)
+		model.add_child(blade)
+		var hilt := MeshInstance3D.new()
+		var hm := BoxMesh.new()
+		hm.size = Vector3(0.4, 0.06, 0.08)
+		hilt.mesh = hm
+		var hmat := StandardMaterial3D.new()
+		hmat.albedo_color = Color(0.45, 0.3, 0.15)
+		hilt.material_override = hmat
+		hilt.position = Vector3(-0.2, 0.25, 0.28)
+		hilt.rotation_degrees = Vector3(0, 35, 0)
+		model.add_child(hilt)
+	else:
+		# Bolsa de couro amarrada
+		var bag := MeshInstance3D.new()
+		var sm := SphereMesh.new()
+		sm.radius = 0.32
+		sm.height = 0.5
+		bag.mesh = sm
+		var lmat := StandardMaterial3D.new()
+		lmat.albedo_color = Color(0.45, 0.3, 0.17)
+		lmat.roughness = 0.85
+		LunariaTextures.apply(lmat, "leather", 0.3, false)
+		bag.material_override = lmat
+		bag.position = Vector3(0, 0.25, 0)
+		model.add_child(bag)
+		var knot := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.06
+		cm.bottom_radius = 0.12
+		cm.height = 0.18
+		knot.mesh = cm
+		knot.material_override = lmat
+		knot.position = Vector3(0, 0.55, 0)
+		model.add_child(knot)
+
+	# Anel de luz dourada no chão
+	var ring := MeshInstance3D.new()
+	var tm := TorusMesh.new()
+	tm.inner_radius = 0.55
+	tm.outer_radius = 0.68
+	ring.mesh = tm
+	var rmat := StandardMaterial3D.new()
+	rmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	rmat.albedo_color = Color(1.0, 0.82, 0.3, 0.85)
+	rmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	rmat.emission_enabled = true
+	rmat.emission = Color(1.0, 0.8, 0.3)
+	ring.material_override = rmat
+	ring.position = Vector3(0, 0.03, 0)
+	root.add_child(ring)
+	var glow := OmniLight3D.new()
+	glow.light_color = Color(1.0, 0.82, 0.4)
+	glow.light_energy = 0.8
+	glow.omni_range = 2.5
+	glow.position = Vector3(0, 0.6, 0)
+	root.add_child(glow)
+
+	var lbl := Label3D.new()
+	lbl.text = "🎒 %s x%d (%.1f kg)\n[Aperte G ou Clique para Pegar]" % [_ground_item_name(item_id), qty, ItemDataScript.weight(item_id) * qty]
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.font_size = 40
+	lbl.pixel_size = 0.006
+	lbl.outline_size = 10
+	lbl.modulate = Color(1.0, 0.92, 0.65)
+	lbl.no_depth_test = true
+	lbl.position = Vector3(0, 1.3, 0)
+	root.add_child(lbl)
+
+	# Flutua e gira devagar
+	var tw := root.create_tween().set_loops()
+	tw.tween_property(model, "position:y", 0.12, 1.2).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(model, "position:y", 0.0, 1.2).set_trans(Tween.TRANS_SINE)
+	return root
+
+func _clear_ground_items() -> void:
+	for did in ground_items_nodes.keys():
+		var n = ground_items_nodes[did]
+		if is_instance_valid(n):
+			n.queue_free()
+	ground_items_nodes.clear()
+	ground_items_data.clear()
+
+# Tecla G: pega o item mais próximo a até 3,5 m
+func _try_pickup_nearest_ground_item() -> bool:
+	if not local_player or ground_items_nodes.is_empty():
+		return false
+	var best_id: int = -1
+	var best_dist: float = GROUND_PICKUP_RANGE
+	for did in ground_items_nodes.keys():
+		var n = ground_items_nodes[did]
+		if not is_instance_valid(n):
+			continue
+		var d: float = local_player.global_position.distance_to(n.global_position)
+		if d <= best_dist:
+			best_dist = d
+			best_id = did
+	if best_id < 0:
+		return false
+	NetworkManager.send_pickup_ground_item(best_id)
+	return true
+
+# Clique do mouse (cursor livre) sobre uma bolsa no chão
+func _try_pickup_ground_item_at_screen(screen_pos: Vector2) -> bool:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or not local_player:
+		return false
+	var from := cam.project_ray_origin(screen_pos)
+	var to := from + cam.project_ray_normal(screen_pos) * 60.0
+	var query := PhysicsRayQueryParameters3D.create(from, to, 8)
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty() or not hit["collider"].has_meta("drop_id"):
+		return false
+	var node: Node3D = hit["collider"]
+	if local_player.global_position.distance_to(node.global_position) > GROUND_PICKUP_RANGE:
+		show_loot_toast("Chegue mais perto para pegar (até 3,5 m).")
+		return true
+	NetworkManager.send_pickup_ground_item(int(node.get_meta("drop_id")))
+	return true
+
 func _setup_mana_bar() -> void:
 	var vbox := get_node_or_null("HUD/PlayerStatusPanel/VBox")
 	var stam_label := get_node_or_null("HUD/PlayerStatusPanel/VBox/StaminaLabel")
@@ -3035,6 +3293,9 @@ func _trigger_zone_fade() -> void:
 	tween.tween_property(screen_fade_rect, "color:a", 0.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 func _cleanup_zone_entities(_target_zone_id: int) -> void:
+	# 0. Itens no chão da zona anterior (o servidor envia os da nova zona)
+	_clear_ground_items()
+
 	# 1. Remove cadáveres da zona anterior
 	for cid in corpses.keys():
 		var c = corpses[cid]

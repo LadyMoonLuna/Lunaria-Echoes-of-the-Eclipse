@@ -113,6 +113,7 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemAlchemyCatalyst: {Name: "Catalisador Alquímico", Weight: 1.6, Slot: protocol.SlotOffHand, BonusINT: 2, BonusMAS: 2, BonusATK: 4},
 	protocol.ItemIronWok:         {Name: "Wok de Ferro", Weight: 4.0, Slot: protocol.SlotOffHand, BonusCON: 2, BonusDEF: 5},
 	protocol.ItemHuntersQuiver:   {Name: "Aljava de Caçador", Weight: 1.5, Slot: protocol.SlotOffHand, BonusDEX: 2, BonusATK: 4},
+	protocol.ItemLeadPlate:       {Name: "Placa de Chumbo", Weight: 25.0, Slot: NoSlot},
 	protocol.ItemOffhandKnuckle:  {Name: "Manopla Secundária", Weight: 2.2, Slot: protocol.SlotOffHand, BonusSTR: 1, BonusATK: 5, BonusDEF: 1},
 }
 

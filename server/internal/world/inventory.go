@@ -81,6 +81,35 @@ func (p *Player) AddGold(amount uint32) uint32 {
 	return p.Gold
 }
 
+// AddEclipseCoins soma Moedas do Eclipse (sem estourar o uint32).
+func (p *Player) AddEclipseCoins(amount uint32) uint32 {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	if p.EclipseCoins > ^uint32(0)-amount {
+		p.EclipseCoins = ^uint32(0)
+	} else {
+		p.EclipseCoins += amount
+	}
+	return p.EclipseCoins
+}
+
+// HeavyItemWeight: itens com este peso por unidade (ou mais) contam como "pesados".
+const HeavyItemWeight float32 = 10.0
+
+// RemoveHeavyItems tira da mochila todos os itens pesados e devolve quantas unidades saíram.
+func (p *Player) RemoveHeavyItems() int {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	removed := 0
+	for id, qty := range p.Inventory {
+		if GetItemInfo(id).Weight >= HeavyItemWeight {
+			removed += int(qty)
+			delete(p.Inventory, id)
+		}
+	}
+	return removed
+}
+
 // equipDEFLocked soma a defesa física dos itens equipados.
 func (p *Player) equipDEFLocked() uint16 {
 	var def uint16

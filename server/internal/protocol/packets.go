@@ -309,6 +309,7 @@ const (
 	ItemIronWok         uint8 = 73 // Wok de Ferro (Mão Secundária)
 	ItemHuntersQuiver   uint8 = 74 // Aljava de Caçador (Mão Secundária)
 	ItemOffhandKnuckle  uint8 = 75 // Manopla Secundária
+	ItemLeadPlate       uint8 = 76 // Placa de Chumbo (25 kg) — item de teste de sobrecarga
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -857,6 +858,8 @@ const (
 	DevCmdLevelStats   uint8 = 8  // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
 	DevCmdTeleport     uint8 = 9  // Teleporte rápido (0..6)
 	DevCmdPortalTravel uint8 = 10 // Travessia de Portal / Mudança de Zona (Value = PortalID)
+	DevCmdGiveMoney    uint8 = 11 // +1.000 Sollares e +50 Moedas do Eclipse
+	DevCmdClearHeavy   uint8 = 12 // Remove da mochila os itens de 10 kg ou mais por unidade
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).
