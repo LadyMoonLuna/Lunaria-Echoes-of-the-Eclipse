@@ -23,6 +23,14 @@ static func get_default_npc_name(id: int) -> String:
 			return "Capitão Randel\n<Comandante da Guarda> [E]"
 		106:
 			return "Guarda Valen\n<Patrulheiro da Vila> [E]"
+		107:
+			return "Irmã Seraphina\n<Mestra Acólita> [E]"
+		108:
+			return "Mestre Aurelius\n<Arquimago> [E]"
+		109:
+			return "Kaelen\n<Mestre Batedor> [E]"
+		110:
+			return "Alquimista Esquecido\n<Espírito dos Esgotos> [E]"
 		_:
 			return "NPC #%d" % id
 
@@ -31,6 +39,39 @@ var max_hp: int = 1000
 var is_dummy: bool = false
 var is_varis: bool = false
 var time_accum: float = 0.0
+var friendship_points: int = 0
+
+static func get_hearts_string(points: int) -> String:
+	if points >= 100:
+		return "❤️❤️❤️❤️❤️"
+	elif points >= 80:
+		return "❤️❤️❤️❤️♡"
+	elif points >= 60:
+		return "❤️❤️❤️♡♡"
+	elif points >= 40:
+		return "❤️❤️♡♡♡"
+	elif points >= 20:
+		return "❤️♡♡♡♡"
+	else:
+		return "♡♡♡♡♡"
+
+static func get_hearts_level_text(points: int) -> String:
+	if points >= 100:
+		return "❤️❤️❤️❤️❤️ (Nível Máximo: Alma Irmã — 20% Desconto + Receitas Secretas)"
+	elif points >= 80:
+		return "❤️❤️❤️❤️♡ (Nível 5: Leal — 15% Desconto)"
+	elif points >= 60:
+		return "❤️❤️❤️♡♡ (Nível 4: Confidente — 10% Desconto + Segredos)"
+	elif points >= 40:
+		return "❤️❤️♡♡♡ (Nível 3: Amigo — 5% Desconto)"
+	elif points >= 20:
+		return "❤️♡♡♡♡ (Nível 2: Conhecido)"
+	else:
+		return "♡♡♡♡♡ (Nível 1: Desconhecido)"
+
+func set_friendship(points: int) -> void:
+	friendship_points = clampi(points, 0, 100)
+	_update_tags()
 
 const INTERPOLATION_SPEED: float = 15.0
 const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
@@ -210,6 +251,10 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 	is_varis = (npc_id == 104 or "shadow" in path_lower or "varis" in path_lower)
 	var is_randel := (npc_id == 105 or "randel" in path_lower)
 	var is_valen := (npc_id == 106 or "valen" in path_lower)
+	var is_seraphina := (npc_id == 107 or "seraphina" in path_lower)
+	var is_aurelius := (npc_id == 108 or "aurelius" in path_lower)
+	var is_kaelen := (npc_id == 109 or "kaelen" in path_lower)
+	var is_ghost_alchemist := (npc_id == 110 or "ghost" in path_lower or "esquecido" in path_lower)
 	var is_guard := (is_randel or is_valen or "guard" in path_lower)
 	var is_dummy_check := (npc_id == 101 or npc_id == 102 or "dummy" in path_lower)
 
@@ -571,6 +616,217 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 		shield_mesh.material_override = sh_mat
 		shield_root.add_child(shield_mesh)
 
+	elif is_seraphina:
+		# 107: Irmã Seraphina <Mestra Acólita> | Túnica branca/dourada com aura luminosa e cajado sagrado
+		is_dummy = false
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.95, 0.94, 0.90, 1.0) # Túnica branca/marfim
+		mat.roughness = 0.55
+		mat.metallic = 0.1
+		body_mesh.material_override = mat
+
+		if apron_mesh:
+			apron_mesh.visible = true
+			var amat := StandardMaterial3D.new()
+			amat.albedo_color = Color(0.88, 0.74, 0.22, 1.0) # Estola sagrada dourada
+			amat.metallic = 0.5
+			amat.roughness = 0.35
+			apron_mesh.material_override = amat
+
+		if visor_mesh:
+			visor_mesh.visible = true
+			var vmat := StandardMaterial3D.new()
+			vmat.albedo_color = Color(1.0, 0.92, 0.4, 1.0)
+			vmat.emission_enabled = true
+			vmat.emission = Color(1.0, 0.92, 0.4)
+			vmat.emission_energy_multiplier = 3.0
+			visor_mesh.material_override = vmat
+
+		# Aura luminosa sagrada
+		var aura := OmniLight3D.new()
+		aura.name = "SeraphinaAura"
+		aura.light_color = Color(1.0, 0.95, 0.65)
+		aura.light_energy = 2.4
+		aura.omni_range = 5.0
+		aura.position = Vector3(0, 1.5, 0)
+		add_child(aura)
+
+		# Cajado Sagrado na mão direita
+		var staff_root := Node3D.new()
+		staff_root.name = "HolyStaffProp"
+		staff_root.position = Vector3(0.5, 0.9, -0.15)
+		add_child(staff_root)
+
+		var shaft := MeshInstance3D.new()
+		var s_cyl := CylinderMesh.new()
+		s_cyl.top_radius = 0.025
+		s_cyl.bottom_radius = 0.025
+		s_cyl.height = 2.2
+		shaft.mesh = s_cyl
+		var s_mat := StandardMaterial3D.new()
+		s_mat.albedo_color = Color(0.9, 0.85, 0.75, 1.0) # Madeira marfim
+		shaft.material_override = s_mat
+		staff_root.add_child(shaft)
+
+		# Cruz Solar no topo do cajado
+		var cross_v := MeshInstance3D.new()
+		var cv_box := BoxMesh.new()
+		cv_box.size = Vector3(0.08, 0.45, 0.08)
+		cross_v.mesh = cv_box
+		var c_mat := StandardMaterial3D.new()
+		c_mat.albedo_color = Color(1.0, 0.88, 0.25, 1.0)
+		c_mat.emission_enabled = true
+		c_mat.emission = Color(1.0, 0.88, 0.25)
+		c_mat.emission_energy_multiplier = 3.5
+		cross_v.material_override = c_mat
+		cross_v.position = Vector3(0, 1.25, 0)
+		staff_root.add_child(cross_v)
+
+		var cross_h := MeshInstance3D.new()
+		var ch_box := BoxMesh.new()
+		ch_box.size = Vector3(0.3, 0.08, 0.08)
+		cross_h.mesh = ch_box
+		cross_h.material_override = c_mat
+		cross_h.position = Vector3(0, 1.35, 0)
+		staff_root.add_child(cross_h)
+
+	elif is_aurelius:
+		# 108: Mestre Aurelius <Arquimago> | Manto azul-astral e dourado com orbe flutuante ciano
+		is_dummy = false
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.106, 0.149, 0.231, 1.0) # #1B263B Azul-escuro astral
+		mat.roughness = 0.45
+		mat.metallic = 0.2
+		body_mesh.material_override = mat
+
+		if apron_mesh:
+			apron_mesh.visible = true
+			var amat := StandardMaterial3D.new()
+			amat.albedo_color = Color(0.85, 0.72, 0.18, 1.0) # Detalhes dourados celestiais
+			amat.metallic = 0.6
+			amat.roughness = 0.3
+			apron_mesh.material_override = amat
+
+		if visor_mesh:
+			visor_mesh.visible = true
+			var vmat := StandardMaterial3D.new()
+			vmat.albedo_color = Color(0.0, 0.95, 1.0, 1.0) # Ciano estelar
+			vmat.emission_enabled = true
+			vmat.emission = Color(0.0, 0.95, 1.0)
+			vmat.emission_energy_multiplier = 3.5
+			visor_mesh.material_override = vmat
+
+		# Orbe Místico Flutuante Ciano
+		var orb_root := Node3D.new()
+		orb_root.name = "ArcaneOrbProp"
+		orb_root.position = Vector3(0.48, 1.5, -0.2)
+		add_child(orb_root)
+
+		var orb := MeshInstance3D.new()
+		var o_sphere := SphereMesh.new()
+		o_sphere.radius = 0.18
+		o_sphere.height = 0.36
+		orb.mesh = o_sphere
+		var o_mat := StandardMaterial3D.new()
+		o_mat.albedo_color = Color(0.0, 0.95, 1.0, 1.0)
+		o_mat.emission_enabled = true
+		o_mat.emission = Color(0.0, 0.95, 1.0)
+		o_mat.emission_energy_multiplier = 4.2
+		orb.material_override = o_mat
+		orb_root.add_child(orb)
+
+		var orb_light := OmniLight3D.new()
+		orb_light.light_color = Color(0.1, 0.92, 1.0)
+		orb_light.light_energy = 2.6
+		orb_light.omni_range = 4.5
+		orb_root.add_child(orb_light)
+
+	elif is_kaelen:
+		# 109: Kaelen <Mestre Batedor> | Couro verde-floresta, capa de pele de lobo e Arco Longo
+		is_dummy = false
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.18, 0.32, 0.15, 1.0) # Couro verde-floresta
+		mat.roughness = 0.85
+		body_mesh.material_override = mat
+
+		if apron_mesh:
+			apron_mesh.visible = true
+			var amat := StandardMaterial3D.new()
+			amat.albedo_color = Color(0.35, 0.22, 0.12, 1.0) # Couro reforçado de caça
+			amat.roughness = 0.8
+			apron_mesh.material_override = amat
+
+		if visor_mesh:
+			visor_mesh.visible = true
+			var vmat := StandardMaterial3D.new()
+			vmat.albedo_color = Color(0.85, 0.7, 0.15, 1.0) # Visor âmbar
+			vmat.emission_enabled = false
+			visor_mesh.material_override = vmat
+
+		# Capa de Pele de Lobo nos ombros
+		var pelt := MeshInstance3D.new()
+		pelt.name = "WolfPeltProp"
+		var p_box := BoxMesh.new()
+		p_box.size = Vector3(0.95, 0.3, 0.5)
+		pelt.mesh = p_box
+		pelt.position = Vector3(0, 1.62, 0.05)
+		var p_mat := StandardMaterial3D.new()
+		p_mat.albedo_color = Color(0.38, 0.36, 0.35, 1.0) # Pele cinza-lobo
+		p_mat.roughness = 0.95
+		pelt.material_override = p_mat
+		add_child(pelt)
+
+		# Arco Longo de Caça nas costas
+		var bow_root := Node3D.new()
+		bow_root.name = "LongbowProp"
+		bow_root.position = Vector3(-0.35, 1.1, 0.25)
+		bow_root.rotation = Vector3(deg_to_rad(15), 0, deg_to_rad(25))
+		add_child(bow_root)
+
+		var bow_shaft := MeshInstance3D.new()
+		var b_cyl := CylinderMesh.new()
+		b_cyl.top_radius = 0.02
+		b_cyl.bottom_radius = 0.02
+		b_cyl.height = 1.6
+		bow_shaft.mesh = b_cyl
+		var b_mat := StandardMaterial3D.new()
+		b_mat.albedo_color = Color(0.32, 0.18, 0.1, 1.0)
+		bow_shaft.material_override = b_mat
+		bow_root.add_child(bow_shaft)
+
+	elif is_ghost_alchemist:
+		# 110: Alquimista Esquecido <Espírito dos Esgotos> | Silhueta fantasmagórica verde-translúcida (transparency = TRANSPARENCY_ALPHA, emission verde)
+		is_dummy = false
+		var mat := StandardMaterial3D.new()
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.albedo_color = Color(0.2, 0.95, 0.45, 0.65)
+		mat.emission_enabled = true
+		mat.emission = Color(0.15, 0.9, 0.35, 1.0)
+		mat.emission_energy_multiplier = 2.8
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		body_mesh.material_override = mat
+
+		if apron_mesh:
+			apron_mesh.visible = false
+
+		if visor_mesh:
+			visor_mesh.visible = true
+			var vmat := StandardMaterial3D.new()
+			vmat.albedo_color = Color(0.3, 1.0, 0.5, 1.0)
+			vmat.emission_enabled = true
+			vmat.emission = Color(0.3, 1.0, 0.5, 1.0)
+			vmat.emission_energy_multiplier = 4.0
+			visor_mesh.material_override = vmat
+
+		# Brilho espectral fantasmagórico verde
+		var g_light := OmniLight3D.new()
+		g_light.name = "GhostSpectralLight"
+		g_light.light_color = Color(0.2, 1.0, 0.4)
+		g_light.light_energy = 3.0
+		g_light.omni_range = 5.5
+		g_light.position = Vector3(0, 1.2, 0)
+		add_child(g_light)
+
 	else:
 		# 100: Garrick <Mestre Ferreiro> | Cor: Marrom-Bronze / Avental de Forja + Martelo na mão
 		is_dummy = false
@@ -759,13 +1015,28 @@ func _update_tags() -> void:
 			name_tag.modulate = Color(0.85, 0.95, 1.0)
 		106: # Guarda Valen
 			name_tag.modulate = Color(0.8, 0.9, 1.0)
+		107: # Irmã Seraphina
+			name_tag.modulate = Color(1.0, 0.92, 0.45)
+		108: # Mestre Aurelius
+			name_tag.modulate = Color(0.35, 0.88, 1.0)
+		109: # Kaelen
+			name_tag.modulate = Color(0.65, 0.95, 0.65)
+		110: # Alquimista Esquecido
+			name_tag.modulate = Color(0.4, 1.0, 0.6)
 		_: # Garrick
 			name_tag.modulate = Color(1.0, 0.85, 0.4)
 
-	if state_text != "":
-		name_tag.text = "%s\n%s" % [npc_name, state_text]
+	if not is_dummy:
+		var hearts_str := get_hearts_string(friendship_points)
+		if state_text != "":
+			name_tag.text = "%s\n%s\n%s" % [npc_name, state_text, hearts_str]
+		else:
+			name_tag.text = "%s\n%s" % [npc_name, hearts_str]
 	else:
-		name_tag.text = npc_name
+		if state_text != "":
+			name_tag.text = "%s\n%s" % [npc_name, state_text]
+		else:
+			name_tag.text = npc_name
 
 func show_dialogue(text: String) -> void:
 	_ensure_node_refs()
@@ -789,6 +1060,18 @@ func show_dialogue(text: String) -> void:
 		106: # Guarda Valen
 			text_color = Color(0.85, 0.92, 1.0, 1.0) # Azul prateado
 			border_color = Color(0.35, 0.65, 0.95, 0.95)
+		107: # Irmã Seraphina
+			text_color = Color(1.0, 0.95, 0.7, 1.0) # Luz sagrada
+			border_color = Color(1.0, 0.85, 0.3, 0.95)
+		108: # Mestre Aurelius
+			text_color = Color(0.6, 0.92, 1.0, 1.0) # Azul astral
+			border_color = Color(0.2, 0.7, 1.0, 0.95)
+		109: # Kaelen
+			text_color = Color(0.75, 1.0, 0.75, 1.0) # Verde caçador
+			border_color = Color(0.3, 0.75, 0.35, 0.95)
+		110: # Alquimista Esquecido
+			text_color = Color(0.55, 1.0, 0.7, 1.0) # Ectoplasma esmeralda
+			border_color = Color(0.1, 0.85, 0.4, 0.95)
 		_: # Garrick
 			text_color = Color(1.0, 0.92, 0.5, 1.0) # Âmbar da forja
 			border_color = Color(0.95, 0.75, 0.2, 0.9)

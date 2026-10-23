@@ -10,53 +10,103 @@ import (
 
 func TestMobCreationAndSpawns(t *testing.T) {
 	mm := NewMobManager()
-	if len(mm.Mobs) != 14 {
-		t.Fatalf("esperava 14 mobs registrados, obteve %d", len(mm.Mobs))
+	if len(mm.Mobs) != 29 {
+		t.Fatalf("esperava 29 mobs registrados, obteve %d", len(mm.Mobs))
 	}
 
 	wolf1 := mm.GetMob(201)
-	if wolf1 == nil || wolf1.MobType != protocol.MobTypeMistWolf || wolf1.MaxHP != 220 {
+	if wolf1 == nil || wolf1.MobType != protocol.MobTypeMistWolf || wolf1.MaxHP != 220 || wolf1.GetZone() != ZoneForest {
 		t.Fatalf("configuracao invalida para Lobo da Bruma 201: %+v", wolf1)
 	}
 
 	enforcer := mm.GetMob(206)
-	if enforcer == nil || enforcer.MobType != protocol.MobTypeIronEnforcer || enforcer.MaxHP != 650 {
+	if enforcer == nil || enforcer.MobType != protocol.MobTypeIronEnforcer || enforcer.MaxHP != 650 || enforcer.GetZone() != ZoneRuins {
 		t.Fatalf("configuracao invalida para Executor de Ferro 206: %+v", enforcer)
 	}
 
 	alphaWolf := mm.GetMob(207)
-	if alphaWolf == nil || alphaWolf.MobType != protocol.MobTypeAlphaWolf || alphaWolf.MaxHP != 750 || alphaWolf.IsActive {
+	if alphaWolf == nil || alphaWolf.MobType != protocol.MobTypeAlphaWolf || alphaWolf.MaxHP != 750 || alphaWolf.IsActive || alphaWolf.GetZone() != ZoneForest {
 		t.Fatalf("configuracao invalida para Lobo Alfa 207: %+v", alphaWolf)
 	}
 
 	lycanAlpha := mm.GetMob(208)
-	if lycanAlpha == nil || lycanAlpha.MobType != protocol.MobTypeLycanthropeAlpha || lycanAlpha.MaxHP != 2200 || lycanAlpha.IsActive {
+	if lycanAlpha == nil || lycanAlpha.MobType != protocol.MobTypeLycanthropeAlpha || lycanAlpha.MaxHP != 2200 || lycanAlpha.IsActive || lycanAlpha.GetZone() != ZoneForest {
 		t.Fatalf("configuracao invalida para Licantropo Alfa 208: %+v", lycanAlpha)
 	}
 
+	arachna := mm.GetMob(217)
+	if arachna == nil || arachna.MobType != protocol.MobTypeArachnaQueen || arachna.MaxHP != 6800 || arachna.GetZone() != ZoneForest {
+		t.Fatalf("configuracao invalida para Arachna 217: %+v", arachna)
+	}
+
+	ymir := mm.GetMob(226)
+	if ymir == nil || ymir.MobType != protocol.MobTypeYmirFrostPatriarch || ymir.MaxHP != 5200 || ymir.GetZone() != ZoneRuins {
+		t.Fatalf("configuracao invalida para Ymir 226: %+v", ymir)
+	}
+
+	vesperian := mm.GetMob(229)
+	if vesperian == nil || vesperian.MobType != protocol.MobTypeLordVesperianVampire || vesperian.MaxHP != 8500 || vesperian.IsActive || vesperian.GetZone() != ZoneSanctuary {
+		t.Fatalf("configuracao invalida para Lorde Vesperian 229: %+v", vesperian)
+	}
+
+	chimera := mm.GetMob(222)
+	if chimera == nil || chimera.MobType != protocol.MobTypeStitchedChimeraZero || chimera.MaxHP != 2800 || chimera.GetZone() != ZoneAncientSewers {
+		t.Fatalf("configuracao invalida para Quimera Costurada 222: %+v", chimera)
+	}
+
 	cultist := mm.GetMob(209)
-	if cultist == nil || cultist.MobType != protocol.MobTypeDarkCultist || cultist.MaxHP != 400 {
+	if cultist == nil || cultist.MobType != protocol.MobTypeDarkCultist || cultist.MaxHP != 400 || cultist.GetZone() != ZoneSanctuary {
 		t.Fatalf("configuracao invalida para Cultista Sombrio 209: %+v", cultist)
 	}
 
 	gargoyle := mm.GetMob(211)
-	if gargoyle == nil || gargoyle.MobType != protocol.MobTypeStoneGargoyle || gargoyle.MaxHP != 580 {
+	if gargoyle == nil || gargoyle.MobType != protocol.MobTypeStoneGargoyle || gargoyle.MaxHP != 580 || gargoyle.GetZone() != ZoneSanctuary {
 		t.Fatalf("configuracao invalida para Gargula de Pedra 211: %+v", gargoyle)
 	}
 
 	vex := mm.GetMob(212)
-	if vex == nil || vex.MobType != protocol.MobTypeInquisitorVex || vex.MaxHP != 1400 {
+	if vex == nil || vex.MobType != protocol.MobTypeInquisitorVex || vex.MaxHP != 1400 || vex.GetZone() != ZoneSanctuary {
 		t.Fatalf("configuracao invalida para Inquisidor Vex 212: %+v", vex)
 	}
 
 	vaelen := mm.GetMob(213)
-	if vaelen == nil || vaelen.MobType != protocol.MobTypeCommanderVaelen || vaelen.MaxHP != 3200 {
+	if vaelen == nil || vaelen.MobType != protocol.MobTypeCommanderVaelen || vaelen.MaxHP != 3200 || vaelen.GetZone() != ZoneRuins {
 		t.Fatalf("configuracao invalida para Comandante Vaelen 213: %+v", vaelen)
 	}
 
 	malakor := mm.GetMob(214)
-	if malakor == nil || malakor.MobType != protocol.MobTypeMalakorHeraldEclipse || malakor.MaxHP != 7500 {
+	if malakor == nil || malakor.MobType != protocol.MobTypeMalakorHeraldEclipse || malakor.MaxHP != 7500 || malakor.GetZone() != ZoneSanctuary {
 		t.Fatalf("configuracao invalida para Malakor 214: %+v", malakor)
+	}
+
+	spider := mm.GetMob(215)
+	if spider == nil || spider.MobType != protocol.MobTypeMistWeaverSpider || spider.MaxHP != 380 || spider.GetZone() != ZoneForest {
+		t.Fatalf("configuracao invalida para Aranha Tecela 215: %+v", spider)
+	}
+
+	slime := mm.GetMob(218)
+	if slime == nil || slime.MobType != protocol.MobTypeAcidCorrosiveSlime || slime.MaxHP != 320 || slime.GetZone() != ZoneAncientSewers {
+		t.Fatalf("configuracao invalida para Lodo Acido 218: %+v", slime)
+	}
+
+	scorpion := mm.GetMob(220)
+	if scorpion == nil || scorpion.MobType != protocol.MobTypeAbyssalScorpion || scorpion.MaxHP != 540 || scorpion.GetZone() != ZoneAncientSewers {
+		t.Fatalf("configuracao invalida para Escorpiao Abissal 220: %+v", scorpion)
+	}
+
+	iceGolem := mm.GetMob(223)
+	if iceGolem == nil || iceGolem.MobType != protocol.MobTypeAncientIceGolem || iceGolem.MaxHP != 720 || iceGolem.GetZone() != ZoneRuins {
+		t.Fatalf("configuracao invalida para Golem de Gelo 223: %+v", iceGolem)
+	}
+
+	frostDrake := mm.GetMob(225)
+	if frostDrake == nil || frostDrake.MobType != protocol.MobTypeWildFrostDrake || frostDrake.MaxHP != 950 || frostDrake.GetZone() != ZoneRuins {
+		t.Fatalf("configuracao invalida para Draco de Geada 225: %+v", frostDrake)
+	}
+
+	bloodGuard := mm.GetMob(227)
+	if bloodGuard == nil || bloodGuard.MobType != protocol.MobTypeVesperianBloodGuard || bloodGuard.MaxHP != 680 || bloodGuard.GetZone() != ZoneSanctuary {
+		t.Fatalf("configuracao invalida para Guarda Sanguinario 227: %+v", bloodGuard)
 	}
 }
 
@@ -190,10 +240,10 @@ func TestMobStopDistanceAndBoundsClamping(t *testing.T) {
 		t.Fatalf("boss deveria ter parado em Z=7.8m (StopDistance 2.2m), mas parou em Z=%.2f", boss.PosZ)
 	}
 
-	// 3. Testa ClampToMapBounds: não deve permitir coordenadas fora de [-70.0, +70.0]
-	wolf.MoveTowards(100.0, 100.0, 200.0, 1.0)
-	if wolf.PosX > 70.0 || wolf.PosZ > 70.0 {
-		t.Fatalf("mob ultrapassou os limites seguros do mapa [-70, 70]: Pos=(%.2f, %.2f)", wolf.PosX, wolf.PosZ)
+	// 3. Testa ClampToMapBounds / ClampToZoneBounds: não deve permitir coordenadas fora de [-295.0, +295.0]
+	wolf.MoveTowards(500.0, 500.0, 800.0, 1.0)
+	if wolf.PosX > 295.0 || wolf.PosZ > 295.0 {
+		t.Fatalf("mob ultrapassou os limites seguros do mapa [-295, 295]: Pos=(%.2f, %.2f)", wolf.PosX, wolf.PosZ)
 	}
 }
 

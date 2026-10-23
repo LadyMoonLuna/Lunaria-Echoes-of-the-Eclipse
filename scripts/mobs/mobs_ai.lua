@@ -707,6 +707,478 @@ function UpdateMob(mob_id, mob_type, mob_x, mob_z, mob_hp, mob_max_hp, current_s
             mob_set_state(mob_id, 0)
             mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
         end
+
+    -- ------------------------------------------------------------------------
+    -- 15. ARANHA TECELÃ DA BRUMA (MobType == 15 — HP 380, Cospe Teias & Veneno)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 15 then
+        local aggro_radius = 12.0
+        local move_speed = 3.8
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist > 3.0 and player_dist <= 10.0 then
+                data.special_cd = 4.5
+                mob_spawn_telegraph(mob_id, player_x, player_z, 2.8, 900)
+                mob_say(mob_id, "*A Aranha Tecelã cospe um casulo espesso de teia pegajosa!*")
+            end
+
+            if player_dist > 2.0 then
+                mob_set_state(mob_id, 1)
+                mob_move_to(mob_id, player_x, player_z, move_speed)
+            else
+                if data.attack_cd <= 0 then
+                    mob_set_state(mob_id, 2)
+                    mob_attack_player(mob_id, nearest_player_id, 24)
+                    data.attack_cd = 1.3
+                else
+                    mob_set_state(mob_id, 1)
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 16. ARACHNA, A RAINHA TECELÃ (MobType == 16 — RAID BOSS HP 6.800)
+    -- Ninho de Teias em (120, -120) no Bosque Sussurrante
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 16 then
+        local aggro_radius = 22.0
+        local move_speed = 3.4
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 4.8, 52)
+            data.special_cd = 6.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 14.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.4
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 4.8, 1400)
+                mob_say(mob_id, "*Arachna bate suas patas gigantes no solo e dispara casulos imperiais de seda!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.8 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 46)
+                        data.attack_cd = 1.3
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 17. LODO ÁCIDO CORROSIVO (MobType == 17 — HP 320, Esgotos Antigos)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 17 then
+        local aggro_radius = 10.0
+        local move_speed = 2.5
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if player_dist > 1.8 then
+                mob_set_state(mob_id, 1)
+                mob_move_to(mob_id, player_x, player_z, move_speed)
+            else
+                if data.attack_cd <= 0 then
+                    mob_set_state(mob_id, 2)
+                    mob_attack_player(mob_id, nearest_player_id, 20)
+                    data.attack_cd = 1.5
+                else
+                    mob_set_state(mob_id, 1)
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 1.8)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 18. ESCORPIÃO ABISSAL GIGANTE (MobType == 18 — HP 540, Esgotos Antigos)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 18 then
+        local aggro_radius = 12.0
+        local move_speed = 3.4
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 2.6, 40)
+            data.special_cd = 5.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 5.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.1
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 2.6, 1100)
+                mob_say(mob_id, "*O Escorpião Abissal ergue seu ferrão venenoso verde-neon!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.2 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 26)
+                        data.attack_cd = 1.2
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 19. EXPERIMENTO Nº 0: A QUIMERA COSTURADA (MobType == 19 — MINI-BOSS HP 2.800)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 19 then
+        local aggro_radius = 16.0
+        local move_speed = 3.6
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 3.8, 48)
+            data.special_cd = 5.5
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 10.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.2
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 3.8, 1200)
+                mob_say(mob_id, "*A Quimera Costurada ruge com múltiplas vozes e desfere um golpe titânico!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.5 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 35)
+                        data.attack_cd = 1.3
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 20. GOLEM DE GELO ANTIGO (MobType == 20 — HP 720, Norte Nevado ZoneID 2)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 20 then
+        local aggro_radius = 12.0
+        local move_speed = 2.2
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 3.5, 36)
+            data.special_cd = 5.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 6.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.3
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 3.5, 1300)
+                mob_say(mob_id, "*O Golem de Gelo racha o solo congelado com uma pisada estrondosa!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.2 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 30)
+                        data.attack_cd = 1.6
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 1.8)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 21. DRACO DE GEADA SELVAGEM (MobType == 21 — HP 950, Ruínas da Vigília)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 21 then
+        local aggro_radius = 15.0
+        local move_speed = 4.0
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 3.8, 42)
+            data.special_cd = 5.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 8.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.2
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 3.8, 1200)
+                mob_say(mob_id, "*O Draco de Geada canaliza um sopro congelante ancestral!*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.4 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 32)
+                        data.attack_cd = 1.3
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 22. YMIR, O PATRIARCA GIGANTE DE GELO (MobType == 22 — BOSS HP 5.200)
+    -- Trono de Gelo em (0, 150) na ZoneID 2
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 22 then
+        local aggro_radius = 20.0
+        local move_speed = 2.8
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 5.0, 62)
+            data.special_cd = 6.0
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if data.special_cd <= 0 and player_dist <= 12.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.5
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 5.0, 1500)
+                mob_say(mob_id, "*Ymir ergue sua clava colossal de gelo eterno: 'Sintam a fúria da Geada Boreal!'*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.8 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 48)
+                        data.attack_cd = 1.4
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 23. GUARDA SANGUINÁRIO DE VESPERIAN (MobType == 23 — HP 680, Cripta Carmesim)
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 23 then
+        local aggro_radius = 13.0
+        local move_speed = 3.6
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if player_dist > 2.2 then
+                mob_set_state(mob_id, 1)
+                mob_move_to(mob_id, player_x, player_z, move_speed)
+            else
+                if data.attack_cd <= 0 then
+                    mob_set_state(mob_id, 2)
+                    mob_attack_player(mob_id, nearest_player_id, 34)
+                    data.attack_cd = 1.3
+                else
+                    mob_set_state(mob_id, 1)
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
+
+    -- ------------------------------------------------------------------------
+    -- 24. LORDE VESPERIAN, O PROGENITOR VAMPIRO (MobType == 24 — RAID BOSS SECRETO HP 8.500)
+    -- Cripta Carmesim em (-140, 140) na ZoneID 3
+    -- ------------------------------------------------------------------------
+    elseif mob_type == 24 then
+        local aggro_radius = 24.0
+        local move_speed = 4.2
+
+        if data.is_charging_aoe then
+            if data.state_timer > 0 then
+                data.state_timer = data.state_timer - dt
+            end
+
+            if data.state_timer > 0 then
+                mob_set_state(mob_id, 2)
+                return
+            end
+
+            data.is_charging_aoe = false
+            data.state_timer = 0.0
+            mob_trigger_slam_damage(mob_id, data.telegraph_x, data.telegraph_z, 5.5, 55)
+            mob_heal_ally(mob_id, mob_id, 300)
+            data.special_cd = 5.5
+            mob_set_state(mob_id, 1)
+            return
+        end
+
+        if nearest_player_id > 0 and player_dist <= aggro_radius then
+            if player_dist > 7.0 and player_dist <= 18.0 and (not data.teleport_cd or data.teleport_cd <= 0) then
+                data.teleport_cd = 7.0
+                mob_say(mob_id, "*Lorde Vesperian dissolve-se em névoa carmesim e surge instantaneamente atrás de sua presa!*")
+                mob_move_to(mob_id, player_x, player_z, 22.0)
+            end
+            if data.teleport_cd and data.teleport_cd > 0 then
+                data.teleport_cd = data.teleport_cd - dt
+            end
+
+            if data.special_cd <= 0 and player_dist <= 12.0 then
+                data.is_charging_aoe = true
+                data.state_timer = 1.3
+                data.telegraph_x = player_x
+                data.telegraph_z = player_z
+                mob_spawn_telegraph(mob_id, player_x, player_z, 5.5, 1300)
+                mob_say(mob_id, "*Lorde Vesperian: 'Seu sangue pertencerá ao primeiro dos imortais!'*")
+                mob_set_state(mob_id, 2)
+                return
+            else
+                if player_dist > 2.6 then
+                    mob_set_state(mob_id, 1)
+                    mob_move_to(mob_id, player_x, player_z, move_speed)
+                else
+                    if data.attack_cd <= 0 then
+                        mob_set_state(mob_id, 2)
+                        mob_attack_player(mob_id, nearest_player_id, 50)
+                        data.attack_cd = 1.1
+                    else
+                        mob_set_state(mob_id, 1)
+                    end
+                end
+            end
+        else
+            mob_set_state(mob_id, 0)
+            mob_move_to(mob_id, spawn_x, spawn_z, 2.0)
+        end
     end
 end
 
@@ -807,6 +1279,80 @@ DropTables = {
             { item_id = 21, name = "Foice Sombria do Inquisidor", rate = 0.06, rare = true }, -- 6% raro
             { item_id = 14, name = "Coração do Licantropo Alfa", rate = 0.05, rare = true }, -- 5% raro
         }
+    },
+    [15] = {
+        name = "Aranha Tecelã da Bruma",
+        drops = {
+            { item_id = 42, name = "Casulo de Seda Perfeito", rate = 1.00, rare = false },
+            { item_id = 11, name = "Glândula de Veneno", rate = 0.25, rare = false },
+        }
+    },
+    [16] = {
+        name = "Arachna, a Rainha Tecelã (Raid Boss)",
+        drops = {
+            { item_id = 43, name = "Coração da Rainha Aranha", rate = 1.00, rare = false },
+            { item_id = 45, name = "Manto de Seda Imperial", rate = 1.00, rare = false },
+            { item_id = 44, name = "Olho Multifacetado de Arachna", rate = 0.001, rare = true, secret = true },
+        }
+    },
+    [17] = {
+        name = "Lodo Ácido Corrosivo",
+        drops = {
+            { item_id = 46, name = "Ácido Puro", rate = 1.00, rare = false },
+            { item_id = 28, name = "Lixo Orgânico", rate = 1.00, rare = false },
+        }
+    },
+    [18] = {
+        name = "Escorpião Abissal Gigante",
+        drops = {
+            { item_id = 48, name = "Veneno Vorpal", rate = 1.00, rare = false },
+            { item_id = 47, name = "Ferrão de Escorpião Abissal", rate = 0.001, rare = true, secret = true },
+        }
+    },
+    [19] = {
+        name = "Experimento Nº 0: A Quimera Costurada (Mini-Boss)",
+        drops = {
+            { item_id = 49, name = "Retalho Quimérico Costurado", rate = 1.00, rare = false },
+            { item_id = 11, name = "Glândula de Veneno Mutante", rate = 1.00, rare = false },
+            { item_id = 12, name = "Placa de Aço Deformada", rate = 1.00, rare = false },
+        }
+    },
+    [20] = {
+        name = "Golem de Gelo Antigo",
+        drops = {
+            { item_id = 50, name = "Núcleo de Gelo Antigo", rate = 1.00, rare = false },
+            { item_id = 12, name = "Placa de Aço Pesada", rate = 1.00, rare = false },
+        }
+    },
+    [21] = {
+        name = "Draco de Geada Selvagem",
+        drops = {
+            { item_id = 51, name = "Escama Dracônica Primordial", rate = 1.00, rare = false },
+            { item_id = 10, name = "Carne Nobre Assada", rate = 1.00, rare = false },
+        }
+    },
+    [22] = {
+        name = "Ymir, o Patriarca Gigante de Gelo (Boss)",
+        drops = {
+            { item_id = 50, name = "Núcleo de Gelo Ancestral", rate = 1.00, rare = false },
+            { item_id = 12, name = "Placa Glacial Reforçada", rate = 1.00, rare = false },
+            { item_id = 52, name = "Coração de Geada Eterna", rate = 0.001, rare = true, secret = true },
+        }
+    },
+    [23] = {
+        name = "Guarda Sanguinário de Vesperian",
+        drops = {
+            { item_id = 53, name = "Insígnia do Guarda Carmesim", rate = 1.00, rare = false },
+            { item_id = 10, name = "Sangue Lunar Puro", rate = 1.00, rare = false },
+        }
+    },
+    [24] = {
+        name = "Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto)",
+        drops = {
+            { item_id = 55, name = "Anel Carmesim de Vesperian", rate = 1.00, rare = false },
+            { item_id = 17, name = "Tomo da Foice do Eclipse", rate = 1.00, rare = false },
+            { item_id = 54, name = "Sangue Puro do Progenitor", rate = 0.001, rare = true, secret = true },
+        }
     }
 }
 
@@ -817,13 +1363,16 @@ function GetDropRatesReport()
     table.insert(lines, "    LUNARIA ONLINE — TABELA DE TAXAS DE DROP (DEV)")
     table.insert(lines, "==================================================")
 
-    local sorted_types = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14}
+    local sorted_types = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}
     for _, t in ipairs(sorted_types) do
         local entry = DropTables[t]
         if entry then
             table.insert(lines, string.format("[Mob %d] %s:", t, entry.name))
             for _, d in ipairs(entry.drops) do
                 local rare_tag = d.rare and " [RARO]" or ""
+                if d.secret then
+                    rare_tag = " [SECRETO 0.1%]"
+                end
                 table.insert(lines, string.format("  - Item #%d (%s): %.1f%%%s", d.item_id, d.name, d.rate * 100.0, rare_tag))
             end
         end

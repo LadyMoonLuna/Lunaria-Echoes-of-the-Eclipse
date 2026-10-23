@@ -22,6 +22,8 @@ signal evolution_offer_received(offer_type: int, option_a: int, option_b: int)
 signal dev_drop_rates_received(report_text: String)
 signal corpse_snapshot_received(corpses_dict: Dictionary)
 signal open_autopsy_ui_received(corpse_id: int, mob_type: int, difficulty_seed: int, organs: Array)
+signal zone_change_received(target_zone_id: int, portal_id: int)
+signal npc_friendship_received(npc_id: int, points: int, level: int)
 
 const SERVER_HOST: String = "127.0.0.1"
 const TCP_PORT: int = 7000
@@ -202,6 +204,26 @@ func _process_tcp() -> void:
 					offset += 2
 				inventory_updated.emit(equipped_slots, items_array)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
+
+			elif opcode == 0x23: # PORTAL_TRAVEL / ZONE_CHANGE (3 bytes)
+				if tcp_rx_buffer.size() < 3:
+					break
+				var target_zone: int = tcp_rx_buffer[1]
+				var portal_id: int = tcp_rx_buffer[2]
+				zone_change_received.emit(target_zone, portal_id)
+				tcp_rx_buffer = tcp_rx_buffer.slice(3)
+
+			elif opcode == 0x24: # FRIENDSHIP_SYNC (8 bytes: [0x24][npc_id u32][pts u16][lvl u8])
+				if tcp_rx_buffer.size() < 8:
+					break
+				var b := StreamPeerBuffer.new()
+				b.big_endian = true
+				b.data_array = tcp_rx_buffer.slice(1, 8)
+				var npc_id: int = b.get_u32()
+				var pts: int = b.get_u16()
+				var lvl: int = b.get_u8()
+				npc_friendship_received.emit(npc_id, pts, lvl)
+				tcp_rx_buffer = tcp_rx_buffer.slice(8)
 
 			elif opcode == 0x36: # PLAYER_RESPAWN (17 bytes)
 				if tcp_rx_buffer.size() < 17:
@@ -451,6 +473,13 @@ func _process_udp() -> void:
 			player_stats_full_received.emit(pid, race, cls, tier, lvl, hp, max_hp, stam, max_stam, buff)
 			player_attributes_received.emit(pid, xp, next_xp, stat_pts, str_stat, dex_stat, con_stat, agi_stat, int_stat, spi_stat, mas_stat, lck_stat)
 
+		elif opcode == 0x23: # ZONE_CHANGE / PORTAL_TRAVEL (3 bytes)
+			if packet.size() < 3:
+				continue
+			var target_zone: int = buffer.get_u8()
+			var portal_id: int = buffer.get_u8()
+			zone_change_received.emit(target_zone, portal_id)
+
 		elif opcode == 0x36: # PLAYER_RESPAWN (17 bytes)
 			if packet.size() < 17:
 				continue
@@ -588,17 +617,33 @@ func send_world_control(cmd_type: int, val: int) -> void:
 
 	tcp.put_data(buffer.data_array)
 
-# send_skip_time avança horas (F6) chamando send_world_control(1, hours)
+# Métodos auxiliares de controle Dev (alimentam o Dev Manager F10 via pacote 0x22)
 func send_skip_time(hours: int = 6) -> void:
 	send_world_control(1, hours)
 
-# send_cycle_moon cicla as 10 fases da lua (F7) chamando send_world_control(2, 1)
 func send_cycle_moon() -> void:
 	send_world_control(2, 1)
 
-# send_cycle_weather cicla os 4 climas (F8) chamando send_world_control(3, 1)
 func send_cycle_weather() -> void:
 	send_world_control(3, 1)
+
+func send_set_hour(hour: int) -> void:
+	send_world_control(4, hour)
+
+func send_set_moon(phase: int) -> void:
+	send_world_control(5, phase)
+
+func send_set_weather(weather: int) -> void:
+	send_world_control(6, weather)
+
+func send_give_item(item_id: int) -> void:
+	send_world_control(7, item_id)
+
+func send_dev_level_control(val: int) -> void:
+	send_world_control(8, val)
+
+func send_dev_teleport(dest_id: int) -> void:
+	send_world_control(9, dest_id)
 
 # send_select_identity envia o pacote TCP 0x30 para definir Raça, Classe e Modo de Ação
 func send_select_identity(race_id: int, class_id: int, action_mode: int = 0) -> void:
@@ -670,9 +715,9 @@ func send_evolution_choice(offer_type: int, chosen_id: int) -> void:
 
 	tcp.put_data(buffer.data_array)
 
-# send_dev_level_up comanda avanço de níveis no servidor (F8/Dev)
-func send_dev_level_up(levels: int = 10) -> void:
-	send_world_control(4, levels)
+# send_dev_level_up comanda controle de nível no servidor (Dev Manager F10)
+func send_dev_level_up(levels: int = 1) -> void:
+	send_world_control(8, levels)
 
 # send_dev_get_drop_rates solicita a tabela de taxas de drop completa ao servidor (0x3A: 5 bytes)
 func send_dev_get_drop_rates() -> void:
@@ -716,3 +761,17 @@ func send_submit_autopsy_result(corpse_id: int, organ_index: int, result_tier: i
 
 	tcp.put_data(buffer.data_array)
 	print("[NetworkManager] 0x3D SUBMIT_AUTOPSY_RESULT enviado: Corpse #%d, Órgão #%d, Tier %d" % [corpse_id, organ_index, result_tier])
+
+# send_portal_travel envia o pacote TCP/UDP 0x23 para solicitar transição de portal (3 bytes: 0x23, TargetZoneID, PortalID)
+func send_portal_travel(target_zone_id: int, portal_id: int) -> void:
+	var buffer := StreamPeerBuffer.new()
+	buffer.big_endian = false
+	buffer.put_u8(0x23)
+	buffer.put_u8(target_zone_id)
+	buffer.put_u8(portal_id)
+
+	if tcp and tcp.get_status() == StreamPeerTCP.STATUS_CONNECTED:
+		tcp.put_data(buffer.data_array)
+	if udp:
+		udp.put_packet(buffer.data_array)
+	print("[NetworkManager] 0x23 PORTAL_TRAVEL enviado: Zona Alvo %d, Portal %d" % [target_zone_id, portal_id])

@@ -8,28 +8,30 @@ import (
 
 // TrainingDummy representa um Boneco de Treino para teste de combate e combos.
 type TrainingDummy struct {
-	mu    sync.RWMutex
-	ID    uint32
-	Name  string
-	PosX  float32
-	PosY  float32
-	PosZ  float32
-	RotY  float32
-	HP    uint16
-	MaxHP uint16
+	mu     sync.RWMutex
+	ID     uint32
+	ZoneID uint8 // Zona instanciada (0 a 8)
+	Name   string
+	PosX   float32
+	PosY   float32
+	PosZ   float32
+	RotY   float32
+	HP     uint16
+	MaxHP  uint16
 }
 
-// NewTrainingDummy cria uma instância de boneco de treino com 1000 HP.
+// NewTrainingDummy cria uma instância de boneco de treino com 1000 HP na Vila (ZoneID = 0).
 func NewTrainingDummy(id uint32, name string, x, y, z, rotY float32) *TrainingDummy {
 	return &TrainingDummy{
-		ID:    id,
-		Name:  name,
-		PosX:  x,
-		PosY:  y,
-		PosZ:  z,
-		RotY:  rotY,
-		HP:    1000,
-		MaxHP: 1000,
+		ID:     id,
+		ZoneID: ZoneVillage,
+		Name:   name,
+		PosX:   x,
+		PosY:   y,
+		PosZ:   z,
+		RotY:   rotY,
+		HP:     1000,
+		MaxHP:  1000,
 	}
 }
 
@@ -74,3 +76,18 @@ func (d *TrainingDummy) ToSnapshot() protocol.NPCSnapshot {
 		State: 0, // Parado
 	}
 }
+
+// GetZone retorna a ZoneID do boneco de treino.
+func (d *TrainingDummy) GetZone() uint8 {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.ZoneID
+}
+
+// SetZone define a ZoneID do boneco de treino.
+func (d *TrainingDummy) SetZone(zoneID uint8) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.ZoneID = zoneID
+}
+

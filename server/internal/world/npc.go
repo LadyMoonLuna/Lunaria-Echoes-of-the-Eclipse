@@ -23,6 +23,7 @@ type NPC struct {
 	mu sync.RWMutex
 
 	ID         uint32
+	ZoneID     uint8 // Zona instanciada onde o NPC reside (0 a 8)
 	Name       string
 	PosX       float32
 	PosY       float32
@@ -34,6 +35,7 @@ type NPC struct {
 	State      uint8
 	ScriptPath string
 	IsActive   bool
+	ShopOpen   bool
 
 	// Sistema de Patrulha Contínua com Waypoints
 	Waypoints          []Waypoint
@@ -55,6 +57,7 @@ type NPC struct {
 func NewNPC(id uint32, name string, initX, initY, initZ float32, scriptPath string, clock *WorldClock, broadcastSay SayCallback) *NPC {
 	return &NPC{
 		ID:                id,
+		ZoneID:            ZoneVillage,
 		Name:              name,
 		PosX:              initX,
 		PosY:              initY,
@@ -66,6 +69,7 @@ func NewNPC(id uint32, name string, initX, initY, initZ float32, scriptPath stri
 		State:             0, // 0 = Parado
 		ScriptPath:        scriptPath,
 		IsActive:          true,
+		ShopOpen:          true,
 		Waypoints:         make([]Waypoint, 0),
 		WaitDuration:      3.0,
 		approachCooldowns: make(map[uint32]time.Time),
@@ -362,5 +366,33 @@ func GetFriendshipLevel(player *Player, npcID uint32) uint8 {
 		return 0
 	}
 	return player.GetFriendshipLevel(npcID)
+}
+
+// GetZone retorna o ZoneID onde o NPC está localizado.
+func (npc *NPC) GetZone() uint8 {
+	npc.mu.RLock()
+	defer npc.mu.RUnlock()
+	return npc.ZoneID
+}
+
+// SetZone define o ZoneID do NPC.
+func (npc *NPC) SetZone(zoneID uint8) {
+	npc.mu.Lock()
+	defer npc.mu.Unlock()
+	npc.ZoneID = zoneID
+}
+
+// IsShopOpen retorna se a loja/serviços do NPC estão abertos thread-safe.
+func (npc *NPC) IsShopOpen() bool {
+	npc.mu.RLock()
+	defer npc.mu.RUnlock()
+	return npc.ShopOpen
+}
+
+// SetShopOpen define se a loja/serviços do NPC estão abertos.
+func (npc *NPC) SetShopOpen(open bool) {
+	npc.mu.Lock()
+	defer npc.mu.Unlock()
+	npc.ShopOpen = open
 }
 

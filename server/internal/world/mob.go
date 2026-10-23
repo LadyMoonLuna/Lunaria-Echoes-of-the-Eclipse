@@ -20,6 +20,7 @@ type Mob struct {
 	Mu sync.RWMutex
 
 	ID        uint32
+	ZoneID    uint8 // Zona instanciada onde o monstro reside (0 a 8)
 	Name      string
 	MobType   uint8
 	State     uint8
@@ -62,6 +63,7 @@ type Mob struct {
 func NewMob(id uint32, name string, mobType uint8, spawnX, spawnY, spawnZ float32, maxHP uint16, moveSpeed float32) *Mob {
 	return &Mob{
 		ID:            id,
+		ZoneID:        ZoneVillage,
 		Name:          name,
 		MobType:       mobType,
 		State:         protocol.MobStatePatrolIdle,
@@ -80,6 +82,13 @@ func NewMob(id uint32, name string, mobType uint8, spawnX, spawnY, spawnZ float3
 		IsActive:      true,
 		DamageDealers: make(map[uint32]int),
 	}
+}
+
+// NewMobWithZone cria uma nova entidade de Mob inicializada com sua ZoneID respectiva.
+func NewMobWithZone(id uint32, name string, mobType uint8, zoneID uint8, spawnX, spawnY, spawnZ float32, maxHP uint16, moveSpeed float32) *Mob {
+	m := NewMob(id, name, mobType, spawnX, spawnY, spawnZ, maxHP, moveSpeed)
+	m.ZoneID = zoneID
+	return m
 }
 
 // ApplySlow aplica redução de velocidade por um tempo determinado.
@@ -162,7 +171,9 @@ func (m *Mob) GetRespawnDelay() time.Duration {
 	switch m.MobType {
 	case protocol.MobTypeAlphaWolf, protocol.MobTypeLycanthropeAlpha,
 		protocol.MobTypeInquisitorVex, protocol.MobTypeCommanderVaelen,
-		protocol.MobTypeMalakorHeraldEclipse:
+		protocol.MobTypeMalakorHeraldEclipse, protocol.MobTypeArachnaQueen,
+		protocol.MobTypeStitchedChimeraZero, protocol.MobTypeYmirFrostPatriarch,
+		protocol.MobTypeLordVesperianVampire:
 		return MobRespawnDelayBoss
 	default:
 		return MobRespawnDelayCommon
@@ -255,7 +266,10 @@ func (m *Mob) MoveTowards(targetX, targetZ float32, speed float32, dt float32) {
 	// Distância de parada durante perseguição para evitar sobreposição total (0.0m)
 	var stopDist float32 = 0.0
 	if m.State == protocol.MobStateChasing {
-		if m.MobType == protocol.MobTypeIronEnforcer || m.MobType == protocol.MobTypeLycanthropeAlpha {
+		if m.MobType == protocol.MobTypeArachnaQueen || m.MobType == protocol.MobTypeYmirFrostPatriarch ||
+			m.MobType == protocol.MobTypeLordVesperianVampire || m.MobType == protocol.MobTypeStitchedChimeraZero {
+			stopDist = 2.4
+		} else if m.MobType == protocol.MobTypeIronEnforcer || m.MobType == protocol.MobTypeLycanthropeAlpha {
 			stopDist = 2.2
 		} else {
 			stopDist = 1.6
@@ -285,7 +299,7 @@ func (m *Mob) MoveTowards(targetX, targetZ float32, speed float32, dt float32) {
 		nextZ = m.PosZ + (dz/dist)*step
 	}
 
-	m.PosX, m.PosZ = ClampToMapBounds(nextX, nextZ)
+	m.PosX, m.PosZ = ClampToZoneBounds(m.ZoneID, nextX, nextZ)
 }
 
 // SetState define o estado atual do monstro thread-safe.
@@ -348,50 +362,85 @@ type MobManager struct {
 	Mobs map[uint32]*Mob
 }
 
-// NewMobManager inicializa os 5 tipos de monstros nos locais definidos no Marco 4.
+// NewMobManager inicializa todas as criaturas e raid bosses nas suas respectivas zonas (600x600m).
 func NewMobManager() *MobManager {
 	mm := &MobManager{
 		Mobs: make(map[uint32]*Mob),
 	}
 
-	// 1. Bosque Sussurrante (Sudeste Distante: 45m a 65m do Centro)
-	mm.Mobs[201] = NewMob(201, "Lobo da Bruma", protocol.MobTypeMistWolf, 45.0, 0.0, -35.0, 220, 4.2)
-	mm.Mobs[202] = NewMob(202, "Lobo da Bruma", protocol.MobTypeMistWolf, 52.0, 0.0, -42.0, 220, 4.2)
+	// =========================================================================
+	// 1. ZONE 1: BOSQUE SUSSURRANTE (ZoneForest = 1, 600x600m)
+	// =========================================================================
+	mm.Mobs[201] = NewMobWithZone(201, "Lobo da Bruma", protocol.MobTypeMistWolf, ZoneForest, 55.0, 0.0, -45.0, 220, 4.2)
+	mm.Mobs[202] = NewMobWithZone(202, "Lobo da Bruma", protocol.MobTypeMistWolf, ZoneForest, 65.0, 0.0, -52.0, 220, 4.2)
 
-	// Lobo Alfa (ID 207) - Ativo na Lua Cheia
-	mob207 := NewMob(207, "Lobo Alfa", protocol.MobTypeAlphaWolf, 58.0, 0.0, -48.0, 750, 4.6)
+	// Lobo Alfa (ID 207) — Ativo na Lua Cheia
+	mob207 := NewMobWithZone(207, "Lobo Alfa", protocol.MobTypeAlphaWolf, ZoneForest, 75.0, 0.0, -60.0, 750, 4.6)
 	mob207.IsActive = false
 	mm.Mobs[207] = mob207
 
-	// Licantropo Alfa (ID 208) - Boss de Raid Secreto (Desperta na Lua de Sangue)
-	mob208 := NewMob(208, "Licantropo Alfa", protocol.MobTypeLycanthropeAlpha, 64.0, 0.0, -55.0, 2200, 4.4)
+	// Licantropo Alfa (ID 208) — Raid Boss Secreto (Desperta na Lua de Sangue)
+	mob208 := NewMobWithZone(208, "Licantropo Alfa", protocol.MobTypeLycanthropeAlpha, ZoneForest, 88.0, 0.0, -72.0, 2200, 4.4)
 	mob208.IsActive = false
 	mm.Mobs[208] = mob208
 
-	// 2. Estrada Real & Acampamento Desertor (Noroeste Distante)
-	mm.Mobs[203] = NewMob(203, "Saqueador Deserdado", protocol.MobTypeOutcastRaider, -45.0, 0.0, 38.0, 350, 3.2)
-	mm.Mobs[204] = NewMob(204, "Besteiro da Vigília", protocol.MobTypeVigilCrossbowman, -52.0, 0.0, 45.0, 200, 3.5)
+	// MobType 15: Aranha Tecelã da Bruma (380 HP)
+	mm.Mobs[215] = NewMobWithZone(215, "Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneForest, 105.0, 0.0, -100.0, 380, 3.8)
+	mm.Mobs[216] = NewMobWithZone(216, "Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneForest, 115.0, 0.0, -110.0, 380, 3.8)
 
-	// 3. Ruínas da Vigília (Norte Distante)
-	mm.Mobs[205] = NewMob(205, "Acólito do Eclipse", protocol.MobTypeEclipseAcolyte, -12.0, 0.0, 52.0, 240, 3.0)
-	mm.Mobs[206] = NewMob(206, "Executor de Ferro", protocol.MobTypeIronEnforcer, 0.0, 0.0, 58.0, 650, 2.4)
+	// MobType 16: Arachna, a Rainha Tecelã (Raid Boss - 6800 HP em (120, -120))
+	mm.Mobs[217] = NewMobWithZone(217, "Arachna, a Rainha Tecelã", protocol.MobTypeArachnaQueen, ZoneForest, 120.0, 0.0, -120.0, 6800, 3.4)
 
-	// 4. Santuário do Eclipse (Dungeon & Raids: X: -65.0 a -85.0, Z: 55.0 a 85.0)
-	// Cultistas Sombrios (MobType 10 - HP 400)
-	mm.Mobs[209] = NewMob(209, "Cultista Sombrio", protocol.MobTypeDarkCultist, -66.0, 0.0, 62.0, 400, 3.2)
-	mm.Mobs[210] = NewMob(210, "Cultista Sombrio", protocol.MobTypeDarkCultist, -72.0, 0.0, 64.0, 400, 3.2)
+	// =========================================================================
+	// 2. ZONE 2: RUÍNAS DA VIGÍLIA & NORTE GELADO (ZoneRuins = 2, 600x600m)
+	// =========================================================================
+	mm.Mobs[203] = NewMobWithZone(203, "Saqueador Deserdado", protocol.MobTypeOutcastRaider, ZoneRuins, -15.0, 0.0, 70.0, 350, 3.2)
+	mm.Mobs[204] = NewMobWithZone(204, "Besteiro da Vigília", protocol.MobTypeVigilCrossbowman, ZoneRuins, 15.0, 0.0, 72.0, 200, 3.5)
+	mm.Mobs[205] = NewMobWithZone(205, "Acólito do Eclipse", protocol.MobTypeEclipseAcolyte, ZoneRuins, -8.0, 0.0, 80.0, 240, 3.0)
+	mm.Mobs[206] = NewMobWithZone(206, "Executor de Ferro", protocol.MobTypeIronEnforcer, ZoneRuins, 8.0, 0.0, 82.0, 650, 2.4)
+	mm.Mobs[213] = NewMobWithZone(213, "Comandante Vaelen", protocol.MobTypeCommanderVaelen, ZoneRuins, 0.0, 0.0, 90.0, 3200, 3.5)
 
-	// Gárgula de Pedra (MobType 11 - HP 580)
-	mm.Mobs[211] = NewMob(211, "Gárgula de Pedra", protocol.MobTypeStoneGargoyle, -78.0, 0.0, 68.0, 580, 3.8)
+	// MobType 20: Golem de Gelo Antigo (720 HP - Norte Nevado)
+	mm.Mobs[223] = NewMobWithZone(223, "Golem de Gelo Antigo", protocol.MobTypeAncientIceGolem, ZoneRuins, -40.0, 0.0, 130.0, 720, 2.2)
+	mm.Mobs[224] = NewMobWithZone(224, "Golem de Gelo Antigo", protocol.MobTypeAncientIceGolem, ZoneRuins, 40.0, 0.0, 130.0, 720, 2.2)
 
-	// Mini-Boss Inquisidor Vex (MobType 12 - HP 1400)
-	mm.Mobs[212] = NewMob(212, "Inquisidor Vex", protocol.MobTypeInquisitorVex, -68.0, 0.0, 72.0, 1400, 3.4)
+	// MobType 21: Draco de Geada Selvagem (950 HP)
+	mm.Mobs[225] = NewMobWithZone(225, "Draco de Geada Selvagem", protocol.MobTypeWildFrostDrake, ZoneRuins, 0.0, 0.0, 175.0, 950, 4.0)
 
-	// Boss Normal Comandante Vaelen, o Traidor (MobType 13 - HP 3200)
-	mm.Mobs[213] = NewMob(213, "Comandante Vaelen", protocol.MobTypeCommanderVaelen, -76.0, 0.0, 76.0, 3200, 3.5)
+	// MobType 22: Ymir, o Patriarca Gigante de Gelo (Boss - 5200 HP em (0, 150))
+	mm.Mobs[226] = NewMobWithZone(226, "Ymir, o Patriarca Gigante de Gelo", protocol.MobTypeYmirFrostPatriarch, ZoneRuins, 0.0, 0.0, 150.0, 5200, 2.8)
 
-	// Raid Boss Malakor, o Arauto do Eclipse (MobType 14 - HP 7500 - Desafio para 5 Jogadores)
-	mm.Mobs[214] = NewMob(214, "Malakor, o Arauto do Eclipse", protocol.MobTypeMalakorHeraldEclipse, -72.0, 0.0, 75.0, 7500, 3.0)
+	// =========================================================================
+	// 3. ZONE 3: SANTUÁRIO DO ECLIPSE (ZoneSanctuary = 3, 600x600m)
+	// =========================================================================
+	mm.Mobs[209] = NewMobWithZone(209, "Cultista Sombrio", protocol.MobTypeDarkCultist, ZoneSanctuary, -75.0, 0.0, 75.0, 400, 3.2)
+	mm.Mobs[210] = NewMobWithZone(210, "Cultista Sombrio", protocol.MobTypeDarkCultist, ZoneSanctuary, -80.0, 0.0, 72.0, 400, 3.2)
+	mm.Mobs[211] = NewMobWithZone(211, "Gárgula de Pedra", protocol.MobTypeStoneGargoyle, ZoneSanctuary, -78.0, 0.0, 82.0, 580, 3.8)
+	mm.Mobs[212] = NewMobWithZone(212, "Inquisidor Vex", protocol.MobTypeInquisitorVex, ZoneSanctuary, -85.0, 0.0, 80.0, 1400, 3.4)
+	mm.Mobs[214] = NewMobWithZone(214, "Malakor, o Arauto do Eclipse", protocol.MobTypeMalakorHeraldEclipse, ZoneSanctuary, -88.0, 0.0, 88.0, 7500, 3.0)
+
+	// MobType 23: Guarda Sanguinário de Vesperian (680 HP - Noroeste Cripta)
+	mm.Mobs[227] = NewMobWithZone(227, "Guarda Sanguinário de Vesperian", protocol.MobTypeVesperianBloodGuard, ZoneSanctuary, -125.0, 0.0, 125.0, 680, 3.6)
+	mm.Mobs[228] = NewMobWithZone(228, "Guarda Sanguinário de Vesperian", protocol.MobTypeVesperianBloodGuard, ZoneSanctuary, -135.0, 0.0, 135.0, 680, 3.6)
+
+	// MobType 24: Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto - 8500 HP em (-140, 140) — Desperta à Noite/Sangue/Eclipse)
+	mob229 := NewMobWithZone(229, "Lorde Vesperian, o Progenitor Vampiro", protocol.MobTypeLordVesperianVampire, ZoneSanctuary, -140.0, 0.0, 140.0, 8500, 4.2)
+	mob229.IsActive = false
+	mm.Mobs[229] = mob229
+
+	// =========================================================================
+	// 4. ZONE 8: ESGOTOS ANTIGOS (ZoneAncientSewers = 8, 600x600m)
+	// =========================================================================
+	// MobType 17: Lodo Ácido Corrosivo (320 HP)
+	mm.Mobs[218] = NewMobWithZone(218, "Lodo Ácido Corrosivo", protocol.MobTypeAcidCorrosiveSlime, ZoneAncientSewers, -30.0, 0.0, 40.0, 320, 2.5)
+	mm.Mobs[219] = NewMobWithZone(219, "Lodo Ácido Corrosivo", protocol.MobTypeAcidCorrosiveSlime, ZoneAncientSewers, 20.0, 0.0, -40.0, 320, 2.5)
+
+	// MobType 18: Escorpião Abissal Gigante (540 HP)
+	mm.Mobs[220] = NewMobWithZone(220, "Escorpião Abissal Gigante", protocol.MobTypeAbyssalScorpion, ZoneAncientSewers, 60.0, 0.0, 60.0, 540, 3.4)
+	mm.Mobs[221] = NewMobWithZone(221, "Escorpião Abissal Gigante", protocol.MobTypeAbyssalScorpion, ZoneAncientSewers, -70.0, 0.0, -50.0, 540, 3.4)
+
+	// MobType 19: Experimento Nº 0: A Quimera Costurada (Mini-Boss - 2800 HP)
+	mm.Mobs[222] = NewMobWithZone(222, "Experimento Nº 0: A Quimera Costurada", protocol.MobTypeStitchedChimeraZero, ZoneAncientSewers, 0.0, 0.0, 110.0, 2800, 3.6)
 
 	return mm
 }
@@ -411,6 +460,20 @@ func (mm *MobManager) GetAllMobs() []*Mob {
 	list := make([]*Mob, 0, len(mm.Mobs))
 	for _, m := range mm.Mobs {
 		list = append(list, m)
+	}
+	return list
+}
+
+// GetAllMobsByZone retorna todos os monstros pertencentes a uma zona específica.
+func (mm *MobManager) GetAllMobsByZone(zoneID uint8) []*Mob {
+	mm.Mu.RLock()
+	defer mm.Mu.RUnlock()
+
+	var list []*Mob
+	for _, m := range mm.Mobs {
+		if m.GetZone() == zoneID {
+			list = append(list, m)
+		}
 	}
 	return list
 }
@@ -448,3 +511,38 @@ func (mm *MobManager) GetSnapshots() []protocol.MobSnapshot {
 	}
 	return snapshots
 }
+
+// GetSnapshotsByZone extrai os snapshots de mobs vivos pertencentes a uma ZoneID específica.
+func (mm *MobManager) GetSnapshotsByZone(zoneID uint8) []protocol.MobSnapshot {
+	mm.Mu.RLock()
+	defer mm.Mu.RUnlock()
+
+	snapshots := make([]protocol.MobSnapshot, 0, len(mm.Mobs))
+	for _, m := range mm.Mobs {
+		m.Mu.RLock()
+		alive := m.IsAlive
+		active := m.IsActive
+		deadAt := m.DeadAt
+		mZone := m.ZoneID
+		m.Mu.RUnlock()
+		if mZone == zoneID && active && (alive || time.Since(deadAt) < 2*time.Second) {
+			snapshots = append(snapshots, m.ToSnapshot())
+		}
+	}
+	return snapshots
+}
+
+// GetZone retorna o ZoneID onde o mob está localizado.
+func (m *Mob) GetZone() uint8 {
+	m.Mu.RLock()
+	defer m.Mu.RUnlock()
+	return m.ZoneID
+}
+
+// SetZone define o ZoneID do mob.
+func (m *Mob) SetZone(zoneID uint8) {
+	m.Mu.Lock()
+	defer m.Mu.Unlock()
+	m.ZoneID = zoneID
+}
+

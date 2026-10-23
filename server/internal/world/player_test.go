@@ -25,10 +25,10 @@ func TestCalculateStatsByClassAndRace(t *testing.T) {
 		t.Fatalf("Esperava (125, 110) para Iniciado Kharad, obteve (%d, %d)", hp, stam)
 	}
 
-	// Acólito (125, 105) + Dhampir (+10, +15) = (135, 120)
-	hp, stam = CalculateStatsByClassAndRace(protocol.ClassAcolyte, protocol.RaceDhampir)
-	if hp != 135 || stam != 120 {
-		t.Fatalf("Esperava (135, 120) para Acólito Dhampir, obteve (%d, %d)", hp, stam)
+	// Assassino (110, 140) + Dhampir (+10, +15) = (120, 155)
+	hp, stam = CalculateStatsByClassAndRace(protocol.ClassAssassin, protocol.RaceDhampir)
+	if hp != 120 || stam != 155 {
+		t.Fatalf("Esperava (120, 155) para Assassino Dhampir, obteve (%d, %d)", hp, stam)
 	}
 
 	// Espadachim (140, 100) + Varkai (+15, +10) = (155, 110)
@@ -453,8 +453,8 @@ func TestRPGEvolutionAndTierScaling(t *testing.T) {
 		protocol.TierUncommon:  6,
 		protocol.TierRare:      7,
 		protocol.TierEpic:      8,
-		protocol.TierUnique:    10,
-		protocol.TierLegendary: 12,
+		protocol.TierUnique:    11,
+		protocol.TierLegendary: 15,
 	}
 	for tier, pts := range expectedPoints {
 		if StatPointsPerLevel(tier) != pts {
@@ -555,7 +555,7 @@ func TestNPCFriendshipAndSecretRecipe(t *testing.T) {
 	}
 }
 
-func TestAll28RacesBaseAttributes(t *testing.T) {
+func TestAll46RacesBaseAttributes(t *testing.T) {
 	testCases := []struct {
 		raceID uint8
 		str    uint8
@@ -599,6 +599,25 @@ func TestAll28RacesBaseAttributes(t *testing.T) {
 		{protocol.RaceCambion, 11, 8, 8, 7, 9, 2, 5, 6},
 		{protocol.RaceNephilim, 9, 9, 8, 8, 10, 10, 7, 7},
 		{protocol.RaceTimeWanderer, 5, 10, 5, 12, 12, 9, 8, 9},
+		// 18 Novas Raças do RPG (29 a 46)
+		{protocol.RaceHalfCelestial, 8, 8, 8, 8, 9, 11, 7, 7},
+		{protocol.RacePyromancer, 6, 8, 7, 8, 12, 6, 7, 6},
+		{protocol.RaceFrostGiant, 14, 4, 15, 4, 6, 6, 9, 4},
+		{protocol.RaceDragonEarth, 12, 5, 14, 4, 5, 6, 10, 5},
+		{protocol.RaceDragonWater, 8, 9, 9, 8, 9, 9, 7, 7},
+		{protocol.RaceDragonLightning, 8, 11, 7, 12, 10, 5, 8, 7},
+		{protocol.RaceDragonMystic, 6, 8, 8, 7, 13, 10, 6, 6},
+		{protocol.RaceOrc, 13, 6, 13, 6, 3, 3, 9, 5},
+		{protocol.RaceDwarf, 11, 5, 13, 4, 6, 7, 12, 5},
+		{protocol.RaceElf, 5, 11, 5, 12, 10, 8, 7, 6},
+		{protocol.RaceSolarElf, 6, 10, 6, 10, 11, 10, 7, 7},
+		{protocol.RaceLunarElf, 5, 11, 5, 12, 10, 8, 8, 8},
+		{protocol.RaceFairy, 3, 10, 4, 13, 11, 11, 5, 10},
+		{protocol.RaceGoblin, 6, 12, 5, 13, 6, 3, 10, 12},
+		{protocol.RaceScorpionDemi, 9, 10, 8, 10, 7, 3, 11, 6},
+		{protocol.RaceTurtleDemi, 9, 4, 16, 3, 6, 8, 9, 5},
+		{protocol.RaceHalfDemon, 8, 10, 7, 10, 11, 4, 8, 8},
+		{protocol.RaceWolfDemi, 12, 9, 10, 11, 3, 4, 8, 7},
 	}
 
 	for _, tc := range testCases {
@@ -737,6 +756,14 @@ func TestDevSetRaceAndKit(t *testing.T) {
 		p.GetItemCount(protocol.ItemOrganicTrash) != 3 {
 		t.Fatalf("DevSetRaceAndKit: kit de itens de teste incompleto no inventário!")
 	}
+
+	// Testa todas as 46 raças aceitas pelo comando Dev
+	for rid := uint8(1); rid <= 46; rid++ {
+		p.DevSetRaceAndKit(rid, protocol.ClassSwordsman)
+		if p.RaceID != rid {
+			t.Fatalf("DevSetRaceAndKit falhou para raça %d!", rid)
+		}
+	}
 }
 
 func TestAutopsyProtectionFlag(t *testing.T) {
@@ -826,5 +853,186 @@ func TestConsumablesNewRaces(t *testing.T) {
 	}
 }
 
+func TestNewMasterNPCsFriendshipAndClasses(t *testing.T) {
+	p := NewPlayer(99, nil, 0, 1.5, 0)
+
+	// Valida afiança inicial 0 para os 4 novos mestres
+	newMasters := []uint32{107, 108, 109, 110}
+	for _, id := range newMasters {
+		if p.GetFriendship(id) != 0 || p.GetFriendshipLevel(id) != 0 {
+			t.Fatalf("NPC %d deveria iniciar com 0 afiança, obteve %d", id, p.GetFriendship(id))
+		}
+		// Incrementa conversa (+5)
+		pts := AddFriendship(p, id, 5)
+		if pts != 5 || p.GetFriendship(id) != 5 {
+			t.Fatalf("Esperava 5 pontos de amizade com NPC %d, obteve %d", id, pts)
+		}
+		// Adiciona +40 pontos (Nível 2)
+		AddFriendship(p, id, 40)
+		if p.GetFriendshipLevel(id) != 2 {
+			t.Fatalf("NPC %d deveria estar em Nível 2 com 45 pontos, obteve Nível %d", id, p.GetFriendshipLevel(id))
+		}
+	}
+
+	// Testa transição de classes ensinadas pelos novos mestres:
+	// Seraphina (107) -> Acólito (ClassID = 4)
+	p.SetIdentityMode(protocol.RaceValerian, protocol.ClassAcolyte, protocol.IdentityModeInitialChange)
+	if p.ClassID != protocol.ClassAcolyte {
+		t.Fatalf("Falha ao definir classe Acólito para jogador!")
+	}
+
+	// Aurelius (108) -> Iniciado (ClassID = 3)
+	p.SetIdentityMode(protocol.RaceValerian, protocol.ClassInitiate, protocol.IdentityModeInitialChange)
+	if p.ClassID != protocol.ClassInitiate {
+		t.Fatalf("Falha ao definir classe Iniciado para jogador!")
+	}
+
+	// Kaelen (109) -> Batedor (ClassID = 2)
+	p.SetIdentityMode(protocol.RaceValerian, protocol.ClassScout, protocol.IdentityModeInitialChange)
+	if p.ClassID != protocol.ClassScout {
+		t.Fatalf("Falha ao definir classe Batedor para jogador!")
+	}
+}
+
+func TestSecretClasses10to15AndDevDirect(t *testing.T) {
+	p := NewPlayer(1, nil, 0, 1.5, 0)
+
+	// 1. Testa IdentityModeDevDirect (ActionMode 98) para todas as 15 classes e 6 tiers
+	for cid := uint8(1); cid <= 15; cid++ {
+		p.SetIdentityMode(protocol.TierLegendary, cid, protocol.IdentityModeDevDirect)
+		if p.ClassID != cid {
+			t.Fatalf("ActionMode 98 deveria definir ClassID=%d, obteve %d", cid, p.ClassID)
+		}
+		if p.ClassTier != protocol.TierLegendary {
+			t.Fatalf("ActionMode 98 deveria definir ClassTier=%d, obteve %d", protocol.TierLegendary, p.ClassTier)
+		}
+	}
+
+	// 2. Testa Despertar Secreto (ActionMode 2) para Classes 10 a 15
+	secretClasses := []uint8{
+		protocol.ClassAstralDancer,
+		protocol.ClassAshInquisitor,
+		protocol.ClassBoneNecromancer,
+		protocol.ClassPrimordialTamer,
+		protocol.ClassRiftKnight,
+		protocol.ClassStormHerald,
+	}
+
+	for _, sc := range secretClasses {
+		p.Level = 25
+		p.XP = 500
+		p.SetIdentityMode(protocol.RaceValerian, sc, protocol.IdentityModeSecretReset)
+
+		if p.ClassID != sc {
+			t.Fatalf("Esperava ClassID=%d, obteve %d", sc, p.ClassID)
+		}
+		if p.ClassTier != protocol.TierUnique {
+			t.Fatalf("Classe secreta deveria iniciar no Tier 5 Única (%d), obteve %d", protocol.TierUnique, p.ClassTier)
+		}
+		if p.Level != 1 {
+			t.Fatalf("Classe secreta deveria resetar para Nível 1, obteve Nível %d", p.Level)
+		}
+
+		// Testa ganho de +11 StatPoints por nível no Tier 5 Única
+		ptsBefore := p.StatPoints
+		p.AddLevel(1)
+		ptsGained := p.StatPoints - ptsBefore
+		if ptsGained != 11 {
+			t.Fatalf("No Tier 5 Única deveria ganhar +11 StatPoints por nível, ganhou %d", ptsGained)
+		}
+
+		// Testa Evolução para Tier 6 Lendária mantendo nível
+		lvlBeforeEvolve := p.Level
+		p.SetIdentityMode(protocol.RaceValerian, sc, protocol.IdentityModeEvolveClass)
+		if p.ClassTier != protocol.TierLegendary {
+			t.Fatalf("Evolução de classe secreta deveria subir para Tier 6 Lendária (%d), obteve %d", protocol.TierLegendary, p.ClassTier)
+		}
+		if p.Level != lvlBeforeEvolve {
+			t.Fatalf("Evolução não deveria alterar nível: antes=%d, depois=%d", lvlBeforeEvolve, p.Level)
+		}
+
+		// No Tier 6 Lendária ganha +15 StatPoints por nível
+		ptsBeforeT6 := p.StatPoints
+		p.AddLevel(1)
+		ptsGainedT6 := p.StatPoints - ptsBeforeT6
+		if ptsGainedT6 != 15 {
+			t.Fatalf("No Tier 6 Lendária deveria ganhar +15 StatPoints por nível, ganhou %d", ptsGainedT6)
+		}
+	}
+
+	// 3. Testa Rastreamento dos Desafios de Obtenção e Reset de UntouchedKills
+	p.UntouchedKills = 10
+	p.LowHPKills = 3
+	p.PerfectAutopsiesStreak = 5
+	p.SoloAlphaWolfKilled = true
+	p.BlockedBossRupture = true
+
+	if p.UntouchedKills != 10 || p.LowHPKills != 3 || p.PerfectAutopsiesStreak != 5 || !p.SoloAlphaWolfKilled || !p.BlockedBossRupture {
+		t.Fatalf("Falha na inicialização dos campos de desafios do jogador")
+	}
+
+	// Ao sofrer dano, UntouchedKills deve zerar
+	p.TakeDamage(10)
+	if p.UntouchedKills != 0 {
+		t.Fatalf("UntouchedKills deveria ter zerado após sofrer dano, valor atual: %d", p.UntouchedKills)
+	}
+
+	// 4. Testa Passiva de -30% Dano Recebido do Cavaleiro da Ruptura (Classe 14)
+	p.SetIdentityMode(protocol.TierCommon, protocol.ClassRiftKnight, protocol.IdentityModeDevDirect)
+	p.HP = 200
+	p.TakeDamage(100) // 100 * 0.70 = 70 de dano efetivo
+	expectedHP := uint16(200 - 70)
+	if p.HP != expectedHP {
+		t.Fatalf("Passiva Cavaleiro da Ruptura deveria reduzir 30%% do dano (esperava HP %d, obteve %d)", expectedHP, p.HP)
+	}
+}
+
+func TestDevControlLevelAndStats(t *testing.T) {
+	p := NewPlayer(1, nil, 0, 1.5, 0)
+	p.ClassTier = protocol.TierCommon // 5 StatPoints por nível
+
+	// Teste val = 1 (+1 nível)
+	p.DevControlLevelAndStats(1)
+	if p.Level != 2 || p.StatPoints != 5 {
+		t.Fatalf("esperava Level 2 e 5 StatPoints, obteve Lvl %d e %d pts", p.Level, p.StatPoints)
+	}
+
+	// Teste val = 5 (+5 níveis)
+	p.DevControlLevelAndStats(5)
+	if p.Level != 7 || p.StatPoints != 30 {
+		t.Fatalf("esperava Level 7 e 30 StatPoints, obteve Lvl %d e %d pts", p.Level, p.StatPoints)
+	}
+
+	// Teste val = 50 (Nível 50)
+	p.DevControlLevelAndStats(50)
+	if p.Level != 50 {
+		t.Fatalf("esperava Level 50, obteve %d", p.Level)
+	}
+
+	// Teste val = 99 (Full Heal + 20 StatPoints)
+	p.HP = 10
+	p.Stamina = 5.0
+	p.DevControlLevelAndStats(0) // Reseta para Nível 1
+	p.DevControlLevelAndStats(99)
+	if p.HP != p.MaxHP || p.Stamina != float32(p.MaxStamina) {
+		t.Fatalf("esperava HP e Stamina cheios após val=99")
+	}
+	if p.StatPoints != 20 {
+		t.Fatalf("esperava 20 StatPoints após val=99, obteve %d", p.StatPoints)
+	}
+
+	// Aloca alguns atributos antes do reset
+	p.AllocateStat(protocol.StatIDSTR)
+	p.AllocateStat(protocol.StatIDCON)
+	if p.AllocSTR != 1 || p.AllocCON != 1 {
+		t.Fatalf("atributos alocados incorretos")
+	}
+
+	// Teste val = 0 (Reset para Nível 1 e atributos zerados)
+	p.DevControlLevelAndStats(0)
+	if p.Level != 1 || p.StatPoints != 0 || p.AllocSTR != 0 || p.AllocCON != 0 {
+		t.Fatalf("esperava Level 1 e atributos limpos após val=0, obteve Lvl %d, AllocSTR %d, AllocCON %d", p.Level, p.AllocSTR, p.AllocCON)
+	}
+}
 
 

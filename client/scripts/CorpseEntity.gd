@@ -33,7 +33,17 @@ const MOB_NAMES := {
 	11: "Gárgula de Pedra",
 	12: "Inquisidor Vex",
 	13: "Comandante Vaelen",
-	14: "Malakor, o Arauto do Eclipse"
+	14: "Malakor, o Arauto do Eclipse",
+	15: "Aranha Tecelã da Bruma",
+	16: "Arachna, a Rainha Tecelã",
+	17: "Lodo Ácido Corrosivo",
+	18: "Escorpião Abissal Gigante",
+	19: "Quimera Costurada Nº 0",
+	20: "Golem de Gelo Antigo",
+	21: "Draco de Geada Selvagem",
+	22: "Ymir, o Patriarca Gigante de Gelo",
+	23: "Guarda Sanguinário de Vesperian",
+	24: "Lorde Vesperian, o Progenitor Vampiro"
 }
 
 func _ready() -> void:

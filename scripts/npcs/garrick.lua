@@ -21,17 +21,18 @@ end
 -- OnTick é chamado pelo servidor a cada 1 segundo passando a hora atual (0 a 23)
 function OnTick(world_hour, npc_id, pos_x, pos_z)
     if world_hour >= 6 and world_hour < 18 then
-        -- Rotina Diurna (06h às 17h): Forja na Rua Nordeste
+        -- Rotina Diurna (06h às 17h59): Forja do Garrick (30.0, 25.0) - Loja ABERTA
+        npc_set_shop_open(true)
         if current_routine ~= "to_forge" and current_routine ~= "in_forge" then
             current_routine = "to_forge"
             waypoints = {
-                { x = -14.0, z = 6.0 }, -- Sai pela porta da taverna para a calçada
-                { x = 0.0, z = 6.0 },   -- Caminha pela rua da praça central
-                { x = 10.0, z = 6.0 },  -- Segue pela rua em direção à forja
-                { x = 10.0, z = 9.0 }   -- Posto de trabalho em frente à bigorna
+                { x = -15.0, z = 20.0 }, -- Sai da calçada da taverna
+                { x = 0.0, z = 15.0 },   -- Cruza a praça central
+                { x = 20.0, z = 20.0 },  -- Segue pela rua leste
+                { x = 30.0, z = 25.0 }   -- Posto de trabalho na bigorna da forja
             }
             waypoint_index = 1
-            npc_say("O sol já nasceu! Hora de sair da taverna e acender a forja.")
+            npc_say("O sol já nasceu! Hora de sair do descanso e acender o fogo sagrado da forja!")
         end
 
         if current_routine == "to_forge" then
@@ -44,6 +45,7 @@ function OnTick(world_hour, npc_id, pos_x, pos_z)
                         current_routine = "in_forge"
                         walk_timer = 0
                         walk_step = 0
+                        npc_set_state(2) -- Trabalhando na Forja
                     end
                 end
             end
@@ -51,28 +53,27 @@ function OnTick(world_hour, npc_id, pos_x, pos_z)
             walk_timer = walk_timer + 1
             if walk_timer >= 12 then
                 walk_timer = 0
-                walk_step = (walk_step + 1) % 3
+                walk_step = (walk_step + 1) % 2
                 if walk_step == 0 then
-                    npc_move_to(10.0, 9.0, 1.6)  -- Bancada da bigorna
-                elseif walk_step == 1 then
-                    npc_move_to(11.5, 9.0, 1.6)  -- Próximo à fornalha
+                    npc_move_to(30.0, 25.0, 1.6)  -- Bancada da bigorna
                 else
-                    npc_move_to(8.5, 8.0, 1.6)   -- Calçada externa
+                    npc_move_to(32.0, 25.0, 1.6)  -- Próximo à fornalha
                 end
             end
         end
-    else
-        -- Rotina Noturna (18h às 05h): Taverna do Crepúsculo
+    elseif world_hour >= 18 and world_hour < 24 then
+        -- Rotina da Noite (18h às 23h59): Taverna do Javali Dourado (-30.0, 25.0) - Loja FECHADA
+        npc_set_shop_open(false)
         if current_routine ~= "to_tavern" and current_routine ~= "in_tavern" then
             current_routine = "to_tavern"
             waypoints = {
-                { x = 10.0, z = 6.0 },  -- Sai da forja para a rua
-                { x = 0.0, z = 6.0 },   -- Cruza a praça central pela rua
-                { x = -14.0, z = 6.0 }, -- Chega em frente à porta da taverna
-                { x = -14.0, z = 9.5 }  -- Entra de verdade pela porta da taverna
+                { x = 20.0, z = 20.0 },  -- Sai da forja para a rua
+                { x = 0.0, z = 15.0 },   -- Cruza a praça central
+                { x = -20.0, z = 20.0 }, -- Chega em frente à calçada da taverna
+                { x = -30.0, z = 25.0 }  -- Entra na Taverna do Javali Dourado
             }
             waypoint_index = 1
-            npc_say("Já deu por hoje... Vou caminhar pelas ruas até a Taverna e tomar uma caneca!")
+            npc_say("O expediente encerrou por hoje! Vou caminhar até a Taverna do Javali Dourado para descansar e beber um hidromel.")
         end
 
         if current_routine == "to_tavern" then
@@ -83,7 +84,35 @@ function OnTick(world_hour, npc_id, pos_x, pos_z)
                     waypoint_index = waypoint_index + 1
                     if waypoint_index > #waypoints then
                         current_routine = "in_tavern"
-                        npc_say("Cheguei à Taverna. O calor desta lareira é muito bem-vindo!")
+                        npc_set_state(3) -- Bebendo na Taverna
+                        npc_say("O calor desta lareira é muito bem-vindo! Uma boa caneca depois de um dia de ferro e fogo!")
+                    end
+                end
+            end
+        end
+    else
+        -- Rotina da Madrugada (00h às 05h59): Descanso em Casa (20.0, 20.0) - Loja FECHADA
+        npc_set_shop_open(false)
+        if current_routine ~= "to_home" and current_routine ~= "in_home" then
+            current_routine = "to_home"
+            waypoints = {
+                { x = -15.0, z = 20.0 },
+                { x = 0.0, z = 15.0 },
+                { x = 20.0, z = 20.0 }
+            }
+            waypoint_index = 1
+            npc_say("A meia-noite chegou... Preciso descansar para o trabalho de amanhã.")
+        end
+
+        if current_routine == "to_home" then
+            local target = waypoints[waypoint_index]
+            if target then
+                npc_move_to(target.x, target.z, 2.4)
+                if dist(pos_x, pos_z, target.x, target.z) <= 0.8 then
+                    waypoint_index = waypoint_index + 1
+                    if waypoint_index > #waypoints then
+                        current_routine = "in_home"
+                        npc_set_state(0) -- Dormindo
                     end
                 end
             end
