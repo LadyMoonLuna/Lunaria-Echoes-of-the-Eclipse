@@ -51,6 +51,8 @@ static func get_default_npc_name(id: int) -> String:
 			return "Tilda\n<Ajudante de Cozinha> [E]"
 		120:
 			return "Mortimer, o Coveiro\n<Guardião do Cemitério> [E]"
+		123:
+			return "Mestra Joalheira Selene\n<Joias e Equipamentos Cravejados> [E]"
 		_:
 			if id >= 400 and id < 410:
 				return "Paladino da Luz\n<Caçador da Igreja>"
@@ -917,7 +919,7 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 		model_id = 105
 	elif is_valen:
 		model_id = 106
-	elif npc_id >= 111 and npc_id <= 120:
+	elif (npc_id >= 111 and npc_id <= 120) or npc_id == 123:
 		model_id = npc_id
 	elif npc_id >= 400 and npc_id < 410:
 		model_id = 121 # Paladino da Luz

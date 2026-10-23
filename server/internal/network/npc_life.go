@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sort"
+	"strings"
 	"time"
 
 	"lunaria/server/internal/protocol"
@@ -779,4 +781,27 @@ func (s *Server) npcCare(npc *world.NPC, action string) {
 		}
 	})
 	log.Printf("[MUNDO VIVO] NPC #%d pagou %d Sollares a %s (%s)\n", npc.ID, price, seller.Name, action)
+}
+
+// genericNPCTalk: saudação, ofício, vitrine (estoque e preços) e encomendas abertas dos NPCs sem script.
+func (s *Server) genericNPCTalk(p *world.Player, npc *world.NPC) {
+	st := shopStateOf(npc)
+	var b strings.Builder
+	fmt.Fprintf(&b, "Olá! Sou %s (%s). Agora: %s.", npc.Name, npc.ProfessionName(), st.Activity)
+	if len(st.Stock) > 0 {
+		sort.Slice(st.Stock, func(i, j int) bool { return st.Stock[i].Price < st.Stock[j].Price })
+		b.WriteString(" À venda:")
+		for _, e := range st.Stock {
+			if e.Qty > 0 {
+				fmt.Fprintf(&b, " %s x%d (%d Sollares);", world.ItemName(e.ItemID), e.Qty, e.Price)
+			}
+		}
+	}
+	if len(st.Orders) > 0 {
+		b.WriteString(" Compro:")
+		for _, o := range st.Orders {
+			fmt.Fprintf(&b, " %s (%d Sollares cada);", world.ItemName(uint8(o.Material)), o.Price)
+		}
+	}
+	s.sendPlayerNPCSay(p, npc.ID, b.String())
 }

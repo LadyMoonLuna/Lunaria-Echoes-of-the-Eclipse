@@ -333,6 +333,9 @@ const (
 	ItemManaPotion      uint8 = 80 // Poção de Mana (Lyra: Cogumelo + Ervas + Água) — +80 Mana
 	ItemBlueprintScroll uint8 = 81 // Pergaminho de Blueprint (forma um aprendiz no ofício do mestre caído)
 	ItemHerbalRemedy    uint8 = 82 // Remédio de Ervas (Lyra) — cura doenças e infecções
+	ItemRubyLongsword   uint8 = 83 // Espada Longa Cravejada de Rubis (Joalheira) — melhor que a do ferreiro
+	ItemGemChestplate   uint8 = 84 // Peitoral Cravejado de Safiras (Joalheira)
+	ItemQuartzCirclet   uint8 = 85 // Diadema de Quartzo (Joalheira, Elmo)
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)

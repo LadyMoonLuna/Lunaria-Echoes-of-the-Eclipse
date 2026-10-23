@@ -130,3 +130,17 @@ func TestOverheatedNPCSeeksFountain(t *testing.T) {
 		t.Fatalf("na fonte deveria se refrescar: calor %.0f sede %.0f", g.Heat, g.Thirst)
 	}
 }
+
+func TestJewelerSellsJewelryPricierThanSmith(t *testing.T) {
+	s := lifeTestServer()
+	j := addLifeNPC(s, world.JewelerID, 46, 8)
+	if j.ShopStock[uint16(protocol.ItemBloodRubyRing)] == 0 || j.Gold != 3000 {
+		t.Fatal("a Joalheira deveria começar com anéis à venda e 3000 Sollares")
+	}
+	if world.ShopPrice(world.JewelerID, protocol.ItemRubyLongsword) <= world.ShopPrice(100, protocol.ItemIronLongsword) {
+		t.Fatal("a espada cravejada deveria custar mais que a do ferreiro")
+	}
+	if world.GetItemInfo(protocol.ItemRubyLongsword).BonusATK <= world.GetItemInfo(protocol.ItemIronLongsword).BonusATK {
+		t.Fatal("e ser melhor")
+	}
+}

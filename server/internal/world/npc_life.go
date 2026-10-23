@@ -58,6 +58,7 @@ const (
 	MaxStockPerItem               = 5
 	TavernMealPrice       uint32  = 12
 	TavernNPCID           uint32  = 115 // Chef Bartolomeu
+	JewelerID             uint32  = 123 // Mestra Joalheira Selene
 )
 
 // ErrandStep é um passo de um plano: andar até (X,Z) na zona e, ao chegar, executar Action.
@@ -150,6 +151,21 @@ var NPCProfiles = map[uint32]NPCProfile{
 		BuyPrices: map[uint16]uint32{MatHerbs: 10, MatPureWater: 5, MatGlowMushroom: 18, MatWolfBlood: 22},
 		Restock:   map[uint16]int{MatHerbs: 8, MatPureWater: 6, MatGlowMushroom: 3},
 	},
+	JewelerID: { // Mestra Joalheira Selene: joias e equipamentos cravejados (melhores e mais caros que os do ferreiro)
+		Recipes: []Recipe{
+			{Output: protocol.ItemBloodRubyRing, Ingredients: []Ingredient{{[]uint16{MatFireRuby}, 1}, {[]uint16{MatSilver}, 2}}, Price: 420, Difficulty: 0.35},
+			{Output: protocol.ItemObsidianRing, Ingredients: []Ingredient{{[]uint16{MatObsidianRock}, 2}, {[]uint16{MatSilver}, 1}}, Price: 380, Difficulty: 0.3},
+			{Output: protocol.ItemStarlightRing, Ingredients: []Ingredient{{[]uint16{MatStarRock}, 1}, {[]uint16{MatQuartz}, 2}, {[]uint16{MatSilver}, 1}}, Price: 450, Difficulty: 0.4},
+			{Output: protocol.ItemSilverMoonAmulet, Ingredients: []Ingredient{{[]uint16{MatSilver}, 3}, {[]uint16{MatManaCrystal}, 1}}, Price: 520, Difficulty: 0.4},
+			{Output: protocol.ItemAncestralFangRing, Ingredients: []Ingredient{{[]uint16{MatSharpFangs}, 2}, {[]uint16{MatSilver}, 1}}, Price: 300, Difficulty: 0.25},
+			{Output: protocol.ItemQuartzCirclet, Ingredients: []Ingredient{{[]uint16{MatQuartz}, 3}, {[]uint16{MatSilver}, 2}}, Price: 480, Difficulty: 0.35},
+			{Output: protocol.ItemRubyLongsword, Ingredients: []Ingredient{{[]uint16{MatIron}, 3}, {[]uint16{MatFireRuby}, 2}, {[]uint16{MatSilver}, 1}}, Price: 650, Difficulty: 0.5},
+			{Output: protocol.ItemGemChestplate, Ingredients: []Ingredient{{[]uint16{MatIron}, 5}, {[]uint16{MatZeroSapphire}, 1}, {[]uint16{MatSilver}, 2}}, Price: 900, Difficulty: 0.55},
+		},
+		BuyPrices: map[uint16]uint32{MatSilver: 40, MatQuartz: 30, MatFireRuby: 120, MatObsidianRock: 25, MatStarRock: 60,
+			MatManaCrystal: 80, MatSharpFangs: 15, MatIron: 25, MatZeroSapphire: 140},
+		Restock: map[uint16]int{MatSilver: 8, MatQuartz: 4},
+	},
 	TavernNPCID: { // Chef Bartolomeu: refeições
 		Recipes: []Recipe{
 			{Output: protocol.ItemCookedNobleMeat, Ingredients: []Ingredient{{[]uint16{uint16(protocol.ItemRawWolfMeat)}, 1}, {fuel, 1}}, Price: 25, Difficulty: 0.1},
@@ -186,6 +202,8 @@ var NPCStarts = map[uint32]NPCStart{
 	115: {1300, 600, PersonalityHonorable, map[uint16]int{uint16(protocol.ItemRawWolfMeat): 8, MatPineRefuge: 6},
 		map[uint16]int{uint16(protocol.ItemCookedNobleMeat): 6}}, // Chef Bartolomeu
 	116: {1400, 80, PersonalityCautious, nil, nil}, // Thorne
+	JewelerID: {900, 3000, PersonalityAmbitious, map[uint16]int{MatSilver: 6, MatQuartz: 4, MatFireRuby: 1, MatObsidianRock: 2},
+		map[uint16]int{uint16(protocol.ItemBloodRubyRing): 1, uint16(protocol.ItemObsidianRing): 1, uint16(protocol.ItemSilverMoonAmulet): 1}}, // Selene
 }
 
 // InitLife prepara o NPC para o Mundo Vivo com seus valores iniciais.

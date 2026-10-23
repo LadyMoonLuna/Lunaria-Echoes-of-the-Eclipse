@@ -3222,7 +3222,7 @@ func _on_npc_spoke(npc_id: int, message: String) -> void:
 			sender_name = "Kaelen"
 		elif npc_id == 110:
 			sender_name = "Alquimista Esquecido"
-		elif (npc_id >= 111 and npc_id <= 120) or (npc_id >= 400 and npc_id < 430):
+		elif (npc_id >= 111 and npc_id <= 123) or (npc_id >= 400 and npc_id < 430):
 			sender_name = NPCEntityScript.get_default_npc_name(npc_id).split("\n")[0]
 		dialogue_label.text = "[%s]: %s" % [sender_name, message]
 		dialogue_label.visible = true

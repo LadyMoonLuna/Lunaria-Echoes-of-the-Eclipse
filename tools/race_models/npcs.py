@@ -613,5 +613,43 @@ def cleric():
     return m
 
 
+def selene():
+    m = N(123, "selene", "Mestra Joalheira Selene Lapidária", "Joalheira",
+          "Elarin esguia de cabelos prateados presos num coque com grampos de safira, monóculo de lapidação "
+          "dourado no olho direito, avental de veludo azul-noite cheio de bolsinhos, luvas finas de seda, "
+          "colares de pedras coloridas e uma pinça de ourives na mão.",
+          "#ba68c8", scale=0.98)
+    skin = m.mat("skin", "#f1d2c0", rough=0.5)
+    hair = m.mat("silver_hair", "#d8dde3", rough=0.6)
+    velvet = m.mat("night_velvet", "#1f2a5a", rough=0.9)
+    dress = m.mat("lilac_silk", "#9575cd", rough=0.6)
+    gold = m.mat("gold", "#e8bd4f", rough=0.25, metal=0.95)
+    sapph = m.mat("sapphire", "#2962ff", emit="#448aff", energy=1.5)
+    ruby = m.mat("ruby", "#d50000", emit="#ff1744", energy=1.5)
+    emer = m.mat("emerald", "#00c853", emit="#00e676", energy=1.2)
+    lens = m.mat("monocle_lens", "#e3f2fd", rough=0.05, metal=0.2)
+    humanoid(m, skin, dress, dress, m.mat("shoes", "#3e2723", rough=0.7),
+             hands=m.mat("silk_gloves", "#f5f5f5", rough=0.5), w=0.92)
+    eyes(m, m.mat("iris", "#7e57c2", rough=0.3), m.mat("sclera", "#f6f2ee", rough=0.3))
+    pointed_ears(m, skin)
+    hair_short(m, hair)
+    m.part("sphere", [0.075], (0, 1.86, 0.08), hair)
+    for x, c in ((-0.05, sapph), (0.0, sapph), (0.05, sapph)):
+        m.part("sphere", [0.012], (x, 1.9, 0.12), c)
+    m.part("torus", [0.024, 0.03], (-0.045, 1.72, -0.125), gold, rot=(90, 0, 0))
+    m.part("cylinder", [0.024, 0.024, 0.004], (-0.045, 1.72, -0.127), lens, rot=(90, 0, 0))
+    m.chain([(-0.07, 1.72, -0.12), (-0.11, 1.6, -0.1), (-0.12, 1.45, -0.08)], [0.004, 0.004, 0.004], gold)
+    m.part("box", [0.36, 0.72, 0.03], (0, 1.0, -0.19), velvet, rot=(3, 0, 0))
+    for i, c in enumerate((ruby, sapph, emer, ruby, sapph)):
+        m.part("box", [0.05, 0.05, 0.02], (-0.12 + i * 0.06, 0.9, -0.21), velvet)
+        m.part("sphere", [0.012], (-0.12 + i * 0.06, 0.93, -0.215), c)
+    m.part("torus", [0.11, 0.122], (0, 1.47, -0.03), gold, rot=(72, 0, 0))
+    for i, c in enumerate((ruby, emer, sapph)):
+        m.part("sphere", [0.018], (-0.05 + i * 0.05, 1.38, -0.13), c)
+    m.part("cylinder", [0.006, 0.003, 0.14], (0.32, 0.92, -0.2), gold, rot=(60, 0, 0), group="arm_r")
+    m.part("sphere", [0.014], (0.32, 0.96, -0.27), sapph, group="arm_r")
+    return m
+
+
 NPCS = [garrick, lyra, varis, randel, valen, ghost_alchemist, nyx, tao, iolanthe, fiorella, bartolomeu, thorne,
-        bran, pip, tilda, mortimer, paladin, cleric]
+        bran, pip, tilda, mortimer, paladin, cleric, selene]

@@ -23,6 +23,14 @@ const (
 	hunterRetireDist float32 = 3
 )
 
+// spawnJeweler cria a Mestra Joalheira Selene, na praça de comércio.
+func spawnJeweler(clock *world.WorldClock, say world.SayCallback) *world.NPC {
+	n := world.NewNPC(world.JewelerID, "Mestra Joalheira Selene Lapidária", 46, 0, 8, "", clock, say)
+	n.SetActive(true)
+	n.SetShopOpen(true)
+	return n
+}
+
 // spawnGravedigger cria Mortimer, o Coveiro, ao lado do cemitério.
 func spawnGravedigger(clock *world.WorldClock, say world.SayCallback) *world.NPC {
 	n := world.NewNPC(world.GravediggerID, "Mortimer, o Coveiro", world.CemeteryOrigin[0]+4, 0, world.CemeteryOrigin[1]+4, "", clock, say)

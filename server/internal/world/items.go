@@ -115,6 +115,9 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemManaPotion:      {Name: "Poção de Mana", Weight: 0.5, Slot: NoSlot},
 	protocol.ItemBlueprintScroll: {Name: "Pergaminho de Blueprint", Weight: 0.2, Slot: NoSlot},
 	protocol.ItemHerbalRemedy:    {Name: "Remédio de Ervas", Weight: 0.3, Slot: NoSlot},
+	protocol.ItemRubyLongsword:   {Name: "Espada Longa Cravejada de Rubis", Weight: 4.0, Slot: protocol.SlotMainHand, BonusSTR: 4, BonusLCK: 2, BonusATK: 18},
+	protocol.ItemGemChestplate:   {Name: "Peitoral Cravejado de Safiras", Weight: 13.0, Slot: protocol.SlotChest, BonusCON: 6, BonusHP: 80, BonusDEF: 10, BonusMDEF: 6},
+	protocol.ItemQuartzCirclet:   {Name: "Diadema de Quartzo", Weight: 0.6, Slot: protocol.SlotHelmet, BonusINT: 4, BonusESP: 3, BonusMDEF: 5},
 	protocol.ItemLeadPlate:       {Name: "Placa de Chumbo", Weight: 25.0, Slot: NoSlot},
 	protocol.ItemOffhandKnuckle:  {Name: "Manopla Secundária", Weight: 2.2, Slot: protocol.SlotOffHand, BonusSTR: 1, BonusATK: 5, BonusDEF: 1},
 }

@@ -100,7 +100,7 @@ func CityName(id uint8) string {
 var Professions = map[uint32]string{
 	100: "Ferreiro", 103: "Alquimista", 104: "Mercador das Sombras", 105: "Capitão da Guarda", 106: "Guarda Real",
 	107: "Sacerdotisa", 108: "Arcanista", 109: "Batedor", 111: "Mestra das Lâminas", 112: "Mestre de Punhos",
-	113: "Escultora", 114: "Tecelã", 115: "Cozinheiro", 116: "Domador",
+	113: "Escultora", 114: "Tecelã", 115: "Cozinheiro", 116: "Domador", 123: "Joalheira",
 	117: "Aprendiz da Forja", 118: "Aprendiz de Alquimia", 119: "Ajudante de Cozinha",
 }
 

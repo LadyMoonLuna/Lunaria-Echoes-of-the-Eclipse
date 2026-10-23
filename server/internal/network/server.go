@@ -317,7 +317,7 @@ func (s *Server) Start() error {
 	allLivingNPCs := []*world.NPC{garrick, lyra, varis, guard1, guard2, seraphina, aurelius, kaelen, ghostAlchemist}
 	allLivingNPCs = append(allLivingNPCs, s.spawnClassMasters(scriptsDir, currentH)...)
 	allLivingNPCs = append(allLivingNPCs, spawnApprentices(s.clock, s.BroadcastNPCSay)...)
-	allLivingNPCs = append(allLivingNPCs, spawnGravedigger(s.clock, s.BroadcastNPCSay))
+	allLivingNPCs = append(allLivingNPCs, spawnGravedigger(s.clock, s.BroadcastNPCSay), spawnJeweler(s.clock, s.BroadcastNPCSay))
 	for _, npc := range allLivingNPCs {
 		if err := s.luaEngine.BindNPC(npc); err != nil {
 			log.Printf("[AVISO] Nao foi possivel vincular script do NPC '%s' (ID %d): %v\n", npc.Name, npc.ID, err)
@@ -1363,6 +1363,12 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 		// 0. Ganho Universal de Afiança por Interação / Conversa Diária (+5 pontos):
 		player.AddFriendship(pkt.TargetNPCID, 5)
 		s.sendFriendshipSync(player, pkt.TargetNPCID)
+
+		// NPCs sem script Lua (Joalheira, aprendizes, Coveiro): conversa e vitrine geradas pelo Mundo Vivo
+		if npc.LuaState == nil {
+			s.genericNPCTalk(player, npc)
+			return
+		}
 
 		// Entrega de Presentes Compatíveis:
 		// Garrick (ID 100 ou 1): Aceita Ferro (+20 Afiança)
