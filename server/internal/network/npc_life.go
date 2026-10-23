@@ -668,7 +668,9 @@ func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty ui
 }
 
 // evaporationZones: zonas abertas onde as águas rasas podem secar.
-var evaporationZones = []uint8{world.ZoneVillage, world.ZoneForest, world.ZoneRuins, world.ZoneSanctuary, world.ZoneAshFrontier}
+var evaporationZones = []uint8{world.ZoneVillage, world.ZoneForest, world.ZoneRuins, world.ZoneSanctuary, world.ZoneAshFrontier,
+	world.ZoneSparseWoods, world.ZoneGrasslands, world.ZoneSavanna, world.ZoneSaltDesert, world.ZoneWindPlateau,
+	world.ZoneFrozenPeaks, world.ZoneBasaltHills, world.ZoneMistMarsh}
 
 // updateWaterEvaporation (a cada 10 s): o calor seca poças e orvalho; chuva ou tempo ameno os reabastece.
 func (s *Server) updateWaterEvaporation(hour int) {

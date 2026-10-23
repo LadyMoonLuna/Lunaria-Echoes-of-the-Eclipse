@@ -1,5 +1,9 @@
 extends Node3D
 
+const LunariaTerrain = preload("res://scripts/world/Terrain.gd")
+const LunariaWorldBuilder = preload("res://scripts/world/WorldBuilder.gd")
+const LunariaWorldData = preload("res://scripts/world/WorldData.gd")
+
 @export var local_player_scene: PackedScene = preload("res://scenes/LocalPlayer.tscn")
 @export var remote_player_scene: PackedScene = preload("res://scenes/RemotePlayer.tscn")
 @export var npc_scene: PackedScene = preload("res://scenes/NPC.tscn")
@@ -556,7 +560,7 @@ const QUEST_PARTS := {
 }
 var _discovery_queue: Array = []
 const HARVEST_RANGE := 3.5
-const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte"}
+const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte", 7: "Barreiro"}
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -669,6 +673,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_action_bar_cooldowns()
+	_keep_player_above_ground()
+	if world_map_ui and local_player and is_instance_valid(local_player):
+		world_map_ui.update_player(current_zone_id, local_player.global_position)
 	if portal_cooldown > 0.0:
 		portal_cooldown -= delta
 
@@ -790,6 +797,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_I:
 			if inventory_ui:
 				inventory_ui.toggle_menu()
+		elif event.keycode == KEY_M:
+			_toggle_world_map()
 		elif event.keycode == KEY_H:
 			if skills_ui:
 				skills_ui.toggle_menu()
@@ -973,6 +982,12 @@ const DEV_BESTIARY := [
 	{"name": "Guarda Sanguinário de Vesperian", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "680 HP", "spawn": "Entrada da Cripta Carmesim a Noroeste", "drops": [53, 10], "col": Color("#ef5350")},
 	{"name": "★ LORDE VESPERIAN, O PROGENITOR VAMPIRO [RAID BOSS SECRETO] ★", "zone": "Santuário do Eclipse", "zone_id": 3, "hp": "8500 HP", "spawn": "🩸 Cripta Carmesim em (-140, 140) — Desperta à Noite, Lua de Sangue ou Eclipse!", "drops": [55, 17, 54], "col": Color("#b71c1c")}
 ]
+
+# Viagem direta para cada zona (0x22 Cmd 14)
+const DEV_ZONES := [[0, "🏛️ Vila do Refúgio"], [1, "🌲 Bosque Sussurrante"], [9, "🌳 Bosque Ralo"], [10, "🌾 Campos Rasteiros"],
+	[11, "🦒 Savana Dourada"], [12, "🏜️ Deserto de Sal"], [13, "🌬️ Planalto dos Ventos"], [2, "❄️ Ruínas da Vigília"],
+	[14, "🏔️ Picos Gelados"], [15, "🪨 Colinas de Basalto"], [4, "🌋 Fronteira das Cinzas"], [3, "🌑 Santuário do Eclipse"],
+	[16, "🐸 Pântano das Brumas"], [8, "🐀 Esgotos Antigos"]]
 
 const DEV_TELEPORTS := [
 	{"name": "🏛️ Praça Central da Vila", "val": 0, "col": Color(0.2, 0.35, 0.55)},
@@ -1962,6 +1977,25 @@ func _build_dev_tab_teleports(tabs: TabContainer) -> void:
 		btn.custom_minimum_size = Vector2(240, 36)
 		grid.add_child(btn)
 
+	var zones_lbl := Label.new()
+	zones_lbl.text = "🗺️ Viajar para a zona (0x22 Cmd 14) — [M] abre o mapa-múndi:"
+	zones_lbl.add_theme_font_size_override("font_size", 12)
+	zones_lbl.add_theme_color_override("font_color", Color(0.7, 1.0, 0.8))
+	tab.add_child(zones_lbl)
+	var zgrid := GridContainer.new()
+	zgrid.columns = 4
+	zgrid.add_theme_constant_override("h_separation", 8)
+	zgrid.add_theme_constant_override("v_separation", 6)
+	tab.add_child(zgrid)
+	for zentry in DEV_ZONES:
+		var zid2: int = zentry[0]
+		var zlabel: String = zentry[1]
+		zgrid.add_child(_dev_create_btn(zlabel, Color(0.25, 0.5, 0.4), func():
+			NetworkManager.send_world_control(14, zid2)
+			if dev_status_label:
+				dev_status_label.text = "Viajando para %s..." % zlabel
+		))
+
 	var extra_card := PanelContainer.new()
 	extra_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.85, 0.4, 0.2)))
 	tab.add_child(extra_card)
@@ -2063,7 +2097,7 @@ func _spawn_corpse(cid: int, mid: int, mtype: int, pos: Vector3, rot_y: float, i
 		corpses_container.add_child(corpse)
 	else:
 		add_child(corpse)
-	corpse.setup(cid, mid, mtype, pos, rot_y, is_looted, remaining_sec)
+	corpse.setup(cid, mid, mtype, on_ground(pos), rot_y, is_looted, remaining_sec)
 	corpses[cid] = corpse
 	print("[World] Cadáver instanciado no chão: ID %d (MobType %d) em %s (restante: %ds)" % [cid, mtype, pos, remaining_sec])
 
@@ -2374,7 +2408,7 @@ func _create_ground_item_node(it: Dictionary) -> Node3D:
 	root.collision_mask = 0
 	root.set_meta("drop_id", int(it["drop_id"]))
 	add_child(root)
-	root.global_position = Vector3(float(it["x"]), 0.0, float(it["z"]))
+	root.global_position = Vector3(float(it["x"]), ground_y(float(it["x"]), float(it["z"])), float(it["z"]))
 
 	var shape := CollisionShape3D.new()
 	var sph := SphereShape3D.new()
@@ -2573,6 +2607,8 @@ func _node_requirement_text(data: Dictionary) -> String:
 			return "[E] Colher — arma cortante (Tesoura: x2)"
 		6:
 			return "[E] Coletar — Frasco Vazio"
+		7:
+			return "[E] Cavar barro/argila — às mãos (Picareta: +1)"
 	return "[E] Coletar"
 
 func _on_resource_nodes_received(nodes: Array) -> void:
@@ -2634,6 +2670,8 @@ func _node_color(mat_id: int, kind: int) -> Color:
 		6:
 			var liq := {145: Color(0.35, 0.65, 1.0), 146: Color(0.4, 0.8, 0.2), 147: Color(0.85, 0.9, 1.0), 153: Color(0.9, 0.9, 0.2)}
 			return liq.get(mat_id, Color(0.4, 0.6, 1.0))
+		7:
+			return Color(0.45, 0.32, 0.22) if mat_id == 156 else Color(0.72, 0.5, 0.36)
 	return ItemDataScript.rarity_color(r)
 
 func _create_resource_node(nd: Dictionary) -> Node3D:
@@ -2647,7 +2685,7 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 	root.collision_layer = 1
 	root.collision_mask = 0
 	add_child(root)
-	root.global_position = Vector3(float(nd["x"]), 0.0, float(nd["z"]))
+	root.global_position = Vector3(float(nd["x"]), ground_y(float(nd["x"]), float(nd["z"])), float(nd["z"]))
 	var model := Node3D.new()
 	model.name = "Model"
 	root.add_child(model)
@@ -2706,6 +2744,17 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 			sph2.radius = 0.6
 			shape.shape = sph2
 			shape.position = Vector3(0, 0.5, 0)
+		7: # Barreiro: montes de barro/argila molhada na margem do rio
+			var mud_mat := _mat(col, 0.0, 0.35)
+			for i in range(3):
+				var lump := SphereMesh.new()
+				lump.radius = 0.55 - i * 0.1
+				lump.height = 0.5 - i * 0.08
+				_add_mesh(model, lump, mud_mat, Vector3(cos(i * 2.1) * 0.45, 0.15, sin(i * 2.1) * 0.45))
+			var sph7 := SphereShape3D.new()
+			sph7.radius = 0.7
+			shape.shape = sph7
+			shape.position = Vector3(0, 0.3, 0)
 		_: # Fonte de água / ácido / orvalho
 			var pool := CylinderMesh.new()
 			pool.top_radius = 1.0
@@ -2889,7 +2938,7 @@ func _on_player_respawn_received(player_id: int, respawn_pos: Vector3) -> void:
 	if player_id == NetworkManager.my_player_id:
 		print("[World] Respawn autoritativo recebido! Posicionando no Centro: ", respawn_pos)
 		if local_player and is_instance_valid(local_player):
-			local_player.global_position = respawn_pos
+			local_player.global_position = Vector3(respawn_pos.x, maxf(respawn_pos.y, ground_y(respawn_pos.x, respawn_pos.z) + 1.5), respawn_pos.z)
 			local_player.velocity = Vector3.ZERO
 		_update_hud()
 	elif remote_players.has(player_id) and is_instance_valid(remote_players[player_id]):
@@ -3157,9 +3206,9 @@ func _on_npc_state_received(npcs_dict: Dictionary) -> void:
 		if npcs.has(nid):
 			var n = npcs[nid]
 			if is_instance_valid(n) and n.has_method("update_network_transform"):
-				n.update_network_transform(data.position, data.rotation_y, data.state)
+				n.update_network_transform(on_ground(data.position), data.rotation_y, data.state)
 		else:
-			_spawn_npc(nid, data.position, data.rotation_y, data.state)
+			_spawn_npc(nid, on_ground(data.position), data.rotation_y, data.state)
 
 func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int) -> void:
 	var npc_inst = npc_scene.instantiate()
@@ -3571,10 +3620,10 @@ func _on_mob_state_received(mobs_dict: Dictionary) -> void:
 		if mobs.has(mid):
 			var mob_node = mobs[mid]
 			if is_instance_valid(mob_node):
-				mob_node.update_network_data(mdata.position, mdata.rotation_y, mdata.state, mdata.hp, mdata.max_hp)
+				mob_node.update_network_data(on_ground(mdata.position), mdata.rotation_y, mdata.state, mdata.hp, mdata.max_hp)
 				mob_node.set_moon_phase(current_moon_phase)
 		else:
-			_spawn_mob(mid, mdata.type, mdata.position, mdata.rotation_y, mdata.state, mdata.hp, mdata.max_hp)
+			_spawn_mob(mid, mdata.type, on_ground(mdata.position), mdata.rotation_y, mdata.state, mdata.hp, mdata.max_hp)
 
 func _spawn_mob(mid: int, mtype: int, pos: Vector3, rot_y: float, state: int, hp: int, max_hp: int) -> void:
 	var mob = MobEntityScript.new()
@@ -3592,7 +3641,7 @@ func _spawn_mob(mid: int, mtype: int, pos: Vector3, rot_y: float, state: int, hp
 func _on_aoe_telegraph_received(_source_id: int, pos_x: float, pos_z: float, radius: float, duration_ms: int) -> void:
 	var dur_sec: float = float(duration_ms) / 1000.0
 	var telegraph_root := Node3D.new()
-	telegraph_root.position = Vector3(pos_x, 0.08, pos_z)
+	telegraph_root.position = Vector3(pos_x, ground_y(pos_x, pos_z) + 0.08, pos_z)
 	add_child(telegraph_root)
 
 	# Círculo base no chão (CylinderMesh achatado)
@@ -3778,11 +3827,16 @@ func _load_zone_map(zone_id: int) -> void:
 			_build_zone_7_black_market(current_map_root)
 		8:
 			_build_zone_8_sewers(current_map_root)
+		9, 10, 11, 12, 13, 14, 15, 16:
+			_build_transition_zone(current_map_root, zone_id)
 		_:
 			_build_zone_0_village(current_map_root)
 
 	# 6. Texturas PBR em pisos, muros e estruturas da zona
 	_texture_zone_map(current_map_root, zone_id)
+
+	# 7. Mundo vivo: relevo, rio, estradas, vegetação, cavernas e fauna (zonas abertas)
+	_build_living_landscape(zone_id)
 
 # Piso de cada zona: [textura, metros por repetição]
 const ZONE_FLOOR_TEXTURES := {
@@ -4403,7 +4457,7 @@ func _spawn_comet_explosion(pos: Vector3) -> void:
 
 func _spawn_acid_puddle(pos: Vector3) -> void:
 	var puddle_root := Node3D.new()
-	puddle_root.position = Vector3(pos.x, 0.05, pos.z)
+	puddle_root.position = Vector3(pos.x, ground_y(pos.x, pos.z) + 0.05, pos.z)
 	add_child(puddle_root)
 
 	var puddle_mesh := MeshInstance3D.new()
@@ -5002,37 +5056,6 @@ func _build_zone_0_village(root: Node3D) -> void:
 
 	# 5. Novas Estruturas das Raças nos Arredores da Vila (Entre ±90m e ±220m)
 
-	# A. Acampamento de Guerra Orkhan & Arena Tribal (130, 0, 80)
-	var orc_root := Node3D.new()
-	orc_root.position = Vector3(130.0, 0.0, 80.0)
-	root.add_child(orc_root)
-	var orc_tent := MeshInstance3D.new()
-	var ot_cyl := CylinderMesh.new()
-	ot_cyl.top_radius = 0.3
-	ot_cyl.bottom_radius = 5.0
-	ot_cyl.height = 4.2
-	orc_tent.mesh = ot_cyl
-	var tent_mat := StandardMaterial3D.new()
-	tent_mat.albedo_color = Color(0.38, 0.22, 0.15, 1.0)
-	orc_tent.material_override = tent_mat
-	orc_tent.position = Vector3(0, 2.1, 0)
-	orc_root.add_child(orc_tent)
-
-	var orc_fire := OmniLight3D.new()
-	orc_fire.light_color = Color(1.0, 0.4, 0.1)
-	orc_fire.light_energy = 3.8
-	orc_fire.omni_range = 10.0
-	orc_fire.position = Vector3(0, 1.2, 7.0)
-	orc_root.add_child(orc_fire)
-	var orc_lbl := Label3D.new()
-	orc_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	orc_lbl.text = "⛺ Acampamento de Guerra Orkhan & Arena Tribal"
-	orc_lbl.font_size = 24
-	orc_lbl.outline_size = 8
-	orc_lbl.modulate = Color(1.0, 0.45, 0.2)
-	orc_lbl.position = Vector3(0, 5.0, 0)
-	orc_root.add_child(orc_lbl)
-
 	# B. Salão de Pedra dos Anões & Mina Rúnica (120, 0, 140)
 	var dwarf_root := Node3D.new()
 	dwarf_root.position = Vector3(120.0, 0.0, 140.0)
@@ -5096,36 +5119,6 @@ func _build_zone_0_village(root: Node3D) -> void:
 	elf_lbl.position = Vector3(0, 4.0, 0)
 	elf_root.add_child(elf_lbl)
 
-	# D. Altar dos Quatro Elementos Dracônicos (140, 0, -130)
-	var draco_root := Node3D.new()
-	draco_root.position = Vector3(140.0, 0.0, -130.0)
-	root.add_child(draco_root)
-	var elem_colors := [Color(0.2, 0.8, 0.3), Color(0.2, 0.5, 1.0), Color(1.0, 0.85, 0.1), Color(0.7, 0.2, 1.0)]
-	for d_idx in range(4):
-		var rad_d := d_idx * (PI / 2.0)
-		var ob_pos := Vector3(cos(rad_d) * 8.0, 0.0, sin(rad_d) * 8.0)
-		var obelisk := MeshInstance3D.new()
-		var ob_box := BoxMesh.new()
-		ob_box.size = Vector3(1.4, 6.0, 1.4)
-		obelisk.mesh = ob_box
-		var ob_mat := StandardMaterial3D.new()
-		ob_mat.albedo_color = elem_colors[d_idx]
-		ob_mat.emission_enabled = true
-		ob_mat.emission = elem_colors[d_idx]
-		ob_mat.emission_energy_multiplier = 2.0
-		obelisk.material_override = ob_mat
-		obelisk.position = ob_pos + Vector3(0, 3.0, 0)
-		draco_root.add_child(obelisk)
-
-	var draco_lbl := Label3D.new()
-	draco_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	draco_lbl.text = "🐉 Altar dos Quatro Elementos Dracônicos"
-	draco_lbl.font_size = 24
-	draco_lbl.outline_size = 8
-	draco_lbl.modulate = Color(1.0, 0.6, 0.2)
-	draco_lbl.position = Vector3(0, 4.0, 0)
-	draco_root.add_child(draco_lbl)
-
 	# E. Favela de Engrenagens Gnarlin (-120, 0, 90)
 	var gob_root := Node3D.new()
 	gob_root.position = Vector3(-120.0, 0.0, 90.0)
@@ -5145,13 +5138,13 @@ func _build_zone_0_village(root: Node3D) -> void:
 	_create_portal_area(root, Vector3(0.0, 0.0, -285.0), "🌲 Portal: Bosque Sussurrante (Sul)", Color(0.2, 0.9, 0.4), 1, 1)
 
 	# Norte (0, 0, 285) -> Ruínas da Vigília & Norte Gelado (Zona 2, Portal ID 3)
-	_create_portal_area(root, Vector3(0.0, 0.0, 285.0), "❄️ Portal: Ruínas da Vigília & Norte Gelado (Norte)", Color(0.3, 0.7, 1.0), 2, 3)
+	_create_portal_area(root, Vector3(0.0, 0.0, 285.0), "🌬️ Portal: Planalto dos Ventos (Norte)", Color(0.6, 0.85, 0.6), 13, 3)
 
 	# Oeste (-285, 0, 0) -> Santuário do Eclipse (Zona 3, Portal ID 5)
 	_create_portal_area(root, Vector3(-285.0, 0.0, 0.0), "🌑 Portal: Santuário do Eclipse (Oeste)", Color(0.9, 0.1, 0.2), 3, 5)
 
 	# Leste (285, 0, 0) -> Fronteira das Cinzas (Zona 4, Portal ID 7)
-	_create_portal_area(root, Vector3(285.0, 0.0, 0.0), "🔥 Portal: Fronteira das Cinzas (Leste - Próxima Expansão)", Color(1.0, 0.7, 0.1), 4, 7)
+	_create_portal_area(root, Vector3(285.0, 0.0, 0.0), "🪨 Portal: Colinas de Basalto (Leste)", Color(0.8, 0.6, 0.35), 15, 7)
 
 func _create_wall_segment(parent: Node3D, pos: Vector3, size: Vector3, stone_mat: Material) -> StaticBody3D:
 	var wall := StaticBody3D.new()
@@ -5626,7 +5619,7 @@ func _build_zone_2_ruins(root: Node3D) -> void:
 	throne_root.add_child(throne_lbl)
 
 	# 3. Portal de Volta para a Vila ao Sul (0, 0, -285)
-	_create_portal_area(root, Vector3(0.0, 0.0, -285.0), "🏛️ Portal: Retornar à Vila do Refúgio", Color(0.3, 0.7, 1.0), 0, 4)
+	_create_portal_area(root, Vector3(0.0, 0.0, -285.0), "🌬️ Portal: Planalto dos Ventos (Sul)", Color(0.6, 0.85, 0.6), 13, 18)
 
 # =============================================================================
 # ZONA 3: SANTUÁRIO DO ECLIPSE (600x600m)
@@ -5739,7 +5732,7 @@ func _build_zone_4_ashlands(root: Node3D) -> void:
 	root.add_child(magma_light)
 
 	# Portal de Volta para a Vila a Oeste (-285, 0, 0)
-	_create_portal_area(root, Vector3(-285.0, 0.0, 0.0), "🏛️ Portal: Retornar à Vila do Refúgio", Color(1.0, 0.7, 0.1), 0, 8)
+	_create_portal_area(root, Vector3(-285.0, 0.0, 0.0), "🪨 Portal: Colinas de Basalto (Oeste)", Color(0.8, 0.6, 0.35), 15, 22)
 
 # =============================================================================
 # ZONA 5: INTERIOR DA IGREJA DA LUZ SAGRADA (60x60m)
@@ -5968,7 +5961,7 @@ func _build_zone_8_sewers(root: Node3D) -> void:
 
 
 # =============================================================================
-# Mundo Vivo: Cemitério da Luz (ao lado da Igreja) e Rio Prateado (a leste da vila)
+# Mundo Vivo: Cemitério da Luz (ao lado da Igreja). O Rio Prateado vem do relevo (scripts/world).
 # Posições iguais às do servidor (world.CemeteryOrigin e world.PlaceRiver).
 # =============================================================================
 func _build_cemetery_and_river(root: Node3D) -> void:
@@ -6010,28 +6003,6 @@ func _build_cemetery_and_river(root: Node3D) -> void:
 	cem_sign.position = Vector3(-60.0, 2.4, -25.0)
 	cemetery.add_child(cem_sign)
 
-	# Rio Prateado: faixa de água corrente fora do muro leste
-	var water_mat := StandardMaterial3D.new()
-	water_mat.albedo_color = Color(0.25, 0.45, 0.55, 0.82)
-	water_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	water_mat.metallic = 0.3
-	water_mat.roughness = 0.08
-	var river := MeshInstance3D.new()
-	river.name = "RioPrateado"
-	var r_box := BoxMesh.new()
-	r_box.size = Vector3(9.0, 0.06, 560.0)
-	river.mesh = r_box
-	river.material_override = water_mat
-	river.position = Vector3(100.0, 0.04, 0.0)
-	root.add_child(river)
-	var river_sign := Label3D.new()
-	river_sign.text = "🌊 Rio Prateado\n(água não tratada: risco de doenças)"
-	river_sign.font_size = 26
-	river_sign.outline_size = 8
-	river_sign.outline_modulate = Color(0, 0, 0, 1)
-	river_sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	river_sign.position = Vector3(94.0, 2.2, 18.0)
-	root.add_child(river_sign)
 
 
 # HUD de sobrevivência (0x50): fome e temperatura sentida, com alertas de frio, calor e fome
@@ -6064,3 +6035,191 @@ func _on_survival_received(hunger: int, cold: int, heat: int, body_temp: int, am
 		col = Color(1.0, 0.3, 0.3)
 	survival_label.text = "Fome: %s | %d°C (ar %d°C) — %s" % [hunger_txt, body_temp, ambient_temp, state]
 	survival_label.add_theme_color_override("font_color", col)
+
+
+# =============================================================================
+# Mundo vivo: relevo, estradas, rio, vegetação e as zonas de transição (9 a 16)
+# =============================================================================
+
+var world_map_ui: CanvasLayer = null
+
+func _toggle_world_map() -> void:
+	if world_map_ui == null:
+		world_map_ui = preload("res://scripts/world/WorldMapUI.gd").new()
+		add_child(world_map_ui)
+	world_map_ui.toggle()
+
+## Altura do chão no ponto (0 nos interiores e nas praças).
+func ground_y(x: float, z: float) -> float:
+	return LunariaTerrain.height(current_zone_id, x, z)
+
+## Mesma posição, apoiada no relevo (o servidor só conhece X/Z).
+func on_ground(pos: Vector3) -> Vector3:
+	return Vector3(pos.x, ground_y(pos.x, pos.z), pos.z)
+
+## Rede de segurança: se o jogador cair por baixo do relevo (spawn, teleporte), volta para cima do chão.
+func _keep_player_above_ground() -> void:
+	if local_player == null or not is_instance_valid(local_player) or not LunariaTerrain.is_open_zone(current_zone_id):
+		return
+	var gp: Vector3 = local_player.global_position
+	var g := ground_y(gp.x, gp.z)
+	if gp.y < g - 2.5:
+		local_player.global_position = Vector3(gp.x, g + 1.2, gp.z)
+		local_player.velocity = Vector3.ZERO
+
+func _build_living_landscape(zone_id: int) -> void:
+	if not LunariaTerrain.is_open_zone(zone_id) or current_map_root == null:
+		return
+	# O piso plano antigo dá lugar ao relevo
+	for child in current_map_root.get_children():
+		if child.name == "ZoneFloor":
+			child.queue_free()
+	# Construções e marcos acompanham o terreno
+	for child in current_map_root.get_children():
+		if child is Node3D and child.name != "ZoneFloor" and not (child is Area3D):
+			var n3 := child as Node3D
+			n3.position.y += ground_y(n3.position.x, n3.position.z)
+	LunariaWorldBuilder.build(zone_id, current_map_root)
+	# Portais que o construtor da zona não criou (zonas de transição e novas ligações)
+	var existing := {}
+	for child in current_map_root.get_children():
+		if child is Area3D and String(child.name).begins_with("Portal_"):
+			existing[int(String(child.name).split("_")[1])] = true
+	for p in LunariaWorldData.PORTALS:
+		if int(p["from"]) != zone_id or existing.has(int(p["id"])):
+			continue
+		var to: int = p["to"]
+		var target_name: String = LunariaWorldData.ZONES[to]["name"] if LunariaWorldData.ZONES.has(to) else "Zona %d" % to
+		_create_portal_area(current_map_root, Vector3(float(p["x"]), 0.0, float(p["z"])), "🌀 Portal: %s" % target_name, Color(0.55, 0.85, 1.0), to, int(p["id"]))
+
+## Marcos centrais das zonas de transição (o relevo, a vegetação e os portais vêm do construtor).
+func _build_transition_zone(root: Node3D, zone_id: int) -> void:
+	var stone := StandardMaterial3D.new()
+	stone.albedo_color = Color("#8a857c")
+	LunariaTextures.apply(stone, "stone_blocks", 1.6)
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color("#7a5a3a")
+	LunariaTextures.apply(wood, "planks", 1.2)
+	var mark := Node3D.new()
+	mark.name = "MarcoCentral"
+	root.add_child(mark)
+	var title := ""
+	match zone_id:
+		9: # Carvalho Ancião e poço de pedra
+			title = "🌳 Carvalho Ancião do Bosque Ralo"
+			_landmark_mesh(mark, _cyl_mesh(1.6, 2.2, 12.0), _plain_mat(Color("#5b4330")), Vector3(0, 6, 0))
+			_landmark_mesh(mark, _sphere_mesh(8.0), _plain_mat(Color("#4f8a3a")), Vector3(0, 15, 0), Vector3(1.2, 0.8, 1.2))
+			_landmark_mesh(mark, _cyl_mesh(1.4, 1.4, 1.0), stone, Vector3(10, 0.5, 6))
+		10: # Moinho de vento
+			title = "🌾 Moinho dos Campos Rasteiros"
+			_landmark_mesh(mark, _cyl_mesh(2.2, 3.4, 11.0), stone, Vector3(0, 5.5, 0))
+			_landmark_mesh(mark, _cyl_mesh(0.0, 3.6, 3.0), wood, Vector3(0, 12.5, 0))
+			var blades := Node3D.new()
+			blades.position = Vector3(0, 10.5, -3.6)
+			mark.add_child(blades)
+			for k in range(4):
+				var bl := MeshInstance3D.new()
+				var bm := BoxMesh.new()
+				bm.size = Vector3(1.2, 7.5, 0.15)
+				bl.mesh = bm
+				bl.material_override = wood
+				bl.rotation.z = k * PI / 2.0
+				bl.position = Vector3(cos(k * PI / 2.0 + PI / 2.0) * 3.6, sin(k * PI / 2.0 + PI / 2.0) * 3.6, 0)
+				blades.add_child(bl)
+			var spin := blades.create_tween().set_loops()
+			spin.tween_property(blades, "rotation:z", TAU, 9.0).as_relative()
+		11: # Baobá
+			title = "🌳 Baobá Solitário da Savana"
+			_landmark_mesh(mark, _cyl_mesh(3.0, 4.2, 14.0), _plain_mat(Color("#8b6e55")), Vector3(0, 7, 0))
+			for k in range(6):
+				var ang := k * TAU / 6.0
+				_landmark_mesh(mark, _cyl_mesh(0.4, 0.7, 6.0), _plain_mat(Color("#8b6e55")), Vector3(cos(ang) * 2.5, 15.5, sin(ang) * 2.5), Vector3.ONE, Vector3(sin(ang) * 35, 0, -cos(ang) * 35))
+			_landmark_mesh(mark, _sphere_mesh(5.0), _plain_mat(Color("#7d8f3c")), Vector3(0, 18.5, 0), Vector3(1.6, 0.35, 1.6))
+		12: # Obelisco de sal
+			title = "🧂 Obelisco de Sal Escaldante"
+			var salt := _plain_mat(Color("#f1ece0"))
+			salt.emission_enabled = true
+			salt.emission = Color("#fff4d6")
+			salt.emission_energy_multiplier = 0.3
+			_landmark_mesh(mark, _cyl_mesh(0.6, 2.4, 16.0, 4), salt, Vector3(0, 8, 0))
+		13: # Torre de vigia
+			title = "🌬️ Torre de Vigia dos Ventos"
+			_landmark_mesh(mark, _cyl_mesh(3.0, 3.6, 16.0), stone, Vector3(0, 8, 0))
+			_landmark_mesh(mark, _cyl_mesh(4.2, 3.2, 1.2), stone, Vector3(0, 16.6, 0))
+			var flag := MeshInstance3D.new()
+			var fm := BoxMesh.new()
+			fm.size = Vector3(0.05, 1.6, 2.6)
+			flag.mesh = fm
+			flag.material_override = _plain_mat(Color("#2e7dc8"))
+			flag.position = Vector3(0, 20.0, 1.4)
+			mark.add_child(flag)
+			_landmark_mesh(mark, _cyl_mesh(0.08, 0.08, 4.5), wood, Vector3(0, 19.4, 0))
+			var wave := flag.create_tween().set_loops()
+			wave.tween_property(flag, "rotation:y", 0.35, 1.1).set_trans(Tween.TRANS_SINE)
+			wave.tween_property(flag, "rotation:y", -0.35, 1.1).set_trans(Tween.TRANS_SINE)
+		14: # Mirante do glaciar (marco de pedras)
+			title = "🏔️ Mirante do Glaciar"
+			var ice := _plain_mat(Color("#b9e3f5"))
+			ice.emission_enabled = true
+			ice.emission = Color("#a6dcff")
+			ice.emission_energy_multiplier = 0.4
+			for k in range(5):
+				_landmark_mesh(mark, _sphere_mesh(1.4 - k * 0.2), stone, Vector3(0, 0.9 + k * 1.9, 0), Vector3(1.2, 0.7, 1.0))
+			_landmark_mesh(mark, _cyl_mesh(0.0, 1.2, 3.5, 6), ice, Vector3(4, 1.7, 3))
+		15: # Arco de basalto
+			title = "🪨 Arco de Basalto da Pedreira Velha"
+			var basalt := _plain_mat(Color("#3c3a3b"))
+			_landmark_mesh(mark, _cyl_mesh(1.4, 1.6, 10.0, 6), basalt, Vector3(-5, 5, 0))
+			_landmark_mesh(mark, _cyl_mesh(1.4, 1.6, 10.0, 6), basalt, Vector3(5, 5, 0))
+			_landmark_mesh(mark, _box_mesh(Vector3(13.0, 2.2, 3.0)), basalt, Vector3(0, 10.6, 0))
+		16: # Palafita do barqueiro
+			title = "🛶 Palafita do Barqueiro"
+			for px in [-3.0, 3.0]:
+				for pz in [-3.0, 3.0]:
+					_landmark_mesh(mark, _cyl_mesh(0.25, 0.3, 4.0), wood, Vector3(px, 1.5, pz))
+			_landmark_mesh(mark, _box_mesh(Vector3(8.0, 0.3, 8.0)), wood, Vector3(0, 3.4, 0))
+			_landmark_mesh(mark, _box_mesh(Vector3(6.0, 3.0, 6.0)), wood, Vector3(0, 5.0, 0))
+			_landmark_mesh(mark, _cyl_mesh(0.0, 5.2, 2.6, 4), _plain_mat(Color("#6d5a3a")), Vector3(0, 7.8, 0))
+	var lbl := Label3D.new()
+	lbl.text = "%s\n%s" % [title, LunariaWorldData.ZONES[zone_id]["name"]]
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.font_size = 30
+	lbl.outline_size = 8
+	lbl.modulate = Color(1.0, 0.95, 0.75)
+	lbl.position = Vector3(0, 24.0, 0)
+	mark.add_child(lbl)
+
+func _plain_mat(col: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = col
+	m.roughness = 0.9
+	return m
+
+func _cyl_mesh(top: float, bottom: float, h: float, segs: int = 12) -> CylinderMesh:
+	var m := CylinderMesh.new()
+	m.top_radius = top
+	m.bottom_radius = bottom
+	m.height = h
+	m.radial_segments = segs
+	return m
+
+func _sphere_mesh(r: float) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = r
+	m.height = r * 2.0
+	return m
+
+func _box_mesh(size: Vector3) -> BoxMesh:
+	var m := BoxMesh.new()
+	m.size = size
+	return m
+
+func _landmark_mesh(parent: Node3D, mesh: Mesh, mat: Material, pos: Vector3, scl: Vector3 = Vector3.ONE, rot_deg: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = mat
+	mi.position = pos
+	mi.scale = scl
+	mi.rotation_degrees = rot_deg
+	parent.add_child(mi)
+	return mi

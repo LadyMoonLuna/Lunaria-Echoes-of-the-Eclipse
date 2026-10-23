@@ -47,7 +47,7 @@ const (
 	WeatherMonsoon      uint8 = 23 // Monção
 
 	WeatherCount uint8 = 24
-	zoneCount          = 9
+	zoneCount          = int(ZoneCount)
 )
 
 // WeatherNames lista os nomes exibidos de cada clima (índice = WeatherType).
@@ -108,6 +108,22 @@ var zoneWeatherTable = [zoneCount][]weatherWeight{
 	ZoneBlackMarket: {{WeatherClear, 1}},
 	ZoneAncientSewers: {{WeatherClear, 20}, {WeatherDenseFog, 10}, {WeatherSporeFog, 10},
 		{WeatherMiasma, 8}},
+	ZoneSparseWoods: {{WeatherClear, 26}, {WeatherRain, 10}, {WeatherDrizzle, 8}, {WeatherDenseFog, 6},
+		{WeatherPetals, 6}, {WeatherFireflies, 8}, {WeatherRainbow, 5}, {WeatherThunderstorm, 4}},
+	ZoneGrasslands: {{WeatherClear, 32}, {WeatherRain, 8}, {WeatherDrizzle, 6}, {WeatherGale, 8},
+		{WeatherThunderstorm, 6}, {WeatherRainbow, 6}, {WeatherPetals, 5}, {WeatherHail, 2}},
+	ZoneSavanna: {{WeatherClear, 32}, {WeatherHeatWave, 12}, {WeatherGale, 8}, {WeatherThunderstorm, 6},
+		{WeatherMonsoon, 5}, {WeatherSandstorm, 3}, {WeatherRainbow, 3}},
+	ZoneSaltDesert: {{WeatherClear, 30}, {WeatherHeatWave, 16}, {WeatherSandstorm, 14}, {WeatherGale, 6},
+		{WeatherMeteorShower, 3}},
+	ZoneWindPlateau: {{WeatherClear, 24}, {WeatherGale, 14}, {WeatherDrizzle, 8}, {WeatherDenseFog, 8},
+		{WeatherHail, 4}, {WeatherSnow, 4}, {WeatherAurora, 3}},
+	ZoneFrozenPeaks: {{WeatherClear, 12}, {WeatherSnow, 18}, {WeatherBlizzard, 12}, {WeatherCrystalFrost, 10},
+		{WeatherAurora, 10}, {WeatherGale, 8}, {WeatherHail, 5}},
+	ZoneBasaltHills: {{WeatherClear, 28}, {WeatherGale, 10}, {WeatherHeatWave, 8}, {WeatherSandstorm, 5},
+		{WeatherAshfall, 4}, {WeatherThunderstorm, 4}},
+	ZoneMistMarsh: {{WeatherDenseFog, 18}, {WeatherDrizzle, 12}, {WeatherRain, 10}, {WeatherSporeFog, 10},
+		{WeatherMiasma, 8}, {WeatherFireflies, 8}, {WeatherClear, 8}, {WeatherMonsoon, 4}},
 }
 
 // rollZoneWeather sorteia um clima ponderado para a zona respeitando dia/noite.

@@ -15,6 +15,7 @@ const (
 	NodeCrystal uint8 = 4 // Cristal — exige Picareta
 	NodeVine    uint8 = 5 // Vinha/cipó/arbusto/cogumelo — arma cortante (1x) ou Tesoura (2x)
 	NodeWater   uint8 = 6 // Fonte de água/ácido/orvalho — exige Frasco Vazio
+	NodeMud     uint8 = 7 // Barreiro na margem do rio (barro/argila) — com as mãos ou Picareta (mais)
 )
 
 // HarvestRange: distância máxima (m) para coletar um nó.
@@ -57,6 +58,9 @@ func NodeKindForMaterial(materialID uint16) uint8 {
 	if liquidMaterials[materialID] {
 		return NodeWater
 	}
+	if materialID == MatMud || materialID == MatClay {
+		return NodeMud
+	}
 	switch MaterialsDB[materialID].Category {
 	case MatWood:
 		return NodeTree
@@ -89,6 +93,22 @@ var zoneResourceTables = map[uint8][]spawnEntry{
 		{MatLunarDew, 3}, {MatQuartz, 3}, {MatSilver, 2}},
 	ZoneAshFrontier: {{MatObsidianRock, 4}, {MatBasalt, 5}, {MatCrimsonOrich, 1}, {MatAbyssTungsten, 2}, {MatFireRuby, 2},
 		{MatIronwood, 2}, {MatAcidSap, 3}, {MatIron, 3}, {MatAdamantine, 1}},
+	ZoneSparseWoods: {{MatPineRefuge, 8}, {MatGreyOak, 6}, {MatStormCedar, 2}, {MatThornVine, 5}, {MatHerbs, 6},
+		{MatGlowMushroom, 3}, {MatRawStone, 4}, {MatCopper, 3}, {MatPureWater, 2}},
+	ZoneGrasslands: {{MatHerbs, 9}, {MatThornVine, 6}, {MatRawStone, 5}, {MatLimestone, 5}, {MatCopper, 3}, {MatTin, 3},
+		{MatGreyOak, 3}, {MatPureWater, 3}},
+	ZoneSavanna: {{MatIronwood, 3}, {MatRawStone, 5}, {MatLimestone, 4}, {MatCopper, 4}, {MatIron, 3}, {MatThornVine, 5},
+		{MatHerbs, 4}, {MatQuartz, 2}},
+	ZoneSaltDesert: {{MatRawStone, 4}, {MatLimestone, 6}, {MatQuartz, 5}, {MatFireRuby, 2}, {MatStarRock, 1}, {MatIron, 3},
+		{MatAcidSap, 3}},
+	ZoneWindPlateau: {{MatPineRefuge, 6}, {MatRawStone, 8}, {MatBasalt, 3}, {MatIron, 5}, {MatCopper, 3}, {MatSilver, 2},
+		{MatHerbs, 4}, {MatThornVine, 3}, {MatPureWater, 2}},
+	ZoneFrozenPeaks: {{MatRawStone, 6}, {MatBasalt, 4}, {MatSilver, 4}, {MatTitanium, 3}, {MatLunarMithril, 2},
+		{MatZeroSapphire, 2}, {MatManaCrystal, 3}, {MatQuartz, 4}},
+	ZoneBasaltHills: {{MatBasalt, 8}, {MatObsidianRock, 3}, {MatRawStone, 5}, {MatIron, 5}, {MatCopper, 3}, {MatFireRuby, 1},
+		{MatThornVine, 3}, {MatIronwood, 2}},
+	ZoneMistMarsh: {{MatBloodWillow, 3}, {MatWhisperEbony, 2}, {MatThornVine, 6}, {MatSteelLiana, 3}, {MatGlowMushroom, 6},
+		{MatParasiteMycel, 3}, {MatToxicWater, 5}, {MatLunarDew, 3}, {MatHerbs, 5}},
 	ZoneAncientSewers: {{MatToxicWater, 5}, {MatIronEaterFungi, 2}, {MatGlowMushroom, 4}, {MatParasiteMycel, 2},
 		{MatIron, 3}, {MatTin, 3}, {MatRawStone, 3}},
 }
@@ -124,7 +144,7 @@ func NewResourceNodeManager() *ResourceNodeManager {
 		n.RespawnIn = time.Duration(45+int(n.Tier)*30) * time.Second
 		m.nodes[n.ID] = &n
 	}
-	for zone := uint8(0); zone <= ZoneAncientSewers; zone++ {
+	for zone := uint8(0); zone < ZoneCount; zone++ {
 		table, ok := zoneResourceTables[zone]
 		if !ok {
 			continue
@@ -176,12 +196,36 @@ func NewResourceNodeManager() *ResourceNodeManager {
 				dist := 2.5 + rng.Float64()*spread
 				x := float32(cx + math.Cos(ang)*dist)
 				z := float32(cz + math.Sin(ang)*dist)
+				if IsRiverWater(zone, x, z) {
+					continue // nada nasce dentro do leito do rio
+				}
 				add(ResourceNode{ZoneID: zone, MaterialID: m, X: x, Z: z})
 			}
 		}
 	}
 	for _, n := range uniqueNodes {
 		add(n)
+	}
+	// Barreiros de barro e argila ao longo das margens do Rio Prateado
+	for zone := uint8(0); zone < ZoneCount; zone++ {
+		rng := rand.New(rand.NewSource(int64(7000 + int(zone)*131)))
+		side := 1.0
+		for z := float32(-280); z <= 280; z += 32 {
+			cx, w, ok := RiverAt(zone, z)
+			if !ok {
+				continue
+			}
+			side = -side
+			mat := MatMud
+			if rng.Float64() < 0.35 {
+				mat = MatClay
+			}
+			x := float32(cx + side*(w/2+1.5+rng.Float64()*2))
+			if x < -290 || x > 290 {
+				continue
+			}
+			add(ResourceNode{ZoneID: zone, MaterialID: mat, X: x, Z: z + float32(rng.Float64()*8-4)})
+		}
 	}
 	return m
 }

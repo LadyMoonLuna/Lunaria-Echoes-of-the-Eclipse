@@ -72,19 +72,19 @@ func TestPortalTravelCardinalZones(t *testing.T) {
 		t.Fatalf("coordenada de retorno na Vila incorreta: (%.1f, %.1f), esperado (0, -275)", px, pz)
 	}
 
-	// 4. Viagem para Ruínas da Vigília (Portal 3: Vila -> Ruínas)
+	// 4. Viagem para o Planalto dos Ventos (Portal 3: Vila -> Planalto, a caminho das Ruínas)
 	server.handlePortalTravel(1, 0, 3)
-	if player.GetZone() != world.ZoneRuins {
-		t.Fatalf("jogador deveria estar na Zona 2 (Ruínas), obteve %d", player.GetZone())
+	if player.GetZone() != world.ZoneWindPlateau {
+		t.Fatalf("jogador deveria estar na Zona 13 (Planalto), obteve %d", player.GetZone())
 	}
 	player.Mu.RLock()
 	px, pz = player.PosX, player.PosZ
 	player.Mu.RUnlock()
 	if px != 0.0 || pz != -275.0 {
-		t.Fatalf("coordenada de chegada incorreta nas Ruínas: (%.1f, %.1f), esperado (0, -275)", px, pz)
+		t.Fatalf("coordenada de chegada incorreta no Planalto: (%.1f, %.1f), esperado (0, -275)", px, pz)
 	}
 
-	// 5. Retorno das Ruínas para a Vila (Portal 4: Ruínas -> Vila)
+	// 5. Retorno do Planalto para a Vila (Portal 4: Planalto -> Vila)
 	server.handlePortalTravel(1, 0, 4)
 	if player.GetZone() != world.ZoneVillage {
 		t.Fatalf("jogador deveria ter retornado à Zona 0 (Vila), obteve %d", player.GetZone())
@@ -120,10 +120,10 @@ func TestPortalTravelCardinalZones(t *testing.T) {
 		t.Fatalf("coordenada de retorno na Vila incorreta: (%.1f, %.1f), esperado (-275, 0)", px, pz)
 	}
 
-	// 8. Viagem para Fronteira das Cinzas (Portal 7: Vila -> Fronteira)
+	// 8. Viagem para as Colinas de Basalto (Portal 7: Vila -> Colinas, a caminho das Cinzas)
 	server.handlePortalTravel(1, 0, 7)
-	if player.GetZone() != world.ZoneAshFrontier {
-		t.Fatalf("jogador deveria estar na Zona 4 (Fronteira das Cinzas), obteve %d", player.GetZone())
+	if player.GetZone() != world.ZoneBasaltHills {
+		t.Fatalf("jogador deveria estar na Zona 15 (Colinas de Basalto), obteve %d", player.GetZone())
 	}
 	player.Mu.RLock()
 	px, pz = player.PosX, player.PosZ
@@ -301,5 +301,31 @@ func TestInternalAndSubterraneanPortals(t *testing.T) {
 	player.Mu.RUnlock()
 	if px != -55.0 || pz != -50.0 {
 		t.Fatalf("coordenada de retorno dos Esgotos incorreta: (%.1f, %.1f)", px, pz)
+	}
+}
+
+// Todas as zonas de transição são alcançáveis a pé e cada portal tem o seu par de volta.
+func TestEveryPortalHasReturnAndZonesAreReachable(t *testing.T) {
+	for id, p := range world.OfficialPortals {
+		if _, ok := world.FindPortal(p.TargetZoneID, p.FromZoneID); !ok {
+			t.Fatalf("portal %d (%d -> %d) não tem caminho de volta", id, p.FromZoneID, p.TargetZoneID)
+		}
+	}
+	seen := map[uint8]bool{world.ZoneVillage: true}
+	queue := []uint8{world.ZoneVillage}
+	for len(queue) > 0 {
+		z := queue[0]
+		queue = queue[1:]
+		for _, p := range world.OfficialPortals {
+			if p.FromZoneID == z && !seen[p.TargetZoneID] {
+				seen[p.TargetZoneID] = true
+				queue = append(queue, p.TargetZoneID)
+			}
+		}
+	}
+	for z := uint8(0); z < world.ZoneCount; z++ {
+		if !seen[z] {
+			t.Fatalf("zona %d (%s) inalcançável", z, world.GetZoneName(z))
+		}
 	}
 }

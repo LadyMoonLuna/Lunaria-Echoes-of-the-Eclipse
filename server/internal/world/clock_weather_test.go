@@ -20,7 +20,7 @@ func TestZoneWeatherRollsRespectTables(t *testing.T) {
 func TestSetWeatherLocksAllZones(t *testing.T) {
 	c := NewWorldClock(10)
 	c.SetWeather(WeatherBlizzard)
-	for z := uint8(0); z < zoneCount; z++ {
+	for z := uint8(0); int(z) < zoneCount; z++ {
 		if c.GetZoneWeather(z) != WeatherBlizzard {
 			t.Fatalf("zona %d não recebeu o clima fixado", z)
 		}

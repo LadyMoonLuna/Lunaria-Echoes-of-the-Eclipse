@@ -887,6 +887,7 @@ const (
 	DevCmdGiveMoney    uint8 = 11 // +1.000 Sollares e +50 Moedas do Eclipse
 	DevCmdClearHeavy   uint8 = 12 // Remove da mochila os itens de 10 kg ou mais por unidade
 	DevCmdWorldEvent   uint8 = 13 // Evento climático/do Mundo Vivo (Value = DevEvent*)
+	DevCmdGoToZone     uint8 = 14 // Viaja direto para a zona Value (entrada padrão da zona)
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).

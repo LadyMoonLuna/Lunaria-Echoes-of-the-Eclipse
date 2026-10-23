@@ -30,6 +30,14 @@ var ZoneBaseTemp = map[uint8]float32{
 	ZoneMageTower:     20,
 	ZoneBlackMarket:   21,
 	ZoneAncientSewers: 13,
+	ZoneSparseWoods:   16,
+	ZoneGrasslands:    19,
+	ZoneSavanna:       27,
+	ZoneSaltDesert:    36, // o sal reflete o sol: o lugar mais quente do mundo
+	ZoneWindPlateau:   10,
+	ZoneFrozenPeaks:   -14,
+	ZoneBasaltHills:   23,
+	ZoneMistMarsh:     18,
 }
 
 // Ambientes fechados: o clima de fora não entra e a variação do dia é menor.

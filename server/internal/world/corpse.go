@@ -618,9 +618,9 @@ func (c *Corpse) CanInteract(px, py, pz float32) bool {
 		return false
 	}
 	dx := px - c.PosX
-	dy := py - c.PosY
+	_ = py // o relevo do terreno é do cliente: só a distância no plano (X/Z) conta
 	dz := pz - c.PosZ
-	return (dx*dx + dy*dy + dz*dz) <= 6.25 // 2.5 * 2.5 = 6.25
+	return (dx*dx + dz*dz) <= 6.25 // 2.5 * 2.5 = 6.25
 }
 
 // DistanceTo calcula a distância euclidiana do corpo até a posição dada.
@@ -628,9 +628,9 @@ func (c *Corpse) DistanceTo(px, py, pz float32) float32 {
 	c.Mu.RLock()
 	defer c.Mu.RUnlock()
 	dx := px - c.PosX
-	dy := py - c.PosY
+	_ = py // o relevo do terreno é do cliente: só a distância no plano (X/Z) conta
 	dz := pz - c.PosZ
-	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
+	return float32(math.Sqrt(float64(dx*dx + dz*dz)))
 }
 
 // IsExpired verifica se o corpo já ultrapassou o tempo de decomposição de 120s.

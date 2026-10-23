@@ -513,6 +513,67 @@ func NewMobManager() *MobManager {
 	// MobType 19: Experimento Nº 0: A Quimera Costurada (Mini-Boss - 2800 HP)
 	mm.Mobs[222] = NewMobWithZone(222, "Experimento Nº 0: A Quimera Costurada", protocol.MobTypeStitchedChimeraZero, ZoneAncientSewers, 0.0, 0.0, 110.0, 2800, 3.6)
 
+	// =========================================================================
+	// 5. ZONAS DE TRANSIÇÃO (9 a 16): criaturas coerentes com cada bioma, em covis afastados das estradas
+	// =========================================================================
+	type spawn struct {
+		name  string
+		kind  uint8
+		zone  uint8
+		x, z  float32
+		hp    uint16
+		speed float32
+	}
+	transition := []spawn{
+		// Bosque Ralo: matilhas e varas de javalis nas clareiras
+		{"Lobo da Bruma", protocol.MobTypeMistWolf, ZoneSparseWoods, -150, 90, 220, 4.2},
+		{"Lobo da Bruma", protocol.MobTypeMistWolf, ZoneSparseWoods, -162, 102, 220, 4.2},
+		{"Lobo da Bruma", protocol.MobTypeMistWolf, ZoneSparseWoods, 190, -150, 220, 4.2},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneSparseWoods, -90, -160, 140, 3.6},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneSparseWoods, -102, -170, 140, 3.6},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneSparseWoods, 60, 180, 140, 3.6},
+		// Campos Rasteiros: javalis no capim e saqueadores errantes
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneGrasslands, -170, 40, 140, 3.6},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneGrasslands, -182, 52, 140, 3.6},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneGrasslands, 200, -60, 140, 3.6},
+		{"Saqueador Deserdado", protocol.MobTypeOutcastRaider, ZoneGrasslands, -200, -200, 350, 3.2},
+		{"Saqueador Deserdado", protocol.MobTypeOutcastRaider, ZoneGrasslands, -212, -190, 350, 3.2},
+		// Savana Dourada: alcateia com Lobo Alfa e javalis
+		{"Lobo Alfa", protocol.MobTypeAlphaWolf, ZoneSavanna, -190, -120, 900, 4.6},
+		{"Lobo da Bruma", protocol.MobTypeMistWolf, ZoneSavanna, -178, -110, 220, 4.2},
+		{"Lobo da Bruma", protocol.MobTypeMistWolf, ZoneSavanna, -200, -132, 220, 4.2},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneSavanna, 220, 160, 140, 3.6},
+		{"Javali Selvagem", protocol.MobTypeWildBoar, ZoneSavanna, 232, 150, 140, 3.6},
+		// Deserto de Sal: escorpiões nas dunas e lodo ácido nas poças de sal
+		{"Escorpião Abissal Gigante", protocol.MobTypeAbyssalScorpion, ZoneSaltDesert, -160, -60, 540, 3.4},
+		{"Escorpião Abissal Gigante", protocol.MobTypeAbyssalScorpion, ZoneSaltDesert, 170, 90, 540, 3.4},
+		{"Escorpião Abissal Gigante", protocol.MobTypeAbyssalScorpion, ZoneSaltDesert, 140, -190, 540, 3.4},
+		{"Lodo Ácido Corrosivo", protocol.MobTypeAcidCorrosiveSlime, ZoneSaltDesert, -210, 170, 320, 2.5},
+		// Planalto dos Ventos: bandidos e besteiros nas pedras
+		{"Saqueador Deserdado", protocol.MobTypeOutcastRaider, ZoneWindPlateau, -180, 120, 350, 3.2},
+		{"Saqueador Deserdado", protocol.MobTypeOutcastRaider, ZoneWindPlateau, -168, 132, 350, 3.2},
+		{"Besteiro da Vigília", protocol.MobTypeVigilCrossbowman, ZoneWindPlateau, -192, 140, 200, 3.5},
+		{"Besteiro da Vigília", protocol.MobTypeVigilCrossbowman, ZoneWindPlateau, 210, -150, 200, 3.5},
+		// Picos Gelados: golens e dracos de geada
+		{"Golem de Gelo Antigo", protocol.MobTypeAncientIceGolem, ZoneFrozenPeaks, -150, 60, 720, 2.2},
+		{"Golem de Gelo Antigo", protocol.MobTypeAncientIceGolem, ZoneFrozenPeaks, 200, -40, 720, 2.2},
+		{"Draco de Geada Selvagem", protocol.MobTypeWildFrostDrake, ZoneFrozenPeaks, -60, 230, 950, 4.0},
+		// Colinas de Basalto: gárgulas e executores nas pedreiras
+		{"Gárgula de Pedra", protocol.MobTypeStoneGargoyle, ZoneBasaltHills, 60, 190, 580, 3.8},
+		{"Gárgula de Pedra", protocol.MobTypeStoneGargoyle, ZoneBasaltHills, -40, -200, 580, 3.8},
+		{"Executor de Ferro", protocol.MobTypeIronEnforcer, ZoneBasaltHills, 180, -170, 650, 2.4},
+		// Pântano das Brumas: lodos e aranhas no brejo
+		{"Lodo Ácido Corrosivo", protocol.MobTypeAcidCorrosiveSlime, ZoneMistMarsh, 80, 150, 320, 2.5},
+		{"Lodo Ácido Corrosivo", protocol.MobTypeAcidCorrosiveSlime, ZoneMistMarsh, -120, -60, 320, 2.5},
+		{"Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneMistMarsh, -190, 170, 380, 3.8},
+		{"Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneMistMarsh, -178, 182, 380, 3.8},
+		{"Aranha Tecelã da Bruma", protocol.MobTypeMistWeaverSpider, ZoneMistMarsh, 150, -180, 380, 3.8},
+	}
+	for i, sp := range transition {
+		id := uint32(300 + i)
+		mm.Mobs[id] = NewMobWithZone(id, sp.name, sp.kind, sp.zone, sp.x, 0.0, sp.z, sp.hp, sp.speed)
+	}
+
 	return mm
 }
 

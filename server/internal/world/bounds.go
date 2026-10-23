@@ -1,6 +1,6 @@
 package world
 
-// Zonas Oficiais de Lunaria (0 a 8)
+// Zonas Oficiais de Lunaria (0 a 16)
 const (
 	ZoneVillage       uint8 = 0 // Vila do Refúgio & Arredores (600x600m | [-295, +295])
 	ZoneForest        uint8 = 1 // Bosque Sussurrante / Floresta (600x600m | [-295, +295])
@@ -12,6 +12,18 @@ const (
 	ZoneBlackMarket   uint8 = 7 // Mercado Negro do Beco (80x80m | [-38, +38])
 	ZoneAncientSewers uint8 = 8 // Esgotos Antigos (600x600m | [-295, +295])
 	ZoneSewers        uint8 = 8 // Alias retrocompatível
+
+	// Zonas de transição (cada uma 600x600 m): o mundo muda aos poucos entre os biomas
+	ZoneSparseWoods uint8 = 9  // Bosque Ralo (sul do Bosque Sussurrante)
+	ZoneGrasslands  uint8 = 10 // Campos Rasteiros
+	ZoneSavanna     uint8 = 11 // Savana Dourada
+	ZoneSaltDesert  uint8 = 12 // Deserto de Sal Escaldante
+	ZoneWindPlateau uint8 = 13 // Planalto dos Ventos (entre a Vila e as Ruínas)
+	ZoneFrozenPeaks uint8 = 14 // Picos Gelados (além das Ruínas)
+	ZoneBasaltHills uint8 = 15 // Colinas de Basalto (entre a Vila e a Fronteira das Cinzas)
+	ZoneMistMarsh   uint8 = 16 // Pântano das Brumas (além do Santuário)
+
+	ZoneCount = 17
 )
 
 // MapSize é a dimensão padrão de mundo aberto expandido para 600x600 metros.
@@ -76,6 +88,22 @@ func GetZoneName(zoneID uint8) string {
 		return "Bosque Sussurrante / Floresta"
 	case ZoneRuins:
 		return "Ruínas da Vigília & Norte Gelado"
+	case ZoneSparseWoods:
+		return "Bosque Ralo"
+	case ZoneGrasslands:
+		return "Campos Rasteiros"
+	case ZoneSavanna:
+		return "Savana Dourada"
+	case ZoneSaltDesert:
+		return "Deserto de Sal Escaldante"
+	case ZoneWindPlateau:
+		return "Planalto dos Ventos"
+	case ZoneFrozenPeaks:
+		return "Picos Gelados"
+	case ZoneBasaltHills:
+		return "Colinas de Basalto"
+	case ZoneMistMarsh:
+		return "Pântano das Brumas"
 	case ZoneSanctuary:
 		return "Santuário do Eclipse"
 	case ZoneAshFrontier:

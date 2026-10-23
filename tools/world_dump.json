@@ -1,0 +1,753 @@
+{
+  "dangers": [
+    {
+      "zone": 1,
+      "x": -60,
+      "z": 200,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": -42,
+      "z": 248,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": -25,
+      "z": 215,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": -15,
+      "z": 192,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": 8,
+      "z": 185,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": 20,
+      "z": 230,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": 38,
+      "z": 205,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": 55,
+      "z": -45,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 1,
+      "x": 55,
+      "z": 175,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 1,
+      "x": 65,
+      "z": -52,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 1,
+      "x": 75,
+      "z": -60,
+      "radius": 38,
+      "name": "Lobo Alfa"
+    },
+    {
+      "zone": 1,
+      "x": 88,
+      "z": -72,
+      "radius": 55,
+      "name": "Licantropo Alfa"
+    },
+    {
+      "zone": 1,
+      "x": 105,
+      "z": -100,
+      "radius": 38,
+      "name": "Aranha Tecelã da Bruma"
+    },
+    {
+      "zone": 1,
+      "x": 115,
+      "z": -110,
+      "radius": 38,
+      "name": "Aranha Tecelã da Bruma"
+    },
+    {
+      "zone": 1,
+      "x": 120,
+      "z": -120,
+      "radius": 75,
+      "name": "Arachna, a Rainha Tecelã"
+    },
+    {
+      "zone": 2,
+      "x": -40,
+      "z": 130,
+      "radius": 38,
+      "name": "Golem de Gelo Antigo"
+    },
+    {
+      "zone": 2,
+      "x": -15,
+      "z": 70,
+      "radius": 38,
+      "name": "Saqueador Deserdado"
+    },
+    {
+      "zone": 2,
+      "x": -8,
+      "z": 80,
+      "radius": 38,
+      "name": "Acólito do Eclipse"
+    },
+    {
+      "zone": 2,
+      "x": 0,
+      "z": 90,
+      "radius": 75,
+      "name": "Comandante Vaelen"
+    },
+    {
+      "zone": 2,
+      "x": 0,
+      "z": 150,
+      "radius": 75,
+      "name": "Ymir, o Patriarca Jotunar"
+    },
+    {
+      "zone": 2,
+      "x": 0,
+      "z": 175,
+      "radius": 55,
+      "name": "Draco de Geada Selvagem"
+    },
+    {
+      "zone": 2,
+      "x": 8,
+      "z": 82,
+      "radius": 38,
+      "name": "Executor de Ferro"
+    },
+    {
+      "zone": 2,
+      "x": 15,
+      "z": 72,
+      "radius": 38,
+      "name": "Besteiro da Vigília"
+    },
+    {
+      "zone": 2,
+      "x": 40,
+      "z": 130,
+      "radius": 38,
+      "name": "Golem de Gelo Antigo"
+    },
+    {
+      "zone": 3,
+      "x": -140,
+      "z": 140,
+      "radius": 75,
+      "name": "Lorde Vesperian, o Progenitor Vampiro"
+    },
+    {
+      "zone": 3,
+      "x": -135,
+      "z": 135,
+      "radius": 38,
+      "name": "Guarda Sanguinário de Vesperian"
+    },
+    {
+      "zone": 3,
+      "x": -125,
+      "z": 125,
+      "radius": 38,
+      "name": "Guarda Sanguinário de Vesperian"
+    },
+    {
+      "zone": 3,
+      "x": -88,
+      "z": 88,
+      "radius": 75,
+      "name": "Malakor, o Arauto do Eclipse"
+    },
+    {
+      "zone": 3,
+      "x": -85,
+      "z": 80,
+      "radius": 55,
+      "name": "Inquisidor Vex"
+    },
+    {
+      "zone": 3,
+      "x": -80,
+      "z": 72,
+      "radius": 38,
+      "name": "Cultista Sombrio"
+    },
+    {
+      "zone": 3,
+      "x": -78,
+      "z": 82,
+      "radius": 38,
+      "name": "Gárgula de Pedra"
+    },
+    {
+      "zone": 3,
+      "x": -75,
+      "z": 75,
+      "radius": 38,
+      "name": "Cultista Sombrio"
+    },
+    {
+      "zone": 9,
+      "x": -162,
+      "z": 102,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 9,
+      "x": -150,
+      "z": 90,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 9,
+      "x": -102,
+      "z": -170,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 9,
+      "x": -90,
+      "z": -160,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 9,
+      "x": 60,
+      "z": 180,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 9,
+      "x": 190,
+      "z": -150,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 10,
+      "x": -212,
+      "z": -190,
+      "radius": 38,
+      "name": "Saqueador Deserdado"
+    },
+    {
+      "zone": 10,
+      "x": -200,
+      "z": -200,
+      "radius": 38,
+      "name": "Saqueador Deserdado"
+    },
+    {
+      "zone": 10,
+      "x": -182,
+      "z": 52,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 10,
+      "x": -170,
+      "z": 40,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 10,
+      "x": 200,
+      "z": -60,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 11,
+      "x": -200,
+      "z": -132,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 11,
+      "x": -190,
+      "z": -120,
+      "radius": 55,
+      "name": "Lobo Alfa"
+    },
+    {
+      "zone": 11,
+      "x": -178,
+      "z": -110,
+      "radius": 38,
+      "name": "Lobo da Bruma"
+    },
+    {
+      "zone": 11,
+      "x": 220,
+      "z": 160,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 11,
+      "x": 232,
+      "z": 150,
+      "radius": 38,
+      "name": "Javali Selvagem"
+    },
+    {
+      "zone": 12,
+      "x": -210,
+      "z": 170,
+      "radius": 38,
+      "name": "Lodo Ácido Corrosivo"
+    },
+    {
+      "zone": 12,
+      "x": -160,
+      "z": -60,
+      "radius": 38,
+      "name": "Escorpião Abissal Gigante"
+    },
+    {
+      "zone": 12,
+      "x": 140,
+      "z": -190,
+      "radius": 38,
+      "name": "Escorpião Abissal Gigante"
+    },
+    {
+      "zone": 12,
+      "x": 170,
+      "z": 90,
+      "radius": 38,
+      "name": "Escorpião Abissal Gigante"
+    },
+    {
+      "zone": 13,
+      "x": -192,
+      "z": 140,
+      "radius": 38,
+      "name": "Besteiro da Vigília"
+    },
+    {
+      "zone": 13,
+      "x": -180,
+      "z": 120,
+      "radius": 38,
+      "name": "Saqueador Deserdado"
+    },
+    {
+      "zone": 13,
+      "x": -168,
+      "z": 132,
+      "radius": 38,
+      "name": "Saqueador Deserdado"
+    },
+    {
+      "zone": 13,
+      "x": 210,
+      "z": -150,
+      "radius": 38,
+      "name": "Besteiro da Vigília"
+    },
+    {
+      "zone": 14,
+      "x": -150,
+      "z": 60,
+      "radius": 38,
+      "name": "Golem de Gelo Antigo"
+    },
+    {
+      "zone": 14,
+      "x": -60,
+      "z": 230,
+      "radius": 55,
+      "name": "Draco de Geada Selvagem"
+    },
+    {
+      "zone": 14,
+      "x": 200,
+      "z": -40,
+      "radius": 38,
+      "name": "Golem de Gelo Antigo"
+    },
+    {
+      "zone": 15,
+      "x": -40,
+      "z": -200,
+      "radius": 38,
+      "name": "Gárgula de Pedra"
+    },
+    {
+      "zone": 15,
+      "x": 60,
+      "z": 190,
+      "radius": 38,
+      "name": "Gárgula de Pedra"
+    },
+    {
+      "zone": 15,
+      "x": 180,
+      "z": -170,
+      "radius": 38,
+      "name": "Executor de Ferro"
+    },
+    {
+      "zone": 16,
+      "x": -190,
+      "z": 170,
+      "radius": 38,
+      "name": "Aranha Tecelã da Bruma"
+    },
+    {
+      "zone": 16,
+      "x": -178,
+      "z": 182,
+      "radius": 38,
+      "name": "Aranha Tecelã da Bruma"
+    },
+    {
+      "zone": 16,
+      "x": -120,
+      "z": -60,
+      "radius": 38,
+      "name": "Lodo Ácido Corrosivo"
+    },
+    {
+      "zone": 16,
+      "x": 80,
+      "z": 150,
+      "radius": 38,
+      "name": "Lodo Ácido Corrosivo"
+    },
+    {
+      "zone": 16,
+      "x": 150,
+      "z": -180,
+      "radius": 38,
+      "name": "Aranha Tecelã da Bruma"
+    }
+  ],
+  "portals": [
+    {
+      "id": 1,
+      "from": 0,
+      "to": 1,
+      "x": 0,
+      "z": -285,
+      "name": "Portal Sul da Vila -\u003e Floresta"
+    },
+    {
+      "id": 2,
+      "from": 1,
+      "to": 0,
+      "x": 0,
+      "z": 285,
+      "name": "Entrada Norte da Floresta -\u003e Vila"
+    },
+    {
+      "id": 3,
+      "from": 0,
+      "to": 13,
+      "x": 0,
+      "z": 285,
+      "name": "Portal Norte da Vila -\u003e Planalto dos Ventos"
+    },
+    {
+      "id": 4,
+      "from": 13,
+      "to": 0,
+      "x": 0,
+      "z": -285,
+      "name": "Entrada Sul do Planalto -\u003e Vila"
+    },
+    {
+      "id": 5,
+      "from": 0,
+      "to": 3,
+      "x": -285,
+      "z": 0,
+      "name": "Portal Oeste da Vila -\u003e Santuário"
+    },
+    {
+      "id": 6,
+      "from": 3,
+      "to": 0,
+      "x": 285,
+      "z": 0,
+      "name": "Entrada Leste do Santuário -\u003e Vila"
+    },
+    {
+      "id": 7,
+      "from": 0,
+      "to": 15,
+      "x": 285,
+      "z": 0,
+      "name": "Portal Leste da Vila -\u003e Colinas de Basalto"
+    },
+    {
+      "id": 8,
+      "from": 15,
+      "to": 0,
+      "x": -285,
+      "z": 0,
+      "name": "Entrada Oeste das Colinas -\u003e Vila"
+    },
+    {
+      "id": 17,
+      "from": 13,
+      "to": 2,
+      "x": 0,
+      "z": 285,
+      "name": "Portal Norte do Planalto -\u003e Ruínas"
+    },
+    {
+      "id": 18,
+      "from": 2,
+      "to": 13,
+      "x": 0,
+      "z": -285,
+      "name": "Entrada Sul das Ruínas -\u003e Planalto"
+    },
+    {
+      "id": 19,
+      "from": 2,
+      "to": 14,
+      "x": 0,
+      "z": 285,
+      "name": "Portal Norte das Ruínas -\u003e Picos Gelados"
+    },
+    {
+      "id": 20,
+      "from": 14,
+      "to": 2,
+      "x": 0,
+      "z": -285,
+      "name": "Entrada Sul dos Picos -\u003e Ruínas"
+    },
+    {
+      "id": 21,
+      "from": 15,
+      "to": 4,
+      "x": 285,
+      "z": 0,
+      "name": "Portal Leste das Colinas -\u003e Fronteira das Cinzas"
+    },
+    {
+      "id": 22,
+      "from": 4,
+      "to": 15,
+      "x": -285,
+      "z": 0,
+      "name": "Entrada Oeste das Cinzas -\u003e Colinas"
+    },
+    {
+      "id": 23,
+      "from": 1,
+      "to": 9,
+      "x": 0,
+      "z": -285,
+      "name": "Portal Sul do Bosque -\u003e Bosque Ralo"
+    },
+    {
+      "id": 24,
+      "from": 9,
+      "to": 1,
+      "x": 0,
+      "z": 285,
+      "name": "Entrada Norte do Bosque Ralo -\u003e Bosque"
+    },
+    {
+      "id": 25,
+      "from": 9,
+      "to": 10,
+      "x": 0,
+      "z": -285,
+      "name": "Portal Sul do Bosque Ralo -\u003e Campos Rasteiros"
+    },
+    {
+      "id": 26,
+      "from": 10,
+      "to": 9,
+      "x": 0,
+      "z": 285,
+      "name": "Entrada Norte dos Campos -\u003e Bosque Ralo"
+    },
+    {
+      "id": 27,
+      "from": 10,
+      "to": 11,
+      "x": 0,
+      "z": -285,
+      "name": "Portal Sul dos Campos -\u003e Savana Dourada"
+    },
+    {
+      "id": 28,
+      "from": 11,
+      "to": 10,
+      "x": 0,
+      "z": 285,
+      "name": "Entrada Norte da Savana -\u003e Campos"
+    },
+    {
+      "id": 29,
+      "from": 11,
+      "to": 12,
+      "x": 0,
+      "z": -285,
+      "name": "Portal Sul da Savana -\u003e Deserto de Sal"
+    },
+    {
+      "id": 30,
+      "from": 12,
+      "to": 11,
+      "x": 0,
+      "z": 285,
+      "name": "Entrada Norte do Deserto -\u003e Savana"
+    },
+    {
+      "id": 31,
+      "from": 3,
+      "to": 16,
+      "x": -285,
+      "z": 0,
+      "name": "Portal Oeste do Santuário -\u003e Pântano das Brumas"
+    },
+    {
+      "id": 32,
+      "from": 16,
+      "to": 3,
+      "x": 285,
+      "z": 0,
+      "name": "Entrada Leste do Pântano -\u003e Santuário"
+    }
+  ],
+  "river": {
+    "mouth_gz": -2370,
+    "mouth_lake_r": 75,
+    "source_gz": 1950,
+    "span": 600
+  },
+  "zones": [
+    {
+      "id": 0,
+      "name": "Vila do Refúgio \u0026 Arredores",
+      "col": 0,
+      "row": 0
+    },
+    {
+      "id": 1,
+      "name": "Bosque Sussurrante / Floresta",
+      "col": 0,
+      "row": -1
+    },
+    {
+      "id": 2,
+      "name": "Ruínas da Vigília \u0026 Norte Gelado",
+      "col": 0,
+      "row": 2
+    },
+    {
+      "id": 3,
+      "name": "Santuário do Eclipse",
+      "col": -1,
+      "row": 0
+    },
+    {
+      "id": 4,
+      "name": "Fronteira das Cinzas",
+      "col": 2,
+      "row": 0
+    },
+    {
+      "id": 9,
+      "name": "Bosque Ralo",
+      "col": 0,
+      "row": -2
+    },
+    {
+      "id": 10,
+      "name": "Campos Rasteiros",
+      "col": 0,
+      "row": -3
+    },
+    {
+      "id": 11,
+      "name": "Savana Dourada",
+      "col": 0,
+      "row": -4
+    },
+    {
+      "id": 12,
+      "name": "Deserto de Sal Escaldante",
+      "col": 0,
+      "row": -5
+    },
+    {
+      "id": 13,
+      "name": "Planalto dos Ventos",
+      "col": 0,
+      "row": 1
+    },
+    {
+      "id": 14,
+      "name": "Picos Gelados",
+      "col": 0,
+      "row": 3
+    },
+    {
+      "id": 15,
+      "name": "Colinas de Basalto",
+      "col": 1,
+      "row": 0
+    },
+    {
+      "id": 16,
+      "name": "Pântano das Brumas",
+      "col": -2,
+      "row": 0
+    }
+  ]
+}

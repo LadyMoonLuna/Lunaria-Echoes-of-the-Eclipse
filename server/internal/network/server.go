@@ -1174,6 +1174,12 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 	case protocol.DevCmdWorldEvent:
 		s.handleDevWorldEvent(player, val)
 
+	case protocol.DevCmdGoToZone:
+		if player == nil || val >= world.ZoneCount {
+			return
+		}
+		s.handlePortalTravel(player.ID, val, 0)
+
 	case protocol.DevCmdClearHeavy:
 		if player == nil {
 			return

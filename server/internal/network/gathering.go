@@ -108,6 +108,11 @@ func harvestYield(p *world.Player, n world.ResourceNode) (uint8, string) {
 			return base, ""
 		}
 		return 0, "✂️ Use uma arma cortante (espada, adaga, cutelo) ou uma Tesoura de Herborista para colher."
+	case world.NodeMud:
+		if p.BestTool(world.ToolPickaxe) > 0 {
+			return base + 1, "" // com a Picareta sai mais barro
+		}
+		return base, "" // às mãos
 	case world.NodeWater:
 		flasks := p.GetItemCount(protocol.ItemEmptyFlask)
 		if flasks == 0 {
@@ -135,6 +140,8 @@ func harvestQuality(p *world.Player, n world.ResourceNode) uint8 {
 		if p.BestTool(world.ToolShears) > 0 {
 			q += 10
 		}
+	case world.NodeMud:
+		tool = p.BestTool(world.ToolPickaxe)
 	}
 	if tool > n.Tier {
 		q += int(tool-n.Tier) * 4

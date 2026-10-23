@@ -55,7 +55,7 @@ func TestCorpseDistanceAndInteraction(t *testing.T) {
 	}
 
 	// Distância calculada
-	dist := c.DistanceTo(3.0, 4.0, 0.0)
+	dist := c.DistanceTo(3.0, 9.0, 4.0) // a altura (Y) não conta: o relevo é do cliente
 	if dist != 5.0 {
 		t.Fatalf("esperava distância 5.0m, obteve %.2f", dist)
 	}

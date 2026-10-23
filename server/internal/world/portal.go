@@ -14,7 +14,7 @@ type PortalDef struct {
 	NightOnly    bool // Restrito para a noite (18h às 06h)
 }
 
-// OfficialPortals contém os 16 portais oficiais de mão dupla de Lunaria.
+// OfficialPortals contém os 32 portais oficiais de mão dupla de Lunaria.
 var OfficialPortals = map[uint8]PortalDef{
 	// 1 & 2: Vila do Refúgio <-> Bosque Sussurrante / Floresta
 	1: {
@@ -39,17 +39,17 @@ var OfficialPortals = map[uint8]PortalDef{
 	// 3 & 4: Vila do Refúgio <-> Ruínas da Vigília & Norte Gelado
 	3: {
 		ID:           3,
-		Name:         "Portal Norte da Vila -> Ruínas",
+		Name:         "Portal Norte da Vila -> Planalto dos Ventos",
 		FromZoneID:   ZoneVillage,
-		TargetZoneID: ZoneRuins,
+		TargetZoneID: ZoneWindPlateau,
 		TargetX:      0.0,
 		TargetY:      1.5,
 		TargetZ:      -275.0,
 	},
 	4: {
 		ID:           4,
-		Name:         "Entrada Sul das Ruínas -> Vila",
-		FromZoneID:   ZoneRuins,
+		Name:         "Entrada Sul do Planalto -> Vila",
+		FromZoneID:   ZoneWindPlateau,
 		TargetZoneID: ZoneVillage,
 		TargetX:      0.0,
 		TargetY:      1.5,
@@ -79,17 +79,17 @@ var OfficialPortals = map[uint8]PortalDef{
 	// 7 & 8: Vila do Refúgio <-> Fronteira das Cinzas (Zona Futura)
 	7: {
 		ID:           7,
-		Name:         "Portal Leste da Vila -> Fronteira das Cinzas",
+		Name:         "Portal Leste da Vila -> Colinas de Basalto",
 		FromZoneID:   ZoneVillage,
-		TargetZoneID: ZoneAshFrontier,
+		TargetZoneID: ZoneBasaltHills,
 		TargetX:      -275.0,
 		TargetY:      1.5,
 		TargetZ:      0.0,
 	},
 	8: {
 		ID:           8,
-		Name:         "Entrada Oeste da Fronteira das Cinzas -> Vila",
-		FromZoneID:   ZoneAshFrontier,
+		Name:         "Entrada Oeste das Colinas -> Vila",
+		FromZoneID:   ZoneBasaltHills,
 		TargetZoneID: ZoneVillage,
 		TargetX:      275.0,
 		TargetY:      1.5,
@@ -177,6 +177,152 @@ var OfficialPortals = map[uint8]PortalDef{
 		TargetY:      1.5,
 		TargetZ:      -50.0,
 	},
+
+	// 17 a 32: zonas de transição (o mundo muda aos poucos entre os biomas)
+	17: {
+		ID:           17,
+		Name:         "Portal Norte do Planalto -> Ruínas",
+		FromZoneID:   ZoneWindPlateau,
+		TargetZoneID: ZoneRuins,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      -275.0,
+	},
+	18: {
+		ID:           18,
+		Name:         "Entrada Sul das Ruínas -> Planalto",
+		FromZoneID:   ZoneRuins,
+		TargetZoneID: ZoneWindPlateau,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      275.0,
+	},
+	19: {
+		ID:           19,
+		Name:         "Portal Norte das Ruínas -> Picos Gelados",
+		FromZoneID:   ZoneRuins,
+		TargetZoneID: ZoneFrozenPeaks,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      -275.0,
+	},
+	20: {
+		ID:           20,
+		Name:         "Entrada Sul dos Picos -> Ruínas",
+		FromZoneID:   ZoneFrozenPeaks,
+		TargetZoneID: ZoneRuins,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      275.0,
+	},
+	21: {
+		ID:           21,
+		Name:         "Portal Leste das Colinas -> Fronteira das Cinzas",
+		FromZoneID:   ZoneBasaltHills,
+		TargetZoneID: ZoneAshFrontier,
+		TargetX:      -275.0,
+		TargetY:      1.5,
+		TargetZ:      0.0,
+	},
+	22: {
+		ID:           22,
+		Name:         "Entrada Oeste das Cinzas -> Colinas",
+		FromZoneID:   ZoneAshFrontier,
+		TargetZoneID: ZoneBasaltHills,
+		TargetX:      275.0,
+		TargetY:      1.5,
+		TargetZ:      0.0,
+	},
+	23: {
+		ID:           23,
+		Name:         "Portal Sul do Bosque -> Bosque Ralo",
+		FromZoneID:   ZoneForest,
+		TargetZoneID: ZoneSparseWoods,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      275.0,
+	},
+	24: {
+		ID:           24,
+		Name:         "Entrada Norte do Bosque Ralo -> Bosque",
+		FromZoneID:   ZoneSparseWoods,
+		TargetZoneID: ZoneForest,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      -275.0,
+	},
+	25: {
+		ID:           25,
+		Name:         "Portal Sul do Bosque Ralo -> Campos Rasteiros",
+		FromZoneID:   ZoneSparseWoods,
+		TargetZoneID: ZoneGrasslands,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      275.0,
+	},
+	26: {
+		ID:           26,
+		Name:         "Entrada Norte dos Campos -> Bosque Ralo",
+		FromZoneID:   ZoneGrasslands,
+		TargetZoneID: ZoneSparseWoods,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      -275.0,
+	},
+	27: {
+		ID:           27,
+		Name:         "Portal Sul dos Campos -> Savana Dourada",
+		FromZoneID:   ZoneGrasslands,
+		TargetZoneID: ZoneSavanna,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      275.0,
+	},
+	28: {
+		ID:           28,
+		Name:         "Entrada Norte da Savana -> Campos",
+		FromZoneID:   ZoneSavanna,
+		TargetZoneID: ZoneGrasslands,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      -275.0,
+	},
+	29: {
+		ID:           29,
+		Name:         "Portal Sul da Savana -> Deserto de Sal",
+		FromZoneID:   ZoneSavanna,
+		TargetZoneID: ZoneSaltDesert,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      275.0,
+	},
+	30: {
+		ID:           30,
+		Name:         "Entrada Norte do Deserto -> Savana",
+		FromZoneID:   ZoneSaltDesert,
+		TargetZoneID: ZoneSavanna,
+		TargetX:      0.0,
+		TargetY:      1.5,
+		TargetZ:      -275.0,
+	},
+	31: {
+		ID:           31,
+		Name:         "Portal Oeste do Santuário -> Pântano das Brumas",
+		FromZoneID:   ZoneSanctuary,
+		TargetZoneID: ZoneMistMarsh,
+		TargetX:      275.0,
+		TargetY:      1.5,
+		TargetZ:      0.0,
+	},
+	32: {
+		ID:           32,
+		Name:         "Entrada Leste do Pântano -> Santuário",
+		FromZoneID:   ZoneMistMarsh,
+		TargetZoneID: ZoneSanctuary,
+		TargetX:      -275.0,
+		TargetY:      1.5,
+		TargetZ:      0.0,
+	},
 }
 
 // GetPortal recupera a definição de um portal pelo seu PortalID.
@@ -214,6 +360,14 @@ func GetDefaultSafeCoordinates(zoneID uint8) (float32, float32, float32) {
 		return 0.0, 1.5, -30.0
 	case ZoneAncientSewers:
 		return 0.0, 1.5, 0.0
+	case ZoneSparseWoods, ZoneGrasslands, ZoneSavanna, ZoneSaltDesert:
+		return 0.0, 1.5, 275.0
+	case ZoneWindPlateau, ZoneFrozenPeaks:
+		return 0.0, 1.5, -275.0
+	case ZoneBasaltHills:
+		return -275.0, 1.5, 0.0
+	case ZoneMistMarsh:
+		return 275.0, 1.5, 0.0
 	default: // ZoneVillage (0)
 		return 0.0, 1.5, 0.0
 	}
@@ -229,21 +383,21 @@ func ResolvePortalTravel(currentZone, targetZoneID, portalID uint8) (PortalDef, 
 	}
 
 	// 2. Busca pela transição de zona (currentZone -> targetZoneID)
-	if targetZoneID <= 8 && targetZoneID != currentZone {
+	if targetZoneID < ZoneCount && targetZoneID != currentZone {
 		if p, ok := FindPortal(currentZone, targetZoneID); ok {
 			return p, true
 		}
 	}
 
 	// 3. Se portalID foi enviado com o targetZoneID (ex: via dev command com valor de zona)
-	if portalID > 0 && portalID <= 8 && portalID != currentZone {
+	if portalID > 0 && portalID < ZoneCount && portalID != currentZone {
 		if p, ok := FindPortal(currentZone, portalID); ok {
 			return p, true
 		}
 	}
 
 	// 4. Fallback: gera um PortalDef virtual com coordenadas seguras para a zona de destino
-	if targetZoneID <= 8 && targetZoneID != currentZone {
+	if targetZoneID < ZoneCount && targetZoneID != currentZone {
 		defX, defY, defZ := GetDefaultSafeCoordinates(targetZoneID)
 		return PortalDef{
 			ID:           portalID,

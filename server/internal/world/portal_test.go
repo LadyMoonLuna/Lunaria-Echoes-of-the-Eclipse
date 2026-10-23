@@ -5,11 +5,11 @@ import (
 )
 
 func TestOfficialPortalsCountAndIntegrity(t *testing.T) {
-	if len(OfficialPortals) != 16 {
-		t.Fatalf("esperado 16 portais oficiais, obteve %d", len(OfficialPortals))
+	if len(OfficialPortals) != 32 {
+		t.Fatalf("esperado 32 portais oficiais, obteve %d", len(OfficialPortals))
 	}
 
-	for id := uint8(1); id <= 16; id++ {
+	for id := uint8(1); id <= 32; id++ {
 		portal, ok := GetPortal(id)
 		if !ok {
 			t.Fatalf("portal ID %d não encontrado no mapa oficial", id)

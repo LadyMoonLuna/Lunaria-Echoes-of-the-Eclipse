@@ -110,6 +110,8 @@ const (
 	MatAcidSap        uint16 = 153
 	MatCharcoal       uint16 = 154 // Carvão (combustível da forja)
 	MatHerbs          uint16 = 155 // Ervas Medicinais
+	MatMud            uint16 = 156 // Barro (margens do rio)
+	MatClay           uint16 = 157 // Argila (margens do rio)
 )
 
 // MaterialsDB é o catálogo oficial de materiais.
@@ -175,6 +177,8 @@ var MaterialsDB = map[uint16]MaterialDef{
 	MatParasiteMycel:  {MatParasiteMycel, "Micélio Parasita", MatPlantLiquid, RarityUnique, 0, 0.4, "Necrose +45%", "Fios vivos que se espalham por qualquer ferida.", 20, 20, 80},
 	MatAcidSap:        {MatAcidSap, "Seiva Ácida", MatPlantLiquid, RarityRare, 0, 0.5, "Ácido +45%", "Brota de fendas ácidas da Fronteira das Cinzas.", 45, 55, 35},
 	MatCharcoal:       {MatCharcoal, "Carvão", MatStone, RarityCommon, 10, 1.0, "Fogo +10%", "Combustível da forja; queima mais quente que a madeira.", 90, 30, 5},
+	MatMud:            {MatMud, "Barro", MatStone, RarityCommon, 10, 1.2, "Vedação +10%", "Lama grossa das margens do Rio Prateado; tapa frestas e molda tijolos.", 20, 10, 5},
+	MatClay:           {MatClay, "Argila", MatStone, RarityUncommon, 25, 1.0, "Cerâmica +20%", "Argila fina e plástica que vira cerâmica, moldes de fundição e cadinhos.", 45, 15, 10},
 	MatHerbs:          {MatHerbs, "Ervas Medicinais", MatPlantLiquid, RarityCommon, 0, 0.2, "Cura +15%", "Folhas amargas que fecham feridas; base das poções de Lyra.", 10, 5, 35},
 }
 

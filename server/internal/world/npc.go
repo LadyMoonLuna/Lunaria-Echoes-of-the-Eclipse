@@ -306,9 +306,9 @@ func (npc *NPC) DistanceTo(px, py, pz float32) float32 {
 	npc.mu.RLock()
 	defer npc.mu.RUnlock()
 	dx := px - npc.PosX
-	dy := py - npc.PosY
+	_ = py // o relevo do terreno é do cliente: só a distância no plano (X/Z) conta
 	dz := pz - npc.PosZ
-	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
+	return float32(math.Sqrt(float64(dx*dx + dz*dz)))
 }
 
 // TryTriggerApproach verifica se o jogador entrou no raio de 4m e se o cooldown de 15s expirou.
@@ -346,9 +346,9 @@ func (npc *NPC) CanInteract(px, py, pz float32) bool {
 		return false
 	}
 	dx := px - npc.PosX
-	dy := py - npc.PosY
+	_ = py // o relevo do terreno é do cliente: só a distância no plano (X/Z) conta
 	dz := pz - npc.PosZ
-	return (dx*dx + dy*dy + dz*dz) <= 25.0
+	return (dx*dx + dz*dz) <= 25.0
 }
 
 // ToSnapshot converte o estado atual do NPC no formato serializável NPCSnapshot.
