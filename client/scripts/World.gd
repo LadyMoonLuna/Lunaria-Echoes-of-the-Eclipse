@@ -3112,6 +3112,84 @@ func _load_zone_map(zone_id: int) -> void:
 		_:
 			_build_zone_0_village(current_map_root)
 
+	# 6. Texturas PBR em pisos, muros e estruturas da zona
+	_texture_zone_map(current_map_root, zone_id)
+
+# Piso de cada zona: [textura, metros por repetição]
+const ZONE_FLOOR_TEXTURES := {
+	0: ["ground", 3.0], 1: ["moss", 2.0], 2: ["stone_blocks", 2.4], 3: ["marble", 2.0],
+	4: ["obsidian", 2.5], 5: ["marble", 1.6], 6: ["stone_blocks", 1.8], 7: ["planks", 1.4], 8: ["stone_blocks", 2.0],
+}
+
+## Percorre a geometria da zona e aplica a biblioteca LunariaTextures a todo material liso,
+## escolhendo a textura pela cor e forma (madeira, pedra, folhagem, telhado, mármore...).
+## Brilhos, vidros e efeitos (emissivos/transparentes/sem sombreamento) ficam intocados.
+func _texture_zone_map(root: Node3D, zone_id: int) -> void:
+	var stack: Array = [root]
+	var done: Dictionary = {}
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		for child in node.get_children():
+			stack.append(child)
+		var mi := node as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var mat := mi.material_override as StandardMaterial3D
+		if mat == null or done.has(mat):
+			continue
+		done[mat] = true
+		if mat.albedo_texture != null or mat.emission_enabled or mat.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED \
+				or mat.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED:
+			continue
+		var tex_info: Array = _pick_zone_texture(mi, mat.albedo_color, zone_id)
+		if tex_info.is_empty():
+			continue
+		LunariaTextures.apply(mat, tex_info[0], tex_info[1], tex_info[2])
+
+func _pick_zone_texture(mi: MeshInstance3D, col: Color, zone_id: int) -> Array:
+	if mi.get_parent() and mi.get_parent().name == "ZoneFloor":
+		var f: Array = ZONE_FLOOR_TEXTURES.get(zone_id, ["ground", 3.0])
+		return [f[0], f[1], true]
+	var aabb := mi.mesh.get_aabb()
+	var longest: float = maxf(aabb.size.x, maxf(aabb.size.y, aabb.size.z))
+	var big: bool = longest > 4.0
+	var h: float = col.h
+	var sat: float = col.s
+	var val: float = col.v
+	var is_sphere: bool = mi.mesh is SphereMesh
+	var is_prism: bool = mi.mesh is PrismMesh
+	# Telhados
+	if is_prism:
+		return ["roof_tiles", 1.6, false]
+	# Cinzas / pedras / metais neutros
+	if sat < 0.22:
+		if val < 0.16:
+			return ["obsidian", 1.0, big]
+		if val > 0.7 and (zone_id == 3 or zone_id == 5):
+			return ["marble", 1.2, big]
+		if big:
+			return ["stone_blocks", 2.4, true]
+		return ["stone", 0.9, false]
+	# Verdes: folhagem e musgo
+	if h > 0.18 and h < 0.48:
+		if is_sphere:
+			return ["leaf", 0.6, false]
+		return ["moss", 1.0, big]
+	# Marrons / laranjas: madeira, tábuas e reboco
+	if h >= 0.04 and h <= 0.15:
+		if val > 0.62 and sat < 0.45:
+			return ["plaster", 1.5, big]
+		if big:
+			return ["planks", 1.2, true]
+		return ["wood", 0.6, false]
+	# Vermelhos fortes: tecidos e toldos
+	if (h < 0.04 or h > 0.94) and sat > 0.4:
+		return ["cloth", 0.6, big]
+	# Roxos/azuis escuros: cristais e pedra mística
+	if val < 0.35:
+		return ["stone", 0.9, big]
+	return ["stone_blocks", 1.6, big]
+
 func _create_zone_floor(parent: Node3D, size: Vector3, col: Color, roughness: float = 0.85, uv_scale: Vector3 = Vector3(1, 1, 1)) -> StaticBody3D:
 	var floor_body := StaticBody3D.new()
 	floor_body.name = "ZoneFloor"
