@@ -90,6 +90,9 @@ type Player struct {
 	WantedTimer         float32                        // segundos restantes como PROCURADO pela Guarda
 	BountyGold          uint32                         // recompensa pela cabeça do jogador
 	JailUntil           time.Time                      // preso: não age até esta hora
+	MurderCount         int                            // NPCs assassinados (para sempre)
+	KillStreak          int                            // assassinatos seguidos enquanto procurado
+	PermanentWanted     map[uint8]bool                 // cidade -> procurado para sempre
 	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
 	EquippedArmorID     uint8                          // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
 	EquippedAccessoryID uint8                          // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade

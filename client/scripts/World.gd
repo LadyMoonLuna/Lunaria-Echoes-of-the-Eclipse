@@ -3158,7 +3158,7 @@ func _on_npc_spoke(npc_id: int, message: String) -> void:
 			sender_name = "Kaelen"
 		elif npc_id == 110:
 			sender_name = "Alquimista Esquecido"
-		elif npc_id >= 111 and npc_id <= 116:
+		elif (npc_id >= 111 and npc_id <= 120) or (npc_id >= 400 and npc_id < 430):
 			sender_name = NPCEntityScript.get_default_npc_name(npc_id).split("\n")[0]
 		dialogue_label.text = "[%s]: %s" % [sender_name, message]
 		dialogue_label.visible = true
@@ -4773,6 +4773,7 @@ func _build_zone_0_village(root: Node3D) -> void:
 	root.add_child(plaza_mesh)
 
 	_create_rebirth_crystal(root)
+	_build_cemetery_and_river(root)
 
 	for cpos in [Vector3(-7.2, 0, -7.2), Vector3(7.2, 0, -7.2), Vector3(-7.2, 0, 7.2), Vector3(7.2, 0, 7.2)]:
 		var lamp := Node3D.new()
@@ -5865,3 +5866,70 @@ func _build_zone_8_sewers(root: Node3D) -> void:
 
 	# Escada / Portal Area3D de Volta para a Vila (0, 0, 0)
 	_create_portal_area(root, Vector3(0.0, 0.0, 0.0), "🪜 Subir para a Vila do Refúgio", Color(0.2, 0.9, 0.4), 0, 16)
+
+
+# =============================================================================
+# Mundo Vivo: Cemitério da Luz (ao lado da Igreja) e Rio Prateado (a leste da vila)
+# Posições iguais às do servidor (world.CemeteryOrigin e world.PlaceRiver).
+# =============================================================================
+func _build_cemetery_and_river(root: Node3D) -> void:
+	var grass_mat := StandardMaterial3D.new()
+	grass_mat.albedo_color = Color(0.22, 0.3, 0.2)
+	grass_mat.roughness = 1.0
+	var fence_mat := StandardMaterial3D.new()
+	fence_mat.albedo_color = Color(0.16, 0.15, 0.16)
+	fence_mat.metallic = 0.6
+	fence_mat.roughness = 0.5
+
+	# Cemitério: gramado escuro cercado, de (-82, -22) a (-58, -58)
+	var cemetery := Node3D.new()
+	cemetery.name = "Cemiterio"
+	root.add_child(cemetery)
+	var ground := MeshInstance3D.new()
+	var g_box := BoxMesh.new()
+	g_box.size = Vector3(20.0, 0.05, 30.0)
+	ground.mesh = g_box
+	ground.material_override = grass_mat
+	ground.position = Vector3(-69.0, 0.03, -40.0)
+	cemetery.add_child(ground)
+	for fence in [[Vector3(-69.0, 0.6, -25.0), Vector3(20.0, 1.2, 0.12)], [Vector3(-69.0, 0.6, -55.0), Vector3(20.0, 1.2, 0.12)],
+			[Vector3(-59.0, 0.6, -40.0), Vector3(0.12, 1.2, 30.0)], [Vector3(-79.0, 0.6, -40.0), Vector3(0.12, 1.2, 30.0)]]:
+		var bar := MeshInstance3D.new()
+		var b_box := BoxMesh.new()
+		b_box.size = fence[1]
+		bar.mesh = b_box
+		bar.material_override = fence_mat
+		bar.position = fence[0]
+		cemetery.add_child(bar)
+	var cem_sign := Label3D.new()
+	cem_sign.text = "⚰️ Cemitério da Luz"
+	cem_sign.font_size = 34
+	cem_sign.outline_size = 8
+	cem_sign.outline_modulate = Color(0, 0, 0, 1)
+	cem_sign.modulate = Color(0.85, 0.85, 1.0)
+	cem_sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	cem_sign.position = Vector3(-60.0, 2.4, -25.0)
+	cemetery.add_child(cem_sign)
+
+	# Rio Prateado: faixa de água corrente fora do muro leste
+	var water_mat := StandardMaterial3D.new()
+	water_mat.albedo_color = Color(0.25, 0.45, 0.55, 0.82)
+	water_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	water_mat.metallic = 0.3
+	water_mat.roughness = 0.08
+	var river := MeshInstance3D.new()
+	river.name = "RioPrateado"
+	var r_box := BoxMesh.new()
+	r_box.size = Vector3(9.0, 0.06, 560.0)
+	river.mesh = r_box
+	river.material_override = water_mat
+	river.position = Vector3(100.0, 0.04, 0.0)
+	root.add_child(river)
+	var river_sign := Label3D.new()
+	river_sign.text = "🌊 Rio Prateado\n(água não tratada: risco de doenças)"
+	river_sign.font_size = 26
+	river_sign.outline_size = 8
+	river_sign.outline_modulate = Color(0, 0, 0, 1)
+	river_sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	river_sign.position = Vector3(94.0, 2.2, 18.0)
+	root.add_child(river_sign)

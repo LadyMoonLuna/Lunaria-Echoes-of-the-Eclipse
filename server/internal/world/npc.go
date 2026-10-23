@@ -57,7 +57,10 @@ type NPC struct {
 	Cold            float32 // 0 a 100 (0 = aquecido); sobe abaixo de 10 °C longe do fogo
 	Heat            float32 // 0 a 100 (0 = fresco); sobe acima de 26 °C (insolação em 100)
 	Temperature     float32 // temperatura sentida agora (°C)
-	Personality     string  // Honrado, Ambicioso, Cauteloso, Implacavel
+	Sick            bool    // doente (água do rio, infecção): perde vida até se tratar
+	Disease         string
+	sickAccum       float32
+	Personality     string // Honrado, Ambicioso, Cauteloso, Implacavel
 	Gold            uint32
 	RawMaterials    map[uint16]int // matérias-primas em mãos
 	ShopStock       map[uint16]int // itens prontos à venda (estoque real, nada infinito)

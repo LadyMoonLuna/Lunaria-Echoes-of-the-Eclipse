@@ -14,19 +14,25 @@ const (
 	ActivityStudying = "Estudando Ofício do Mestre Caído"
 	ActivityHired    = "Seguindo o Contratante"
 
-	WantedDuration     float32 = 180 // segundos como PROCURADO
-	BountyPerCrime     uint32  = 200
-	GuardHuntSpeedMult float32 = 1.35
-	GuardBaseSpeed     float32 = 3.2
-	JailDuration               = 60 * time.Second
-	JailX, JailZ       float32 = -10, -14 // Pátio do Quartel
+	WantedDuration       float32 = 180 // segundos como PROCURADO
+	BountyPerHit         uint32  = 100 // cada golpe num cidadão
+	BountyPerKill        uint32  = 300 // cada assassinato
+	BountyStreakBonus    uint32  = 200 // +200 por assassinato consecutivo (2º = +200, 3º = +400...)
+	MurdersForPermanent          = 6   // 6+ assassinatos: procurado para sempre nas cidades vizinhas
+	LawlessPursuitRadius float32 = 40  // Guardas entram nos Esgotos/Mercado Negro, mas não vão longe
+	NecroUrgentBounty    uint32  = 1500
+	JailGrace                    = 30 * time.Second // após a cela, a Guarda espera antes de voltar a caçar
+	GuardHuntSpeedMult   float32 = 1.35
+	GuardBaseSpeed       float32 = 3.2
+	JailDuration                 = 60 * time.Second
+	JailX, JailZ         float32 = -10, -14 // Pátio do Quartel
 
 	NPCStrikeRange    float32 = 2.6
 	NPCStrikeInterval         = 1500 * time.Millisecond
 
 	StudySecondsToGraduate float32 = 600 // 10 min de estudo na Mesa de Blueprints
 	ApprenticeTrainingFee  uint32  = 300
-	HireFee                uint32  = 500
+	HireFee                uint32  = 50000
 	HireMinFriendship              = 60 // 3 corações
 )
 
@@ -42,8 +48,53 @@ var nonCitizens = map[uint32]bool{104: true, 110: true}
 // IsVillageCitizen: atacar este NPC é crime.
 func IsVillageCitizen(npcID uint32) bool { return !nonCitizens[npcID] }
 
-// Zonas onde a Guarda não entra.
+// Zonas sem lei: a Guarda só entra um pouco, perseguindo.
 func IsLawlessZone(zone uint8) bool { return zone == ZoneAncientSewers || zone == ZoneBlackMarket }
+
+// City: cidade com Guarda própria; Zones são suas áreas e Lawless as zonas sem lei coladas a ela.
+type City struct {
+	ID      uint8
+	Name    string
+	Zones   []uint8
+	Lawless map[uint8][2]float32 // zona sem lei -> ponto de chegada pelo portal
+	ExitTo  map[uint8][2]float32 // zona sem lei -> ponto de volta na cidade
+}
+
+var Cities = []City{
+	{ID: 1, Name: "Vila do Refúgio", Zones: []uint8{ZoneVillage, ZoneChurch, ZoneMageTower},
+		Lawless: map[uint8][2]float32{ZoneAncientSewers: {0, 0}, ZoneBlackMarket: {0, 30}},
+		ExitTo:  map[uint8][2]float32{ZoneAncientSewers: {-55, -50}, ZoneBlackMarket: {-40, 40}}},
+}
+
+// CityOfZone devolve a cidade a que a zona pertence (0 = nenhuma).
+func CityOfZone(zone uint8) uint8 {
+	for _, c := range Cities {
+		for _, z := range c.Zones {
+			if z == zone {
+				return c.ID
+			}
+		}
+	}
+	return 0
+}
+
+// CityByID busca a cidade.
+func CityByID(id uint8) (City, bool) {
+	for _, c := range Cities {
+		if c.ID == id {
+			return c, true
+		}
+	}
+	return City{}, false
+}
+
+// CityName devolve o nome da cidade.
+func CityName(id uint8) string {
+	if c, ok := CityByID(id); ok {
+		return c.Name
+	}
+	return "região"
+}
 
 // Professions: ofício exibido no anúncio de morte e no título do sucessor.
 var Professions = map[uint32]string{
@@ -94,7 +145,21 @@ type Tombstone struct {
 	Zone       uint8
 	X, Z       float32
 	DiedAt     time.Time
+
+	// Parte 3: o corpo é levado ao cemitério; sem cuidado pode voltar como zumbi
+	MaxHP          int
+	Buried         bool
+	Slot           int
+	Carried        bool // o Coveiro já recolheu o corpo
+	KilledByZombie bool
+	Purified       bool
+	NecroTried     bool
+	Rose           bool // ergueu-se como zumbi
+	LastRoll       time.Time
 }
+
+// Processed: cova purificada, já tentada por um Necromante ou já erguida não volta mais.
+func (t *Tombstone) Processed() bool { return t.Purified || t.NecroTried || t.Rose }
 
 // TakeDamage fere o NPC. Retorna o HP restante e se morreu agora (morte permanente).
 func (npc *NPC) TakeDamage(dmg int) (int, bool) {
@@ -197,22 +262,119 @@ func (npc *NPC) RegisterCraft() bool { return npc.registerCraftLocked() }
 
 // --- Crime do jogador ---
 
-// MarkWanted marca o jogador como PROCURADO e soma a recompensa.
-func (p *Player) MarkWanted() {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
-	p.WantedTimer = WantedDuration
-	p.BountyGold += BountyPerCrime
+// CrimeResult descreve o efeito de um crime na ficha do jogador.
+type CrimeResult struct {
+	WasWanted       bool
+	Bounty          uint32 // recompensa total depois do crime
+	Added           uint32
+	Murders         int
+	BecamePermanent bool
 }
 
-// IsWanted informa se a Guarda o caça.
+// RegisterHit soma +100 por golpe num cidadão e renova o tempo de procurado.
+func (p *Player) RegisterHit() CrimeResult {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	r := CrimeResult{WasWanted: p.isWantedLocked()}
+	p.WantedTimer = WantedDuration
+	p.BountyGold += BountyPerHit
+	r.Added, r.Bounty, r.Murders = BountyPerHit, p.BountyGold, p.MurderCount
+	return r
+}
+
+// RegisterMurder soma +300 e +200 por assassinato consecutivo; no 6º, procurado para sempre nas cidades.
+func (p *Player) RegisterMurder() CrimeResult {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	r := CrimeResult{WasWanted: p.isWantedLocked()}
+	add := BountyPerKill + BountyStreakBonus*uint32(p.KillStreak)
+	p.KillStreak++
+	p.MurderCount++
+	p.WantedTimer = WantedDuration
+	p.BountyGold += add
+	if p.MurderCount >= MurdersForPermanent && !p.everyCityPermanentLocked() {
+		for _, c := range Cities {
+			p.markPermanentLocked(c.ID)
+		}
+		r.BecamePermanent = true
+	}
+	r.Added, r.Bounty, r.Murders = add, p.BountyGold, p.MurderCount
+	return r
+}
+
+func (p *Player) markPermanentLocked(city uint8) {
+	if p.PermanentWanted == nil {
+		p.PermanentWanted = map[uint8]bool{}
+	}
+	p.PermanentWanted[city] = true
+}
+
+func (p *Player) everyCityPermanentLocked() bool {
+	for _, c := range Cities {
+		if !p.PermanentWanted[c.ID] {
+			return false
+		}
+	}
+	return true
+}
+
+// MarkPermanentWanted: procurado para sempre na cidade (fuga para zona sem lei, necromancia testemunhada).
+func (p *Player) MarkPermanentWanted(city uint8) bool {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	if p.PermanentWanted[city] {
+		return false
+	}
+	p.markPermanentLocked(city)
+	return true
+}
+
+// AddBounty soma uma recompensa extra (ex.: urgência da Igreja).
+func (p *Player) AddBounty(v uint32) {
+	p.Mu.Lock()
+	p.BountyGold += v
+	p.WantedTimer = WantedDuration
+	p.Mu.Unlock()
+}
+
+func (p *Player) isWantedLocked() bool {
+	if p.WantedTimer > 0 {
+		return true
+	}
+	for _, v := range p.PermanentWanted {
+		if v {
+			return true
+		}
+	}
+	return false
+}
+
+// IsWanted informa se alguma Guarda o caça.
 func (p *Player) IsWanted() bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
-	return p.WantedTimer > 0
+	return p.isWantedLocked()
 }
 
-// TickWanted desconta o tempo de procurado; ao zerar, a recompensa expira.
+// IsWantedIn informa se a Guarda daquela cidade o caça (respeitando a pena recém-cumprida).
+func (p *Player) IsWantedIn(city uint8) bool {
+	p.Mu.RLock()
+	defer p.Mu.RUnlock()
+	if time.Now().Before(p.JailUntil.Add(JailGrace)) {
+		return false
+	}
+	return p.WantedTimer > 0 || p.PermanentWanted[city]
+}
+
+// IsPermanentWanted informa se é procurado para sempre na cidade.
+func (p *Player) IsPermanentWanted(city uint8) bool {
+	p.Mu.RLock()
+	defer p.Mu.RUnlock()
+	return p.PermanentWanted[city]
+}
+
+// TickWanted desconta o tempo de procurado; ao zerar, a sequência de assassinatos zera e,
+// se não houver procura permanente, a recompensa expira.
 func (p *Player) TickWanted(dt float32) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -222,11 +384,15 @@ func (p *Player) TickWanted(dt float32) {
 	p.WantedTimer -= dt
 	if p.WantedTimer <= 0 {
 		p.WantedTimer = 0
-		p.BountyGold = 0
+		p.KillStreak = 0
+		if !p.isWantedLocked() {
+			p.BountyGold = 0
+		}
 	}
 }
 
 // PayBountyAndJail: abatido pela Guarda, perde a recompensa (até o ouro que tem) e vai preso.
+// A procura permanente continua valendo.
 func (p *Player) PayBountyAndJail() uint32 {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -234,6 +400,7 @@ func (p *Player) PayBountyAndJail() uint32 {
 	p.Gold -= paid
 	p.BountyGold = 0
 	p.WantedTimer = 0
+	p.KillStreak = 0
 	p.PKMode = false
 	p.JailUntil = time.Now().Add(JailDuration)
 	return paid

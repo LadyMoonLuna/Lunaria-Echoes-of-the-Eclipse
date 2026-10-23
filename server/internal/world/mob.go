@@ -40,6 +40,19 @@ type Mob struct {
 	IsActive       bool // Ativo no mundo (controlado por eventos como Fases da Lua)
 	DeadAt         time.Time
 
+	// Mundo Vivo: zumbis (não renascem) e quem matou a criatura
+	Undead         bool
+	ZombieOwner    uint32 // jogador Necromante a quem o zumbi serve (0 = selvagem)
+	Level          uint8
+	NoRespawn      bool
+	KilledByZombie bool
+	ZombieTargetID uint32 // alvo atual (jogador, NPC ou mob)
+	ZombieTargetIs uint8  // 1 jogador, 2 NPC, 3 mob
+	ZombieSeenAt   time.Time
+	ZombieNextHit  time.Time
+	WanderX        float32
+	WanderZ        float32
+
 	// Rastreamento de causadores de dano (para evolução solo Varkai)
 	DamageDealers map[uint32]int
 
@@ -235,11 +248,12 @@ func (m *Mob) CheckRespawn() bool {
 	m.Mu.Lock()
 	defer m.Mu.Unlock()
 
-	if m.IsAlive {
+	if m.IsAlive || m.NoRespawn {
 		return false
 	}
 
 	if time.Since(m.DeadAt) >= m.GetRespawnDelay() {
+		m.KilledByZombie = false
 		m.HP = m.MaxHP
 		m.PosX = m.SpawnX
 		m.PosY = m.SpawnY
@@ -507,6 +521,29 @@ func (mm *MobManager) GetMob(id uint32) *Mob {
 	mm.Mu.RLock()
 	defer mm.Mu.RUnlock()
 	return mm.Mobs[id]
+}
+
+// AddDynamicMob registra uma criatura criada em tempo de jogo (ex.: zumbis) com um ID livre a partir de 5000.
+func (mm *MobManager) AddDynamicMob(m *Mob) uint32 {
+	mm.Mu.Lock()
+	defer mm.Mu.Unlock()
+	id := uint32(5000)
+	for {
+		if _, used := mm.Mobs[id]; !used {
+			break
+		}
+		id++
+	}
+	m.ID = id
+	mm.Mobs[id] = m
+	return id
+}
+
+// RemoveMob tira a criatura do mundo para sempre.
+func (mm *MobManager) RemoveMob(id uint32) {
+	mm.Mu.Lock()
+	defer mm.Mu.Unlock()
+	delete(mm.Mobs, id)
 }
 
 // GetAllMobs retorna a lista de todos os mobs.

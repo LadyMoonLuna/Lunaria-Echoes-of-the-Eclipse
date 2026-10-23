@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -54,11 +55,59 @@ type lifeEvents struct {
 	buyMeal    bool
 	depleted   []uint8
 	zoneChange bool
+	buried     []uint32
+	care       string // compra de remédio/poção ou cura na Igreja (feita fora da trava)
+	sickMsg    string
+}
+
+// needsCtx: o que a vila oferece agora para matar a sede, a fome e tratar doenças e ferimentos.
+type needsCtx struct {
+	tavern      bool
+	fountainDry bool
+	healer      [2]float32 // balcão da Alquimista (ou de quem herdou o ofício)
+	healerZone  uint8
+	remedy      bool
+	potion      bool
+	church      bool
+}
+
+func (s *Server) needsContext() needsCtx {
+	ctx := needsCtx{tavern: s.tavernHasMeal()}
+	s.conflict.mu.Lock()
+	ctx.fountainDry = s.conflict.fountainDry
+	s.conflict.mu.Unlock()
+	if h := s.professionHolder(world.LyraID); h != nil {
+		h.WithLife(func(a *world.NPC) {
+			ctx.healer, ctx.healerZone = a.Life.Home, a.Life.HomeZone
+			ctx.remedy = a.ShopStock[uint16(protocol.ItemHerbalRemedy)] > 0
+			ctx.potion = a.ShopStock[uint16(protocol.ItemHealingPotion)] > 0
+		})
+	}
+	s.mu.RLock()
+	sera := s.npcs[world.SeraphinaID]
+	s.mu.RUnlock()
+	ctx.church = sera != nil && sera.Alive()
+	return ctx
+}
+
+// professionHolder devolve o NPC vivo que exerce o ofício (mestre original ou aprendiz formado).
+func (s *Server) professionHolder(profession uint32) *world.NPC {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if n := s.npcs[profession]; n != nil && n.Alive() && n.Profession == profession {
+		return n
+	}
+	for _, n := range s.npcs {
+		if n.Alive() && n.Profession == profession {
+			return n
+		}
+	}
+	return nil
 }
 
 func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float32) {
 	var ev lifeEvents
-	tavern := s.tavernHasMeal()
+	ctx := s.needsContext()
 	villageNodes := s.resourceNodes.InZone(world.ZoneVillage)
 	forestNodes := s.resourceNodes.InZone(world.ZoneForest)
 	now := time.Now()
@@ -76,7 +125,7 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 			return
 		}
 		if len(n.Life.Plan) == 0 {
-			planNeeds(n, tavern, villageNodes, &ev)
+			planNeeds(n, ctx, villageNodes, &ev)
 		}
 		if len(n.Life.Plan) == 0 && n.Profession != 0 {
 			produceAndOrder(n, now, villageNodes, forestNodes, &ev)
@@ -115,6 +164,15 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 	if ev.buyMeal {
 		s.serveTavernMeal(npc)
 	}
+	if ev.care != "" {
+		s.npcCare(npc, ev.care)
+	}
+	if ev.sickMsg != "" {
+		s.BroadcastNPCSay(npc.ID, ev.sickMsg)
+	}
+	for _, id := range ev.buried {
+		s.buryBody(npc, id)
+	}
 	for _, z := range ev.depleted {
 		s.broadcastResourceNodes(z)
 	}
@@ -123,12 +181,51 @@ func (s *Server) tickNPCLife(npc *world.NPC, dt float32, hour int, ambient float
 	}
 }
 
-// planNeeds escolhe o afazer biológico mais urgente: sede, fome, frio.
-func planNeeds(n *world.NPC, tavern bool, villageNodes []world.ResourceNode, ev *lifeEvents) {
+// planNeeds escolhe o afazer mais urgente: doença, ferimento, sede, fome, frio e calor.
+func planNeeds(n *world.NPC, ctx needsCtx, villageNodes []world.ResourceNode, ev *lifeEvents) {
+	remedy, potion := uint16(protocol.ItemHerbalRemedy), uint16(protocol.ItemHealingPotion)
+	hurt := float64(n.HP) < float64(n.MaxHP)*world.HurtThreshold
 	switch {
+	case n.Sick:
+		if n.ShopStock[remedy] > 0 && n.Profession == world.LyraID { // a Alquimista usa o próprio remédio
+			n.ShopStock[remedy]--
+			n.Sick, n.Disease = false, ""
+			return
+		}
+		price := world.ShopPrice(world.LyraID, protocol.ItemHerbalRemedy)
+		if ctx.remedy && n.Gold >= price*2 {
+			n.Life.Plan = world.RouteTo(n.ZoneID, ctx.healerZone, ctx.healer[0], ctx.healer[1]+1.5, "buy_remedy")
+			ev.says = append(ev.says, fmt.Sprintf("Estou com %s... preciso de um remédio da Alquimista.", n.Disease))
+		} else if ctx.church && n.Gold >= world.ChurchCurePrice {
+			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.ChurchDoor[0], world.ChurchDoor[1], "church_cure")
+			ev.says = append(ev.says, fmt.Sprintf("A %s não passa... vou pedir a cura na Igreja.", n.Disease))
+		}
+		if len(n.Life.Plan) > 0 || !hurt {
+			return
+		}
+		fallthrough
+	case hurt:
+		if n.ShopStock[potion] > 0 && n.Profession == world.LyraID {
+			n.ShopStock[potion]--
+			n.HP = min(n.MaxHP, n.HP+int(float64(n.MaxHP)*world.NPCPotionHealFrac))
+			return
+		}
+		price := world.ShopPrice(world.LyraID, protocol.ItemHealingPotion)
+		if ctx.potion && n.Gold >= price*2 {
+			n.Life.Plan = world.RouteTo(n.ZoneID, ctx.healerZone, ctx.healer[0], ctx.healer[1]+1.5, "buy_potion")
+			ev.says = append(ev.says, "Estou ferido... vou comprar uma poção com a Alquimista.")
+		} else if ctx.church && n.Gold >= world.ChurchHealPrice {
+			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.ChurchDoor[0], world.ChurchDoor[1], "church_heal")
+			ev.says = append(ev.says, "Estou muito ferido... a Igreja há de me curar.")
+		}
 	case n.Thirst < world.NeedThreshold:
-		n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFountain[0], world.PlaceFountain[1], "drink")
-		ev.says = append(ev.says, "Estou com uma sede terrível... vou até a Fonte Central.")
+		if ctx.fountainDry {
+			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceRiver[0], world.PlaceRiver[1], "drink_river")
+			ev.says = append(ev.says, "A Fonte secou! Vou ter que beber do rio... que os deuses me protejam.")
+		} else {
+			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFountain[0], world.PlaceFountain[1], "drink")
+			ev.says = append(ev.says, "Estou com uma sede terrível... vou até a Fonte Central.")
+		}
 	case n.Hunger < world.NeedThreshold:
 		meal := uint16(protocol.ItemCookedNobleMeat)
 		if n.ID == world.TavernNPCID && n.ShopStock[meal] > 0 {
@@ -136,7 +233,7 @@ func planNeeds(n *world.NPC, tavern bool, villageNodes []world.ResourceNode, ev 
 			n.Hunger = 100
 			return
 		}
-		if tavern && n.ID != world.TavernNPCID && n.Gold >= world.TavernMealPrice {
+		if ctx.tavern && n.ID != world.TavernNPCID && n.Gold >= world.TavernMealPrice {
 			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceTavern[0], world.PlaceTavern[1], "eat")
 			ev.says = append(ev.says, "Meu estômago ronca... hora de uma refeição na Taverna.")
 			return
@@ -158,8 +255,12 @@ func planNeeds(n *world.NPC, tavern bool, villageNodes []world.ResourceNode, ev 
 		n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFurnace[0], world.PlaceFurnace[1]+3, "warm")
 		ev.says = append(ev.says, "Brrr... este frio corta os ossos. Vou me aquecer na Fornalha.")
 	case n.Heat > world.HeatThreshold:
-		n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFountain[0], world.PlaceFountain[1], "cool")
-		ev.says = append(ev.says, "Que calor sufocante... vou me refrescar na Fonte.")
+		if ctx.fountainDry {
+			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceRiver[0], world.PlaceRiver[1], "cool_river")
+		} else {
+			n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFountain[0], world.PlaceFountain[1], "cool")
+		}
+		ev.says = append(ev.says, "Que calor sufocante... vou me refrescar na água.")
 	}
 }
 
@@ -175,8 +276,12 @@ func produceAndOrder(n *world.NPC, now time.Time, villageNodes, forestNodes []wo
 				continue
 			}
 			world.ConsumeRecipe(n.RawMaterials, r)
-			n.ShopStock[uint16(r.Output)]++
 			n.Life.LastCraft = now
+			if rand.Float64() < world.CraftFailChance(n, r) {
+				ev.says = append(ev.says, fmt.Sprintf("💥 Droga! Estraguei o(a) %s... ainda tenho muito a aprender.", world.ItemName(r.Output)))
+				break // falha: perde o material e não ganha experiência
+			}
+			n.ShopStock[uint16(r.Output)]++
 			ev.says = append(ev.says, fmt.Sprintf("🔨 Terminei mais um(a) %s para a loja!", world.ItemName(r.Output)))
 			if n.RegisterCraft() {
 				ev.says = append(ev.says, fmt.Sprintf("⭐ Meu ofício de %s chegou ao nível %d!", n.ProfessionName(), n.ProfessionLevel))
@@ -295,6 +400,23 @@ func (s *Server) advanceErrand(n *world.NPC, ev *lifeEvents) {
 	case "cool":
 		n.Heat = 0
 		n.Thirst = 100
+	case "drink_river", "cool_river":
+		n.Thirst = 100
+		if st.Action == "cool_river" {
+			n.Heat = 0
+		}
+		if sick, disease := world.CatchRiverDisease(nil); sick && !n.Sick {
+			n.Sick, n.Disease = true, disease
+			ev.sickMsg = fmt.Sprintf("Ugh... a água do rio me fez mal. Peguei %s!", disease)
+		}
+	case "buy_remedy", "buy_potion", "church_cure", "church_heal":
+		ev.care = st.Action
+	case "pickup_body":
+		if !s.pickupBody(st.TombID) {
+			n.Life.Plan = nil
+		}
+	case "bury":
+		ev.buried = append(ev.buried, st.TombID)
 	case "enter_zone":
 		n.ZoneID = st.EnterZone
 		n.PosX, n.PosZ = st.EnterX, st.EnterZ
@@ -554,5 +676,105 @@ func (s *Server) updateWaterEvaporation(hour int) {
 		if s.resourceNodes.UpdateEvaporation(zone, temp, world.IsRainyWeather(weather), rand.Float32) {
 			s.broadcastResourceNodes(zone)
 		}
+		if zone == world.ZoneVillage {
+			s.updateFountain(temp, world.IsRainyWeather(weather))
+		}
 	}
+}
+
+// updateFountain: a Fonte Central é funda e só seca num calor extremo; chuva ou tempo ameno a enchem.
+func (s *Server) updateFountain(temp float32, raining bool) {
+	s.conflict.mu.Lock()
+	dry := s.conflict.fountainDry
+	switch {
+	case dry && (raining || temp < world.FountainRefillTemp):
+		s.conflict.fountainDry = false
+	case !dry && !raining && temp > world.FountainDryTemp && rand.Float32() < (temp-world.FountainDryTemp)*world.FountainDryChancePer:
+		s.conflict.fountainDry = true
+	}
+	changed := dry != s.conflict.fountainDry
+	nowDry := s.conflict.fountainDry
+	s.conflict.mu.Unlock()
+	if !changed {
+		return
+	}
+	if nowDry {
+		s.BroadcastNPCSay(0, "🏜️ O calor foi tanto que a Fonte Central SECOU! Os moradores terão de buscar água no Rio Prateado, a leste.")
+	} else {
+		s.BroadcastNPCSay(0, "💧 A Fonte Central voltou a jorrar água limpa.")
+	}
+}
+
+// npcCare: o NPC paga à Alquimista (remédio/poção) ou à Igreja (mais caro) para se tratar.
+func (s *Server) npcCare(npc *world.NPC, action string) {
+	var seller *world.NPC
+	var item uint16
+	var price uint32
+	switch action {
+	case "buy_remedy", "buy_potion":
+		seller = s.professionHolder(world.LyraID)
+		item = uint16(protocol.ItemHerbalRemedy)
+		if action == "buy_potion" {
+			item = uint16(protocol.ItemHealingPotion)
+		}
+		if seller == nil || seller == npc {
+			return
+		}
+		var mult float32
+		seller.WithLife(func(a *world.NPC) { mult = world.SellPriceMult(a.Personality) })
+		price = uint32(float32(world.ShopPrice(world.LyraID, uint8(item)))*mult + 0.5)
+	default:
+		s.mu.RLock()
+		seller = s.npcs[world.SeraphinaID]
+		s.mu.RUnlock()
+		if seller == nil || !seller.Alive() || seller == npc {
+			return
+		}
+		price = world.ChurchHealPrice
+		if action == "church_cure" {
+			price = world.ChurchCurePrice
+		}
+	}
+	paid := false
+	npc.WithLife(func(n *world.NPC) {
+		if n.Gold >= price {
+			n.Gold -= price
+			paid = true
+		}
+	})
+	if !paid {
+		return
+	}
+	sold := false
+	seller.WithLife(func(a *world.NPC) {
+		if a.IsDead {
+			return
+		}
+		if item != 0 {
+			if a.ShopStock[item] <= 0 {
+				return
+			}
+			a.ShopStock[item]--
+		}
+		a.Gold += price
+		sold = true
+	})
+	if !sold {
+		npc.WithLife(func(n *world.NPC) { n.Gold += price })
+		return
+	}
+	npc.WithLife(func(n *world.NPC) {
+		switch action {
+		case "buy_remedy", "church_cure":
+			n.Sick, n.Disease = false, ""
+			if action == "church_cure" {
+				n.HP = n.MaxHP
+			}
+		case "buy_potion":
+			n.HP = min(n.MaxHP, n.HP+int(float64(n.MaxHP)*world.NPCPotionHealFrac))
+		case "church_heal":
+			n.HP = n.MaxHP
+		}
+	})
+	log.Printf("[MUNDO VIVO] NPC #%d pagou %d Sollares a %s (%s)\n", npc.ID, price, seller.Name, action)
 }

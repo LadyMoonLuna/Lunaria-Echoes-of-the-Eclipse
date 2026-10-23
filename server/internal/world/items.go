@@ -114,6 +114,7 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemHealingPotion:   {Name: "Poção de Cura", Weight: 0.5, Slot: NoSlot},
 	protocol.ItemManaPotion:      {Name: "Poção de Mana", Weight: 0.5, Slot: NoSlot},
 	protocol.ItemBlueprintScroll: {Name: "Pergaminho de Blueprint", Weight: 0.2, Slot: NoSlot},
+	protocol.ItemHerbalRemedy:    {Name: "Remédio de Ervas", Weight: 0.3, Slot: NoSlot},
 	protocol.ItemLeadPlate:       {Name: "Placa de Chumbo", Weight: 25.0, Slot: NoSlot},
 	protocol.ItemOffhandKnuckle:  {Name: "Manopla Secundária", Weight: 2.2, Slot: protocol.SlotOffHand, BonusSTR: 1, BonusATK: 5, BonusDEF: 1},
 }

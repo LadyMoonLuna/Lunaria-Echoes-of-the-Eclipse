@@ -430,5 +430,33 @@ def malakor():
     return m
 
 
+def zumbi():
+    m = M(26, "zumbi", "Zumbi", "Morto-vivo",
+          "Corpo putrefato que voltou a andar: pele cinza-esverdeada com manchas roxas, olhos leitosos que brilham "
+          "fraco, roupas rasgadas e enlameadas, costelas à mostra e braços estendidos à frente, mancando.",
+          "#7cb342", scale=1.0)
+    skin = m.mat("rotten_skin", "#8a9a70", rough=0.85)
+    bruise = m.mat("bruise", "#5e3c5c", rough=0.8)
+    rag = m.mat("torn_rags", "#4e4537", rough=1.0, double=True)
+    pants = m.mat("muddy_pants", "#3b3328", rough=1.0)
+    bone = m.mat("bone", "#e6dcc3", rough=0.6)
+    eye = m.mat("milky_eye", "#e0f2f1", emit="#b2dfdb", energy=1.2)
+    humanoid(m, skin, rag, pants, m.mat("bare_feet", "#6f7a5a", rough=0.9), w=0.95)
+    eyes(m, eye)
+    m.part("sphere", [0.13], (0, 1.75, 0.02), m.mat("patchy_hair", "#3b3a33", rough=1.0), scale=(1.0, 0.7, 1.0))
+    m.part("box", [0.06, 0.05, 0.01], (-0.06, 1.66, -0.12), bruise)
+    m.part("box", [0.1, 0.03, 0.01], (0, 1.62, -0.125), m.mat("open_jaw", "#2b1d1d", rough=0.9))
+    for i in range(3):
+        m.part("box", [0.16, 0.012, 0.02], (0, 1.3 - i * 0.06, -0.165), bone)
+    m.part("box", [0.1, 0.14, 0.01], (0.1, 1.15, -0.17), bruise, rot=(0, 0, 15))
+    # Braços estendidos para frente
+    m.part("capsule", [0.06, 0.4], (0.25, 1.35, -0.3), skin, rot=(80, 0, 0), group="arm_r", mirror=True)
+    m.part("sphere", [0.05], (0.25, 1.33, -0.52), skin, group="arm_r", mirror=True)
+    m.part("box", [0.2, 0.3, 0.02], (-0.12, 0.85, -0.16), rag, rot=(0, 0, -12))
+    m.extra_actions = {"attack": "attack_1h", "death": "death_fall"}
+    m.primary = "rotten_skin"
+    return m
+
+
 MOBS = [javali, lobo_bruma, saqueador, besteiro, acolito_eclipse, executor, lobo_alfa, licantropo_alfa, cultista, gargula,
-        inquisidor, vaelen, malakor]
+        inquisidor, vaelen, malakor, zumbi]

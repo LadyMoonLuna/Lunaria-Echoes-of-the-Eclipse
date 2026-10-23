@@ -29,12 +29,17 @@ type conflictState struct {
 	treasury    uint32               // tesouro da Vila (recompensas sem família viva)
 	mobStrikes  map[uint32]time.Time // último golpe de cada mob em NPCs
 	crimeVictim map[uint32]uint32    // jogador -> última vítima (a família recebe a recompensa)
+	fountainDry bool
+	tombClaims  map[uint32]uint32 // túmulo -> NPC que está levando o corpo
+	lastHeal    map[uint32]time.Time
 }
 
 func (c *conflictState) lazyInit() {
 	if c.mobStrikes == nil {
 		c.mobStrikes = map[uint32]time.Time{}
 		c.crimeVictim = map[uint32]uint32{}
+		c.tombClaims = map[uint32]uint32{}
+		c.lastHeal = map[uint32]time.Time{}
 	}
 }
 
@@ -74,6 +79,11 @@ func (s *Server) handleConflictPacket(playerID uint32, data []byte) {
 		}
 	case protocol.PacketTypeTombstoneRequest:
 		writeTCP(player, protocol.SerializeTombstones(s.tombstoneEntries()))
+	case protocol.PacketTypeCorpseRite:
+		var pkt protocol.CorpseRitePacket
+		if protocol.DeserializeCorpseRite(data, &pkt) == nil {
+			s.handleCorpseRite(player, pkt)
+		}
 	}
 }
 
@@ -107,44 +117,64 @@ func (s *Server) playerHitNPC(player *world.Player, npc *world.NPC, damage uint1
 	s.onNPCAttacked(npc, player.ID, false)
 }
 
-// registerCrime marca o jogador como PROCURADO e solta a Guarda atrás dele.
+// registerCrime: +100 por golpe, +300 por assassinato e +200 por assassinato consecutivo; a Guarda inicia a caçada.
 func (s *Server) registerCrime(player *world.Player, victim *world.NPC, killed bool) {
-	wasWanted := player.IsWanted()
-	player.MarkWanted()
-	if wasWanted && !killed {
-		// já procurado: renova o tempo, mas a recompensa só sobe por novo crime grave
-		player.Mu.Lock()
-		player.BountyGold -= world.BountyPerCrime
-		player.Mu.Unlock()
+	var r world.CrimeResult
+	if killed {
+		r = player.RegisterMurder()
+	} else {
+		r = player.RegisterHit()
 	}
 	s.conflict.mu.Lock()
 	s.conflict.lazyInit()
 	s.conflict.crimeVictim[player.ID] = victim.ID
 	s.conflict.mu.Unlock()
-	if !wasWanted {
+	switch {
+	case !r.WasWanted:
 		s.BroadcastNPCSay(0, fmt.Sprintf("🚨 CRIME NA VILA! %s atacou %s! Os Guardas Reais iniciaram a caçada!", playerName(player), victim.Name))
+	case killed:
+		s.BroadcastNPCSay(0, fmt.Sprintf("🚨 ASSASSINATO! %s matou %s! Recompensa: %d Sollares (+%d).", playerName(player), victim.Name, r.Bounty, r.Added))
 	}
+	if r.BecamePermanent {
+		s.BroadcastNPCSay(0, fmt.Sprintf("☠️ %s já assassinou %d cidadãos e agora é PROCURADO PARA SEMPRE em todas as cidades vizinhas!", playerName(player), r.Murders))
+	}
+	s.dispatchLawmen(player, victim)
+}
+
+// dispatchLawmen manda os Guardas (e caçadores da Igreja ativos) da cidade atrás do jogador.
+func (s *Server) dispatchLawmen(player *world.Player, exclude *world.NPC) {
 	zone := player.GetZone()
-	if world.IsLawlessZone(zone) {
+	city := world.CityOfZone(zone)
+	if city == 0 {
 		return
 	}
-	for _, id := range world.GuardNPCs {
-		s.mu.RLock()
-		guard := s.npcs[id]
-		s.mu.RUnlock()
-		if guard == nil || !guard.Targetable() || guard.GetZone() != zone || guard == victim {
-			continue
+	s.mu.RLock()
+	lawmen := make([]*world.NPC, 0, 4)
+	for id, n := range s.npcs {
+		if world.IsLawman(id) && n != exclude && n.Targetable() && world.CityOfZone(n.GetZone()) == city {
+			lawmen = append(lawmen, n)
 		}
-		guard.WithLife(func(g *world.NPC) {
-			if g.Life.HuntTarget == 0 && g.IsPatrolling {
-				g.Life.WasPatrolling = true
-				g.IsPatrolling = false
-			}
-			g.Life.HuntTarget = player.ID
-			g.Life.Plan = nil
-			g.CurrentActivity = world.ActivityHunting
-		})
 	}
+	s.mu.RUnlock()
+	for _, g := range lawmen {
+		startHunt(g, player.ID)
+	}
+}
+
+func startHunt(guard *world.NPC, playerID uint32) {
+	guard.WithLife(func(g *world.NPC) {
+		if g.Life.HuntTarget == 0 && g.IsPatrolling {
+			g.Life.WasPatrolling = true
+			g.IsPatrolling = false
+		}
+		if g.Life.HuntTarget == 0 {
+			g.Life.PursuitHomeZone = g.ZoneID
+			g.Life.PursuitHome = [2]float32{g.PosX, g.PosZ}
+		}
+		g.Life.HuntTarget = playerID
+		g.Life.Plan = nil
+		g.CurrentActivity = world.ActivityHunting
+	})
 }
 
 // onNPCAttacked: NPCs de combate revidam; civis gritam por socorro e fogem até o Guarda mais próximo.
@@ -212,6 +242,10 @@ func (s *Server) nearestGuardPos(npc *world.NPC) (float32, float32, bool) {
 
 // handleNPCDeath: túmulo, espólio no chão, anúncio solene. O NPC nunca renasce.
 func (s *Server) handleNPCDeath(npc *world.NPC, killer string) {
+	s.handleNPCDeathBy(npc, killer, false)
+}
+
+func (s *Server) handleNPCDeathBy(npc *world.NPC, killer string, byZombie bool) {
 	x, _, z := npc.GetPos()
 	zone := npc.GetZone()
 	profession := npc.ProfessionName()
@@ -224,7 +258,8 @@ func (s *Server) handleNPCDeath(npc *world.NPC, killer string) {
 	})
 	s.conflict.mu.Lock()
 	s.conflict.tombstones = append(s.conflict.tombstones, world.Tombstone{NPCID: npc.ID, Name: npc.Name,
-		Profession: profession, Killer: killer, Zone: zone, X: x, Z: z, DiedAt: time.Now()})
+		Profession: profession, Killer: killer, Zone: zone, X: x, Z: z, DiedAt: time.Now(),
+		MaxHP: npc.MaxHP, KilledByZombie: byZombie, LastRoll: time.Now()})
 	s.conflict.mu.Unlock()
 
 	items, gold := npc.TakeEstate()
@@ -273,6 +308,7 @@ func (s *Server) updateNPCConflict(dt float32) {
 		s.tickGuardHunt(n)
 		s.tickRetaliation(n)
 		s.tickFollowing(n)
+		s.tickZombieAwareness(n)
 		s.tickApprentice(n, dt, hour)
 		s.tickGraduateRoutine(n, hour)
 	}
@@ -333,29 +369,111 @@ func endPursuit(g *world.NPC) {
 	g.CurrentActivity = world.ActivityWorking
 }
 
-// tickGuardHunt: o Guarda persegue o criminoso (+35% de velocidade) até abatê-lo ou ele fugir para zonas sem lei.
+// tickGuardHunt: o Guarda persegue o criminoso (+35% de velocidade) pela cidade e um pouco além,
+// para dentro dos Esgotos/Mercado Negro. Se ele escapar lá dentro, vira procurado permanente nesta cidade.
 func (s *Server) tickGuardHunt(n *world.NPC) {
 	var target uint32
-	n.WithLife(func(g *world.NPC) { target = g.Life.HuntTarget })
+	var homeZone uint8
+	n.WithLife(func(g *world.NPC) { target, homeZone = g.Life.HuntTarget, g.Life.PursuitHomeZone })
 	if target == 0 {
+		s.spotWanted(n)
 		return
 	}
+	city := world.CityOfZone(homeZone)
 	p := s.findPlayer(target)
-	if p == nil || !p.IsWanted() || world.IsLawlessZone(p.GetZone()) {
-		n.WithLife(endPursuit)
-		if p != nil && world.IsLawlessZone(p.GetZone()) {
-			s.BroadcastNPCSay(n.ID, "Maldito! Fugiu para onde a lei não alcança... mas voltará a cair!")
-		}
+	if p == nil || !p.IsWantedIn(city) {
+		s.returnFromPursuit(n)
 		return
+	}
+	pzone := p.GetZone()
+	nzone := n.GetZone()
+	c, _ := world.CityByID(city)
+	if pzone != nzone {
+		switch {
+		case world.CityOfZone(pzone) == city:
+			// voltou para outra área da cidade: o Guarda vai atrás
+			p.Mu.RLock()
+			px, pz := p.PosX, p.PosZ
+			p.Mu.RUnlock()
+			n.WithLife(func(g *world.NPC) { g.ZoneID, g.PosX, g.PosZ, g.TargetX, g.TargetZ = pzone, px+2, pz+2, px+2, pz+2 })
+		case world.IsLawlessZone(pzone) && c.Lawless != nil:
+			if entry, ok := c.Lawless[pzone]; ok {
+				n.WithLife(func(g *world.NPC) {
+					g.ZoneID, g.PosX, g.PosZ, g.TargetX, g.TargetZ = pzone, entry[0], entry[1], entry[0], entry[1]
+				})
+				s.BroadcastNPCSay(n.ID, "Não vai escapar pelos túneis! Atrás dele!")
+			}
+		default:
+			s.returnFromPursuit(n)
+			return
+		}
+	}
+	if world.IsLawlessZone(pzone) {
+		entry := c.Lawless[pzone]
+		p.Mu.RLock()
+		dx, dz := p.PosX-entry[0], p.PosZ-entry[1]
+		p.Mu.RUnlock()
+		if dx*dx+dz*dz > world.LawlessPursuitRadius*world.LawlessPursuitRadius {
+			if p.MarkPermanentWanted(city) {
+				s.BroadcastNPCSay(0, fmt.Sprintf("📜 %s se escondeu nas sombras... A Guarda desistiu, mas ele agora é PROCURADO PERMANENTE em %s!",
+					playerName(p), world.CityName(city)))
+			}
+			s.returnFromPursuit(n)
+			return
+		}
 	}
 	reach, killed := s.chaseAndStrike(n, p, world.GuardBaseSpeed*world.GuardHuntSpeedMult, world.CombatNPCs[n.ID])
 	if !reach {
-		n.WithLife(endPursuit)
+		s.returnFromPursuit(n)
 		return
 	}
 	if killed {
 		s.guardKilledCriminal(n, p)
 	}
+}
+
+// spotWanted: Guardas e caçadores ociosos reconhecem procurados na cidade e atacam à vista.
+func (s *Server) spotWanted(n *world.NPC) {
+	if !world.IsLawman(n.ID) {
+		return
+	}
+	zone := n.GetZone()
+	city := world.CityOfZone(zone)
+	if city == 0 {
+		return
+	}
+	nx, _, nz := n.GetPos()
+	s.mu.RLock()
+	var seen *world.Player
+	for _, p := range s.players {
+		if p.GetZone() != zone || !p.IsWantedIn(city) {
+			continue
+		}
+		p.Mu.RLock()
+		dx, dz := p.PosX-nx, p.PosZ-nz
+		p.Mu.RUnlock()
+		if dx*dx+dz*dz <= 30*30 {
+			seen = p
+			break
+		}
+	}
+	s.mu.RUnlock()
+	if seen != nil {
+		startHunt(n, seen.ID)
+		s.BroadcastNPCSay(n.ID, fmt.Sprintf("Alto lá, %s! Você é procurado em %s!", playerName(seen), world.CityName(city)))
+	}
+}
+
+// returnFromPursuit encerra a caçada e devolve o perseguidor ao seu posto.
+func (s *Server) returnFromPursuit(n *world.NPC) {
+	n.WithLife(func(g *world.NPC) {
+		if g.Life.HuntTarget != 0 && g.ZoneID != g.Life.PursuitHomeZone {
+			g.ZoneID = g.Life.PursuitHomeZone
+			g.PosX, g.PosZ = g.Life.PursuitHome[0], g.Life.PursuitHome[1]
+			g.TargetX, g.TargetZ = g.PosX, g.PosZ
+		}
+		endPursuit(g)
+	})
 }
 
 // guardKilledCriminal: o criminoso paga a recompensa à família da vítima (ou ao tesouro) e renasce preso.
@@ -382,16 +500,17 @@ func (s *Server) guardKilledCriminal(guard *world.NPC, p *world.Player) {
 	s.BroadcastPlayerRespawn(p.ID, world.JailX, 1.5, world.JailZ)
 	s.sendPlayerStats(p)
 	s.sendInventorySync(p)
-	for _, id := range world.GuardNPCs {
-		s.mu.RLock()
-		g := s.npcs[id]
-		s.mu.RUnlock()
-		if g != nil {
-			g.WithLife(func(gg *world.NPC) {
-				if gg.Life.HuntTarget == p.ID {
-					endPursuit(gg)
-				}
-			})
+	s.mu.RLock()
+	hunters := make([]*world.NPC, 0, 4)
+	for _, g := range s.npcs {
+		hunters = append(hunters, g)
+	}
+	s.mu.RUnlock()
+	for _, g := range hunters {
+		hunting := false
+		g.WithLife(func(gg *world.NPC) { hunting = gg.Life.HuntTarget == p.ID })
+		if hunting {
+			s.returnFromPursuit(g)
 		}
 	}
 	s.BroadcastNPCSay(guard.ID, fmt.Sprintf("⛓️ Justiça feita! %s foi abatido e levado à cela. %d Sollares de recompensa foram para %s.",
@@ -463,7 +582,7 @@ func (s *Server) tickMobsVersusNPCs(npcs []*world.NPC) {
 	now := time.Now()
 	for _, mob := range s.mobManager.GetAllMobs() {
 		mob.Mu.RLock()
-		alive := mob.IsAlive && mob.IsActive && now.After(mob.PolymorphUntil)
+		alive := mob.IsAlive && mob.IsActive && now.After(mob.PolymorphUntil) && !mob.Undead // zumbis têm IA própria
 		mx, mz, zone, maxHP, name := mob.PosX, mob.PosZ, mob.ZoneID, mob.MaxHP, mob.Name
 		mob.Mu.RUnlock()
 		if !alive {
@@ -734,4 +853,20 @@ func (s *Server) tickGraduateRoutine(n *world.NPC, hour int) {
 			}
 		}
 	})
+}
+
+// projectileNPCHit devolve o NPC atingido pelo projétil (raio 1,1 m), se houver.
+func (s *Server) projectileNPCHit(p *world.Projectile, zone uint8) *world.NPC {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, npc := range s.npcs {
+		if p.HitTargets[npc.ID] || npc.GetZone() != zone || !npc.Targetable() {
+			continue
+		}
+		nx, _, nz := npc.GetPos()
+		if (nx-p.PosX)*(nx-p.PosX)+(nz-p.PosZ)*(nz-p.PosZ) <= 1.1*1.1 {
+			return npc
+		}
+	}
+	return nil
 }

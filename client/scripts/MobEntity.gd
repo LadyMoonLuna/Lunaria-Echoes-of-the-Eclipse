@@ -5,7 +5,7 @@ const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
 const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
 ## Textura do corpo principal de cada tipo de mob
 const MOB_TEXTURES := {
-	1: "fur", 25: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
+	1: "fur", 25: "fur", 26: "cloth", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
 	10: "cloth", 11: "stone", 12: "cloth", 13: "metal_hammered", 14: "obsidian",
 }
 
@@ -36,6 +36,7 @@ var collision_shape: CollisionShape3D = null
 const MOB_NAMES := {
 	1: "Lobo da Bruma",
 	25: "Javali Selvagem",
+	26: "Zumbi",
 	2: "Saqueador Deserdado",
 	3: "Besteiro da Vigília",
 	4: "Acólito do Eclipse",

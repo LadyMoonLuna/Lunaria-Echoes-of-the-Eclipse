@@ -11,15 +11,18 @@ import (
 
 // Atividades
 const (
-	ActivityWorking   = "Trabalhando"
-	ActivityEating    = "Comendo"
-	ActivityDrinking  = "Bebendo na Fonte"
-	ActivityWarming   = "Aquecendo no Fogo"
-	ActivityCooling   = "Refrescando na Fonte"
-	ActivityGathering = "Coletando Recursos"
-	ActivitySleeping  = "Dormindo"
-	ActivityFleeing   = "Fugindo"
-	ActivityDead      = "Morto"
+	ActivityWorking       = "Trabalhando"
+	ActivityEating        = "Comendo"
+	ActivityDrinking      = "Bebendo na Fonte"
+	ActivityWarming       = "Aquecendo no Fogo"
+	ActivityCooling       = "Refrescando na Fonte"
+	ActivityDrinkingRiver = "Bebendo no Rio"
+	ActivitySeekingCure   = "Procurando Cura"
+	ActivityBurying       = "Levando o Corpo ao Cemitério"
+	ActivityGathering     = "Coletando Recursos"
+	ActivitySleeping      = "Dormindo"
+	ActivityFleeing       = "Fugindo"
+	ActivityDead          = "Morto"
 )
 
 // Personalidades
@@ -63,6 +66,7 @@ type ErrandStep struct {
 	X, Z      float32
 	Action    string // "", "drink", "eat", "warm", "gather", "enter_zone"
 	NodeID    uint32 // nó de recurso para "gather"
+	TombID    uint32 // túmulo (ID do NPC morto) para "pickup_body"/"bury"
 	EnterZone uint8  // zona de destino para "enter_zone"
 	EnterX    float32
 	EnterZ    float32
@@ -82,13 +86,15 @@ type NPCLifeState struct {
 	LastSpeech    time.Time
 
 	// Parte 2: conflito, caçada, contratação e sucessão
-	Aggressor      uint32 // jogador ou mob que o atacou (revide/fuga)
-	AggressorIsMob bool
-	HuntTarget     uint32 // guarda caçando este jogador procurado
-	LastStrike     time.Time
-	Following      uint32 // jogador que contratou o NPC
-	StudyingFor    uint32 // aprendiz: ID do mestre caído cuja oficina estuda
-	StudyProgress  float32
+	Aggressor       uint32 // jogador ou mob que o atacou (revide/fuga)
+	AggressorIsMob  bool
+	HuntTarget      uint32 // guarda caçando este jogador procurado
+	PursuitHomeZone uint8  // onde o perseguidor estava ao começar a caçada
+	PursuitHome     [2]float32
+	LastStrike      time.Time
+	Following       uint32 // jogador que contratou o NPC
+	StudyingFor     uint32 // aprendiz: ID do mestre caído cuja oficina estuda
+	StudyProgress   float32
 }
 
 // BuyOrder: o NPC compra Wanted unidades do material por Price cada.
@@ -108,7 +114,8 @@ type Ingredient struct {
 type Recipe struct {
 	Output      uint8
 	Ingredients []Ingredient
-	Price       uint32 // preço base de venda
+	Price       uint32  // preço base de venda
+	Difficulty  float64 // 0..1: chance-base de um aprendiz falhar
 }
 
 // NPCProfile: profissão do NPC (receitas, preços de compra, onde coletar).
@@ -125,26 +132,27 @@ var fuel = []uint16{MatCharcoal, MatPineRefuge, MatGreyOak}
 var NPCProfiles = map[uint32]NPCProfile{
 	100: { // Garrick, o Ferreiro
 		Recipes: []Recipe{
-			{Output: protocol.ItemIronLongsword, Ingredients: []Ingredient{{[]uint16{MatIron}, 3}, {fuel, 1}}, Price: 180},
-			{Output: ItemIronAxe, Ingredients: []Ingredient{{[]uint16{MatIron}, 2}, {fuel, 2}}, Price: 90},
-			{Output: ItemIronPickaxe, Ingredients: []Ingredient{{[]uint16{MatIron}, 2}, {fuel, 2}}, Price: 95},
-			{Output: protocol.ItemSteelChestplate, Ingredients: []Ingredient{{[]uint16{MatIron}, 5}, {fuel, 2}}, Price: 260},
+			{Output: protocol.ItemIronLongsword, Ingredients: []Ingredient{{[]uint16{MatIron}, 3}, {fuel, 1}}, Price: 180, Difficulty: 0.35},
+			{Output: ItemIronAxe, Ingredients: []Ingredient{{[]uint16{MatIron}, 2}, {fuel, 2}}, Price: 90, Difficulty: 0.15},
+			{Output: ItemIronPickaxe, Ingredients: []Ingredient{{[]uint16{MatIron}, 2}, {fuel, 2}}, Price: 95, Difficulty: 0.15},
+			{Output: protocol.ItemSteelChestplate, Ingredients: []Ingredient{{[]uint16{MatIron}, 5}, {fuel, 2}}, Price: 260, Difficulty: 0.5},
 		},
 		BuyPrices: map[uint16]uint32{MatIron: 25, MatCharcoal: 12, MatPineRefuge: 6, MatGreyOak: 9},
 		Restock:   map[uint16]int{MatIron: 10, MatPineRefuge: 6},
 	},
 	103: { // Lyra, a Alquimista
 		Recipes: []Recipe{
-			{Output: protocol.ItemHealingPotion, Ingredients: []Ingredient{{[]uint16{MatHerbs}, 2}, {[]uint16{MatPureWater}, 1}}, Price: 45},
-			{Output: protocol.ItemManaPotion, Ingredients: []Ingredient{{[]uint16{MatGlowMushroom}, 1}, {[]uint16{MatHerbs}, 1}, {[]uint16{MatPureWater}, 1}}, Price: 60},
-			{Output: protocol.ItemWolfBloodPotion, Ingredients: []Ingredient{{[]uint16{MatWolfBlood}, 1}, {[]uint16{MatPureWater}, 1}}, Price: 70},
+			{Output: protocol.ItemHealingPotion, Ingredients: []Ingredient{{[]uint16{MatHerbs}, 2}, {[]uint16{MatPureWater}, 1}}, Price: 45, Difficulty: 0.2},
+			{Output: protocol.ItemManaPotion, Ingredients: []Ingredient{{[]uint16{MatGlowMushroom}, 1}, {[]uint16{MatHerbs}, 1}, {[]uint16{MatPureWater}, 1}}, Price: 60, Difficulty: 0.3},
+			{Output: protocol.ItemHerbalRemedy, Ingredients: []Ingredient{{[]uint16{MatHerbs}, 2}, {[]uint16{MatGlowMushroom}, 1}, {[]uint16{MatPureWater}, 1}}, Price: 55, Difficulty: 0.25},
+			{Output: protocol.ItemWolfBloodPotion, Ingredients: []Ingredient{{[]uint16{MatWolfBlood}, 1}, {[]uint16{MatPureWater}, 1}}, Price: 70, Difficulty: 0.4},
 		},
 		BuyPrices: map[uint16]uint32{MatHerbs: 10, MatPureWater: 5, MatGlowMushroom: 18, MatWolfBlood: 22},
 		Restock:   map[uint16]int{MatHerbs: 8, MatPureWater: 6, MatGlowMushroom: 3},
 	},
 	TavernNPCID: { // Chef Bartolomeu: refeições
 		Recipes: []Recipe{
-			{Output: protocol.ItemCookedNobleMeat, Ingredients: []Ingredient{{[]uint16{uint16(protocol.ItemRawWolfMeat)}, 1}, {fuel, 1}}, Price: 25},
+			{Output: protocol.ItemCookedNobleMeat, Ingredients: []Ingredient{{[]uint16{uint16(protocol.ItemRawWolfMeat)}, 1}, {fuel, 1}}, Price: 25, Difficulty: 0.1},
 		},
 		BuyPrices: map[uint16]uint32{uint16(protocol.ItemRawWolfMeat): 8, MatPineRefuge: 6},
 		Restock:   map[uint16]int{uint16(protocol.ItemRawWolfMeat): 8, MatPineRefuge: 6},
@@ -164,7 +172,7 @@ var NPCStarts = map[uint32]NPCStart{
 	100: {1800, 1500, PersonalityHonorable, map[uint16]int{MatIron: 6, MatPineRefuge: 4},
 		map[uint16]int{uint16(protocol.ItemIronLongsword): 1, uint16(ItemIronAxe): 2, uint16(ItemIronPickaxe): 2}},
 	103: {1200, 1200, PersonalityAmbitious, map[uint16]int{MatHerbs: 4, MatPureWater: 3, MatGlowMushroom: 1},
-		map[uint16]int{uint16(protocol.ItemHealingPotion): 3, uint16(protocol.ItemManaPotion): 2}},
+		map[uint16]int{uint16(protocol.ItemHealingPotion): 3, uint16(protocol.ItemManaPotion): 2, uint16(protocol.ItemHerbalRemedy): 2}},
 	104: {900, 2500, PersonalityRuthless, nil, nil},  // Varis
 	105: {2500, 400, PersonalityHonorable, nil, nil}, // Capitão Randel
 	106: {2500, 250, PersonalityCautious, nil, nil},  // Guarda Valen
@@ -316,8 +324,17 @@ func (npc *NPC) TickNeeds(dt float32, ambient float32) bool {
 	m := dt / 60
 	t := npc.FeltTemp(ambient)
 	npc.Temperature = t
-	npc.Hunger = clampNeed(npc.Hunger - HungerPerMinute*m)
-	npc.Thirst = clampNeed(npc.Thirst - ThirstPerMinute*ThirstMultiplier(t)*m)
+	sickMult := float32(1)
+	if npc.Sick {
+		sickMult = SickNeedsMult
+		npc.sickAccum += SickHPPerMinute * m
+		if npc.sickAccum >= 1 {
+			npc.HP -= int(npc.sickAccum)
+			npc.sickAccum -= float32(int(npc.sickAccum))
+		}
+	}
+	npc.Hunger = clampNeed(npc.Hunger - HungerPerMinute*sickMult*m)
+	npc.Thirst = clampNeed(npc.Thirst - ThirstPerMinute*ThirstMultiplier(t)*sickMult*m)
 	switch {
 	case t < ComfortMinTemp: // esfria proporcional ao quanto está abaixo do conforto
 		npc.Cold = clampNeed(npc.Cold + ColdRisePerMinute*(ComfortMinTemp-t)/5*m)
@@ -385,6 +402,12 @@ func ActivityFor(action string) string {
 		return ActivityCooling
 	case "flee":
 		return ActivityFleeing
+	case "drink_river":
+		return ActivityDrinkingRiver
+	case "buy_remedy", "buy_potion", "church_cure", "church_heal":
+		return ActivitySeekingCure
+	case "pickup_body", "bury":
+		return ActivityBurying
 	}
 	return ActivityGathering
 }

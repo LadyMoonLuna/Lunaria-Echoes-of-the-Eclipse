@@ -80,6 +80,7 @@ const (
 	PacketTypeNPCContract         uint8 = 0x4C // [Client -> Server] Contratar/treinar/assentar/dispensar NPC (6 bytes)
 	PacketTypeTombstoneRequest    uint8 = 0x4D // [Client -> Server] Pedir lista de túmulos (1 byte)
 	PacketTypeTombstoneState      uint8 = 0x4E // [Server -> Client] Túmulos permanentes (tamanho variável)
+	PacketTypeCorpseRite          uint8 = 0x4F // [Client -> Server] Purificar / reviver corpo ou cova (7 bytes)
 )
 
 // Tipos de Projéteis 3D
@@ -124,6 +125,7 @@ const (
 	MobTypeVesperianBloodGuard  uint8 = 23 // Guarda Sanguinário de Vesperian (HP 680)
 	MobTypeLordVesperianVampire uint8 = 24 // Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto - HP 8.500)
 	MobTypeWildBoar             uint8 = 25 // Javali Selvagem (Bosque Sussurrante - HP 140, mais fraco que o Lobo da Bruma)
+	MobTypeZombie               uint8 = 26 // Zumbi (corpo não processado que voltou à vida; não renasce)
 )
 
 // Estados de Mobs do Marco 4
@@ -329,6 +331,7 @@ const (
 	ItemHealingPotion   uint8 = 79 // Poção de Cura (Lyra: Ervas + Água) — +90 HP
 	ItemManaPotion      uint8 = 80 // Poção de Mana (Lyra: Cogumelo + Ervas + Água) — +80 Mana
 	ItemBlueprintScroll uint8 = 81 // Pergaminho de Blueprint (forma um aprendiz no ofício do mestre caído)
+	ItemHerbalRemedy    uint8 = 82 // Remédio de Ervas (Lyra) — cura doenças e infecções
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -2407,4 +2410,31 @@ func SerializeTombstones(list []TombstoneEntry) []byte {
 	}
 	binary.LittleEndian.PutUint16(b[1:3], uint16(len(b)))
 	return b
+}
+
+// --- 0x4F: CORPSE_RITE (Client -> Server, 7 bytes) ---
+// op | alvo (0 = cadáver de criatura, 1 = corpo/cova de NPC) | id u32 | rito (0 = purificar, 1 = reviver como zumbi)
+
+const (
+	CorpseRitePacketSize       = 7
+	RiteTargetCorpse     uint8 = 0
+	RiteTargetGrave      uint8 = 1
+	RitePurify           uint8 = 0
+	RiteRaise            uint8 = 1
+)
+
+type CorpseRitePacket struct {
+	Target uint8
+	ID     uint32
+	Rite   uint8
+}
+
+func DeserializeCorpseRite(data []byte, pkt *CorpseRitePacket) error {
+	if len(data) < CorpseRitePacketSize || data[0] != PacketTypeCorpseRite {
+		return ErrInvalidPacketSize
+	}
+	pkt.Target = data[1]
+	pkt.ID = binary.LittleEndian.Uint32(data[2:6])
+	pkt.Rite = data[6]
+	return nil
 }

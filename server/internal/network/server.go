@@ -317,6 +317,7 @@ func (s *Server) Start() error {
 	allLivingNPCs := []*world.NPC{garrick, lyra, varis, guard1, guard2, seraphina, aurelius, kaelen, ghostAlchemist}
 	allLivingNPCs = append(allLivingNPCs, s.spawnClassMasters(scriptsDir, currentH)...)
 	allLivingNPCs = append(allLivingNPCs, spawnApprentices(s.clock, s.BroadcastNPCSay)...)
+	allLivingNPCs = append(allLivingNPCs, spawnGravedigger(s.clock, s.BroadcastNPCSay))
 	for _, npc := range allLivingNPCs {
 		if err := s.luaEngine.BindNPC(npc); err != nil {
 			log.Printf("[AVISO] Nao foi possivel vincular script do NPC '%s' (ID %d): %v\n", npc.Name, npc.ID, err)
@@ -860,7 +861,7 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 					s.handleSubmitAutopsyResult(submitPkt)
 				}
 
-			case protocol.PacketTypeSetPKMode, protocol.PacketTypeNPCContract, protocol.PacketTypeTombstoneRequest:
+			case protocol.PacketTypeSetPKMode, protocol.PacketTypeNPCContract, protocol.PacketTypeTombstoneRequest, protocol.PacketTypeCorpseRite:
 				// Pacotes 0x4B / 0x4C / 0x4D: Postura Hostil, contratos de NPC e túmulos (Mundo Vivo, Parte 2)
 				size := protocol.SetPKModePacketSize
 				switch header[0] {
@@ -868,6 +869,8 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 					size = protocol.NPCContractPacketSize
 				case protocol.PacketTypeTombstoneRequest:
 					size = protocol.TombstoneRequestSize
+				case protocol.PacketTypeCorpseRite:
+					size = protocol.CorpseRitePacketSize
 				}
 				full := make([]byte, size)
 				full[0] = header[0]
@@ -2982,6 +2985,8 @@ func getMobKillXP(mobType uint8) uint16 {
 	switch mobType {
 	case protocol.MobTypeMistWolf: // 1: Lobo da Bruma (35 XP)
 		return 35
+	case protocol.MobTypeZombie: // 26: Zumbi (40 XP)
+		return 40
 	case protocol.MobTypeWildBoar: // 25: Javali Selvagem (20 XP)
 		return 20
 	case protocol.MobTypeOutcastRaider: // 2: Saqueador Deserdado (45 XP)
@@ -3033,6 +3038,7 @@ func getMobKillXP(mobType uint8) uint16 {
 
 // handleMobDeath distribui XP a todos os jogadores participantes ou próximos e valida a evolução secreta Varkai.
 func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
+	defer s.handleZombieRemains(mob) // zumbis não renascem
 	mob.Mu.RLock()
 	mobID := mob.ID
 	mobName := mob.Name
@@ -3120,6 +3126,12 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 		killer = eligible[0]
 	}
 	s.mu.RUnlock()
+
+	// Sem jogador por perto (morto por NPC ou zumbi): o corpo fica no chão mesmo assim
+	if killer == nil && s.corpseManager != nil {
+		s.corpseManager.CreateCorpseFromMob(mob, 0, 0)
+		s.broadcastCorpseSnapshots()
+	}
 
 	if killer != nil {
 		// Rastreio dos Desafios Secretos e Passivas no Abate
@@ -4220,6 +4232,20 @@ func (s *Server) updateProjectiles(dt float32) {
 				}
 			}
 		}
+
+		// 3. Colisão contra NPCs (raio 1.1m) — só com a Postura Hostil ligada
+		if p.IsActive && owner.IsPKMode() {
+			if npc := s.projectileNPCHit(p, ownerZone); npc != nil {
+				p.HitTargets[npc.ID] = true
+				damage, isCrit := s.luaEngine.CallCalculateDamage(ownerRace, ownerClass, actionType, hpPct, int(h), moon, weather,
+					ownerTier, ownerLevel, ownerBuff, oSTR, oDEX, oINT, oSPI, oMAS, oLCK)
+				damage = applyPathDamage(damage, owner)
+				s.playerHitNPC(owner, npc, damage, isCrit, actionType)
+				if p.ProjType != protocol.ProjTypePiercingArrow {
+					p.IsActive = false
+				}
+			}
+		}
 	}
 
 	s.projManager.Cleanup()
@@ -4505,6 +4531,10 @@ func (s *Server) runGameLoop() {
 					if !mob.IsAlive {
 						continue
 					}
+					if mob.Undead {
+						s.updateZombieAI(mob, dt) // zumbis: IA própria, bem menos esperta
+						continue
+					}
 
 					// Recuperação autoritativa de vulnerabilidade expirada (ex: Executor de Ferro)
 					if mob.CheckVulnerabilityExpired() {
@@ -4624,6 +4654,7 @@ func (s *Server) runGameLoop() {
 				s.updateNPCRoutines(int(h))
 				s.updateNPCLife(1.0)
 				s.updateNPCConflict(1.0)
+				s.updateAfterlife()
 				if s.serverTick%(GameTickRate*10) < GameTickRate {
 					s.updateWaterEvaporation(int(h))
 				}
@@ -4646,11 +4677,7 @@ func (s *Server) runGameLoop() {
 
 				// Limpeza de Cadáveres Decompostos (120 segundos de persistência)
 				if s.corpseManager != nil {
-					expired := s.corpseManager.CleanupExpired()
-					if len(expired) > 0 {
-						log.Printf("[CORPSE] %d cadáver(es) se decompuseram no solo: %v\n", len(expired), expired)
-						s.broadcastCorpseSnapshots()
-					}
+					s.processExpiredCorpses() // corpos não aproveitados podem voltar como zumbis
 				}
 
 				s.mu.RLock()

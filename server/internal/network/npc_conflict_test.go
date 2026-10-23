@@ -19,8 +19,8 @@ func TestAttackingCitizenMakesWantedAndGuardsHunt(t *testing.T) {
 	guard := addLifeNPC(s, 105, 20, 0)
 	p := conflictPlayer(s, 1, 0)
 	s.playerHitNPC(p, lyra, 100, 0, protocol.ActionBasicAttack)
-	if !p.IsWanted() || p.BountyGold != world.BountyPerCrime {
-		t.Fatalf("jogador deveria ficar procurado com recompensa %d, tem %d", world.BountyPerCrime, p.BountyGold)
+	if !p.IsWanted() || p.BountyGold != world.BountyPerHit {
+		t.Fatalf("jogador deveria ficar procurado com recompensa %d, tem %d", world.BountyPerHit, p.BountyGold)
 	}
 	if guard.Life.HuntTarget != p.ID || guard.CurrentActivity != world.ActivityHunting {
 		t.Fatal("o Guarda deveria iniciar a caçada")
@@ -29,8 +29,8 @@ func TestAttackingCitizenMakesWantedAndGuardsHunt(t *testing.T) {
 		t.Fatal("Lyra (civil) deveria fugir até o Guarda")
 	}
 	s.playerHitNPC(p, lyra, 10, 0, protocol.ActionBasicAttack)
-	if p.BountyGold != world.BountyPerCrime {
-		t.Fatal("golpes repetidos não deveriam acumular recompensa sem novo crime grave")
+	if p.BountyGold != 2*world.BountyPerHit {
+		t.Fatal("cada golpe deveria somar +100")
 	}
 }
 
@@ -49,18 +49,54 @@ func TestCombatNPCRetaliates(t *testing.T) {
 	}
 }
 
-func TestLawlessZoneEndsHunt(t *testing.T) {
+func TestGuardsFollowIntoSewersThenPermanentWanted(t *testing.T) {
 	s := lifeTestServer()
 	lyra := addLifeNPC(s, 103, 0, 0)
 	guard := addLifeNPC(s, 105, 20, 0)
 	p := conflictPlayer(s, 1, 0)
 	s.playerHitNPC(p, lyra, 10, 0, protocol.ActionBasicAttack)
 	p.Mu.Lock()
-	p.ZoneID = world.ZoneAncientSewers
+	p.ZoneID, p.PosX, p.PosZ = world.ZoneAncientSewers, 5, 5
 	p.Mu.Unlock()
 	s.updateNPCConflict(1)
-	if guard.Life.HuntTarget != 0 {
-		t.Fatal("a caçada deveria parar nos Esgotos")
+	if guard.GetZone() != world.ZoneAncientSewers || guard.Life.HuntTarget != p.ID {
+		t.Fatal("o Guarda deveria entrar nos Esgotos atrás do criminoso")
+	}
+	p.Mu.Lock()
+	p.PosX, p.PosZ = 80, 80 // fugiu fundo nos túneis
+	p.Mu.Unlock()
+	s.updateNPCConflict(1)
+	if guard.Life.HuntTarget != 0 || guard.GetZone() != world.ZoneVillage {
+		t.Fatal("o Guarda não deveria ir longe nos Esgotos e deveria voltar ao posto")
+	}
+	if !p.IsPermanentWanted(1) {
+		t.Fatal("escapar pelos Esgotos deveria tornar a procura permanente na cidade")
+	}
+}
+
+func TestMurderBountyStreakAndPermanent(t *testing.T) {
+	p := world.NewPlayer(1, nil, 0, 0, 0)
+	want := []uint32{300, 500, 700}
+	total := uint32(0)
+	for i, w := range want {
+		r := p.RegisterMurder()
+		total += w
+		if r.Added != w || p.BountyGold != total {
+			t.Fatalf("assassinato %d deveria somar %d (somou %d, total %d)", i+1, w, r.Added, p.BountyGold)
+		}
+	}
+	for i := 0; i < 2; i++ {
+		p.RegisterMurder()
+	}
+	if p.IsPermanentWanted(1) {
+		t.Fatal("5 assassinatos ainda não tornam a procura permanente")
+	}
+	if r := p.RegisterMurder(); !r.BecamePermanent || !p.IsPermanentWanted(1) {
+		t.Fatal("no 6º assassinato a procura deveria ser permanente")
+	}
+	p.TickWanted(1000)
+	if !p.IsWanted() || p.BountyGold == 0 {
+		t.Fatal("procurado permanente não expira")
 	}
 }
 
@@ -74,7 +110,7 @@ func TestGuardKillJailsAndPaysBounty(t *testing.T) {
 	gold := p.Gold
 	lyraGold := lyra.Gold
 	s.guardKilledCriminal(guard, p)
-	if p.Gold != gold-world.BountyPerCrime || lyra.Gold != lyraGold+world.BountyPerCrime || !p.IsJailed() || p.IsWanted() {
+	if p.Gold != gold-world.BountyPerHit || lyra.Gold != lyraGold+world.BountyPerHit || !p.IsJailed() || p.IsWanted() {
 		t.Fatal("o criminoso abatido deveria pagar a recompensa à vítima e ir preso")
 	}
 }
@@ -128,7 +164,7 @@ func TestHireRequiresFriendshipAndGold(t *testing.T) {
 	s := lifeTestServer()
 	lyra := addLifeNPC(s, 103, 0, 0)
 	p := conflictPlayer(s, 1, 0)
-	p.AddGold(1000)
+	p.AddGold(60000)
 	s.hireNPC(p, lyra)
 	if lyra.Life.Following != 0 {
 		t.Fatal("sem 3 corações não deveria aceitar")

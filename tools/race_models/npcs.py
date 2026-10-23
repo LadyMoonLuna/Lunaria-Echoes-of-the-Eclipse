@@ -451,4 +451,167 @@ def thorne():
     return m
 
 
-NPCS = [garrick, lyra, varis, randel, valen, ghost_alchemist, nyx, tao, iolanthe, fiorella, bartolomeu, thorne]
+
+# ---------------------------------------------------------------------------
+# Mundo Vivo: aprendizes, Coveiro e caçadores da Igreja
+# ---------------------------------------------------------------------------
+
+def bran():
+    m = N(117, "bran", "Bran", "Aprendiz da Forja",
+          "Rapaz de 15 anos, filho do Garrick: ombros já largos, sardas, cabelo ruivo curto e despenteado. "
+          "Avental de couro grande demais para ele, luvas remendadas e um martelinho de aprendiz no cinto.",
+          "#ffb74d", scale=0.86)
+    skin = m.mat("skin_freckled", "#e2b08c", rough=0.6)
+    hair = m.mat("ginger_hair", "#c1501f", rough=0.9)
+    shirt = m.mat("rough_shirt", "#8d7b68", rough=0.9)
+    apron = m.mat("big_apron", "#5a3a22", rough=0.85)
+    iron = m.mat("small_hammer", "#5f646b", rough=0.4, metal=0.85)
+    freckle = m.mat("freckle", "#b9734f", rough=0.6)
+    humanoid(m, skin, shirt, m.mat("pants", "#4a3b2e", rough=0.9), m.mat("boots", "#2e231b", rough=0.8),
+             hands=m.mat("patched_glove", "#6d4c35", rough=0.8), w=1.05)
+    eyes(m, m.mat("iris", "#3b6d3a", rough=0.3), m.mat("sclera", "#f3eee8", rough=0.3))
+    hair_short(m, hair)
+    m.part("sphere", [0.05], (0.06, 1.85, -0.06), hair, scale=(1.2, 0.5, 1.0), rot=(0, 0, 25), mirror=True)
+    for x in (-0.05, -0.03, 0.03, 0.05):
+        m.part("sphere", [0.006], (x, 1.69, -0.125), freckle)
+    m.part("box", [0.38, 0.78, 0.03], (0, 1.0, -0.19), apron, rot=(3, 0, 0))
+    belt(m, apron, iron, y=0.98, w=1.05)
+    m.part("cylinder", [0.012, 0.012, 0.26], (0.2, 0.86, -0.12), m.mat("handle", "#6d4c35", rough=0.8))
+    m.part("box", [0.08, 0.05, 0.05], (0.2, 0.99, -0.12), iron)
+    return m
+
+
+def pip():
+    m = N(118, "pip", "Pip", "Aprendiz de Alquimia",
+          "Menina franzina de óculos redondos e tranças castanhas, jaleco verde-água manchado de reagentes, "
+          "bolsa de frascos a tiracolo e um tubo de ensaio brilhante sempre na mão.",
+          "#4db6ac", scale=0.84)
+    skin = m.mat("skin", "#f0c8a8", rough=0.55)
+    hair = m.mat("braids", "#6d4c41", rough=0.9)
+    coat = m.mat("lab_coat", "#9fd8cf", rough=0.85)
+    stain = m.mat("reagent_stain", "#7b1fa2", rough=0.6)
+    glass = m.mat("lens", "#e0f7fa", rough=0.05, metal=0.2)
+    rim = m.mat("brass_rim", "#b8863b", rough=0.3, metal=0.9)
+    glow = m.mat("vial_glow", "#76ff03", emit="#64dd17", energy=3.0)
+    humanoid(m, skin, coat, m.mat("skirt", "#37474f", rough=0.9), m.mat("shoes", "#3e2723", rough=0.8), w=0.92)
+    eyes(m, m.mat("iris", "#5d4037", rough=0.3), m.mat("sclera", "#f5f2ee", rough=0.3))
+    hair_short(m, hair)
+    for x in (-0.12, 0.12):
+        m.chain([(x, 1.68, 0.02), (x * 1.05, 1.5, 0.03), (x * 1.1, 1.36, 0.02)], [0.035, 0.03, 0.022], hair)
+    m.part("torus", [0.026, 0.032], (0.045, 1.72, -0.125), rim, rot=(90, 0, 0), mirror=True)
+    m.part("cylinder", [0.026, 0.026, 0.004], (0.045, 1.72, -0.127), glass, rot=(90, 0, 0), mirror=True)
+    m.part("box", [0.08, 0.06, 0.01], (-0.08, 1.15, -0.17), stain, rot=(0, 0, 20))
+    m.part("box", [0.03, 0.62, 0.02], (0, 1.2, -0.05), m.mat("strap", "#5d4037", rough=0.8), rot=(0, 0, 38))
+    m.part("box", [0.16, 0.12, 0.08], (0.2, 0.95, 0.0), m.mat("vial_bag", "#6d4c41", rough=0.85))
+    m.part("cylinder", [0.018, 0.018, 0.12], (0.3, 1.0, -0.2), glow, group="arm_r")
+    return m
+
+
+def tilda():
+    m = N(119, "tilda", "Tilda", "Ajudante de Cozinha",
+          "Jovem Orkhan de pele verde-clara e presinhas, coque alto preso com uma colher de pau, avental branco "
+          "encardido sobre vestido de linho e uma panela de cobre debaixo do braço.",
+          "#aed581", scale=0.92)
+    skin = m.mat("skin", "#9ccc65", rough=0.6)
+    hair = m.mat("dark_bun", "#3e2723", rough=0.9)
+    linen = m.mat("linen_dress", "#a1887f", rough=0.9)
+    white = m.mat("kitchen_white", "#eeeeea", rough=0.85)
+    copper = m.mat("copper_pot", "#c56b3a", rough=0.35, metal=0.9)
+    tusk = m.mat("tusk", "#fff8e1", rough=0.4)
+    humanoid(m, skin, linen, linen, m.mat("clogs", "#5d4037", rough=0.8), w=1.08)
+    eyes(m, m.mat("iris", "#4e342e", rough=0.3))
+    hair_short(m, hair)
+    m.part("sphere", [0.08], (0, 1.92, 0.04), hair)
+    m.part("cylinder", [0.008, 0.008, 0.24], (0, 1.94, 0.04), m.mat("spoon", "#a1887f", rough=0.8), rot=(0, 0, 70))
+    m.part("cylinder", [0.0, 0.012, 0.035], (0.035, 1.645, -0.125), tusk, mirror=True)
+    m.part("box", [0.36, 0.6, 0.025], (0, 1.0, -0.19), white, rot=(4, 0, 0))
+    m.part("cylinder", [0.12, 0.1, 0.12], (-0.33, 1.05, -0.05), copper, group="arm_l")
+    return m
+
+
+def mortimer():
+    m = N(120, "mortimer", "Mortimer, o Coveiro", "Guardião do Cemitério",
+          "Homem alto e encurvado de rosto encovado, barba grisalha rala e olheiras fundas. Sobretudo preto puído, "
+          "chapéu de abas largas, lanterna de vela pendurada no cinto, rosário da Igreja no pescoço e uma pá enorme.",
+          "#78909c", scale=1.06)
+    skin = m.mat("pale_skin", "#cdbfb0", rough=0.6)
+    coat = m.mat("worn_black_coat", "#1f1f24", rough=0.9)
+    hat = m.mat("wide_hat", "#151518", rough=0.85)
+    beard = m.mat("grey_stubble", "#9e9e9e", rough=0.95)
+    iron = m.mat("shovel_iron", "#6b6f73", rough=0.5, metal=0.8)
+    wood = m.mat("shovel_wood", "#5d4037", rough=0.9)
+    flame = m.mat("candle_flame", "#ffcc80", emit="#ffa726", energy=3.5)
+    silver = m.mat("rosary_silver", "#cfd8dc", rough=0.3, metal=0.9)
+    humanoid(m, skin, coat, m.mat("trousers", "#2b2b30", rough=0.9), m.mat("mud_boots", "#3a2e24", rough=0.9), w=0.9)
+    eyes(m, m.mat("iris", "#455a64", rough=0.3), m.mat("sclera", "#e8e2da", rough=0.3))
+    m.part("box", [0.03, 0.012, 0.01], (0.045, 1.695, -0.118), m.mat("eye_bags", "#8d7f74", rough=0.6), mirror=True)
+    m.part("sphere", [0.09], (0, 1.62, -0.06), beard, scale=(1.1, 0.8, 0.8))
+    m.part("cylinder", [0.3, 0.3, 0.02], (0, 1.86, 0.0), hat)
+    m.part("cylinder", [0.13, 0.14, 0.16], (0, 1.94, 0.0), hat)
+    m.part("box", [0.46, 0.9, 0.04], (0, 0.88, 0.14), coat, rot=(-4, 0, 0))
+    m.part("torus", [0.1, 0.112], (0, 1.45, -0.04), silver, rot=(70, 0, 0))
+    m.part("box", [0.02, 0.05, 0.01], (0, 1.34, -0.14), silver)
+    belt(m, m.mat("belt", "#3e2723", rough=0.8), silver, w=0.92)
+    m.part("box", [0.07, 0.11, 0.07], (-0.2, 0.86, -0.08), m.mat("lantern_cage", "#424242", rough=0.4, metal=0.7))
+    m.part("sphere", [0.02], (-0.2, 0.87, -0.08), flame)
+    m.part("cylinder", [0.02, 0.02, 1.25], (0.36, 0.85, -0.12), wood, rot=(8, 0, 0), group="arm_r")
+    m.part("box", [0.2, 0.26, 0.02], (0.36, 0.2, -0.2), iron, rot=(8, 0, 0), group="arm_r")
+    return m
+
+
+def paladin():
+    m = N(121, "paladin", "Paladino da Luz", "Caçador da Igreja",
+          "Cavaleiro de armadura de placas branca e dourada, tabardo com o sol da Igreja, elmo fechado com "
+          "visor em cruz, capa marfim, escudo-torre com o sol radiante e maça de guerra benta.",
+          "#fff59d", scale=1.08)
+    plate = m.mat("white_plate", "#e8e6df", rough=0.3, metal=0.85)
+    gold = m.mat("holy_gold", "#e0b44c", rough=0.25, metal=0.95)
+    tabard = m.mat("sun_tabard", "#f5f0e1", rough=0.8, double=True)
+    cape = m.mat("ivory_cape", "#efe7d2", rough=0.85, double=True)
+    glow = m.mat("holy_glow", "#fff9c4", emit="#ffeb3b", energy=3.0)
+    humanoid(m, plate, plate, plate, plate, hands=plate, forearm=plate, w=1.18)
+    m.part("sphere", [0.15], (0, 1.75, 0.0), plate, scale=(1.0, 1.08, 1.05))
+    m.part("box", [0.14, 0.018, 0.01], (0, 1.74, -0.148), m.mat("visor_slit", "#111111", rough=0.9))
+    m.part("box", [0.018, 0.1, 0.01], (0, 1.73, -0.149), m.mat("visor_slit2", "#111111", rough=0.9))
+    m.part("cylinder", [0.0, 0.03, 0.12], (0, 1.94, 0.0), gold)
+    m.part("sphere", [0.2], (0, 1.28, -0.01), plate, scale=(1.4, 1.25, 0.95))
+    m.part("box", [0.3, 0.75, 0.02], (0, 0.98, -0.2), tabard)
+    m.part("sphere", [0.06], (0, 1.18, -0.215), gold, scale=(1, 1, 0.2))
+    m.part("box", [0.55, 1.1, 0.03], (0, 0.95, 0.22), cape, rot=(-6, 0, 0))
+    m.part("sphere", [0.12], (0.3, 1.55, 0), plate, scale=(1.2, 0.8, 1.1), mirror=True)
+    m.part("box", [0.06, 0.9, 0.5], (-0.45, 1.0, -0.12), plate, group="arm_l")
+    m.part("sphere", [0.1], (-0.48, 1.05, -0.12), gold, scale=(0.3, 1, 1), group="arm_l")
+    m.part("cylinder", [0.02, 0.02, 0.6], (0.36, 0.95, -0.25), m.mat("mace_grip", "#5d4037", rough=0.8), rot=(70, 0, 0), group="arm_r")
+    m.part("sphere", [0.08], (0.36, 1.05, -0.53), gold, group="arm_r")
+    m.part("sphere", [0.03], (0.36, 1.05, -0.62), glow, group="arm_r")
+    return m
+
+
+def cleric():
+    m = N(122, "cleric", "Clériga da Luz", "Caçadora da Igreja",
+          "Sacerdotisa de túnica branca com bordados dourados, mitra baixa, estola azul-celeste com sóis, "
+          "cajado coroado por um sol de cristal que brilha ao curar os aliados, e um livro de preces no quadril.",
+          "#81d4fa", scale=1.0)
+    skin = m.mat("skin", "#e9c6a5", rough=0.55)
+    robe = m.mat("white_robe", "#f7f5ef", rough=0.85)
+    gold = m.mat("gold_trim", "#d9a93f", rough=0.3, metal=0.9)
+    stole = m.mat("sky_stole", "#4fc3f7", rough=0.7, double=True)
+    hair = m.mat("blonde_hair", "#e6c56a", rough=0.85)
+    crystal = m.mat("sun_crystal", "#fffde7", emit="#ffee58", energy=4.5)
+    humanoid(m, skin, robe, robe, m.mat("sandals", "#a1887f", rough=0.8), w=0.94)
+    eyes(m, m.mat("iris", "#1e88e5", rough=0.3), m.mat("sclera", "#f5f2ee", rough=0.3))
+    hair_long(m, hair, 0.5)
+    m.part("cylinder", [0.11, 0.13, 0.12], (0, 1.9, 0.02), robe)
+    m.part("box", [0.03, 0.1, 0.01], (0, 1.92, -0.11), gold)
+    m.part("cylinder", [0.26, 0.38, 0.9], (0, 0.55, 0), robe)
+    m.part("torus", [0.37, 0.39], (0, 0.12, 0), gold)
+    m.part("box", [0.08, 0.9, 0.015], (0.08, 1.05, -0.17), stole, rot=(0, 0, 4), mirror=True)
+    m.part("box", [0.14, 0.18, 0.05], (-0.24, 0.9, -0.02), m.mat("prayer_book", "#6d4c41", rough=0.8))
+    m.part("cylinder", [0.018, 0.018, 1.6], (0.35, 0.85, -0.12), gold, group="arm_r")
+    m.part("torus", [0.08, 0.1], (0.35, 1.7, -0.12), gold, rot=(90, 0, 0), group="arm_r")
+    m.part("sphere", [0.06], (0.35, 1.7, -0.12), crystal, group="arm_r")
+    return m
+
+
+NPCS = [garrick, lyra, varis, randel, valen, ghost_alchemist, nyx, tao, iolanthe, fiorella, bartolomeu, thorne,
+        bran, pip, tilda, mortimer, paladin, cleric]

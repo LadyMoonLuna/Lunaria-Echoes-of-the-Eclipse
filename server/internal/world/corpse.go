@@ -201,7 +201,30 @@ type Corpse struct {
 	DifficultySeed uint32
 	KillerPlayerID uint32
 
+	// Mundo Vivo: risco de voltar como zumbi
+	KilledByZombie bool
+	ZombieRemains  bool // restos de zumbi nunca se reerguem
+	Purified       bool
+	NecroTried     bool
+	MobLevel       uint8
+	MobMaxHP       uint16
+
 	Organs []CorpseOrgan
+}
+
+// Processed: corpo aproveitado (saqueado, autopsiado, purificado ou já tentado por um Necromante) não se ergue.
+func (c *Corpse) Processed() bool {
+	c.Mu.RLock()
+	defer c.Mu.RUnlock()
+	if c.IsLooted || c.Purified || c.NecroTried || c.ZombieRemains {
+		return true
+	}
+	for _, o := range c.Organs {
+		if o.Extracted {
+			return true
+		}
+	}
+	return false
 }
 
 // NewCorpse instancia uma nova entidade Corpse gerando sua anatomia e órgãos vitais.
@@ -719,8 +742,12 @@ func (cm *CorpseManager) CreateCorpseFromMob(mob *Mob, killerID uint32, luckBonu
 	rotY := mob.RotY
 	mob.Mu.RUnlock()
 
+	mob.Mu.RLock()
+	byZombie, undead, lvl, maxHP := mob.KilledByZombie, mob.Undead, mob.Level, mob.MaxHP
+	mob.Mu.RUnlock()
 	c := NewCorpse(corpseID, mobID, mobType, mobName, x, y, z, rotY, killerID, luckBonus)
 	c.ZoneID = mobZone
+	c.KilledByZombie, c.ZombieRemains, c.MobLevel, c.MobMaxHP = byZombie, undead, lvl, maxHP
 	cm.corpses[corpseID] = c
 	return c
 }
@@ -738,6 +765,24 @@ func (cm *CorpseManager) RemoveCorpse(corpseID uint32) {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 	delete(cm.corpses, corpseID)
+}
+
+// ExpireCorpses remove e devolve os cadáveres decompostos (para o teste de reerguimento).
+func (cm *CorpseManager) ExpireCorpses() []*Corpse {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	var out []*Corpse
+	now := time.Now()
+	for id, c := range cm.corpses {
+		c.Mu.RLock()
+		isExp := now.After(c.ExpiresAt)
+		c.Mu.RUnlock()
+		if isExp {
+			out = append(out, c)
+			delete(cm.corpses, id)
+		}
+	}
+	return out
 }
 
 // CleanupExpired remove cadáveres que já expiraram o tempo de vida útil de 120s.

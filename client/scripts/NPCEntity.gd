@@ -43,7 +43,19 @@ static func get_default_npc_name(id: int) -> String:
 			return "Chef Bartolomeu\n<Mestre do Banquete> [E]"
 		116:
 			return "Thorne\n<Eremita das Feras> [E]"
+		117:
+			return "Bran\n<Aprendiz da Forja> [E]"
+		118:
+			return "Pip\n<Aprendiz de Alquimia> [E]"
+		119:
+			return "Tilda\n<Ajudante de Cozinha> [E]"
+		120:
+			return "Mortimer, o Coveiro\n<Guardião do Cemitério> [E]"
 		_:
+			if id >= 400 and id < 410:
+				return "Paladino da Luz\n<Caçador da Igreja>"
+			if id >= 420 and id < 430:
+				return "Clériga da Luz\n<Caçadora da Igreja>"
 			return "NPC #%d" % id
 
 var current_hp: int = 1000
@@ -905,8 +917,12 @@ func _setup_npc_visuals(script_path: String = "") -> void:
 		model_id = 105
 	elif is_valen:
 		model_id = 106
-	elif npc_id >= 111 and npc_id <= 116:
+	elif npc_id >= 111 and npc_id <= 120:
 		model_id = npc_id
+	elif npc_id >= 400 and npc_id < 410:
+		model_id = 121 # Paladino da Luz
+	elif npc_id >= 420 and npc_id < 430:
+		model_id = 122 # Clériga da Luz
 	_apply_npc_model(model_id)
 
 func _apply_npc_model(model_id: int) -> void:
