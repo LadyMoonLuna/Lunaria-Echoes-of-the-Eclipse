@@ -45,6 +45,7 @@ type Corpse struct {
 	Mu sync.RWMutex
 
 	CorpseID       uint32
+	ZoneID         uint8 // Zona onde o cadáver se encontra (0 a 8)
 	MobID          uint32
 	MobType        uint8
 	MobName        string
@@ -71,6 +72,7 @@ func NewCorpse(corpseID, mobID uint32, mobType uint8, mobName string, x, y, z, r
 
 	c := &Corpse{
 		CorpseID:       corpseID,
+		ZoneID:         ZoneVillage,
 		MobID:          mobID,
 		MobType:        mobType,
 		MobName:        mobName,
@@ -293,6 +295,130 @@ func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 			ItemReward: protocol.ItemInquisitorShadowScythe, Quantity: 1, Difficulty: 9,
 		})
 
+	case protocol.MobTypeMistWeaverSpider: // 15: Aranha Tecelã da Bruma
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Casulo de Seda Perfeito", OrganType: OrganPelt,
+			ItemReward: protocol.ItemPerfectSilkCocoon, Quantity: 1, Difficulty: 6,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Glândula de Veneno", OrganType: OrganFangOrClaw,
+			ItemReward: protocol.ItemDarkPoisonGland, Quantity: 1, Difficulty: 5,
+		})
+
+	case protocol.MobTypeArachnaQueen: // 16: Arachna, a Rainha Tecelã (Raid Boss)
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Coração da Rainha Aranha", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemSpiderQueenHeart, Quantity: 1, Difficulty: 10,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Manto de Seda Imperial", OrganType: OrganPelt,
+			ItemReward: protocol.ItemImperialSilkCloak, Quantity: 1, Difficulty: 9,
+		})
+		if rand.Float64() < 0.001*(1.0+luckBonus) {
+			organs = append(organs, CorpseOrgan{
+				Index: 2, Name: "Olho Multifacetado de Arachna", OrganType: OrganHeartRelic,
+				ItemReward: protocol.ItemArachnaEye, Quantity: 1, Difficulty: 10,
+			})
+		}
+
+	case protocol.MobTypeAcidCorrosiveSlime: // 17: Lodo Ácido Corrosivo
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Ácido Puro Concentrado", OrganType: OrganBlood,
+			ItemReward: protocol.ItemPureAcid, Quantity: 1, Difficulty: 5,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Lixo Orgânico Decomposto", OrganType: OrganPelt,
+			ItemReward: protocol.ItemOrganicTrash, Quantity: 1, Difficulty: 4,
+		})
+
+	case protocol.MobTypeAbyssalScorpion: // 18: Escorpião Abissal Gigante
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Veneno Vorpal Abissal", OrganType: OrganBlood,
+			ItemReward: protocol.ItemVorpalPoison, Quantity: 1, Difficulty: 7,
+		})
+		if rand.Float64() < 0.001*(1.0+luckBonus) {
+			organs = append(organs, CorpseOrgan{
+				Index: 1, Name: "Ferrão de Escorpião Abissal", OrganType: OrganFangOrClaw,
+				ItemReward: protocol.ItemAbyssalScorpionStinger, Quantity: 1, Difficulty: 9,
+			})
+		}
+
+	case protocol.MobTypeStitchedChimeraZero: // 19: Experimento Nº 0: A Quimera Costurada (Mini-Boss)
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Retalho Quimérico Costurado", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemChimeraFleshPart, Quantity: 1, Difficulty: 9,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Glândula de Veneno Mutante", OrganType: OrganFangOrClaw,
+			ItemReward: protocol.ItemDarkPoisonGland, Quantity: 2, Difficulty: 7,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 2, Name: "Placa de Aço Deformada", OrganType: OrganPelt,
+			ItemReward: protocol.ItemHeavySteelPlate, Quantity: 1, Difficulty: 6,
+		})
+
+	case protocol.MobTypeAncientIceGolem: // 20: Golem de Gelo Antigo
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Núcleo de Gelo Antigo", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemAncientIceCore, Quantity: 1, Difficulty: 7,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Placa de Aço Congelada", OrganType: OrganPelt,
+			ItemReward: protocol.ItemHeavySteelPlate, Quantity: 1, Difficulty: 6,
+		})
+
+	case protocol.MobTypeWildFrostDrake: // 21: Draco de Geada Selvagem
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Escama Dracônica Primordial", OrganType: OrganPelt,
+			ItemReward: protocol.ItemPrimordialDragonScale, Quantity: 1, Difficulty: 8,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Carne Dracônica Nobre", OrganType: OrganFangOrClaw,
+			ItemReward: protocol.ItemCookedNobleMeat, Quantity: 2, Difficulty: 5,
+		})
+
+	case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Gigante de Gelo (Boss)
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Núcleo de Gelo Ancestral de Ymir", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemAncientIceCore, Quantity: 2, Difficulty: 9,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Placa Glacial Reforçada", OrganType: OrganPelt,
+			ItemReward: protocol.ItemHeavySteelPlate, Quantity: 2, Difficulty: 8,
+		})
+		if rand.Float64() < 0.001*(1.0+luckBonus) {
+			organs = append(organs, CorpseOrgan{
+				Index: 2, Name: "Coração de Geada Eterna", OrganType: OrganHeartRelic,
+				ItemReward: protocol.ItemEternalFrostHeart, Quantity: 1, Difficulty: 10,
+			})
+		}
+
+	case protocol.MobTypeVesperianBloodGuard: // 23: Guarda Sanguinário de Vesperian
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Insígnia do Guarda Carmesim", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemCrimsonGuardInsignia, Quantity: 1, Difficulty: 8,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Sangue Lunar Puro", OrganType: OrganBlood,
+			ItemReward: protocol.ItemPureLunarBlood, Quantity: 1, Difficulty: 7,
+		})
+
+	case protocol.MobTypeLordVesperianVampire: // 24: Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto)
+		organs = append(organs, CorpseOrgan{
+			Index: 0, Name: "Anel Carmesim de Vesperian", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemVesperianCrimsonRing, Quantity: 1, Difficulty: 10,
+		})
+		organs = append(organs, CorpseOrgan{
+			Index: 1, Name: "Tomo da Foice do Eclipse", OrganType: OrganHeartRelic,
+			ItemReward: protocol.ItemEclipseScytheTome, Quantity: 1, Difficulty: 9,
+		})
+		if rand.Float64() < 0.001*(1.0+luckBonus) {
+			organs = append(organs, CorpseOrgan{
+				Index: 2, Name: "Sangue Puro do Progenitor", OrganType: OrganBlood,
+				ItemReward: protocol.ItemProgenitorPureBlood, Quantity: 1, Difficulty: 10,
+			})
+		}
+
 	default:
 		organs = append(organs, CorpseOrgan{
 			Index: 0, Name: "Carne Crua de Caça", OrganType: OrganPelt,
@@ -435,11 +561,13 @@ func (cm *CorpseManager) CreateCorpseFromMob(mob *Mob, killerID uint32, luckBonu
 	mobID := mob.ID
 	mobType := mob.MobType
 	mobName := mob.Name
+	mobZone := mob.ZoneID
 	x, y, z := mob.PosX, mob.PosY, mob.PosZ
 	rotY := mob.RotY
 	mob.Mu.RUnlock()
 
 	c := NewCorpse(corpseID, mobID, mobType, mobName, x, y, z, rotY, killerID, luckBonus)
+	c.ZoneID = mobZone
 	cm.corpses[corpseID] = c
 	return c
 }
@@ -501,3 +629,35 @@ func (cm *CorpseManager) Count() int {
 	defer cm.mu.RUnlock()
 	return len(cm.corpses)
 }
+
+// GetSnapshotsByZone retorna a lista de cadáveres ativos filtrados por ZoneID.
+func (cm *CorpseManager) GetSnapshotsByZone(zoneID uint8) []protocol.CorpseSnapshot {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+
+	snapshots := make([]protocol.CorpseSnapshot, 0, len(cm.corpses))
+	now := time.Now()
+	for _, c := range cm.corpses {
+		c.Mu.RLock()
+		if c.ZoneID == zoneID && !now.After(c.ExpiresAt) {
+			snapshots = append(snapshots, c.ToSnapshot())
+		}
+		c.Mu.RUnlock()
+	}
+	return snapshots
+}
+
+// GetZone retorna a ZoneID do cadáver.
+func (c *Corpse) GetZone() uint8 {
+	c.Mu.RLock()
+	defer c.Mu.RUnlock()
+	return c.ZoneID
+}
+
+// SetZone define a ZoneID do cadáver.
+func (c *Corpse) SetZone(zoneID uint8) {
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+	c.ZoneID = zoneID
+}
+

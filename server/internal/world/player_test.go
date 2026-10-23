@@ -25,10 +25,10 @@ func TestCalculateStatsByClassAndRace(t *testing.T) {
 		t.Fatalf("Esperava (125, 110) para Iniciado Kharad, obteve (%d, %d)", hp, stam)
 	}
 
-	// Acólito (125, 105) + Dhampir (+10, +15) = (135, 120)
-	hp, stam = CalculateStatsByClassAndRace(protocol.ClassAcolyte, protocol.RaceDhampir)
-	if hp != 135 || stam != 120 {
-		t.Fatalf("Esperava (135, 120) para Acólito Dhampir, obteve (%d, %d)", hp, stam)
+	// Assassino (110, 140) + Dhampir (+10, +15) = (120, 155)
+	hp, stam = CalculateStatsByClassAndRace(protocol.ClassAssassin, protocol.RaceDhampir)
+	if hp != 120 || stam != 155 {
+		t.Fatalf("Esperava (120, 155) para Assassino Dhampir, obteve (%d, %d)", hp, stam)
 	}
 
 	// Espadachim (140, 100) + Varkai (+15, +10) = (155, 110)
@@ -453,8 +453,8 @@ func TestRPGEvolutionAndTierScaling(t *testing.T) {
 		protocol.TierUncommon:  6,
 		protocol.TierRare:      7,
 		protocol.TierEpic:      8,
-		protocol.TierUnique:    10,
-		protocol.TierLegendary: 12,
+		protocol.TierUnique:    11,
+		protocol.TierLegendary: 15,
 	}
 	for tier, pts := range expectedPoints {
 		if StatPointsPerLevel(tier) != pts {
@@ -555,7 +555,7 @@ func TestNPCFriendshipAndSecretRecipe(t *testing.T) {
 	}
 }
 
-func TestAll28RacesBaseAttributes(t *testing.T) {
+func TestAll46RacesBaseAttributes(t *testing.T) {
 	testCases := []struct {
 		raceID uint8
 		str    uint8
@@ -599,6 +599,25 @@ func TestAll28RacesBaseAttributes(t *testing.T) {
 		{protocol.RaceCambion, 11, 8, 8, 7, 9, 2, 5, 6},
 		{protocol.RaceNephilim, 9, 9, 8, 8, 10, 10, 7, 7},
 		{protocol.RaceTimeWanderer, 5, 10, 5, 12, 12, 9, 8, 9},
+		// 18 Novas Raças do RPG (29 a 46)
+		{protocol.RaceHalfCelestial, 8, 8, 8, 8, 9, 11, 7, 7},
+		{protocol.RacePyromancer, 6, 8, 7, 8, 12, 6, 7, 6},
+		{protocol.RaceFrostGiant, 14, 4, 15, 4, 6, 6, 9, 4},
+		{protocol.RaceDragonEarth, 12, 5, 14, 4, 5, 6, 10, 5},
+		{protocol.RaceDragonWater, 8, 9, 9, 8, 9, 9, 7, 7},
+		{protocol.RaceDragonLightning, 8, 11, 7, 12, 10, 5, 8, 7},
+		{protocol.RaceDragonMystic, 6, 8, 8, 7, 13, 10, 6, 6},
+		{protocol.RaceOrc, 13, 6, 13, 6, 3, 3, 9, 5},
+		{protocol.RaceDwarf, 11, 5, 13, 4, 6, 7, 12, 5},
+		{protocol.RaceElf, 5, 11, 5, 12, 10, 8, 7, 6},
+		{protocol.RaceSolarElf, 6, 10, 6, 10, 11, 10, 7, 7},
+		{protocol.RaceLunarElf, 5, 11, 5, 12, 10, 8, 8, 8},
+		{protocol.RaceFairy, 3, 10, 4, 13, 11, 11, 5, 10},
+		{protocol.RaceGoblin, 6, 12, 5, 13, 6, 3, 10, 12},
+		{protocol.RaceScorpionDemi, 9, 10, 8, 10, 7, 3, 11, 6},
+		{protocol.RaceTurtleDemi, 9, 4, 16, 3, 6, 8, 9, 5},
+		{protocol.RaceHalfDemon, 8, 10, 7, 10, 11, 4, 8, 8},
+		{protocol.RaceWolfDemi, 12, 9, 10, 11, 3, 4, 8, 7},
 	}
 
 	for _, tc := range testCases {
@@ -736,6 +755,14 @@ func TestDevSetRaceAndKit(t *testing.T) {
 		p.GetItemCount(protocol.ItemSilverSilkCocoon) != 1 ||
 		p.GetItemCount(protocol.ItemOrganicTrash) != 3 {
 		t.Fatalf("DevSetRaceAndKit: kit de itens de teste incompleto no inventário!")
+	}
+
+	// Testa todas as 46 raças aceitas pelo comando Dev
+	for rid := uint8(1); rid <= 46; rid++ {
+		p.DevSetRaceAndKit(rid, protocol.ClassSwordsman)
+		if p.RaceID != rid {
+			t.Fatalf("DevSetRaceAndKit falhou para raça %d!", rid)
+		}
 	}
 }
 
@@ -906,12 +933,12 @@ func TestSecretClasses10to15AndDevDirect(t *testing.T) {
 			t.Fatalf("Classe secreta deveria resetar para Nível 1, obteve Nível %d", p.Level)
 		}
 
-		// Testa ganho de +10 StatPoints por nível no Tier 5 Única
+		// Testa ganho de +11 StatPoints por nível no Tier 5 Única
 		ptsBefore := p.StatPoints
 		p.AddLevel(1)
 		ptsGained := p.StatPoints - ptsBefore
-		if ptsGained != 10 {
-			t.Fatalf("No Tier 5 Única deveria ganhar +10 StatPoints por nível, ganhou %d", ptsGained)
+		if ptsGained != 11 {
+			t.Fatalf("No Tier 5 Única deveria ganhar +11 StatPoints por nível, ganhou %d", ptsGained)
 		}
 
 		// Testa Evolução para Tier 6 Lendária mantendo nível
@@ -924,12 +951,12 @@ func TestSecretClasses10to15AndDevDirect(t *testing.T) {
 			t.Fatalf("Evolução não deveria alterar nível: antes=%d, depois=%d", lvlBeforeEvolve, p.Level)
 		}
 
-		// No Tier 6 Lendária ganha +12 StatPoints por nível
+		// No Tier 6 Lendária ganha +15 StatPoints por nível
 		ptsBeforeT6 := p.StatPoints
 		p.AddLevel(1)
 		ptsGainedT6 := p.StatPoints - ptsBeforeT6
-		if ptsGainedT6 != 12 {
-			t.Fatalf("No Tier 6 Lendária deveria ganhar +12 StatPoints por nível, ganhou %d", ptsGainedT6)
+		if ptsGainedT6 != 15 {
+			t.Fatalf("No Tier 6 Lendária deveria ganhar +15 StatPoints por nível, ganhou %d", ptsGainedT6)
 		}
 	}
 
