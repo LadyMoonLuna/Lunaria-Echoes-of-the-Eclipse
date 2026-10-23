@@ -1,4 +1,5 @@
 extends CanvasLayer
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 const ClassPaths = preload("res://scripts/ClassPaths.gd")
 var is_open: bool = false
@@ -990,6 +991,7 @@ func _ready() -> void:
 	layer = 20
 	visible = false
 	_build_ui()
+	LunariaUI.watch(self) # mesmo estilo do inventário
 	_switch_tab(0)
 
 func _input(event: InputEvent) -> void:

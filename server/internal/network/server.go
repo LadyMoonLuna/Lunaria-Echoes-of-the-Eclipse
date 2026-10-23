@@ -45,6 +45,7 @@ type Server struct {
 	serverTick    uint32
 
 	garrickLastDefend time.Time
+	devItemQuality    map[uint32]uint8 // qualidade escolhida no Dev Menu para os itens dados (por jogador)
 	guardLastAttack   map[uint32]time.Time
 
 	forgeWarningMu   sync.Mutex
@@ -1156,9 +1157,16 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 				val == protocol.ItemOrganicTrash {
 				qty = 5
 			}
-			player.AddItem(val, qty)
+			s.mu.RLock()
+			q := s.devItemQuality[player.ID]
+			s.mu.RUnlock()
+			if q > 0 {
+				player.AddItemWithQuality(val, qty, q)
+			} else {
+				player.AddItem(val, qty)
+			}
 			s.sendInventorySync(player)
-			log.Printf("[DEV] Adicionado item %d (+%d) ao inventário do Jogador #%d!\n", val, qty, player.ID)
+			log.Printf("[DEV] Adicionado item %d (+%d, qualidade %d) ao inventário do Jogador #%d!\n", val, qty, q, player.ID)
 			s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Item #%d (+%d) adicionado ao inventário do Jogador #%d!", val, qty, player.ID))
 		}
 
@@ -1173,6 +1181,17 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 
 	case protocol.DevCmdWorldEvent:
 		s.handleDevWorldEvent(player, val)
+
+	case protocol.DevCmdItemQuality:
+		if player == nil {
+			return
+		}
+		s.mu.Lock()
+		if s.devItemQuality == nil {
+			s.devItemQuality = make(map[uint32]uint8)
+		}
+		s.devItemQuality[player.ID] = min(val, 100)
+		s.mu.Unlock()
 
 	case protocol.DevCmdGoToZone:
 		if player == nil || val >= world.ZoneCount {
@@ -1219,43 +1238,24 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		if player == nil {
 			return
 		}
-		var targetX, targetY, targetZ float32
-		var locName string
-		switch val {
-		case 0:
-			targetX, targetY, targetZ = 0.0, 1.5, 0.0
-			locName = "Centro da Vila"
-		case 1:
-			targetX, targetY, targetZ = -20.0, 1.5, -15.0
-			locName = "Igreja da Luz"
-		case 2:
-			targetX, targetY, targetZ = 20.0, 1.5, -15.0
-			locName = "Torre do Arcanista"
-		case 3:
-			targetX, targetY, targetZ = -21.0, 1.5, -19.0
-			locName = "Entrada dos Esgotos"
-		case 4:
-			targetX, targetY, targetZ = 52.0, 1.5, -42.0
-			locName = "Bosque Sussurrante / Lobos"
-		case 5:
-			targetX, targetY, targetZ = 0.0, 1.5, 62.0
-			locName = "Ruínas da Vigília / Vaelen"
-		case 6:
-			targetX, targetY, targetZ = -82.0, 1.5, 82.0
-			locName = "Santuário do Eclipse / Malakor"
-		case 7:
-			targetX, targetY, targetZ = -25.0, 1.5, -25.0
-			locName = "Mercado Negro"
-		default:
-			targetX, targetY, targetZ = 0.0, 1.5, 0.0
-			locName = "Centro da Vila (Padrão)"
+		dest, ok := devTeleports[val]
+		if !ok {
+			dest = devTeleports[0]
 		}
-
-		player.Respawn(targetX, targetY, targetZ)
-		s.BroadcastPlayerRespawn(player.ID, targetX, targetY, targetZ)
-		s.sendPlayerStats(player)
-		log.Printf("[DEV TELEPORT] Jogador #%d teleportado para %s (%.1f, %.1f, %.1f)!\n", player.ID, locName, targetX, targetY, targetZ)
-		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Jogador #%d teleportado para %s!", player.ID, locName))
+		x, z := dest.x, dest.z
+		if dest.useSafe {
+			x, _, z = world.GetDefaultSafeCoordinates(dest.zone)
+		}
+		if dest.zone == player.GetZone() {
+			player.Respawn(x, 1.5, z)
+			s.BroadcastPlayerRespawn(player.ID, x, 1.5, z)
+			s.sendPlayerStats(player)
+		} else {
+			s.movePlayerToZone(player, world.PortalDef{Name: dest.name, FromZoneID: player.GetZone(), TargetZoneID: dest.zone,
+				TargetX: x, TargetY: 1.5, TargetZ: z})
+		}
+		log.Printf("[DEV TELEPORT] Jogador #%d teleportado para %s (zona %d: %.1f, %.1f)\n", player.ID, dest.name, dest.zone, x, z)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Jogador #%d teleportado para %s!", player.ID, dest.name))
 
 	case 10:
 		// CommandType 10: Travessia de Portal / Mudança de Zona (Value = PortalID)
@@ -1299,6 +1299,28 @@ func (s *Server) handlePortalTravel(playerID uint32, targetZoneID, portalID uint
 		}
 	}
 
+	s.movePlayerToZone(player, portal)
+}
+
+// devTeleports: destinos do Dev Menu (0x22 Cmd 9) — cada um com a zona certa.
+var devTeleports = map[uint8]struct {
+	name    string
+	zone    uint8
+	x, z    float32
+	useSafe bool
+}{
+	0: {"Praça Central da Vila", world.ZoneVillage, 0, 7, false},
+	1: {"Igreja da Luz", world.ZoneChurch, 0, 0, true},
+	2: {"Torre do Arcanista", world.ZoneMageTower, 0, 0, true},
+	3: {"Esgotos Antigos", world.ZoneSewers, 0, 0, true},
+	4: {"Bosque Sussurrante", world.ZoneForest, 0, 0, true},
+	5: {"Ruínas da Vigília", world.ZoneRuins, 0, 0, true},
+	6: {"Santuário do Eclipse", world.ZoneSanctuary, 0, 0, true},
+	7: {"Mercado Negro", world.ZoneBlackMarket, 0, 0, true},
+}
+
+// movePlayerToZone leva o jogador para a zona/posição do portal e avisa o cliente (0x36 + 0x23).
+func (s *Server) movePlayerToZone(player *world.Player, portal world.PortalDef) {
 	oldZone := player.GetZone()
 	newZone := portal.TargetZoneID
 	targetX, targetY, targetZ := portal.TargetX, portal.TargetY, portal.TargetZ

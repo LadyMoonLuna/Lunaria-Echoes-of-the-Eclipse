@@ -4,8 +4,8 @@ signal identity_changed(race_id: int, class_id: int)
 signal action_triggered(action_type: int)
 
 const SPEED: float = 8.0
-const DODGE_SPEED: float = 18.0
-const JUMP_VELOCITY: float = 6.0
+const DODGE_SPEED: float = 12.5
+const JUMP_VELOCITY: float = 7.0
 const MOUSE_SENSITIVITY: float = 0.003
 const NETWORK_TICK_INTERVAL: float = 0.05 # 20 Hz (a cada 50ms)
 
@@ -30,6 +30,14 @@ const ACTION_COOLDOWNS := {1: 0.45, 2: 0.9, 3: 2.0, 4: 4.0, 5: 6.0, 6: 10.0}
 const JUMP_COOLDOWN: float = 0.45
 var action_ready_at: Dictionary = {}
 var jump_cooldown: float = 0.0
+# Pulo mais seco: a gravidade pesa mais na subida e ainda mais na queda (~0,65 s no ar)
+const JUMP_RISE_GRAVITY: float = 2.0
+const JUMP_FALL_GRAVITY: float = 2.7
+const DODGE_TIME: float = 0.55 # rolamento completo: ~7 m
+# O terreno tem relevo: is_on_floor() pisca em descidas, então damos uma folga curta
+var _floor_grace: float = 0.0
+func _grounded() -> bool:
+	return is_on_floor() or _floor_grace > 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 var attack_cooldown: float = 0.0
 var is_menu_open: bool = false
@@ -1432,14 +1440,14 @@ func can_dash() -> bool:
 
 func _perform_dodge_roll() -> void:
 	# Sem rolar no ar nem emendar rolamentos: só no chão e fora da recarga
-	if is_menu_open or is_dodging or not is_on_floor() or action_cooldown_left(2) > 0.0:
+	if is_menu_open or is_dodging or not _grounded() or action_cooldown_left(2) > 0.0:
 		return
 	if not can_dash():
 		return # acima de 100% do peso a esquiva (Shift) fica bloqueada
 	_start_cooldown(2)
 
 	is_dodging = true
-	dodge_timer = 0.35
+	dodge_timer = DODGE_TIME
 
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	if get_viewport().gui_get_focus_owner() is LineEdit:
@@ -1464,15 +1472,11 @@ func _perform_dodge_roll() -> void:
 	if NetworkManager and NetworkManager.my_player_id > 0:
 		NetworkManager.send_player_action(2, dodge_direction)
 
-	if race_model and is_instance_valid(race_model):
-		# O clipe dodge_roll do modelo faz o rolamento; o timer só libera a esquiva
-		race_model.play_action(2)
-		var tw_dodge := create_tween()
-		tw_dodge.tween_interval(0.35)
-		tw_dodge.finished.connect(func(): is_dodging = false)
-	elif body_mesh:
-		var tw := create_tween()
-		tw.tween_property(body_mesh, "rotation:x", deg_to_rad(360.0), 0.35)
+	if body_mesh:
+		# Cambalhota visível: o corpo inteiro (modelo 3D incluso) gira para a frente
+		body_mesh.rotation.x = 0.0
+		var tw := body_mesh.create_tween()
+		tw.tween_property(body_mesh, "rotation:x", deg_to_rad(-360.0), DODGE_TIME).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw.finished.connect(func():
 			body_mesh.rotation.x = 0.0
 			is_dodging = false
@@ -4067,11 +4071,14 @@ func _physics_process(delta: float) -> void:
 
 	if attack_cooldown > 0.0:
 		attack_cooldown -= delta
-	if jump_cooldown > 0.0 and is_on_floor():
+	if jump_cooldown > 0.0 and _grounded():
 		jump_cooldown -= delta
 
-	if not is_on_floor():
-		velocity.y -= gravity * delta
+	if is_on_floor():
+		_floor_grace = 0.12
+	else:
+		_floor_grace -= delta
+		velocity.y -= gravity * (JUMP_RISE_GRAVITY if velocity.y > 0.0 else JUMP_FALL_GRAVITY) * delta
 
 	if is_dodging:
 		dodge_timer -= delta
@@ -4084,8 +4091,9 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0.0, SPEED * 2.0 * delta)
 			velocity.z = move_toward(velocity.z, 0.0, SPEED * 2.0 * delta)
 		else:
-			if Input.is_action_just_pressed("jump") and is_on_floor() and jump_cooldown <= 0.0:
+			if Input.is_action_just_pressed("jump") and _grounded() and jump_cooldown <= 0.0:
 				velocity.y = JUMP_VELOCITY
+				_floor_grace = 0.0
 				jump_cooldown = JUMP_COOLDOWN
 
 			var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")

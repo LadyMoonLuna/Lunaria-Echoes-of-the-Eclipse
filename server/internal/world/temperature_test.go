@@ -38,7 +38,7 @@ func TestPuddlesDryInHeatAndRefillWithRain(t *testing.T) {
 		t.Fatal("no calor extremo alguma poça da vila deveria secar")
 	}
 	for _, n := range m.InZone(ZoneVillage) {
-		if IsEvaporable(n.MaterialID) && n.Available() {
+		if IsEvaporable(n.MaterialID) && !n.Purified && n.Available() {
 			t.Fatal("poça seca não pode ser coletada")
 		}
 	}

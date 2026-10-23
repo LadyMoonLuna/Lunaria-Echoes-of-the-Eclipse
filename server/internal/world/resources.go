@@ -32,7 +32,13 @@ type ResourceNode struct {
 	DepletedAt time.Time
 	RespawnIn  time.Duration
 	DriedUp    bool // poça/riacho que secou no calor; só volta com chuva ou tempo ameno
+	Purified   bool // Fonte Purificada da Vila: água sempre de alta qualidade
 }
+
+// Fonte de Água Purificada no centro da Vila (mesmo ponto onde os NPCs bebem).
+var PurifiedFountainPos = [2]float32{0, 0}
+
+const PurifiedFountainRadius float32 = 3.4
 
 // Available informa se o nó já voltou a crescer.
 func (n *ResourceNode) Available() bool {
@@ -206,6 +212,10 @@ func NewResourceNodeManager() *ResourceNodeManager {
 	for _, n := range uniqueNodes {
 		add(n)
 	}
+	// Fonte de Água Purificada no centro da praça da Vila: nunca seca e enche os frascos na hora
+	add(ResourceNode{ZoneID: ZoneVillage, MaterialID: MatPureWater, X: PurifiedFountainPos[0], Z: PurifiedFountainPos[1] + PurifiedFountainRadius})
+	m.nodes[nextID-1].RespawnIn = 2 * time.Second
+	m.nodes[nextID-1].Purified = true
 	// Barreiros de barro e argila ao longo das margens do Rio Prateado
 	for zone := uint8(0); zone < ZoneCount; zone++ {
 		rng := rand.New(rand.NewSource(int64(7000 + int(zone)*131)))
@@ -293,7 +303,7 @@ func (m *ResourceNodeManager) UpdateEvaporation(zone uint8, tempC float32, raini
 	defer m.mu.Unlock()
 	changed := false
 	for _, n := range m.nodes {
-		if n.ZoneID != zone || !IsEvaporable(n.MaterialID) {
+		if n.ZoneID != zone || !IsEvaporable(n.MaterialID) || n.Purified {
 			continue
 		}
 		switch {

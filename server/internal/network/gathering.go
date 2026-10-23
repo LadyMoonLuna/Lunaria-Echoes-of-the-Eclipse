@@ -146,6 +146,9 @@ func harvestQuality(p *world.Player, n world.ResourceNode) uint8 {
 	if tool > n.Tier {
 		q += int(tool-n.Tier) * 4
 	}
+	if n.Purified {
+		q = 90 + rand.Intn(11) // água abençoada da Fonte da praça
+	}
 	if q > 100 {
 		q = 100
 	}

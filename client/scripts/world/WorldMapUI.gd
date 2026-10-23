@@ -3,6 +3,7 @@ extends CanvasLayer
 ## com o nome de cada região e a posição do jogador.
 
 const Data = preload("res://scripts/world/WorldData.gd")
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 const MAP_PNG := "res://assets/world_map.png"
 const MAP_META := "res://assets/world_map.json"
 
@@ -17,9 +18,7 @@ func _ready() -> void:
 	layer = 110
 	panel = PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.03, 0.04, 0.07, 0.94)
-	panel.add_theme_stylebox_override("panel", bg)
+	panel.add_theme_stylebox_override("panel", LunariaUI.frame_style()) # estilo do inventário
 	panel.visible = false
 	add_child(panel)
 	var vb := VBoxContainer.new()

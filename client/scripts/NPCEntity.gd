@@ -1058,17 +1058,11 @@ func _update_tags() -> void:
 		_: # Garrick
 			name_tag.modulate = Color(1.0, 0.85, 0.4)
 
-	if not is_dummy:
-		var hearts_str := get_hearts_string(friendship_points)
-		if state_text != "":
-			name_tag.text = "%s\n%s\n%s" % [npc_name, state_text, hearts_str]
-		else:
-			name_tag.text = "%s\n%s" % [npc_name, hearts_str]
+	# Os corações de amizade aparecem só na caixa de diálogo, não sobre a cabeça
+	if state_text != "":
+		name_tag.text = "%s\n%s" % [npc_name, state_text]
 	else:
-		if state_text != "":
-			name_tag.text = "%s\n%s" % [npc_name, state_text]
-		else:
-			name_tag.text = npc_name
+		name_tag.text = npc_name
 
 func show_dialogue(text: String) -> void:
 	_ensure_node_refs()

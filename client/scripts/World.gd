@@ -3,6 +3,7 @@ extends Node3D
 const LunariaTerrain = preload("res://scripts/world/Terrain.gd")
 const LunariaWorldBuilder = preload("res://scripts/world/WorldBuilder.gd")
 const LunariaWorldData = preload("res://scripts/world/WorldData.gd")
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 @export var local_player_scene: PackedScene = preload("res://scenes/LocalPlayer.tscn")
 @export var remote_player_scene: PackedScene = preload("res://scenes/RemotePlayer.tscn")
@@ -1008,6 +1009,7 @@ func _build_dev_manager_ui() -> void:
 	dev_canvas_layer.name = "DevCanvasLayer"
 	dev_canvas_layer.layer = 120
 	add_child(dev_canvas_layer)
+	LunariaUI.watch(dev_canvas_layer) # mesmo estilo do inventário
 
 	# 1. Botão fixo no topo direito [🛠️ DEV (F9)]
 	dev_btn_top = Button.new()
@@ -1206,6 +1208,7 @@ func request_class_or_race_change(is_race: bool, target_id: int, target_tier: in
 		dev_canvas_layer.name = "DevCanvasLayer"
 		dev_canvas_layer.layer = 125
 		add_child(dev_canvas_layer)
+		LunariaUI.watch(dev_canvas_layer)
 
 	var modal := PanelContainer.new()
 	modal.name = "ClassOrRaceConfirmationModal"
@@ -1874,9 +1877,11 @@ func _build_dev_tab_items(tabs: TabContainer) -> void:
 		var item_id: int = item["id"]
 		var item_name: String = item["name"]
 		var btn := _dev_create_btn("+ Pegar Item", col, func():
-			NetworkManager.send_give_item(item_id)
-			if dev_status_label: dev_status_label.text = "Item adicionado: #%d %s" % [item_id, item_name]
-			show_loot_toast("+ %s" % item_name)
+			_dev_pick_quality(item_name, func(q: int):
+				NetworkManager.send_give_item(item_id)
+				if dev_status_label: dev_status_label.text = "Item adicionado: #%d %s (Qualidade %d)" % [item_id, item_name, q]
+				show_loot_toast("+ %s" % item_name)
+			)
 		)
 		btn.custom_minimum_size = Vector2(100, 26)
 		hb.add_child(btn)
@@ -1929,18 +1934,20 @@ func _build_dev_tab_bestiary(tabs: TabContainer) -> void:
 		var drops_arr: Array = mob["drops"]
 		var mob_name: String = mob["name"]
 		var drop_btn := _dev_create_btn("📦 Pegar Drops", Color(0.3, 0.7, 0.4), func():
-			for item_id in drops_arr:
-				NetworkManager.send_give_item(item_id)
-			if dev_status_label:
-				dev_status_label.text = "Drops de %s adicionados ao inventário!" % mob_name
-			show_loot_toast("Drops de %s coletados!" % mob_name)
+			_dev_pick_quality("Drops de " + mob_name, func(q: int):
+				for item_id in drops_arr:
+					NetworkManager.send_give_item(item_id)
+				if dev_status_label:
+					dev_status_label.text = "Drops de %s adicionados (Qualidade %d)!" % [mob_name, q]
+				show_loot_toast("Drops de %s coletados!" % mob_name)
+			)
 		)
 		btn_vb.add_child(drop_btn)
 
 		var zid: int = mob["zone_id"]
 		var zname: String = mob["zone"]
 		var tp_btn := _dev_create_btn("⚡ Ir para Zona", Color(0.3, 0.5, 0.8), func():
-			NetworkManager.send_dev_teleport(zid)
+			NetworkManager.send_world_control(14, zid) # viagem de zona (o Cmd 9 é um local fixo)
 			if dev_status_label:
 				dev_status_label.text = "Teleportando para %s (Zona #%d)..." % [zname, zid]
 			show_loot_toast("Teleportando para %s..." % zname)
@@ -1954,7 +1961,7 @@ func _build_dev_tab_teleports(tabs: TabContainer) -> void:
 	tabs.add_child(tab)
 
 	var desc_lbl := Label.new()
-	desc_lbl.text = "Teleporte instantâneo seguro (0x22 Cmd 9 via 0x36 RESPAWN com I-Frames):"
+	desc_lbl.text = "Teleporte instantâneo para locais conhecidos (troca de zona automática):"
 	desc_lbl.add_theme_font_size_override("font_size", 12)
 	desc_lbl.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 	tab.add_child(desc_lbl)
@@ -2153,7 +2160,7 @@ func _try_interact_nearest_npc() -> void:
 	if nearest_id > 0:
 		print("[World] Interagindo com NPC #%d (distância: %.2fm)" % [nearest_id, min_dist])
 		NetworkManager.send_player_interact(nearest_id)
-		if nearest_id in [100, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116]:
+		if nearest_id != 101 and nearest_id != 102: # todos falam, menos os bonecos de treino
 			if class_master_ui:
 				class_master_ui.open_master_menu(nearest_id)
 
@@ -3248,7 +3255,7 @@ func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int
 		p_name = NPCEntityScript.get_default_npc_name(nid)
 		script_path = "scripts/npcs/%s.lua" % ["nyx", "tao", "iolanthe", "fiorella", "bartolomeu", "thorne"][nid - 111]
 	else:
-		p_name = "NPC #%d" % nid
+		p_name = NPCEntityScript.get_default_npc_name(nid) # aprendizes, Coveiro, Joalheira, caçadores
 
 	if npc_inst.has_method("set_npc_info"):
 		npc_inst.set_npc_info(nid, p_name, script_path)
@@ -4926,6 +4933,7 @@ func _build_zone_0_village(root: Node3D) -> void:
 	root.add_child(plaza_mesh)
 
 	_create_rebirth_crystal(root)
+	_build_purified_fountain(root)
 	_build_cemetery_and_river(root)
 
 	for cpos in [Vector3(-7.2, 0, -7.2), Vector3(7.2, 0, -7.2), Vector3(-7.2, 0, 7.2), Vector3(7.2, 0, 7.2)]:
@@ -6223,3 +6231,153 @@ func _landmark_mesh(parent: Node3D, mesh: Mesh, mat: Material, pos: Vector3, scl
 	mi.rotation_degrees = rot_deg
 	parent.add_child(mi)
 	return mi
+
+
+## Fonte de Água Purificada: bacia de pedra em volta do Cristal do Renascimento, com água
+## luminosa e quatro jorros. O nó de coleta (servidor) fica na borda sul da bacia.
+func _build_purified_fountain(parent: Node3D) -> void:
+	var root := Node3D.new()
+	root.name = "PurifiedFountain"
+	parent.add_child(root)
+	var stone := StandardMaterial3D.new()
+	LunariaTextures.apply(stone, "stone", 0.9, false)
+	stone.albedo_color = Color("#c9c3b4")
+	stone.roughness = 0.8
+	# Mureta da bacia (anel de 16 blocos)
+	var seg := 16
+	for i in range(seg):
+		var ang := TAU * float(i) / float(seg)
+		var block := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = Vector3(1.38, 0.62, 0.42)
+		block.mesh = bm
+		block.material_override = stone
+		block.position = Vector3(cos(ang) * 3.2, 0.31, sin(ang) * 3.2)
+		block.rotation.y = -ang + PI * 0.5
+		root.add_child(block)
+	var floor_mesh := MeshInstance3D.new()
+	var fc := CylinderMesh.new()
+	fc.top_radius = 3.05
+	fc.bottom_radius = 3.05
+	fc.height = 0.1
+	floor_mesh.mesh = fc
+	floor_mesh.material_override = stone
+	floor_mesh.position = Vector3(0, 0.05, 0)
+	root.add_child(floor_mesh)
+	# Água purificada: azul-celeste levemente luminosa
+	var water := MeshInstance3D.new()
+	var wc := CylinderMesh.new()
+	wc.top_radius = 3.0
+	wc.bottom_radius = 3.0
+	wc.height = 0.04
+	water.mesh = wc
+	var wm := StandardMaterial3D.new()
+	wm.albedo_color = Color(0.18, 0.5, 0.78, 0.78)
+	wm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	wm.metallic = 0.3
+	wm.roughness = 0.05
+	wm.emission_enabled = true
+	wm.emission = Color(0.2, 0.55, 0.9)
+	wm.emission_energy_multiplier = 0.25
+	water.material_override = wm
+	water.position = Vector3(0, 0.45, 0)
+	root.add_child(water)
+	var shimmer := water.create_tween().set_loops()
+	shimmer.tween_property(wm, "emission_energy_multiplier", 0.45, 2.2).set_trans(Tween.TRANS_SINE)
+	shimmer.tween_property(wm, "emission_energy_multiplier", 0.2, 2.2).set_trans(Tween.TRANS_SINE)
+	# Quatro jorros saindo do pedestal do cristal
+	for i in range(4):
+		var ang := TAU * float(i) / 4.0 + PI * 0.25
+		var jet := GPUParticles3D.new()
+		jet.amount = 40
+		jet.lifetime = 0.9
+		var pm := ParticleProcessMaterial.new()
+		pm.direction = Vector3(cos(ang), 1.6, sin(ang)).normalized()
+		pm.spread = 6.0
+		pm.initial_velocity_min = 3.0
+		pm.initial_velocity_max = 3.6
+		pm.gravity = Vector3(0, -9.8, 0)
+		pm.scale_min = 0.6
+		pm.scale_max = 1.0
+		pm.color = Color(0.75, 0.93, 1.0, 0.85)
+		jet.process_material = pm
+		var drop := SphereMesh.new()
+		drop.radius = 0.05
+		drop.height = 0.1
+		var dm := StandardMaterial3D.new()
+		dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		dm.albedo_color = Color(0.8, 0.95, 1.0, 0.85)
+		dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		dm.vertex_color_use_as_albedo = true
+		drop.material = dm
+		jet.draw_pass_1 = drop
+		jet.position = Vector3(cos(ang) * 1.6, 0.6, sin(ang) * 1.6)
+		root.add_child(jet)
+	var glow := OmniLight3D.new()
+	glow.light_color = Color(0.55, 0.85, 1.0)
+	glow.light_energy = 1.2
+	glow.omni_range = 7.0
+	glow.position = Vector3(0, 1.0, 0)
+	root.add_child(glow)
+	var sign := Label3D.new()
+	sign.text = "💧 Fonte de Água Purificada"
+	sign.font_size = 34
+	sign.outline_size = 8
+	sign.modulate = Color(0.7, 0.92, 1.0)
+	sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sign.position = Vector3(0, 0.9, 3.6)
+	root.add_child(sign)
+
+
+# Qualidades rápidas do menu de drops do Dev (0 = qualidade padrão do jogo)
+const DEV_QUALITY_PRESETS := [[0, "🎲 Padrão"], [25, "🟫 Ruim (25)"], [50, "⬜ Comum (50)"], [70, "🟩 Boa (70)"], [90, "🟦 Excelente (90)"], [100, "🟨 Perfeita (100)"]]
+var _dev_quality_popup: Control = null
+
+## Pequeno menu para escolher a Qualidade do material antes de colocá-lo no inventário.
+func _dev_pick_quality(what: String, on_pick: Callable) -> void:
+	if _dev_quality_popup and is_instance_valid(_dev_quality_popup):
+		_dev_quality_popup.queue_free()
+	var holder := CenterContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dev_canvas_layer.add_child(holder)
+	var pop := PanelContainer.new()
+	_dev_quality_popup = holder
+	pop.custom_minimum_size = Vector2(340, 0)
+	holder.add_child(pop)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 6)
+	pop.add_child(vb)
+	var title := Label.new()
+	title.text = "⚖️ Qualidade — %s" % what
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_color_override("font_color", Color(0.98, 0.86, 0.55))
+	vb.add_child(title)
+	var choose := func(q: int):
+		NetworkManager.send_world_control(15, q)
+		on_pick.call(q)
+		holder.queue_free()
+	for preset in DEV_QUALITY_PRESETS:
+		var qv: int = preset[0]
+		var b := Button.new()
+		b.text = preset[1]
+		b.pressed.connect(func(): choose.call(qv))
+		vb.add_child(b)
+	var hb := HBoxContainer.new()
+	vb.add_child(hb)
+	var slider := HSlider.new()
+	slider.min_value = 1
+	slider.max_value = 100
+	slider.value = 80
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(slider)
+	var custom := Button.new()
+	custom.text = "Pegar com 80"
+	slider.value_changed.connect(func(v: float): custom.text = "Pegar com %d" % int(v))
+	custom.pressed.connect(func(): choose.call(int(slider.value)))
+	hb.add_child(custom)
+	var cancel := Button.new()
+	cancel.text = "Cancelar"
+	cancel.pressed.connect(func(): holder.queue_free())
+	vb.add_child(cancel)

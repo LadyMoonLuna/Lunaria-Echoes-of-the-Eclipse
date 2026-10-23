@@ -1,4 +1,5 @@
 extends CanvasLayer
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 var is_open: bool = false
 var current_npc_id: int = 0
@@ -339,6 +340,131 @@ const MASTER_DATA := {
 	}
 }
 
+# NPCs da vila que não ensinam classe: mesma caixa de diálogo, sem a seção de vocação
+const VILLAGER_DATA := {
+	117: {
+		"title": "Bran, Aprendiz da Forja",
+		"sub": "Forja de Garrick • Humano, 17 anos • Sonha em forjar a própria espada",
+		"greeting": "Ah! Oi! Desculpa a fuligem... o mestre Garrick me mandou cuidar do fole. Precisa de alguma coisa?",
+		"about": "Garrick me pegou da rua quando eu tinha doze anos. Hoje eu já sei temperar uma lâmina — quase sem quebrar nenhuma.",
+		"color": Color("#ffb74d"),
+		"talk_quotes": [
+			"Se o mestre Garrick faltar um dia, sou eu quem assume a bigorna. Ele diz que eu ainda bato torto.",
+			"Escutei que o cobre perto do rio é mais macio. Dá pra trabalhar sem rachar.",
+			"Uma vez deixei uma espada cair no barril de têmpera e ela saiu azul. Ninguém sabe por quê."
+		],
+		"services": [
+			{"icon": "🔥", "title": "Ajudar no Fole", "desc": "Bran conta segredos da forja enquanto vocês trabalham.", "action": "chat"}
+		]
+	},
+	118: {
+		"title": "Pip, Aprendiz de Alquimia",
+		"sub": "Laboratório de Lyra • Gnomo, 23 anos • Explodiu o caldeirão três vezes",
+		"greeting": "Cuidado onde pisa! Esse frasco é... bom, não sei o que é, mas borbulha. Olá!",
+		"about": "Lyra diz que tenho mãos firmes e cabeça avoada. Eu digo que é criatividade.",
+		"color": Color("#ba68c8"),
+		"talk_quotes": [
+			"Água Purificada da fonte da praça é a melhor base pra poções. A do rio deixa gosto de lama.",
+			"Cogumelos brilhantes só crescem perto da água. Nunca coma um sem saber o nome!",
+			"Se eu errar a receita sai uma poção ruim... a Lyra finge que não vê."
+		],
+		"services": [
+			{"icon": "🧪", "title": "Dicas de Alquimia", "desc": "Pip ensina o básico das misturas.", "action": "chat"}
+		]
+	},
+	119: {
+		"title": "Tilda, Ajudante de Cozinha",
+		"sub": "Taverna do Javali Dourado • Halfling, 30 anos • Mão boa para temperos",
+		"greeting": "Bem-vindo à Taverna! O Chef está gritando lá dentro, então fala baixinho comigo.",
+		"about": "Cresci entre panelas. O Chef Bartolomeu diz que meu ensopado é quase tão bom quanto o dele. Quase.",
+		"color": Color("#ff8a65"),
+		"talk_quotes": [
+			"Carne de javali precisa descansar no sal antes de ir pro fogo.",
+			"Os guardas pedem sempre dose dupla depois da patrulha noturna.",
+			"Quem come bem aguenta o frio da montanha. Leve comida antes de viajar!"
+		],
+		"services": [
+			{"icon": "🍞", "title": "Pedir um Lanche", "desc": "Pão quente e conversa.", "action": "chat"}
+		]
+	},
+	120: {
+		"title": "Mortimer, o Coveiro",
+		"sub": "Cemitério da Vila • Humano, 61 anos • Enterra quem ninguém enterra",
+		"greeting": "Hmm. Visitante vivo. Raridade por aqui. Veio prestar respeito ou cavar problema?",
+		"about": "Quarenta anos de pá na mão. Os mortos são calmos; os vivos é que me dão trabalho.",
+		"color": Color("#90a4ae"),
+		"talk_quotes": [
+			"Corpos largados viram coisa ruim depois de um tempo. Traga-os pra cá, é mais seguro pra todos.",
+			"A Igreja vigia o cemitério. Necromante que aparecer por aqui não sai inteiro.",
+			"Cada lápide tem um nome. Eu lembro de todos."
+		],
+		"services": [
+			{"icon": "⚰️", "title": "Perguntar sobre os Túmulos", "desc": "Quem descansa no cemitério da Vila.", "action": "chat"}
+		]
+	},
+	123: {
+		"title": "Mestra Joalheira Selene Lapidária",
+		"sub": "Ateliê de Joias • Elfa, 140 anos • Lapida gemas desde antes da Vila existir",
+		"greeting": "Bem-vindo ao meu ateliê. Cada pedra tem uma luz escondida; meu ofício é libertá-la.",
+		"about": "Aprendi a lapidar com os anões das montanhas, e eles aprenderam comigo a ter paciência.",
+		"color": Color("#80deea"),
+		"talk_quotes": [
+			"Rubis guardam calor; safiras guardam calma. Escolha bem o que levar no dedo.",
+			"Quartzo é humilde, mas uma boa lapidação o faz brilhar como diamante.",
+			"Traga-me Prata e eu cravejo qualquer gema que você encontrar."
+		],
+		"services": [
+			{"icon": "💍", "title": "Ver Joias", "desc": "Anéis, colares e diademas cravejados.", "action": "chat"},
+			{"icon": "💎", "title": "Avaliar Gema", "desc": "Selene diz quanto vale sua pedra.", "action": "chat"}
+		]
+	},
+	400: {
+		"title": "Paladino da Luz",
+		"sub": "Caçador da Igreja da Luz Sagrada",
+		"greeting": "Que a Luz o proteja, viajante. Estou na trilha de mortos-vivos e de quem os ergue.",
+		"about": "Fiz votos diante do altar de Seraphina. Minha espada só se ergue contra a escuridão.",
+		"color": Color("#fff176"),
+		"talk_quotes": [
+			"Se vir um necromante, avise a Igreja. Não tente enfrentá-lo sozinho.",
+			"Zumbis temem fogo e Luz. Água benta também ajuda.",
+			"Rezo pelos que caíram sem túmulo."
+		],
+		"services": []
+	},
+	420: {
+		"title": "Clériga da Luz",
+		"sub": "Caçadora da Igreja da Luz Sagrada",
+		"greeting": "A Luz guia meus passos. Precisa de cura ou de coragem?",
+		"about": "Curei feridos em três epidemias. A Peste Cinzenta só cede às preces da Igreja.",
+		"color": Color("#fff59d"),
+		"talk_quotes": [
+			"Doenças passam de pessoa para pessoa. Evite beber da água do rio.",
+			"A Irmã Seraphina cura até a Peste Cinzenta, por uma oferta à Igreja.",
+			"Os mortos merecem descanso. Leve os corpos ao Coveiro."
+		],
+		"services": []
+	},
+}
+
+## Dados da caixa de diálogo de qualquer NPC (Mestres, aldeões, caçadores da Igreja).
+func info_for(npc_id: int) -> Dictionary:
+	if MASTER_DATA.has(npc_id):
+		return MASTER_DATA[npc_id]
+	var key := npc_id
+	if npc_id >= 400 and npc_id < 420:
+		key = 400
+	elif npc_id >= 420 and npc_id < 440:
+		key = 420
+	var d: Dictionary = VILLAGER_DATA.get(key, {
+		"title": "Morador de Lunaria", "sub": "Habitante da Vila",
+		"greeting": "Olá, viajante. Belo dia, não?", "color": Color("#cfd8dc"),
+		"talk_quotes": ["Dizem que a Fonte da praça nunca seca.", "Cuidado com as feras depois do pôr do sol."],
+		"services": []}).duplicate()
+	d["villager"] = true
+	d["class_id"] = 0
+	d["class_name"] = ""
+	return d
+
 # Pistas das Provações de Linhagem (servidor: race_trials.go)
 const LINEAGE_RUMORS := [
 	"Lupharion: um Varkai, Ferovar ou Ulvar que derrubar o Licantropo Alfa sob a Lua de Sangue.",
@@ -386,6 +512,7 @@ func _ready() -> void:
 	layer = 22
 	visible = false
 	_build_ui()
+	LunariaUI.watch(self) # mesmo estilo do inventário
 
 func _unhandled_input(event: InputEvent) -> void:
 	if is_open and event is InputEventKey and event.pressed and not event.echo:
@@ -395,7 +522,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func open_master_menu(npc_id: int) -> void:
 	current_npc_id = npc_id
-	var m_info: Dictionary = MASTER_DATA.get(npc_id, MASTER_DATA[105])
+	var m_info: Dictionary = info_for(npc_id)
 	current_npc_name = m_info["title"]
 	view_mode = "main"
 
@@ -556,7 +683,7 @@ func _build_ui() -> void:
 	footer_hbox.add_child(close_btn)
 
 func _update_display() -> void:
-	var m_info: Dictionary = MASTER_DATA.get(current_npc_id, MASTER_DATA[105])
+	var m_info: Dictionary = info_for(current_npc_id)
 
 	if master_title_label:
 		master_title_label.text = m_info["title"]
@@ -572,6 +699,8 @@ func _update_display() -> void:
 
 	if view_mode == "trade":
 		_render_trade_view(m_info)
+	elif view_mode == "talk":
+		_render_talk_view(m_info)
 	else:
 		_render_main_view(m_info)
 
@@ -609,7 +738,7 @@ func _render_main_view(m_info: Dictionary) -> void:
 	# -------------------------------------------------------------
 	var talk_btn := Button.new()
 	talk_btn.custom_minimum_size = Vector2(0, 44)
-	talk_btn.text = "💬 Conversar & Estreitar Laços (+Amizade / Afiança Diária)"
+	talk_btn.text = "💬 Conversar (assuntos e Afiança)"
 	talk_btn.add_theme_font_size_override("font_size", 12)
 	talk_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	var talk_style := StyleBoxFlat.new()
@@ -618,7 +747,10 @@ func _render_main_view(m_info: Dictionary) -> void:
 	talk_style.set_border_width_all(1)
 	talk_style.set_corner_radius_all(6)
 	talk_btn.add_theme_stylebox_override("normal", talk_style)
-	talk_btn.pressed.connect(_on_talk_pressed)
+	talk_btn.pressed.connect(func():
+		view_mode = "talk"
+		_update_display()
+	)
 	options_vbox.add_child(talk_btn)
 
 	# -------------------------------------------------------------
@@ -677,6 +809,9 @@ func _render_main_view(m_info: Dictionary) -> void:
 		trade_btn.add_theme_stylebox_override("normal", trade_style)
 		trade_btn.pressed.connect(_on_open_trade_pressed)
 		options_vbox.add_child(trade_btn)
+
+	if m_info.get("villager", false):
+		return # aldeões não ensinam vocações
 
 	# Separador sutil antes do bloco de Classe
 	var class_sep := HSeparator.new()
@@ -906,6 +1041,80 @@ func _render_trade_view(m_info: Dictionary) -> void:
 	options_vbox.add_child(back_btn)
 
 # -------------------------------------------------------------
+# VISÃO DE CONVERSA: ASSUNTOS
+# -------------------------------------------------------------
+const TALK_TOPICS := [
+	["👋", "Como vai você?", "mood"],
+	["🧑", "Fale um pouco sobre você.", "about"],
+	["📜", "Alguma novidade por aí?", "rumor"],
+	["🗺️", "O que há para fazer na região?", "hint"],
+	["💕", "Conversar com calma (+Afiança)", "bond"],
+]
+
+func _render_talk_view(m_info: Dictionary) -> void:
+	for topic in TALK_TOPICS:
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(0, 36)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.text = "%s  %s" % [topic[0], topic[1]]
+		b.add_theme_font_size_override("font_size", 12)
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		var st := StyleBoxFlat.new()
+		st.bg_color = Color(0.1, 0.16, 0.24, 0.95)
+		st.border_color = Color(0.35, 0.55, 0.85, 0.7)
+		st.set_border_width_all(1)
+		st.set_corner_radius_all(6)
+		st.content_margin_left = 12
+		b.add_theme_stylebox_override("normal", st)
+		var kind: String = topic[2]
+		b.pressed.connect(func(): _answer_topic(kind, m_info))
+		options_vbox.add_child(b)
+	var back_btn := Button.new()
+	back_btn.custom_minimum_size = Vector2(0, 34)
+	back_btn.text = "⬅️ Voltar"
+	back_btn.add_theme_font_size_override("font_size", 11)
+	back_btn.pressed.connect(func():
+		view_mode = "main"
+		_update_display()
+	)
+	options_vbox.add_child(back_btn)
+
+func _answer_topic(kind: String, m_info: Dictionary) -> void:
+	if kind == "bond":
+		_on_talk_pressed()
+		return
+	var world := get_parent()
+	var hour: int = 12
+	if world and "current_world_hour" in world:
+		hour = world.current_world_hour
+	var quotes: Array = m_info.get("talk_quotes", [])
+	var text := ""
+	match kind:
+		"mood":
+			if hour < 6:
+				text = "*boceja* Já era para eu estar dormindo... mas tudo bem, fale."
+			elif hour < 12:
+				text = "Bem disposto! A manhã é a melhor hora para trabalhar."
+			elif hour < 18:
+				text = "Cansado, mas o trabalho não para. E você, como vai a jornada?"
+			else:
+				text = "A noite chegou. Hora de descansar e ficar longe das feras."
+		"about":
+			text = m_info.get("about", m_info.get("sub", ""))
+		"rumor":
+			text = quotes[randi() % quotes.size()] if quotes.size() > 0 else m_info["greeting"]
+		"hint":
+			var hints := [
+				"A Fonte de Água Purificada da praça enche seus frascos com água da melhor qualidade.",
+				"O Rio Prateado corta todas as regiões. Siga a estrada e não se perde.",
+				"Aperte M para ver o mapa de Lunaria inteiro.",
+				"Os covis de feras ficam longe das estradas. Ande pelas trilhas se estiver ferido.",
+			]
+			text = hints[randi() % hints.size()]
+	if master_greeting_label:
+		master_greeting_label.text = "💬 \"%s\"" % text
+
+# -------------------------------------------------------------
 # AÇÕES E EVENTOS
 # -------------------------------------------------------------
 func _on_talk_pressed() -> void:
@@ -922,7 +1131,7 @@ func _on_talk_pressed() -> void:
 	if world and world.has_method("set_npc_friendship"):
 		world.set_npc_friendship(current_npc_id, cur_pts)
 
-	var m_info: Dictionary = MASTER_DATA.get(current_npc_id, MASTER_DATA[105])
+	var m_info: Dictionary = info_for(current_npc_id)
 	var quotes: Array = m_info.get("talk_quotes", [])
 	var quote: String = quotes[randi() % quotes.size()] if quotes.size() > 0 else m_info["greeting"]
 
@@ -932,7 +1141,7 @@ func _on_talk_pressed() -> void:
 	update_friendship_display()
 
 	if world and world.has_method("show_loot_toast"):
-		world.show_loot_toast("✨ Afiança Aumentada: +5 pontos com %s! (%s)" % [m_info["title"], get_hearts_string(cur_pts)])
+		world.show_loot_toast("✨ Afiança Aumentada: +5 pontos com %s!" % m_info["title"])
 
 func _on_open_trade_pressed() -> void:
 	var world := get_parent()
@@ -964,7 +1173,7 @@ func _on_service_requested(action_key: String, service_title: String) -> void:
 		nm_node.send_player_interact(current_npc_id)
 
 	var world := get_parent()
-	var m_info: Dictionary = MASTER_DATA.get(current_npc_id, MASTER_DATA[105])
+	var m_info: Dictionary = info_for(current_npc_id)
 
 	match action_key:
 		"repair", "guard_sharpen":

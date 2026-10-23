@@ -1,4 +1,5 @@
 extends CanvasLayer
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 var is_open: bool = false
 var report_text: String = ""
@@ -255,6 +256,7 @@ func _ready() -> void:
 	layer = 25
 	visible = false
 	_build_ui()
+	LunariaUI.watch(self) # mesmo estilo do inventário
 
 func toggle_menu() -> void:
 	if is_open:

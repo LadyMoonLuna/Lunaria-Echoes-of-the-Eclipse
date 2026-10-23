@@ -1,4 +1,5 @@
 extends CanvasLayer
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 const ItemData = preload("res://scripts/ItemData.gd")
 const AutopsyMinigameScript = preload("res://scripts/AutopsyMinigame.gd")
@@ -123,6 +124,7 @@ func _ready() -> void:
 	layer = 25
 	visible = false
 	_build_ui()
+	LunariaUI.watch(self) # mesmo estilo do inventário
 
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:

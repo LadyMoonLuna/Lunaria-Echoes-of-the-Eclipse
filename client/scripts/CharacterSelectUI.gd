@@ -1,4 +1,5 @@
 extends CanvasLayer
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 signal identity_confirmed(race_id: int, class_id: int)
 
@@ -512,6 +513,7 @@ var confirm_button: Button = null
 func _ready() -> void:
 	layer = 25
 	_build_ui()
+	LunariaUI.watch(self) # mesmo estilo do inventário
 	_select_race(selected_race)
 	open_menu()
 

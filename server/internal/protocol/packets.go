@@ -888,6 +888,7 @@ const (
 	DevCmdClearHeavy   uint8 = 12 // Remove da mochila os itens de 10 kg ou mais por unidade
 	DevCmdWorldEvent   uint8 = 13 // Evento climático/do Mundo Vivo (Value = DevEvent*)
 	DevCmdGoToZone     uint8 = 14 // Viaja direto para a zona Value (entrada padrão da zona)
+	DevCmdItemQuality  uint8 = 15 // Qualidade (1..100) dos próximos itens dados pelo Dev (0 = padrão)
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).

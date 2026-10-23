@@ -1,4 +1,5 @@
 extends CanvasLayer
+const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 
 signal evolution_accepted(offer_type: int, chosen_option: int)
 
@@ -126,6 +127,7 @@ func _ready() -> void:
 	layer = 30
 	visible = false
 	_build_ui()
+	LunariaUI.watch(self) # mesmo estilo do inventário
 
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
