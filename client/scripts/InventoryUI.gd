@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## Inventário em estilo Livro Aberto: páginas de pergaminho numa moldura de madeira.
-## Página esquerda: 14 slots em silhueta humanoide. Página direita: atributos sublinhados
+## Página esquerda: 15 slots em silhueta humanoide. Página direita: atributos sublinhados
 ## com a caixa preta de detalhamento. Coluna escura: inspetor do item selecionado.
 ## Rodapé: grade da mochila, carteira, barra de peso e lixeira.
 
@@ -36,24 +36,25 @@ var stat_totals := {"str": 0, "dex": 0, "con": 0, "agi": 0, "int": 0, "spi": 0, 
 # Seleção atual no inspetor: {"source": "equip"/"bag", "index": int, "id": int, "qty": int}
 var selected: Dictionary = {}
 
-const SLOT_COUNT := 14
+const SLOT_COUNT := 15
 
 const SLOT_NAMES := [
 	"Elmo", "Peitoral", "Calças", "Botas", "Luvas", "Capa / Túnica", "Colar", "Brinco / Amuleto",
-	"Anel 1", "Anel 2", "Anel 3", "Anel 4", "Mão Principal", "Mão Secundária"
+	"Anel 1", "Anel 2", "Anel 3", "Anel 4", "Mão Principal", "Mão Secundária", "Cinto"
 ]
 
-const SLOT_ICONS := ["🪖", "🛡️", "👖", "👢", "🧤", "🧥", "📿", "💎", "💍", "💍", "💍", "💍", "⚔️", "🔰"]
+const SLOT_ICONS := ["🪖", "🛡️", "👖", "👢", "🧤", "🧥", "📿", "💎", "💍", "💍", "💍", "💍", "⚔️", "🔰", "🎗️"]
 # Rótulos curtos desenhados dentro dos slots (não dependem de fonte de emoji)
-const SLOT_SHORT := ["ELMO", "PEITO", "CALÇA", "BOTAS", "LUVAS", "CAPA", "COLAR", "BRINCO", "ANEL", "ANEL", "ANEL", "ANEL", "ARMA", "ESCUDO"]
-const SLOT_CAPTIONS := ["Elmo", "Peitoral", "Calças", "Botas", "Luvas", "Capa", "Colar", "Brinco", "Anel 1", "Anel 2", "Anel 3", "Anel 4", "Mão Princ.", "Mão Sec."]
+const SLOT_SHORT := ["ELMO", "PEITO", "CALÇA", "BOTAS", "LUVAS", "CAPA", "COLAR", "BRINCO", "ANEL", "ANEL", "ANEL", "ANEL", "ARMA", "ESCUDO", "CINTO"]
+const SLOT_CAPTIONS := ["Elmo", "Peitoral", "Calças", "Botas", "Luvas", "Capa", "Colar", "Brinco", "Anel 1", "Anel 2", "Anel 3", "Anel 4", "Mão Princ.", "Mão Sec.", "Cinto"]
 
 # Silhueta humanoide: linhas de slots (índices do servidor)
 const EQUIP_LAYOUT := [
 	[6, 7, 0],
 	[5, 1, 4],
-	[12, 2, 13],
-	[8, 9, 3, 10, 11],
+	[12, 14, 13],
+	[8, 2, 9],
+	[10, 3, 11],
 ]
 
 # Linhas da página de status: [chave, rótulo]

@@ -14,7 +14,7 @@ signal player_stats_updated(player_id: int, race_id: int, class_id: int, hp: int
 signal player_stats_full_received(player_id: int, race_id: int, class_id: int, class_tier: int, level: int, hp: int, max_hp: int, stamina: int, max_stamina: int, buff_active: int)
 signal player_attributes_received(player_id: int, xp: int, next_level_xp: int, stat_points: int, str_stat: int, dex_stat: int, con_stat: int, agi_stat: int, int_stat: int, spi_stat: int, mas_stat: int, lck_stat: int)
 signal inventory_updated(equipped_slots_array: Array, items_array: Array) # items: {"id", "quantity", "quality"} — uma entrada por Qualidade
-signal equipped_qualities_updated(qualities: Array) # Condição (0-100) de cada um dos 14 slots
+signal equipped_qualities_updated(qualities: Array) # Condição (0-100) de cada um dos 15 slots
 signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: float, max_weight: float, speed_mult: float)
 signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
 signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
@@ -195,11 +195,11 @@ func _process_tcp() -> void:
 				player_attributes_received.emit(pid, xp, next_xp, stat_pts, str_stat, dex_stat, con_stat, agi_stat, int_stat, spi_stat, mas_stat, lck_stat)
 				tcp_rx_buffer = tcp_rx_buffer.slice(expected_len)
 
-			elif opcode == 0x38: # INVENTORY_SYNC: op | 14 slots | 14 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count u16 | count × (item, qtd, Qualidade)
-				if tcp_rx_buffer.size() < 48:
+			elif opcode == 0x38: # INVENTORY_SYNC: op | 15 slots | 15 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count u16 | count × (item, qtd, Qualidade)
+				if tcp_rx_buffer.size() < 50:
 					break
-				var slot_count: int = tcp_rx_buffer[46] | (tcp_rx_buffer[47] << 8)
-				var total_size: int = 48 + slot_count * 3
+				var slot_count: int = tcp_rx_buffer[48] | (tcp_rx_buffer[49] << 8)
+				var total_size: int = 50 + slot_count * 3
 				if tcp_rx_buffer.size() < total_size:
 					break
 				var inv_buf := StreamPeerBuffer.new()
@@ -207,17 +207,17 @@ func _process_tcp() -> void:
 				inv_buf.data_array = tcp_rx_buffer.slice(0, total_size)
 				var equipped_slots: Array = []
 				var equipped_qualities: Array = []
-				for i in range(14):
+				for i in range(15):
 					equipped_slots.append(tcp_rx_buffer[1 + i])
-					equipped_qualities.append(tcp_rx_buffer[15 + i])
-				inv_buf.seek(29)
+					equipped_qualities.append(tcp_rx_buffer[16 + i])
+				inv_buf.seek(31)
 				var gold: int = inv_buf.get_u32()
 				var eclipse_coins: int = inv_buf.get_u32()
 				var cur_weight: float = inv_buf.get_float()
 				var max_weight: float = inv_buf.get_float()
-				var speed_mult: float = float(tcp_rx_buffer[45]) / 100.0
+				var speed_mult: float = float(tcp_rx_buffer[47]) / 100.0
 				var items_array: Array = []
-				var offset: int = 48
+				var offset: int = 50
 				for i in range(slot_count):
 					items_array.append({"id": tcp_rx_buffer[offset], "quantity": tcp_rx_buffer[offset + 1], "quality": tcp_rx_buffer[offset + 2]})
 					offset += 3

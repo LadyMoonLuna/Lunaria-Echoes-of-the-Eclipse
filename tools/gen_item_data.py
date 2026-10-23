@@ -49,9 +49,9 @@ starting = [mat_ids[n] for n in re.search(r"StartingDiscoveredMaterials = \[\]ui
 out = '''extends RefCounted
 ## Dados de itens compartilhados entre Inventário e Status.
 ## GERADO por tools/gen_item_data.py a partir de server/internal/world/items.go — não edite à mão.
-## weight = kg por unidade | slot = 0..13 (-1 = não equipável) | bonus = atributos concedidos.
+## weight = kg por unidade | slot = 0..14 (-1 = não equipável) | bonus = atributos concedidos.
 
-const SLOT_COUNT := 14
+const SLOT_COUNT := 15
 const RING_SLOTS := [8, 9, 10, 11]
 
 const ITEMS := {

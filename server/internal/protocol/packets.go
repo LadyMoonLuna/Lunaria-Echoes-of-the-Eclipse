@@ -203,7 +203,7 @@ const (
 	RaceMaxID uint8 = 47
 )
 
-// Slots de Equipamento (Array fixo de 14 slots)
+// Slots de Equipamento (Array fixo de 15 slots)
 const (
 	SlotHelmet   uint8 = 0  // Elmo / Cabeça
 	SlotChest    uint8 = 1  // Peitoral / Armadura
@@ -212,16 +212,16 @@ const (
 	SlotGloves   uint8 = 4  // Luvas / Mãos
 	SlotCloak    uint8 = 5  // Capa / Túnica
 	SlotAmulet   uint8 = 6  // Colar / Relíquia
-	SlotEarring  uint8 = 7  // Brinco / Amuleto (cintos também ocupam este acessório)
-	SlotBelt     uint8 = 7  // Alias: cinto ocupa o slot de acessório (Brinco/Amuleto)
+	SlotEarring  uint8 = 7  // Brinco / Amuleto
 	SlotRing1    uint8 = 8  // Anel 1
 	SlotRing2    uint8 = 9  // Anel 2
 	SlotRing3    uint8 = 10 // Anel 3
 	SlotRing4    uint8 = 11 // Anel 4
 	SlotMainHand uint8 = 12 // Mão Principal / Arma Direita
 	SlotOffHand  uint8 = 13 // Mão Secundária / Esquerda
+	SlotBelt     uint8 = 14 // Cinto (15º slot)
 
-	EquipSlotCount = 14
+	EquipSlotCount = 15
 )
 
 // Ações do pacote 0x39 USE_OR_EQUIP_ITEM
@@ -466,7 +466,7 @@ const (
 	PlayerRespawnPacketSize  = 17 // uint8 (1) + uint32 (4) + 3x float32 (12) = 17 bytes
 	AllocateStatPacketSize   = 8  // uint8 (1) + uint32 (4) + uint8 (1) + uint16 Amount (2) = 8 bytes
 
-	InventorySyncHeaderSize  = 48 // op (1) + 14 slots + 14 Condições + Gold u32 + Eclipses u32 + Peso f32 + PesoMáx f32 + Velocidade% u8 + count u16
+	InventorySyncHeaderSize  = 50 // op (1) + 15 slots + 15 Condições + Gold u32 + Eclipses u32 + Peso f32 + PesoMáx f32 + Velocidade% u8 + count u16
 	InventorySlotEntrySize   = 3  // item (1) + quantidade (1) + Qualidade 0-100 (1) = 3 bytes
 	UseOrEquipItemPacketSize = 8  // op (1) + playerID u32 (4) + itemID (1) + action (1) + slot (1) = 8 bytes
 
@@ -1482,7 +1482,7 @@ type InventorySyncPacket struct {
 }
 
 // SerializeInventorySync empacota o 0x38.
-// Layout: op | 14 slots | 14 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 |
+// Layout: op | 15 slots | 15 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 |
 // count u16 | count × (item, quantidade, Qualidade)
 func SerializeInventorySync(equippedSlots, equippedQualities [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) []byte {
 	count := len(slots)
@@ -1493,14 +1493,14 @@ func SerializeInventorySync(equippedSlots, equippedQualities [EquipSlotCount]uin
 	buf[0] = PacketTypeInventorySync
 	for i := 0; i < EquipSlotCount; i++ {
 		buf[1+i] = equippedSlots[i]
-		buf[15+i] = equippedQualities[i]
+		buf[1+EquipSlotCount+i] = equippedQualities[i]
 	}
-	binary.LittleEndian.PutUint32(buf[29:33], status.Gold)
-	binary.LittleEndian.PutUint32(buf[33:37], status.EclipseCoins)
-	binary.LittleEndian.PutUint32(buf[37:41], math.Float32bits(status.CurrentWeight))
-	binary.LittleEndian.PutUint32(buf[41:45], math.Float32bits(status.MaxWeight))
-	buf[45] = status.SpeedPercent
-	binary.LittleEndian.PutUint16(buf[46:48], uint16(count))
+	binary.LittleEndian.PutUint32(buf[31:35], status.Gold)
+	binary.LittleEndian.PutUint32(buf[35:39], status.EclipseCoins)
+	binary.LittleEndian.PutUint32(buf[39:43], math.Float32bits(status.CurrentWeight))
+	binary.LittleEndian.PutUint32(buf[43:47], math.Float32bits(status.MaxWeight))
+	buf[47] = status.SpeedPercent
+	binary.LittleEndian.PutUint16(buf[48:50], uint16(count))
 	offset := InventorySyncHeaderSize
 	for i := 0; i < count; i++ {
 		buf[offset] = slots[i].ItemID
@@ -1529,16 +1529,16 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 	}
 	for i := 0; i < EquipSlotCount; i++ {
 		out.EquippedSlots[i] = data[1+i]
-		out.EquippedQualities[i] = data[15+i]
+		out.EquippedQualities[i] = data[1+EquipSlotCount+i]
 	}
 	out.EquippedArmorID = out.EquippedSlots[SlotChest]
 	out.EquippedAccessoryID = out.EquippedSlots[SlotRing1]
-	out.Status.Gold = binary.LittleEndian.Uint32(data[29:33])
-	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[33:37])
-	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[37:41]))
-	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[41:45]))
-	out.Status.SpeedPercent = data[45]
-	out.SlotCount = binary.LittleEndian.Uint16(data[46:48])
+	out.Status.Gold = binary.LittleEndian.Uint32(data[31:35])
+	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[35:39])
+	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[39:43]))
+	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[43:47]))
+	out.Status.SpeedPercent = data[47]
+	out.SlotCount = binary.LittleEndian.Uint16(data[48:50])
 	if len(data) < InventorySyncHeaderSize+int(out.SlotCount)*InventorySlotEntrySize {
 		return ErrInvalidPacketSize
 	}

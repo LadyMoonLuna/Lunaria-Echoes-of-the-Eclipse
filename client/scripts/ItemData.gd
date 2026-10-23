@@ -1,9 +1,9 @@
 extends RefCounted
 ## Dados de itens compartilhados entre Inventário e Status.
 ## GERADO por tools/gen_item_data.py a partir de server/internal/world/items.go — não edite à mão.
-## weight = kg por unidade | slot = 0..13 (-1 = não equipável) | bonus = atributos concedidos.
+## weight = kg por unidade | slot = 0..14 (-1 = não equipável) | bonus = atributos concedidos.
 
-const SLOT_COUNT := 14
+const SLOT_COUNT := 15
 const RING_SLOTS := [8, 9, 10, 11]
 
 const ITEMS := {
@@ -37,7 +37,7 @@ const ITEMS := {
 	33: {"name": "Calças de Couro Lupino", "weight": 3.5, "slot": 2, "bonus": {"agi": 3, "hp": 30, "def": 2}},
 	34: {"name": "Botas Passo-da-Bruma", "weight": 1.8, "slot": 3, "bonus": {"agi": 4, "dex": 2, "hp": 25, "def": 1}},
 	35: {"name": "Manoplas de Forjador de Estrelas", "weight": 2.5, "slot": 4, "bonus": {"str": 4, "mas": 3, "def": 2}},
-	36: {"name": "Cinto de Transmutador", "weight": 0.3, "slot": 7, "bonus": {"int": 3, "spi": 3, "mdef": 2}},
+	36: {"name": "Cinto de Transmutador", "weight": 0.3, "slot": 14, "bonus": {"int": 3, "spi": 3, "mdef": 2}},
 	37: {"name": "Colar da Lua Prateada", "weight": 0.2, "slot": 6, "bonus": {"int": 4, "spi": 4, "lck": 3, "mdef": 3}},
 	38: {"name": "Anel de Rubi Sanguinário", "weight": 0.1, "slot": 8, "bonus": {"str": 4, "con": 3}},
 	39: {"name": "Anel de Obsidiana", "weight": 0.1, "slot": 8, "bonus": {"con": 4, "mas": 3}},

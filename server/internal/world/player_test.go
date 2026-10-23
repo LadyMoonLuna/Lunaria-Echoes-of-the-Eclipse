@@ -744,7 +744,8 @@ func TestDevSetRaceAndKit(t *testing.T) {
 	}
 
 	slots := p.GetEquippedSlots()
-	for i := 0; i < 12; i++ {
+	for _, i := range []uint8{protocol.SlotHelmet, protocol.SlotChest, protocol.SlotLegs, protocol.SlotBoots, protocol.SlotGloves,
+		protocol.SlotCloak, protocol.SlotAmulet, protocol.SlotRing1, protocol.SlotRing2, protocol.SlotRing3, protocol.SlotRing4, protocol.SlotBelt} {
 		if slots[i] == 0 {
 			t.Fatalf("DevSetRaceAndKit: slot %d está vazio!", i)
 		}

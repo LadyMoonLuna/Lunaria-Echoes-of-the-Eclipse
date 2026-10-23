@@ -665,8 +665,8 @@ def _hand(weapon, rot=(0, 0, 0), offset=(0, 0, 0)):
 
 
 LOADOUTS = {
+    # O Viajante começa de mãos vazias: a arma só aparece quando houver uma no inventário
     "0": {"name": "Viajante", "outfit": "outfit_traveler",
-          "hand_r": _hand("iron_dagger", (-70, 0, 0)),
           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_spin"}},
     # --- 6 Classes Básicas de Combate ---
     "1": {"name": "Espadachim da Aurora", "outfit": "outfit_swordsman",

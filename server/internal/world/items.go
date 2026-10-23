@@ -68,7 +68,7 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemWolfLeatherPants:    {Name: "Calças de Couro Lupino", Weight: 3.5, Slot: protocol.SlotLegs, BonusAGI: 3, BonusHP: 30, BonusDEF: 2},
 	protocol.ItemMistwalkerBoots:     {Name: "Botas Passo-da-Bruma", Weight: 1.8, Slot: protocol.SlotBoots, BonusAGI: 4, BonusDEX: 2, BonusHP: 25, BonusDEF: 1},
 	protocol.ItemBlacksmithGauntlets: {Name: "Manoplas de Forjador de Estrelas", Weight: 2.5, Slot: protocol.SlotGloves, BonusSTR: 4, BonusMAS: 3, BonusDEF: 2},
-	protocol.ItemAlchemistBelt:       {Name: "Cinto de Transmutador", Weight: 0.3, Slot: protocol.SlotEarring, BonusINT: 3, BonusESP: 3, BonusMDEF: 2},
+	protocol.ItemAlchemistBelt:       {Name: "Cinto de Transmutador", Weight: 0.3, Slot: protocol.SlotBelt, BonusINT: 3, BonusESP: 3, BonusMDEF: 2},
 	protocol.ItemSilverMoonAmulet:    {Name: "Colar da Lua Prateada", Weight: 0.2, Slot: protocol.SlotAmulet, BonusINT: 4, BonusESP: 4, BonusLCK: 3, BonusMDEF: 3},
 	protocol.ItemBloodRubyRing:       {Name: "Anel de Rubi Sanguinário", Weight: 0.1, Slot: protocol.SlotRing1, BonusSTR: 4, BonusCON: 3},
 	protocol.ItemObsidianRing:        {Name: "Anel de Obsidiana", Weight: 0.1, Slot: protocol.SlotRing1, BonusCON: 4, BonusMAS: 3},
