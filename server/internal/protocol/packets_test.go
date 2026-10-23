@@ -235,9 +235,9 @@ func TestSelectIdentityPacket(t *testing.T) {
 	playerID := uint32(99)
 	raceID := RaceNoctari
 	classID := ClassScout
-	actionMode := IdentityModeEvolveClass
+	subPath := uint8(2)
 
-	data := SerializeSelectIdentity(playerID, raceID, classID, actionMode)
+	data := SerializeSelectIdentity(playerID, raceID, classID, actionMode, subPath)
 	if len(data) != SelectIdentityPacketSize {
 		t.Fatalf("esperava %d bytes, obteve %d", SelectIdentityPacketSize, len(data))
 	}
@@ -249,7 +249,7 @@ func TestSelectIdentityPacket(t *testing.T) {
 	if err := DeserializeSelectIdentity(data[:], &parsed); err != nil {
 		t.Fatalf("erro ao decodificar SELECT_IDENTITY: %v", err)
 	}
-	if parsed.PlayerID != playerID || parsed.RaceID != raceID || parsed.ClassID != classID || parsed.ActionMode != actionMode {
+	if parsed.PlayerID != playerID || parsed.RaceID != raceID || parsed.ClassID != classID || parsed.ActionMode != actionMode || parsed.SubPath != subPath {
 		t.Fatalf("dados divergentes em SELECT_IDENTITY: %+v", parsed)
 	}
 
@@ -339,8 +339,9 @@ func TestPlayerStatsPacket(t *testing.T) {
 	spi := uint8(6)
 	mas := uint8(7)
 	lck := uint8(9)
+	subPath := uint8(3)
 
-	data := SerializePlayerStats(playerID, raceID, classID, classTier, level, hp, maxHP, stamina, maxStamina, buffActive, xp, nextLevelXP, statPoints, str, dex, con, agi, intStat, spi, mas, lck)
+	data := SerializePlayerStats(playerID, raceID, classID, classTier, level, hp, maxHP, stamina, maxStamina, buffActive, xp, nextLevelXP, statPoints, str, dex, con, agi, intStat, spi, mas, lck, subPath)
 	if len(data) != PlayerStatsPacketSize {
 		t.Fatalf("esperava %d bytes, obteve %d", PlayerStatsPacketSize, len(data))
 	}
@@ -357,7 +358,8 @@ func TestPlayerStatsPacket(t *testing.T) {
 		parsed.HP != hp || parsed.MaxHP != maxHP || parsed.Stamina != stamina || parsed.MaxStamina != maxStamina ||
 		parsed.BuffActive != buffActive || parsed.XP != xp || parsed.NextLevelXP != nextLevelXP ||
 		parsed.StatPoints != statPoints || parsed.STR != str || parsed.DEX != dex || parsed.CON != con ||
-		parsed.AGI != agi || parsed.INT != intStat || parsed.SPI != spi || parsed.MAS != mas || parsed.LCK != lck {
+		parsed.AGI != agi || parsed.INT != intStat || parsed.SPI != spi || parsed.MAS != mas || parsed.LCK != lck ||
+		parsed.SubPath != subPath {
 		t.Fatalf("dados divergentes em PLAYER_STATS: %+v", parsed)
 	}
 }
@@ -808,6 +810,28 @@ func TestCorpseSnapshotPacket(t *testing.T) {
 			p.IsLooted != s.IsLooted || p.RemainingSeconds != s.RemainingSeconds {
 			t.Fatalf("snapshot #%d divergente: %+v vs %+v", i, p, s)
 		}
+	}
+}
+
+func TestFriendshipSyncPacket(t *testing.T) {
+	npcID := uint32(100)
+	points := uint16(65)
+	level := uint8(4)
+
+	data := SerializeFriendshipSync(npcID, points, level)
+	if len(data) != 8 {
+		t.Fatalf("esperava 8 bytes, obteve %d", len(data))
+	}
+	if data[0] != PacketTypeFriendshipSync {
+		t.Fatalf("esperava opcode 0x24, obteve 0x%02x", data[0])
+	}
+
+	pkt, err := DeserializeFriendshipSync(data)
+	if err != nil {
+		t.Fatalf("falha ao deserializar: %v", err)
+	}
+	if pkt.NPCID != npcID || pkt.Points != points || pkt.Level != level {
+		t.Fatalf("dados divergentes: %+v vs esperado (ID: %d, Pts: %d, Lvl: %d)", pkt, npcID, points, level)
 	}
 }
 

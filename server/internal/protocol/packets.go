@@ -21,6 +21,9 @@ const (
 	PacketTypeNPCSay           uint8 = 0x21
 	PacketTypeDevWorldControl  uint8 = 0x22
 	PacketTypeDevSkipTime      uint8 = 0x22 // Alias retrocompatível
+	PacketTypePortalTravel     uint8 = 0x23 // Transição de Portal / Mudança de Zona
+	PacketTypeZoneChange       uint8 = 0x23 // Alias retrocompatível
+	PacketTypeFriendshipSync   uint8 = 0x24 // [Server -> Client] Sincronização de Afiança com NPC (8 bytes)
 
 	// Marco 3
 	PacketTypeSelectIdentity uint8 = 0x30
@@ -90,6 +93,18 @@ const (
 	MobTypeInquisitorVex        uint8 = 12 // Mini-Boss Inquisidor Vex (HP 1.400)
 	MobTypeCommanderVaelen      uint8 = 13 // Boss Normal Comandante Vaelen, o Traidor (HP 3.200)
 	MobTypeMalakorHeraldEclipse uint8 = 14 // Raid Boss Malakor, o Arauto do Eclipse (HP 7.500)
+
+	// Quadrante 4: Novas Criaturas e Raid Bosses
+	MobTypeMistWeaverSpider     uint8 = 15 // Aranha Tecelã da Bruma (HP 380)
+	MobTypeArachnaQueen         uint8 = 16 // Arachna, a Rainha Tecelã (Raid Boss - HP 6.800)
+	MobTypeAcidCorrosiveSlime   uint8 = 17 // Lodo Ácido Corrosivo / Slime Mutante (HP 320)
+	MobTypeAbyssalScorpion      uint8 = 18 // Escorpião Abissal Gigante (HP 540)
+	MobTypeStitchedChimeraZero  uint8 = 19 // Experimento Nº 0: A Quimera Costurada (Mini-Boss - HP 2.800)
+	MobTypeAncientIceGolem      uint8 = 20 // Golem de Gelo Antigo (HP 720)
+	MobTypeWildFrostDrake       uint8 = 21 // Draco de Geada Selvagem (HP 950)
+	MobTypeYmirFrostPatriarch   uint8 = 22 // Ymir, o Patriarca Gigante de Gelo (Boss - HP 5.200)
+	MobTypeVesperianBloodGuard  uint8 = 23 // Guarda Sanguinário de Vesperian (HP 680)
+	MobTypeLordVesperianVampire uint8 = 24 // Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto - HP 8.500)
 )
 
 // Estados de Mobs do Marco 4
@@ -141,6 +156,26 @@ const (
 	RaceCambion       uint8 = 26 // Cambion (Sangue-de-Enxofre)
 	RaceNephilim      uint8 = 27 // Nephilim (Híbrido do Crepúsculo)
 	RaceTimeWanderer  uint8 = 28 // Errante Temporal (Cronomante)
+
+	// Quadrante 5: 18 Novas Raças do RPG (29 a 46)
+	RaceHalfCelestial   uint8 = 29 // Meio-Celestial (Ser de Luz)
+	RacePyromancer       uint8 = 30 // Pyromante (Fulgor & Chama da Vida)
+	RaceFrostGiant      uint8 = 31 // Gigante de Gelo (Pele Gélida - 1.45x)
+	RaceDragonEarth     uint8 = 32 // Drago (Terra) (Couraça Ancestral)
+	RaceDragonWater     uint8 = 33 // Drago (Água) (Lima da Água)
+	RaceDragonLightning uint8 = 34 // Drago (Raio) (Para-Raios)
+	RaceDragonMystic    uint8 = 35 // Drago (Místico) (Sangue Místico)
+	RaceOrc             uint8 = 36 // Orc (Barriga de Ferro & Músculos de Aço)
+	RaceDwarf           uint8 = 37 // Anão (Ímpeto da Forja - 0.82x)
+	RaceElf             uint8 = 38 // Elfo (Pés Velozes & Corpo Esguio)
+	RaceSolarElf        uint8 = 39 // Elfo Solar (Devoto de Azgher)
+	RaceLunarElf        uint8 = 40 // Elfo Lunar (Devoto de Tenebra)
+	RaceFairy           uint8 = 41 // Fadinha (Espírito da Natureza - 0.55x)
+	RaceGoblin          uint8 = 42 // Goblin (Cleptomancia - 0.75x)
+	RaceScorpionDemi    uint8 = 43 // Demi-Humano Escorpião (Sangue Ruim)
+	RaceTurtleDemi      uint8 = 44 // Demi-Humano Tartaruga (Armadura Orgânica - 1.35x)
+	RaceHalfDemon       uint8 = 45 // Meio-Demônio / Succubus (Aparência Inofensiva)
+	RaceWolfDemi        uint8 = 46 // Demi-Humano Lobo (Olfato & Instinto)
 )
 
 // Slots de Equipamento (Array fixo de 12 slots)
@@ -216,32 +251,68 @@ const (
 	ItemObsidianRing        uint8 = 39 // Anel de Obsidiana (Anel: +4 CON, +3 MAS)
 	ItemStarlightRing       uint8 = 40 // Anel Estelar (Anel: +3 INT, +4 LCK)
 	ItemAlphaPeltCloak      uint8 = 41 // Capa de Pele Alfa (Capa: +35 HP, +3 FOR, +3 AGI)
+
+	// Quadrante 4: Drops de Criaturas e Raid Bosses
+	ItemPerfectSilkCocoon      uint8 = 42 // Casulo de Seda Perfeito
+	ItemSpiderQueenHeart       uint8 = 43 // Coração da Rainha Aranha (Relíquia: +12 INT, +8 SPI)
+	ItemArachnaEye             uint8 = 44 // Olho Multifacetado de Arachna (0.1% - Desbloqueia Raça 21 Aracne)
+	ItemImperialSilkCloak      uint8 = 45 // Manto de Seda Imperial (Capa: +45 HP, +6 INT, +5 SPI)
+	ItemPureAcid               uint8 = 46 // Ácido Puro (Alquimia / Corrosivo)
+	ItemAbyssalScorpionStinger uint8 = 47 // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Demi-Humano Escorpião)
+	ItemVorpalPoison           uint8 = 48 // Veneno Vorpal (Toxina Letal)
+	ItemChimeraFleshPart       uint8 = 49 // Retalho Quimérico Costurado (Mutagênico)
+	ItemAncientIceCore         uint8 = 50 // Núcleo de Gelo Antigo (Gélido)
+	ItemPrimordialDragonScale  uint8 = 51 // Escama Dracônica Primordial (Armadura Superior)
+	ItemEternalFrostHeart      uint8 = 52 // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Boreal / Gigante de Gelo)
+	ItemCrimsonGuardInsignia   uint8 = 53 // Insígnia do Guarda Carmesim
+	ItemProgenitorPureBlood    uint8 = 54 // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Dhampir / Vampiro)
+	ItemVesperianCrimsonRing   uint8 = 55 // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
 )
 
 
-// Identificadores de Classes (Base 1-6 e Secretas 7-9)
+// Identificadores de Classes (Base 1-12 e Secretas 13-21)
 const (
 	ClassNone     uint8 = 0 // Viajante / Sem Classe (Tier 0)
 	ClassTraveler uint8 = 0 // Alias
 
-	// Classes Base (Evoluem de Tier 1 a Tier 4 mantendo nível)
-	ClassSwordsman  uint8 = 1 // Espadachim (Melee: HP 140, Stam 100)
-	ClassScout      uint8 = 2 // Batedor (Ranged Proj 1: HP 105, Stam 135)
-	ClassInitiate   uint8 = 3 // Iniciado (Ranged Proj 3: HP 95, Stam 110)
-	ClassAcolyte    uint8 = 4 // Acólito (Híbrido: HP 125, Stam 105)
-	ClassBlacksmith uint8 = 5 // Ferreiro (Melee Pesado: HP 155, Stam 100)
-	ClassAlchemist  uint8 = 6 // Alquimista (Ranged Químico Proj 6: HP 110, Stam 120)
+	// As 6 Classes Básicas de Combate (IDs 1 a 6)
+	ClassWarrior      uint8 = 1  // Guerreiro (Arma: Espada)
+	ClassSwordsman    uint8 = 1  // Alias retrocompatível
+	ClassMage         uint8 = 2  // Mago (Arma: Cajado / Orbe Arcano)
+	ClassInitiate     uint8 = 2  // Alias retrocompatível
+	ClassArcher       uint8 = 3  // Arqueiro (Arma: Arco)
+	ClassScout        uint8 = 3  // Alias retrocompatível
+	ClassAssassin     uint8 = 4  // Assassino (Arma: Duas Adagas)
+	ClassAcolyte      uint8 = 4  // Alias retrocompatível
+	ClassFighter      uint8 = 5  // Lutador (Arma: Manoplas Pesadas)
+	ClassShieldBearer uint8 = 6  // Escudeiro (Arma: Escudo Colossal + Maça Curta)
 
-	// Classes Secretas (Tier 5 a 6, exigem Reset de Nível para 1)
-	ClassEclipseReaper     uint8 = 7  // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
-	ClassRunicArtificer    uint8 = 8  // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
-	ClassHomunculusCreator uint8 = 9  // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
-	ClassAstralDancer      uint8 = 10 // Dançarino Astral (Crítico e Esquiva: HP 135, Stam 140)
-	ClassAshInquisitor     uint8 = 11 // Inquisidor das Cinzas (Dano com Vida Baixa: HP 145, Stam 115)
-	ClassBoneNecromancer   uint8 = 12 // Necromante de Ossos (Lança Óssea & Cura no Abate: HP 130, Stam 120)
-	ClassPrimordialTamer   uint8 = 13 // Domador Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
-	ClassRiftKnight        uint8 = 14 // Cavaleiro da Ruptura (Resistência e Gravidade: HP 180, Stam 100)
-	ClassStormHerald       uint8 = 15 // Arauto da Tempestade (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
+	// As 6 Classes Básicas de Produção Combatentes (IDs 7 a 12)
+	ClassBlacksmith  uint8 = 7  // Ferreiro (Arma: Martelo de Forja)
+	ClassAlchemist   uint8 = 8  // Alquimista (Arma: Catalisador & Frascos Químicos)
+	ClassSculptor    uint8 = 9  // Escultor (Arma: Cinzel & Adaga do Luar)
+	ClassTamer       uint8 = 10 // Domador (Arma: Chicote Bestial)
+	ClassWarTailor   uint8 = 11 // Alfaiate de Guerra (Arma: Fios de Aço & Agulhas Rúnicas)
+	ClassHuntingChef uint8 = 12 // Chef de Caça (Arma: Cutelo Gigante & Wok de Ferro)
+
+	// Classes Secretas Variantes (IDs 13 a 18 - Tier 3 Raro / Tier 4 Épico, SEM Reset de Nível)
+	ClassRunicSpellblade uint8 = 13 // Espadachim Rúnico (Spellblade)
+	ClassVampireHunter   uint8 = 14 // Caçador de Vampiros (Inquisidor de Prata)
+	ClassAegisValkyrie   uint8 = 15 // Valquíria da Égide (Lanceiro Celeste)
+	ClassShadowMonk      uint8 = 16 // Monge das Sombras (Punho Silencioso)
+	ClassCursedSmith     uint8 = 17 // Forjador de Armas Amaldiçoadas
+	ClassPlagueDoctor    uint8 = 18 // Médico da Peste (Doutor Corvo)
+
+	// Classes Secretas Únicas / Lendárias (IDs 19 a 27 - Tier 5 a 6, exigem Reset de Nível para 1)
+	ClassEclipseReaper     uint8 = 19 // Ceifador do Eclipse (Melee Foice: HP 160, Stam 110, Lifesteal)
+	ClassRunicArtificer    uint8 = 20 // Artífice Rúnico (Híbrido Mecânico Martelo-Canhão: HP 150, Stam 115)
+	ClassHomunculusCreator uint8 = 21 // Criador de Homúnculos (Elixires e Regeneração: HP 130, Stam 125)
+	ClassAstralDancer      uint8 = 22 // Dançarino Astral (Crítico e Esquiva: HP 135, Stam 140)
+	ClassAshInquisitor     uint8 = 23 // Inquisidor das Cinzas (Dano com Vida Baixa: HP 145, Stam 115)
+	ClassBoneNecromancer   uint8 = 24 // Necromante de Ossos (Lança Óssea & Cura no Abate: HP 130, Stam 120)
+	ClassPrimordialTamer   uint8 = 25 // Domador Primordial (Espírito Alfa & Behemoth: HP 165, Stam 120)
+	ClassRiftKnight        uint8 = 26 // Cavaleiro da Ruptura (Resistência e Gravidade: HP 180, Stam 100)
+	ClassStormHerald       uint8 = 27 // Arauto da Tempestade (Dano Elétrico & Relâmpagos: HP 125, Stam 130)
 )
 
 // Os 6 Tiers de Raridade de Classe
@@ -303,11 +374,12 @@ const (
 	NPCSayHeaderSize          = 7  // uint8 (1) + uint32 (4) + uint16 (2) = 7 bytes
 	DevWorldControlPacketSize = 3  // uint8 (1) + uint8 (1) + uint8 (1) = 3 bytes
 	DevSkipTimePacketSize     = 3  // Alias
+	PortalTravelPacketSize    = 3  // uint8 (1) + uint8 (1) + uint8 (1) = 3 bytes
 
-	SelectIdentityPacketSize = 8  // uint8 (1) + uint32 (4) + 3x uint8 (3) = 8 bytes
+	SelectIdentityPacketSize = 9  // uint8 (1) + uint32 (4) + 4x uint8 (4) = 9 bytes
 	PlayerActionPacketSize   = 14 // uint8 (1) + uint32 (4) + uint8 (1) + 2x float32 (8) = 14 bytes
 	CombatEventPacketSize    = 17 // uint8 (1) + 2x uint32 (8) + uint8 (1) + uint16 (2) + uint8 (1) + 2x uint16 (4) = 17 bytes
-	PlayerStatsPacketSize    = 31 // uint8 (1) + uint32 (4) + 4x uint8 (4) + 4x uint16 (8) + uint8 (1) + 2x uint16 (4) + 9x uint8 (9) = 31 bytes
+	PlayerStatsPacketSize    = 32 // uint8 (1) + uint32 (4) + 4x uint8 (4) + 4x uint16 (8) + uint8 (1) + 2x uint16 (4) + 10x uint8 (10) = 32 bytes
 	PlayerRespawnPacketSize  = 17 // uint8 (1) + uint32 (4) + 3x float32 (12) = 17 bytes
 	AllocateStatPacketSize   = 6  // uint8 (1) + uint32 (4) + uint8 (1) = 6 bytes
 
@@ -717,9 +789,10 @@ const (
 	DevCmdSetHour      uint8 = 4 // Define hora exata (Value % 24)
 	DevCmdSetMoon      uint8 = 5 // Define fase da lua exata (0 a 9)
 	DevCmdSetWeather   uint8 = 6 // Define clima exato (0 a 3)
-	DevCmdGiveItem     uint8 = 7 // Dá item (Value) ou kit 12 slots (255)
-	DevCmdLevelStats   uint8 = 8 // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
-	DevCmdTeleport     uint8 = 9 // Teleporte rápido (0..6)
+	DevCmdGiveItem     uint8 = 7  // Dá item (Value) ou kit 12 slots (255)
+	DevCmdLevelStats   uint8 = 8  // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
+	DevCmdTeleport     uint8 = 9  // Teleporte rápido (0..6)
+	DevCmdPortalTravel uint8 = 10 // Travessia de Portal / Mudança de Zona (Value = PortalID)
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).
@@ -763,28 +836,66 @@ func DeserializeDevSkipTime(data []byte, out *DevSkipTimePacket) error {
 	return DeserializeDevWorldControl(data, out)
 }
 
+// --- 0x23: PORTAL_TRAVEL / ZONE_CHANGE (3 bytes) ---
+
+// PortalTravelPacket representa o pacote 0x23 de transição de portal / mudança de zona de mão dupla.
+type PortalTravelPacket struct {
+	TargetZoneID uint8 // ZoneID de destino (0 a 8)
+	PortalID     uint8 // ID do portal (1 a 16)
+}
+
+// ZoneChangePacket é um alias retrocompatível para PortalTravelPacket.
+type ZoneChangePacket = PortalTravelPacket
+
+// SerializePortalTravel serializa o pacote 0x23 PORTAL_TRAVEL (3 bytes).
+func SerializePortalTravel(targetZoneID, portalID uint8) [PortalTravelPacketSize]byte {
+	var b [PortalTravelPacketSize]byte
+	b[0] = PacketTypePortalTravel
+	b[1] = targetZoneID
+	b[2] = portalID
+	return b
+}
+
+// DeserializePortalTravel desserializa o pacote 0x23 PORTAL_TRAVEL (3 bytes).
+func DeserializePortalTravel(data []byte, out *PortalTravelPacket) error {
+	if len(data) < PortalTravelPacketSize {
+		return ErrInvalidPacketSize
+	}
+	if data[0] != PacketTypePortalTravel {
+		return ErrInvalidPacketType
+	}
+	out.TargetZoneID = data[1]
+	out.PortalID = data[2]
+	return nil
+}
+
 // --- 0x30: SELECT_IDENTITY (TCP: Client -> Server, 8 bytes) ---
 
-// SelectIdentityPacket representa a escolha de Raça e Classe do jogador e o modo de ação (evoluir/resetar).
+// SelectIdentityPacket representa a escolha de Raça e Classe do jogador, modo de ação e Caminho Evolutivo.
 type SelectIdentityPacket struct {
 	PlayerID   uint32
 	RaceID     uint8
 	ClassID    uint8
 	ActionMode uint8
+	SubPath    uint8
 }
 
-// SerializeSelectIdentity cria o payload de 8 bytes do pacote SELECT_IDENTITY.
-func SerializeSelectIdentity(playerID uint32, raceID, classID, actionMode uint8) [SelectIdentityPacketSize]byte {
+// SerializeSelectIdentity cria o payload de 9 bytes do pacote SELECT_IDENTITY.
+func SerializeSelectIdentity(playerID uint32, raceID, classID, actionMode, subPath uint8) [SelectIdentityPacketSize]byte {
 	var b [SelectIdentityPacketSize]byte
 	b[0] = PacketTypeSelectIdentity
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
 	b[5] = raceID
 	b[6] = classID
 	b[7] = actionMode
+	if subPath == 0 {
+		subPath = 1
+	}
+	b[8] = subPath
 	return b
 }
 
-// DeserializeSelectIdentity decodifica o pacote SELECT_IDENTITY (8 bytes, suporta 7 bytes legado com ActionMode 0).
+// DeserializeSelectIdentity decodifica o pacote SELECT_IDENTITY (9 bytes, compatível com 8 e 7 bytes legado).
 func DeserializeSelectIdentity(data []byte, out *SelectIdentityPacket) error {
 	if len(data) < 7 {
 		return ErrInvalidPacketSize
@@ -795,10 +906,18 @@ func DeserializeSelectIdentity(data []byte, out *SelectIdentityPacket) error {
 	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
 	out.RaceID = data[5]
 	out.ClassID = data[6]
-	if len(data) >= SelectIdentityPacketSize {
+	if len(data) >= 8 {
 		out.ActionMode = data[7]
 	} else {
 		out.ActionMode = IdentityModeInitialChange
+	}
+	if len(data) >= SelectIdentityPacketSize {
+		out.SubPath = data[8]
+		if out.SubPath == 0 {
+			out.SubPath = 1
+		}
+	} else {
+		out.SubPath = 1
 	}
 	return nil
 }
@@ -909,10 +1028,11 @@ type PlayerStatsPacket struct {
 	SPI         uint8
 	MAS         uint8
 	LCK         uint8
+	SubPath     uint8
 }
 
-// SerializePlayerStats cria o payload de 31 bytes do pacote PLAYER_STATS.
-func SerializePlayerStats(playerID uint32, raceID, classID, classTier, level uint8, hp, maxHP, stamina, maxStamina uint16, buffActive uint8, xp, nextLevelXP uint16, statPoints, str, dex, con, agi, intStat, spi, mas, lck uint8) [PlayerStatsPacketSize]byte {
+// SerializePlayerStats cria o payload de 32 bytes do pacote PLAYER_STATS.
+func SerializePlayerStats(playerID uint32, raceID, classID, classTier, level uint8, hp, maxHP, stamina, maxStamina uint16, buffActive uint8, xp, nextLevelXP uint16, statPoints, str, dex, con, agi, intStat, spi, mas, lck, subPath uint8) [PlayerStatsPacketSize]byte {
 	var b [PlayerStatsPacketSize]byte
 	b[0] = PacketTypePlayerStats
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
@@ -936,6 +1056,10 @@ func SerializePlayerStats(playerID uint32, raceID, classID, classTier, level uin
 	b[28] = spi
 	b[29] = mas
 	b[30] = lck
+	if subPath == 0 {
+		subPath = 1
+	}
+	b[31] = subPath
 	return b
 }
 
@@ -946,12 +1070,13 @@ func SerializePlayerStatsPacket(pkt PlayerStatsPacket) [PlayerStatsPacketSize]by
 		pkt.HP, pkt.MaxHP, pkt.Stamina, pkt.MaxStamina, pkt.BuffActive,
 		pkt.XP, pkt.NextLevelXP, pkt.StatPoints,
 		pkt.STR, pkt.DEX, pkt.CON, pkt.AGI, pkt.INT, pkt.SPI, pkt.MAS, pkt.LCK,
+		pkt.SubPath,
 	)
 }
 
-// DeserializePlayerStats decodifica o pacote PLAYER_STATS (31 bytes).
+// DeserializePlayerStats decodifica o pacote PLAYER_STATS (32 bytes, compatível com 31 bytes).
 func DeserializePlayerStats(data []byte, out *PlayerStatsPacket) error {
-	if len(data) < PlayerStatsPacketSize {
+	if len(data) < 31 {
 		return ErrInvalidPacketSize
 	}
 	if data[0] != PacketTypePlayerStats {
@@ -978,6 +1103,14 @@ func DeserializePlayerStats(data []byte, out *PlayerStatsPacket) error {
 	out.SPI = data[28]
 	out.MAS = data[29]
 	out.LCK = data[30]
+	if len(data) >= PlayerStatsPacketSize {
+		out.SubPath = data[31]
+		if out.SubPath == 0 {
+			out.SubPath = 1
+		}
+	} else {
+		out.SubPath = 1
+	}
 	return nil
 }
 
@@ -1699,5 +1832,37 @@ func DeserializeCorpseSnapshot(data []byte) ([]CorpseSnapshot, error) {
 		offset += CorpseSnapshotEntrySize
 	}
 	return res, nil
+}
+
+// FriendshipSyncPacket transporta pontos e nível de afiança entre jogador e NPC.
+type FriendshipSyncPacket struct {
+	NPCID  uint32
+	Points uint16
+	Level  uint8
+}
+
+// SerializeFriendshipSync empacota os dados de afiança para envio ao cliente (8 bytes).
+func SerializeFriendshipSync(npcID uint32, points uint16, level uint8) []byte {
+	buf := make([]byte, 8)
+	buf[0] = PacketTypeFriendshipSync
+	binary.BigEndian.PutUint32(buf[1:5], npcID)
+	binary.BigEndian.PutUint16(buf[5:7], points)
+	buf[7] = level
+	return buf
+}
+
+// DeserializeFriendshipSync decodifica os dados de afiança do payload (8 bytes).
+func DeserializeFriendshipSync(data []byte) (FriendshipSyncPacket, error) {
+	if len(data) < 8 {
+		return FriendshipSyncPacket{}, errors.New("tamanho insuficiente para FriendshipSyncPacket (esperado 8 bytes)")
+	}
+	if data[0] != PacketTypeFriendshipSync {
+		return FriendshipSyncPacket{}, errors.New("opcode invalido para FriendshipSyncPacket")
+	}
+	return FriendshipSyncPacket{
+		NPCID:  binary.BigEndian.Uint32(data[1:5]),
+		Points: binary.BigEndian.Uint16(data[5:7]),
+		Level:  data[7],
+	}, nil
 }
 
