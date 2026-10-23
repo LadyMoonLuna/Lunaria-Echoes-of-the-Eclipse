@@ -2413,6 +2413,16 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		}
 		return true, msg
 
+	case protocol.ItemHealingPotion: // 79: Poção de Cura (Lyra)
+		p.consumeOneItemLocked(itemID)
+		p.HP = uint16(min(uint32(p.HP)+90, uint32(p.MaxHP)))
+		return true, "Você bebeu a Poção de Cura e recuperou +90 HP."
+
+	case protocol.ItemManaPotion: // 80: Poção de Mana (Lyra)
+		p.consumeOneItemLocked(itemID)
+		p.Mana = min(p.Mana+80, float32(p.MaxMana))
+		return true, "Você bebeu a Poção de Mana e recuperou +80 de Mana."
+
 	case protocol.ItemWolfBloodPotion: // 4: Poção de Sangue Lupino (+20% Velocidade e Crítico por 20s)
 		p.consumeOneItemLocked(itemID)
 		p.WolfPotionUntil = time.Now().Add(20 * time.Second)

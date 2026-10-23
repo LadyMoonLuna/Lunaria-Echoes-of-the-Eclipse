@@ -78,9 +78,9 @@ type spawnEntry struct {
 // zoneResourceTables: o que nasce em cada zona (e com que frequência).
 var zoneResourceTables = map[uint8][]spawnEntry{
 	ZoneVillage: {{MatPineRefuge, 12}, {MatGreyOak, 6}, {MatStormCedar, 1}, {MatRawStone, 8}, {MatLimestone, 5},
-		{MatCopper, 5}, {MatTin, 4}, {MatIron, 5}, {MatQuartz, 3}, {MatThornVine, 5}, {MatPureWater, 3}},
+		{MatCopper, 5}, {MatTin, 4}, {MatIron, 5}, {MatQuartz, 3}, {MatThornVine, 5}, {MatPureWater, 3}, {MatHerbs, 5}},
 	ZoneForest: {{MatPineRefuge, 8}, {MatGreyOak, 8}, {MatStormCedar, 4}, {MatWhisperEbony, 2}, {MatBloodWillow, 1},
-		{MatSolarAsh, 1}, {MatThornVine, 6}, {MatSteelLiana, 2}, {MatGlowMushroom, 4}, {MatParasiteMycel, 1},
+		{MatSolarAsh, 1}, {MatThornVine, 6}, {MatSteelLiana, 2}, {MatGlowMushroom, 4}, {MatParasiteMycel, 1}, {MatHerbs, 4},
 		{MatPureWater, 3}, {MatLunarDew, 2}},
 	ZoneRuins: {{MatRawStone, 6}, {MatBasalt, 4}, {MatLimestone, 4}, {MatIron, 6}, {MatSilver, 3}, {MatTitanium, 3},
 		{MatLunarMithril, 2}, {MatQuartz, 4}, {MatManaCrystal, 2}, {MatZeroSapphire, 1}, {MatGreyOak, 2}},

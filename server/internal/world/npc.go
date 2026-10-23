@@ -48,6 +48,20 @@ type NPC struct {
 	LuaMu    sync.Mutex
 	LuaState *lua.LState
 
+	// --- Mundo Vivo: agente biológico e econômico ---
+	HP              int
+	MaxHP           int
+	IsDead          bool    // Morte permanente: nunca renasce
+	Hunger          float32 // 0 a 100 (100 = saciado); cai 0,5/min
+	Thirst          float32 // 0 a 100 (100 = hidratado); cai 0,8/min
+	Cold            float32 // 0 a 100 (0 = aquecido); sobe no frio longe do fogo
+	Personality     string  // Honrado, Ambicioso, Cauteloso, Implacavel
+	Gold            uint32
+	RawMaterials    map[uint16]int // matérias-primas em mãos
+	ShopStock       map[uint16]int // itens prontos à venda (estoque real, nada infinito)
+	CurrentActivity string
+	Life            NPCLifeState
+
 	approachCooldowns map[uint32]time.Time
 	broadcastSay      SayCallback
 	clock             *WorldClock
@@ -73,6 +87,14 @@ func NewNPC(id uint32, name string, initX, initY, initZ float32, scriptPath stri
 		Waypoints:         make([]Waypoint, 0),
 		WaitDuration:      3.0,
 		approachCooldowns: make(map[uint32]time.Time),
+		HP:                600,
+		MaxHP:             600,
+		Hunger:            100,
+		Thirst:            100,
+		Personality:       PersonalityHonorable,
+		RawMaterials:      make(map[uint16]int),
+		ShopStock:         make(map[uint16]int),
+		CurrentActivity:   ActivityWorking,
 		broadcastSay:      broadcastSay,
 		clock:             clock,
 	}

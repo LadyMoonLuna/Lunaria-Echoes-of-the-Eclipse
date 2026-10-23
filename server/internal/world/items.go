@@ -1,6 +1,10 @@
 package world
 
-import "lunaria/server/internal/protocol"
+import (
+	"fmt"
+
+	"lunaria/server/internal/protocol"
+)
 
 // ItemInfo descreve um item do catálogo: peso (kg), slot de equipamento e bônus concedidos.
 type ItemInfo struct {
@@ -107,6 +111,8 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemHuntersQuiver:   {Name: "Aljava de Caçador", Weight: 1.5, Slot: protocol.SlotOffHand, BonusDEX: 2, BonusATK: 4},
 	protocol.ItemAutopsyDagger:   {Name: "Adaga de Autópsia", Weight: 0.6, Slot: protocol.SlotMainHand, BonusDEX: 1, BonusATK: 4},
 	protocol.ItemMetalScrap:      {Name: "Sucata Metálica", Weight: 1.0, Slot: NoSlot},
+	protocol.ItemHealingPotion:   {Name: "Poção de Cura", Weight: 0.5, Slot: NoSlot},
+	protocol.ItemManaPotion:      {Name: "Poção de Mana", Weight: 0.5, Slot: NoSlot},
 	protocol.ItemLeadPlate:       {Name: "Placa de Chumbo", Weight: 25.0, Slot: NoSlot},
 	protocol.ItemOffhandKnuckle:  {Name: "Manopla Secundária", Weight: 2.2, Slot: protocol.SlotOffHand, BonusSTR: 1, BonusATK: 5, BonusDEF: 1},
 }
@@ -161,4 +167,12 @@ func WeightSpeedMultiplier(current, max float32) float32 {
 	default:
 		return 0.0
 	}
+}
+
+// ItemName devolve o nome legível de um item ou material.
+func ItemName(itemID uint8) string {
+	if n := GetItemInfo(itemID).Name; n != "" {
+		return n
+	}
+	return fmt.Sprintf("item #%d", itemID)
 }

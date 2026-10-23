@@ -75,6 +75,8 @@ const ITEMS := {
 	74: {"name": "Aljava de Caçador", "weight": 1.5, "slot": 13, "bonus": {"dex": 2, "atk": 4}},
 	77: {"name": "Adaga de Autópsia", "weight": 0.6, "slot": 12, "bonus": {"dex": 1, "atk": 4}},
 	78: {"name": "Sucata Metálica", "weight": 1.0, "slot": -1, "bonus": {}},
+	79: {"name": "Poção de Cura", "weight": 0.5, "slot": -1, "bonus": {}},
+	80: {"name": "Poção de Mana", "weight": 0.5, "slot": -1, "bonus": {}},
 	76: {"name": "Placa de Chumbo", "weight": 25.0, "slot": -1, "bonus": {}},
 	75: {"name": "Manopla Secundária", "weight": 2.2, "slot": 13, "bonus": {"str": 1, "atk": 5, "def": 1}},
 	160: {"name": "Machado Velho", "weight": 3.0, "slot": -1, "bonus": {}, "tool": "axe", "tool_tier": 1},
@@ -146,6 +148,8 @@ const ITEMS := {
 	151: {"name": "Fungo Devorador de Ferro", "weight": 0.5, "slot": -1, "bonus": {}},
 	152: {"name": "Micélio Parasita", "weight": 0.4, "slot": -1, "bonus": {}},
 	153: {"name": "Seiva Ácida", "weight": 0.5, "slot": -1, "bonus": {}},
+	154: {"name": "Carvão", "weight": 1.0, "slot": -1, "bonus": {}},
+	155: {"name": "Ervas Medicinais", "weight": 0.2, "slot": -1, "bonus": {}},
 }
 
 const RARITY_NAMES := ["", "Comum", "Incomum", "Raro", "Épico", "Único", "Exótico", "Lendário", "Mítico"]
@@ -211,6 +215,8 @@ const MATERIALS := {
 	151: {"name": "Fungo Devorador de Ferro", "category": "Planta_Liquido", "rarity": 4, "durability": 0, "weight": 0.5, "resist": "Corrosão +50%", "trait": "Come metal; usado para gravar runas em armas.", "thermal": 30, "electric": 40, "magic": 50},
 	152: {"name": "Micélio Parasita", "category": "Planta_Liquido", "rarity": 5, "durability": 0, "weight": 0.4, "resist": "Necrose +45%", "trait": "Fios vivos que se espalham por qualquer ferida.", "thermal": 20, "electric": 20, "magic": 80},
 	153: {"name": "Seiva Ácida", "category": "Planta_Liquido", "rarity": 3, "durability": 0, "weight": 0.5, "resist": "Ácido +45%", "trait": "Brota de fendas ácidas da Fronteira das Cinzas.", "thermal": 45, "electric": 55, "magic": 35},
+	154: {"name": "Carvão", "category": "Pedra", "rarity": 1, "durability": 10, "weight": 1.0, "resist": "Fogo +10%", "trait": "Combustível da forja; queima mais quente que a madeira.", "thermal": 90, "electric": 30, "magic": 5},
+	155: {"name": "Ervas Medicinais", "category": "Planta_Liquido", "rarity": 1, "durability": 0, "weight": 0.2, "resist": "Cura +15%", "trait": "Folhas amargas que fecham feridas; base das poções de Lyra.", "thermal": 10, "electric": 5, "magic": 35},
 }
 
 static func is_material(item_id: int) -> bool:

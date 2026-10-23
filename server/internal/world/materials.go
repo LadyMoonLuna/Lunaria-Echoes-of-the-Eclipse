@@ -108,6 +108,8 @@ const (
 	MatIronEaterFungi uint16 = 151
 	MatParasiteMycel  uint16 = 152
 	MatAcidSap        uint16 = 153
+	MatCharcoal       uint16 = 154 // Carvão (combustível da forja)
+	MatHerbs          uint16 = 155 // Ervas Medicinais
 )
 
 // MaterialsDB é o catálogo oficial de materiais.
@@ -172,6 +174,8 @@ var MaterialsDB = map[uint16]MaterialDef{
 	MatIronEaterFungi: {MatIronEaterFungi, "Fungo Devorador de Ferro", MatPlantLiquid, RarityEpic, 0, 0.5, "Corrosão +50%", "Come metal; usado para gravar runas em armas.", 30, 40, 50},
 	MatParasiteMycel:  {MatParasiteMycel, "Micélio Parasita", MatPlantLiquid, RarityUnique, 0, 0.4, "Necrose +45%", "Fios vivos que se espalham por qualquer ferida.", 20, 20, 80},
 	MatAcidSap:        {MatAcidSap, "Seiva Ácida", MatPlantLiquid, RarityRare, 0, 0.5, "Ácido +45%", "Brota de fendas ácidas da Fronteira das Cinzas.", 45, 55, 35},
+	MatCharcoal:       {MatCharcoal, "Carvão", MatStone, RarityCommon, 10, 1.0, "Fogo +10%", "Combustível da forja; queima mais quente que a madeira.", 90, 30, 5},
+	MatHerbs:          {MatHerbs, "Ervas Medicinais", MatPlantLiquid, RarityCommon, 0, 0.2, "Cura +15%", "Folhas amargas que fecham feridas; base das poções de Lyra.", 10, 5, 35},
 }
 
 // StartingDiscoveredMaterials: o que todo jogador já conhece ao começar.

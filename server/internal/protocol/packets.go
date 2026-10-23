@@ -73,6 +73,9 @@ const (
 	PacketTypeResourceNodesSync   uint8 = 0x45 // [Server -> Client] Nós de recurso da zona
 	PacketTypeDiscoveredMaterials uint8 = 0x46 // [Server -> Client] Materiais descobertos (lista completa ou novos)
 	PacketTypeQuestState          uint8 = 0x47 // [Server -> Client] Estado de missão (5 bytes)
+	PacketTypeShopRequest         uint8 = 0x48 // [Client -> Server] Abrir loja viva de um NPC (9 bytes)
+	PacketTypeShopTrade           uint8 = 0x49 // [Client -> Server] Comprar/vender com o NPC (13 bytes)
+	PacketTypeShopState           uint8 = 0x4A // [Server -> Client] Estado da loja viva (tamanho variável)
 )
 
 // Tipos de Projéteis 3D
@@ -319,6 +322,8 @@ const (
 	ItemLeadPlate       uint8 = 76 // Placa de Chumbo (25 kg) — item de teste de sobrecarga
 	ItemAutopsyDagger   uint8 = 77 // Adaga de Autópsia (presente de Garrick; arma cortante para dissecar)
 	ItemMetalScrap      uint8 = 78 // Sucata Metálica (resultado de extração/criação metálica de baixa qualidade)
+	ItemHealingPotion   uint8 = 79 // Poção de Cura (Lyra: Ervas + Água) — +90 HP
+	ItemManaPotion      uint8 = 80 // Poção de Mana (Lyra: Cogumelo + Ervas + Água) — +80 Mana
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -2233,4 +2238,104 @@ const QuestStatePacketSize = 5
 
 func SerializeQuestState(questID, stage, have, need uint8) [QuestStatePacketSize]byte {
 	return [QuestStatePacketSize]byte{PacketTypeQuestState, questID, stage, have, need}
+}
+
+// --- 0x48: SHOP_REQUEST / 0x49: SHOP_TRADE / 0x4A: SHOP_STATE (Mundo Vivo) ---
+
+const (
+	ShopRequestPacketSize       = 9  // op | playerID u32 | npcID u32
+	ShopTradePacketSize         = 13 // op | playerID u32 | npcID u32 | ação | item | qualidade | qtd
+	ShopActionBuy         uint8 = 0
+	ShopActionSell        uint8 = 1
+)
+
+type ShopRequestPacket struct {
+	PlayerID uint32
+	NPCID    uint32
+}
+
+type ShopTradePacket struct {
+	PlayerID uint32
+	NPCID    uint32
+	Action   uint8
+	ItemID   uint8
+	Quality  uint8
+	Qty      uint8
+}
+
+func DeserializeShopRequest(data []byte, pkt *ShopRequestPacket) error {
+	if len(data) < ShopRequestPacketSize || data[0] != PacketTypeShopRequest {
+		return ErrInvalidPacketSize
+	}
+	pkt.PlayerID = binary.LittleEndian.Uint32(data[1:5])
+	pkt.NPCID = binary.LittleEndian.Uint32(data[5:9])
+	return nil
+}
+
+func DeserializeShopTrade(data []byte, pkt *ShopTradePacket) error {
+	if len(data) < ShopTradePacketSize || data[0] != PacketTypeShopTrade {
+		return ErrInvalidPacketSize
+	}
+	pkt.PlayerID = binary.LittleEndian.Uint32(data[1:5])
+	pkt.NPCID = binary.LittleEndian.Uint32(data[5:9])
+	pkt.Action, pkt.ItemID, pkt.Quality, pkt.Qty = data[9], data[10], data[11], data[12]
+	return nil
+}
+
+type ShopStockEntry struct {
+	ItemID uint8
+	Qty    uint8
+	Price  uint32
+}
+
+type ShopOrderEntry struct {
+	Material uint16
+	Wanted   uint8
+	Price    uint32
+}
+
+type ShopState struct {
+	NPCID                uint32
+	Gold                 uint32
+	HP, MaxHP            uint16
+	Hunger, Thirst, Cold uint8
+	Activity             string
+	Stock                []ShopStockEntry
+	Orders               []ShopOrderEntry
+}
+
+// SerializeShopState: op | tamanho u16 | npc u32 | ouro u32 | hp u16 | maxhp u16 | fome | sede | frio |
+// lenAtividade u8 + texto | nEstoque u8 + (item u8, qtd u8, preço u32)* | nEncomendas u8 + (mat u16, qtd u8, preço u32)*
+func SerializeShopState(st ShopState) []byte {
+	act := []byte(st.Activity)
+	if len(act) > 255 {
+		act = act[:255]
+	}
+	if len(st.Stock) > 255 {
+		st.Stock = st.Stock[:255]
+	}
+	if len(st.Orders) > 255 {
+		st.Orders = st.Orders[:255]
+	}
+	b := make([]byte, 3, 32+len(act)+6*len(st.Stock)+7*len(st.Orders))
+	b[0] = PacketTypeShopState
+	b = binary.LittleEndian.AppendUint32(b, st.NPCID)
+	b = binary.LittleEndian.AppendUint32(b, st.Gold)
+	b = binary.LittleEndian.AppendUint16(b, st.HP)
+	b = binary.LittleEndian.AppendUint16(b, st.MaxHP)
+	b = append(b, st.Hunger, st.Thirst, st.Cold, uint8(len(act)))
+	b = append(b, act...)
+	b = append(b, uint8(len(st.Stock)))
+	for _, e := range st.Stock {
+		b = append(b, e.ItemID, e.Qty)
+		b = binary.LittleEndian.AppendUint32(b, e.Price)
+	}
+	b = append(b, uint8(len(st.Orders)))
+	for _, o := range st.Orders {
+		b = binary.LittleEndian.AppendUint16(b, o.Material)
+		b = append(b, o.Wanted)
+		b = binary.LittleEndian.AppendUint32(b, o.Price)
+	}
+	binary.LittleEndian.PutUint16(b[1:3], uint16(len(b)))
+	return b
 }

@@ -350,6 +350,7 @@ func (s *Server) Start() error {
 	s.dummies[dummy1.ID] = dummy1
 	s.dummies[dummy2.ID] = dummy2
 	s.mu.Unlock()
+	s.initNPCLife(allLivingNPCs)
 
 	log.Println("[WORLD] NPCs (Garrick 100, Lyra 103, Varis 104, Guardas 105-106, Seraphina 107, Aurelius 108, Kaelen 109, Fantasma 110) e Bonecos de Treino (101, 102) carregados com sucesso!")
 
@@ -857,6 +858,32 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 					s.handleSubmitAutopsyResult(submitPkt)
 				}
 
+			case protocol.PacketTypeShopRequest, protocol.PacketTypeShopTrade:
+				// Pacotes 0x48 / 0x49: loja viva dos NPCs (Mundo Vivo)
+				size := protocol.ShopRequestPacketSize
+				if header[0] == protocol.PacketTypeShopTrade {
+					size = protocol.ShopTradePacketSize
+				}
+				full := make([]byte, size)
+				full[0] = header[0]
+				if _, err := io.ReadFull(conn, full[1:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				if header[0] == protocol.PacketTypeShopRequest {
+					var req protocol.ShopRequestPacket
+					if protocol.DeserializeShopRequest(full, &req) == nil {
+						req.PlayerID = playerID
+						s.handleShopRequest(req)
+					}
+				} else {
+					var trade protocol.ShopTradePacket
+					if protocol.DeserializeShopTrade(full, &trade) == nil {
+						trade.PlayerID = playerID
+						s.handleShopTrade(trade)
+					}
+				}
+
 			default:
 				log.Printf("[TCP] Opcode desconhecido de jogador %d: 0x%02x\n", playerID, header[0])
 			}
@@ -911,7 +938,8 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 	// Consumíveis e Tomos Secretos (2, 3, 4, 16, 17, 18, 26, 28, 29, 30)
 	case protocol.ItemRawWolfMeat, protocol.ItemCookedNobleMeat, protocol.ItemWolfBloodPotion,
 		protocol.ItemBeastProgenitorBlood, protocol.ItemEclipseScytheTome, protocol.ItemStarforgeCore,
-		protocol.ItemRunicWarhammerRecipe, protocol.ItemOrganicTrash, protocol.ItemRunicHourglass, protocol.ItemSilverSilkCocoon:
+		protocol.ItemRunicWarhammerRecipe, protocol.ItemOrganicTrash, protocol.ItemRunicHourglass, protocol.ItemSilverSilkCocoon,
+		protocol.ItemHealingPotion, protocol.ItemManaPotion:
 		ok, msg := player.UseConsumable(itemID)
 		if ok {
 			log.Printf("[ITEM] Jogador #%d usou item ID %d: %s\n", pkt.PlayerID, itemID, msg)
@@ -4480,7 +4508,7 @@ func (s *Server) runGameLoop() {
 				garrick := s.npcs[100]
 				s.mu.RUnlock()
 
-				if garrick != nil {
+				if garrick != nil && !garrick.LifeBusy() {
 					gx, _, gz := garrick.GetPos()
 					garrickZone := garrick.GetZone()
 					for _, mob := range allMobs {
@@ -4546,6 +4574,7 @@ func (s *Server) runGameLoop() {
 
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
+				s.updateNPCLife(1.0)
 				s.updateClassMasterRoutines(int(h))
 				s.updatePlaceTrials()
 				s.expireGroundItems()
@@ -4653,7 +4682,7 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	}
 
 	// 2. Lyra (103)
-	if lyra != nil {
+	if lyra != nil && !lyra.LifeBusy() {
 		if worldHour >= 6 && worldHour < 18 {
 			lyra.SetZone(world.ZoneVillage)
 			lyra.SetShopOpen(true)
@@ -4688,7 +4717,7 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	}
 
 	// 3. Varis (104)
-	if varis != nil {
+	if varis != nil && !varis.LifeBusy() {
 		if worldHour >= 18 || worldHour < 6 {
 			varis.SetZone(world.ZoneBlackMarket)
 			varis.SetActive(true)
@@ -4707,7 +4736,7 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	}
 
 	// 4. Irmã Seraphina (107)
-	if seraphina != nil {
+	if seraphina != nil && !seraphina.LifeBusy() {
 		if worldHour >= 6 && worldHour < 18 {
 			if seraphina.GetZone() != world.ZoneChurch {
 				seraphina.SetZone(world.ZoneChurch)
@@ -4724,7 +4753,7 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	}
 
 	// 5. Mestre Aurelius (108)
-	if aurelius != nil {
+	if aurelius != nil && !aurelius.LifeBusy() {
 		if worldHour >= 6 && worldHour < 18 {
 			if aurelius.GetZone() != world.ZoneMageTower {
 				aurelius.SetZone(world.ZoneMageTower)
@@ -4741,7 +4770,7 @@ func (s *Server) updateNPCRoutines(worldHour int) {
 	}
 
 	// 6. Kaelen (109)
-	if kaelen != nil {
+	if kaelen != nil && !kaelen.LifeBusy() {
 		if !kaelen.IsPatrolling {
 			kaelen.SetPatrolRoute([]world.Waypoint{
 				{X: 25.0, Z: -95.0},
