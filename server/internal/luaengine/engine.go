@@ -64,6 +64,11 @@ func (e *Engine) SetNPCAttackCallback(cb func(npcID, mobID uint32, damage uint16
 
 // BindNPC inicializa a VM Lua dedicada do NPC e registra as funções da API Go.
 func (e *Engine) BindNPC(npc *world.NPC) error {
+	// NPCs sem script (aprendizes, Coveiro, caçadores da Igreja) vivem só pela rotina em Go.
+	// L.DoFile("") leria o STDIN e travaria o servidor esperando o teclado antes de abrir as portas.
+	if strings.TrimSpace(npc.ScriptPath) == "" {
+		return nil
+	}
 	L := lua.NewState()
 
 	// 1. Registro da API Go para dentro do Lua
