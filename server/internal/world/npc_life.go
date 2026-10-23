@@ -325,9 +325,10 @@ func (npc *NPC) TickNeeds(dt float32, ambient float32) bool {
 	t := npc.FeltTemp(ambient)
 	npc.Temperature = t
 	sickMult := float32(1)
-	if npc.Sick {
-		sickMult = SickNeedsMult
-		npc.sickAccum += SickHPPerMinute * m
+	if npc.SymptomaticLocked(time.Now()) {
+		d := Disease(npc.Disease)
+		sickMult = d.NeedsMult
+		npc.sickAccum += d.HPPerMinute * m
 		if npc.sickAccum >= 1 {
 			npc.HP -= int(npc.sickAccum)
 			npc.sickAccum -= float32(int(npc.sickAccum))

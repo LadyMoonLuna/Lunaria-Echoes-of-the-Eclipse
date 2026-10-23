@@ -186,14 +186,15 @@ func planNeeds(n *world.NPC, ctx needsCtx, villageNodes []world.ResourceNode, ev
 	remedy, potion := uint16(protocol.ItemHerbalRemedy), uint16(protocol.ItemHealingPotion)
 	hurt := float64(n.HP) < float64(n.MaxHP)*world.HurtThreshold
 	switch {
-	case n.Sick:
-		if n.ShopStock[remedy] > 0 && n.Profession == world.LyraID { // a Alquimista usa o próprio remédio
+	case n.SymptomaticLocked(time.Now()):
+		severe := world.Disease(n.Disease).Severe                               // a Peste Cinzenta só a Igreja cura
+		if !severe && n.ShopStock[remedy] > 0 && n.Profession == world.LyraID { // a Alquimista usa o próprio remédio
 			n.ShopStock[remedy]--
-			n.Sick, n.Disease = false, ""
+			n.CureLocked(time.Now())
 			return
 		}
 		price := world.ShopPrice(world.LyraID, protocol.ItemHerbalRemedy)
-		if ctx.remedy && n.Gold >= price*2 {
+		if !severe && ctx.remedy && n.Gold >= price*2 {
 			n.Life.Plan = world.RouteTo(n.ZoneID, ctx.healerZone, ctx.healer[0], ctx.healer[1]+1.5, "buy_remedy")
 			ev.says = append(ev.says, fmt.Sprintf("Estou com %s... preciso de um remédio da Alquimista.", n.Disease))
 		} else if ctx.church && n.Gold >= world.ChurchCurePrice {
@@ -405,8 +406,7 @@ func (s *Server) advanceErrand(n *world.NPC, ev *lifeEvents) {
 		if st.Action == "cool_river" {
 			n.Heat = 0
 		}
-		if sick, disease := world.CatchRiverDisease(nil); sick && !n.Sick {
-			n.Sick, n.Disease = true, disease
+		if sick, disease := world.CatchRiverDisease(nil); sick && n.InfectLocked(disease, time.Now()) {
 			ev.sickMsg = fmt.Sprintf("Ugh... a água do rio me fez mal. Peguei %s!", disease)
 		}
 	case "buy_remedy", "buy_potion", "church_cure", "church_heal":
@@ -766,7 +766,9 @@ func (s *Server) npcCare(npc *world.NPC, action string) {
 	npc.WithLife(func(n *world.NPC) {
 		switch action {
 		case "buy_remedy", "church_cure":
-			n.Sick, n.Disease = false, ""
+			if action == "church_cure" || !world.Disease(n.Disease).Severe {
+				n.CureLocked(time.Now())
+			}
 			if action == "church_cure" {
 				n.HP = n.MaxHP
 			}

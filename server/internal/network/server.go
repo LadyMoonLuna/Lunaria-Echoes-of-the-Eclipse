@@ -4656,6 +4656,9 @@ func (s *Server) runGameLoop() {
 				s.updateNPCConflict(1.0)
 				s.updateAfterlife()
 				if s.serverTick%(GameTickRate*10) < GameTickRate {
+					s.updateContagion(world.ContagionCheckInterval)
+				}
+				if s.serverTick%(GameTickRate*10) < GameTickRate {
 					s.updateWaterEvaporation(int(h))
 				}
 				s.updateClassMasterRoutines(int(h))

@@ -155,27 +155,22 @@ const (
 	FountainRefillTemp   float32 = 28    // e volta com chuva ou tempo mais fresco
 	FountainDryChancePer float32 = 0.002 // por grau acima de 38 °C, a cada verificação
 	RiverSicknessChance          = 0.20
-	SickHPPerMinute      float32 = 10
-	SickNeedsMult        float32 = 1.5
 	HurtThreshold                = 0.5 // abaixo de 50% de HP o NPC procura cura
 	ChurchCurePrice      uint32  = 150 // Igreja cura doenças (mais caro que o remédio)
 	ChurchHealPrice      uint32  = 120 // Igreja cura ferimentos
 	NPCPotionHealFrac            = 0.4 // uma poção cura 40% da vida de um NPC
 )
 
-var Diseases = []string{"Febre do Rio", "Infecção Intestinal", "Disenteria", "Verme do Lodo"}
-
-// CatchRiverDisease: beber direto do rio pode adoecer.
+// CatchRiverDisease: beber direto do rio pode adoecer (sorteio ponderado entre as doenças da água).
 func CatchRiverDisease(r *rand.Rand) (bool, string) {
 	roll := rand.Float64
-	pick := rand.Intn
 	if r != nil {
-		roll, pick = r.Float64, r.Intn
+		roll = r.Float64
 	}
 	if roll() >= RiverSicknessChance {
 		return false, ""
 	}
-	return true, Diseases[pick(len(Diseases))]
+	return true, pickWeighted(riverDiseases, roll())
 }
 
 // --- Aprendizes falham ---

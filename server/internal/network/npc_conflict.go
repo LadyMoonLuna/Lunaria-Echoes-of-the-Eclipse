@@ -32,6 +32,7 @@ type conflictState struct {
 	fountainDry bool
 	tombClaims  map[uint32]uint32 // túmulo -> NPC que está levando o corpo
 	lastHeal    map[uint32]time.Time
+	epidemics   map[string]bool // doença -> epidemia declarada
 }
 
 func (c *conflictState) lazyInit() {

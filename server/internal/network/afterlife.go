@@ -144,6 +144,7 @@ func (s *Server) pickupBody(tombID uint32) bool {
 func (s *Server) buryBody(digger *world.NPC, tombID uint32) {
 	s.conflict.mu.Lock()
 	var name string
+	purified := false
 	for i := range s.conflict.tombstones {
 		t := &s.conflict.tombstones[i]
 		if t.NPCID != tombID || !t.Carried || t.Rose {
@@ -152,9 +153,13 @@ func (s *Server) buryBody(digger *world.NPC, tombID uint32) {
 		slot := world.CemeterySlot(t.Slot)
 		t.Buried, t.Zone, t.X, t.Z = true, world.ZoneVillage, slot[0], slot[1]
 		name = t.Name
+		purified = t.Purified
 	}
 	delete(s.conflict.tombClaims, tombID)
 	s.conflict.mu.Unlock()
+	if name != "" && !purified && rand.Float64() < world.BurialPlagueChance {
+		digger.Infect(world.DiseaseGreyPlague) // mexer em corpo não purificado é arriscado
+	}
 	if name != "" {
 		s.BroadcastNPCSay(digger.ID, fmt.Sprintf("⚰️ %s descansa agora no cemitério, ao lado da Igreja. Que a Luz guarde sua alma.", name))
 	}
@@ -457,6 +462,9 @@ func (s *Server) zombieStrike(z *world.Mob, kind uint8, id uint32, dmg int) {
 		if died {
 			s.handleNPCDeathBy(n, zname, true)
 		} else {
+			if rand.Float64() < world.ZombieBitePlagueChance && n.Infect(world.DiseaseGreyPlague) {
+				log.Printf("[CONTÁGIO] A mordida de %s passou a %s para %s\n", zname, world.DiseaseGreyPlague, n.Name)
+			}
 			s.onNPCAttacked(n, z.ID, true)
 		}
 	case ztMob:

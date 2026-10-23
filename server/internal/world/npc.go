@@ -59,6 +59,8 @@ type NPC struct {
 	Temperature     float32 // temperatura sentida agora (°C)
 	Sick            bool    // doente (água do rio, infecção): perde vida até se tratar
 	Disease         string
+	InfectedAt      time.Time
+	ImmuneTo        map[string]time.Time // imunidade depois da cura
 	sickAccum       float32
 	Personality     string // Honrado, Ambicioso, Cauteloso, Implacavel
 	Gold            uint32
