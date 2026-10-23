@@ -3223,8 +3223,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				drops = append(drops, "Presas e Garras Afiadas x1 (garra)")
 			}
 			if rand.Float64() < 0.03+luckBonus { // 3% Raro
-				killer.AddItem(protocol.ItemAncestralFangRing, 1)
-				drops = append(drops, "Anel de Presa Ancestral [RARO] x1")
+				killer.AddItem(protocol.ItemSharpWolfFang, 2)
+				drops = append(drops, "Presas Ancestrais (material para joias) x2")
 			}
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemSilverSilkCocoon, 1)
@@ -3242,8 +3242,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			}
 
 			if rand.Float64() < 0.04+luckBonus { // 4% Raro (reduzido para evitar excessos)
-				killer.AddItem(protocol.ItemAncestralFangRing, 1)
-				drops = append(drops, "Anel de Presa Ancestral [RARO] x1")
+				killer.AddItem(protocol.ItemSharpWolfFang, 2)
+				drops = append(drops, "Presas Ancestrais (material para joias) x2")
 			}
 
 		case protocol.MobTypeEclipseAcolyte: // 4: Acólito do Eclipse
@@ -3261,10 +3261,9 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			}
 
 		case protocol.MobTypeIronEnforcer: // 5: Executor de Ferro
-			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
 			killer.AddItem(protocol.ItemEmptyFlask, 1)
-			killer.AddItem(protocol.ItemIronOre, 2)
-			drops = append(drops, "Placa de Aço Pesada x1", "Frasco de Vidro Vazio x1", "Ferro x2")
+			killer.AddItem(protocol.ItemIronOre, 4)
+			drops = append(drops, "Frasco de Vidro Vazio x1", "Ferro x4")
 			if rand.Float64() < 0.04+luckBonus { // 4% Raro
 				killer.AddItem(protocol.ItemTitansHammerTome, 1)
 				drops = append(drops, "Tomo do Martelo Titânico [RARO] x1")
@@ -3278,8 +3277,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			killer.AddItem(protocol.ItemAlphaWolfPelt, 1)
 			drops = append(drops, "Pele Intacta de Lobo Alfa x1")
 			if rand.Float64() < 0.06+luckBonus { // 6% Raro
-				killer.AddItem(protocol.ItemAncestralFangRing, 1)
-				drops = append(drops, "Anel de Presa Ancestral [RARO] x1")
+				killer.AddItem(protocol.ItemSharpWolfFang, 2)
+				drops = append(drops, "Presas Ancestrais (material para joias) x2")
 			}
 
 		case protocol.MobTypeLycanthropeAlpha: // 7: Licantropo Alfa
@@ -3296,8 +3295,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			killer.AddItem(protocol.ItemEmptyFlask, 1)
 			drops = append(drops, "Frasco de Vidro Vazio x1")
 			if rand.Float64() < 0.05+luckBonus { // 5% Raro
-				killer.AddItem(protocol.ItemShadowCultistRobe, 1)
-				drops = append(drops, "Manto do Cultista Sombrio [RARO] x1")
+				killer.AddItem(protocol.ItemDarkPoisonGland, 1)
+				drops = append(drops, "Glândula de Veneno Sombrio [RARO] x1")
 			}
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemEclipseScytheTome, 1)
@@ -3305,8 +3304,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			}
 
 		case protocol.MobTypeStoneGargoyle: // 11: Gárgula de Pedra
-			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
-			drops = append(drops, "Placa de Aço Pesada x1")
+			killer.AddItem(protocol.ItemIronOre, 2)
+			drops = append(drops, "Ferro (couraça partida) x2")
 			if rand.Float64() < 0.06+luckBonus { // 6% Raro
 				killer.AddItem(protocol.ItemGargoyleStoneHeart, 1)
 				drops = append(drops, "Coração Pétreo da Gárgula [RARO] x1")
@@ -3318,8 +3317,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 
 		case protocol.MobTypeInquisitorVex: // 12: Inquisidor Vex
 			if rand.Float64() < 0.06+luckBonus { // 6% Raro
-				killer.AddItem(protocol.ItemInquisitorShadowScythe, 1)
-				drops = append(drops, "Foice Sombria do Inquisidor [RARO] x1")
+				killer.AddItem(protocol.ItemIronOre, 3)
+				drops = append(drops, "Ferro da Foice Partida [RARO] x3")
 			}
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemBrokenSoulChalice, 1)
@@ -3331,8 +3330,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			}
 
 		case protocol.MobTypeCommanderVaelen: // 13: Comandante Vaelen
-			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
-			drops = append(drops, "Placa de Aço Pesada x1")
+			killer.AddItem(protocol.ItemIronOre, 2)
+			drops = append(drops, "Ferro (couraça partida) x2")
 			if rand.Float64() < 0.05+luckBonus { // 5% Raro
 				killer.AddItem(protocol.ItemTraitorCommanderInsignia, 1)
 				drops = append(drops, "Insígnia do Traidor Vaelen [RARO] x1")
@@ -3354,8 +3353,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				drops = append(drops, "Olho do Arauto do Eclipse [RARO] x1")
 			}
 			if rand.Float64() < 0.06+luckBonus { // 6% Raro
-				killer.AddItem(protocol.ItemInquisitorShadowScythe, 1)
-				drops = append(drops, "Foice Sombria do Inquisidor [RARO] x1")
+				killer.AddItem(protocol.ItemIronOre, 3)
+				drops = append(drops, "Ferro da Foice Partida [RARO] x3")
 			}
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemLycanAlphaHeart, 1)
@@ -3376,8 +3375,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 
 		case protocol.MobTypeArachnaQueen: // 16: Arachna, a Rainha Tecelã (Raid Boss)
 			killer.AddItem(protocol.ItemSpiderQueenHeart, 1)
-			killer.AddItem(protocol.ItemImperialSilkCloak, 1)
-			drops = append(drops, "Coração da Rainha Aranha x1", "Manto de Seda Imperial x1")
+			killer.AddItem(protocol.ItemPerfectSilkCocoon, 3)
+			drops = append(drops, "Coração da Rainha Aranha x1", "Seda Imperial (Teias) x3")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemArachnaEye, 1)
 				drops = append(drops, "Olho Multifacetado de Arachna [SECRETO 0.1% - Desbloqueia Raça Aracne!] x1")
@@ -3403,13 +3402,13 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 		case protocol.MobTypeStitchedChimeraZero: // 19: Experimento Nº 0: A Quimera Costurada (Mini-Boss)
 			killer.AddItem(protocol.ItemChimeraFleshPart, 1)
 			killer.AddItem(protocol.ItemDarkPoisonGland, 1)
-			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
-			drops = append(drops, "Retalho Quimérico Costurado x1", "Glândula de Veneno Mutante x1", "Placa de Aço Deformada x1")
+			killer.AddItem(protocol.ItemIronOre, 2)
+			drops = append(drops, "Retalho Quimérico Costurado x1", "Glândula de Veneno Mutante x1", "Ferro Deformado x2")
 
 		case protocol.MobTypeAncientIceGolem: // 20: Golem de Gelo Antigo
 			killer.AddItem(protocol.ItemAncientIceCore, 1)
-			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
-			drops = append(drops, "Núcleo de Gelo Antigo x1", "Placa de Aço Pesada x1")
+			killer.AddItem(protocol.ItemIronOre, 2)
+			drops = append(drops, "Núcleo de Gelo Antigo x1", "Ferro Congelado x2")
 
 		case protocol.MobTypeWildFrostDrake: // 21: Draco de Geada Selvagem
 			killer.AddItem(protocol.ItemPrimordialDragonScale, 1)
@@ -3418,8 +3417,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 
 		case protocol.MobTypeYmirFrostPatriarch: // 22: Ymir, o Patriarca Jotunar (Boss)
 			killer.AddItem(protocol.ItemAncientIceCore, 2)
-			killer.AddItem(protocol.ItemHeavySteelPlate, 2)
-			drops = append(drops, "Núcleo de Gelo Ancestral x2", "Placa Glacial Reforçada x2")
+			killer.AddItem(protocol.ItemIronOre, 4)
+			drops = append(drops, "Núcleo de Gelo Ancestral x2", "Ferro Glacial x4")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemEternalFrostHeart, 1)
 				drops = append(drops, "Coração de Geada Eterna [SECRETO 0.1% - Desbloqueia Jotunar!] x1")
@@ -3430,9 +3429,8 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			drops = append(drops, "Insígnia do Guarda Carmesim x1")
 
 		case protocol.MobTypeLordVesperianVampire: // 24: Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto)
-			killer.AddItem(protocol.ItemVesperianCrimsonRing, 1)
 			killer.AddItem(protocol.ItemEclipseScytheTome, 1)
-			drops = append(drops, "Anel Carmesim de Vesperian x1", "Tomo da Foice do Eclipse x1")
+			drops = append(drops, "Tomo da Foice do Eclipse x1")
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemProgenitorPureBlood, 1)
 				drops = append(drops, "Sangue Puro do Progenitor [SECRETO 0.1% - Desbloqueia Raça Sangrael!] x1")
