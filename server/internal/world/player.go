@@ -93,9 +93,17 @@ type Player struct {
 	MurderCount         int                            // NPCs assassinados (para sempre)
 	KillStreak          int                            // assassinatos seguidos enquanto procurado
 	PermanentWanted     map[uint8]bool                 // cidade -> procurado para sempre
-	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
-	EquippedArmorID     uint8                          // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
-	EquippedAccessoryID uint8                          // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade
+
+	// Sobrevivência: fome (100 = saciado) e temperatura corporal
+	Hunger              float32
+	Cold, Heat          float32
+	BodyTemp            float32
+	AmbientTemp         float32
+	survivalInit        bool
+	survivalDmg         float32
+	EclipseCoins        uint32 // Moedas do Eclipse (Mercado Negro)
+	EquippedArmorID     uint8  // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
+	EquippedAccessoryID uint8  // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade
 
 	// Mini-game de Autópsia e Proteção contra Mobs
 	InAutopsy           bool      // Flag de autópsia ativa
@@ -1722,7 +1730,7 @@ func (p *Player) RegenerateStamina(dt float32, isNight bool, moonPhase uint8) {
 		baseRegenRate *= 1.15 // +15% de regeneração sob a Lua Crescente
 	}
 
-	p.Stamina += baseRegenRate * dt
+	p.Stamina += baseRegenRate * p.staminaRegenMultLocked() * dt
 	if p.Stamina > float32(p.MaxStamina) {
 		p.Stamina = float32(p.MaxStamina)
 	}
@@ -2386,6 +2394,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 	switch itemID {
 	case protocol.ItemRawWolfMeat: // 2: Carne Crua de Lobo (+45 HP / +90 HP Chimeryth)
 		p.consumeOneItemLocked(itemID)
+		p.feedLocked(itemID)
 		healAmt := uint16(45)
 		msg := "Você consumiu Carne Crua de Lobo e recuperou +45 HP."
 		if p.RaceID == protocol.RaceChimera {
@@ -2401,6 +2410,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 
 	case protocol.ItemCookedNobleMeat: // 3: Carne Nobre Assada (+90 HP, +40 Stamina / dobro Chimeryth)
 		p.consumeOneItemLocked(itemID)
+		p.feedLocked(itemID)
 		healAmt := uint16(90)
 		stamAmt := float32(40)
 		msg := "Você saboreou Carne Nobre Assada (+90 HP, +40 Stamina)."

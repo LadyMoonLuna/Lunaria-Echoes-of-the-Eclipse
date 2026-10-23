@@ -7,6 +7,7 @@ import (
 	"sort"
 	"time"
 
+	"lunaria/server/internal/protocol"
 	"lunaria/server/internal/world"
 )
 
@@ -129,4 +130,94 @@ func (s *Server) ActiveEpidemics() []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// handleDevWorldEvent dispara eventos climáticos e do Mundo Vivo pelo menu DEV (0x22, comando 13).
+func (s *Server) handleDevWorldEvent(player *world.Player, ev uint8) {
+	infectNear := func(disease string, count int) int {
+		if player == nil {
+			return 0
+		}
+		player.Mu.RLock()
+		zone, px, pz := player.ZoneID, player.PosX, player.PosZ
+		player.Mu.RUnlock()
+		s.mu.RLock()
+		var list []*world.NPC
+		for _, n := range s.npcs {
+			if n.Targetable() && n.GetZone() == zone {
+				list = append(list, n)
+			}
+		}
+		s.mu.RUnlock()
+		sort.Slice(list, func(i, j int) bool {
+			ax, _, az := list[i].GetPos()
+			bx, _, bz := list[j].GetPos()
+			return dist2(ax, az, px, pz) < dist2(bx, bz, px, pz)
+		})
+		done := 0
+		for _, n := range list {
+			if done >= count {
+				break
+			}
+			if n.Infect(disease) {
+				done++
+			}
+		}
+		return done
+	}
+	msg := ""
+	switch ev {
+	case protocol.DevEventDryFountain, protocol.DevEventFillFountain:
+		s.conflict.mu.Lock()
+		s.conflict.fountainDry = ev == protocol.DevEventDryFountain
+		s.conflict.mu.Unlock()
+		msg = map[bool]string{true: "🏜️ A Fonte Central SECOU (DEV). Os NPCs vão ao Rio Prateado.", false: "💧 A Fonte Central voltou a jorrar (DEV)."}[ev == protocol.DevEventDryFountain]
+	case protocol.DevEventFluEpidemic:
+		msg = fmt.Sprintf("☣️ %d moradores pegaram %s (DEV).", infectNear(world.DiseaseMistFlu, 5), world.DiseaseMistFlu)
+	case protocol.DevEventDysentery:
+		msg = fmt.Sprintf("☣️ %d moradores pegaram %s (DEV).", infectNear(world.DiseaseDysentery, 5), world.DiseaseDysentery)
+	case protocol.DevEventGreyPlague:
+		msg = fmt.Sprintf("☣️ %d moradores pegaram %s (DEV).", infectNear(world.DiseaseGreyPlague, 3), world.DiseaseGreyPlague)
+	case protocol.DevEventCureAll:
+		s.mu.RLock()
+		for _, n := range s.npcs {
+			n.WithLife(func(h *world.NPC) { h.CureLocked(time.Now()) })
+		}
+		s.mu.RUnlock()
+		msg = "✨ Todas as doenças foram curadas (DEV)."
+	case protocol.DevEventSpawnZombie:
+		if player == nil {
+			return
+		}
+		player.Mu.RLock()
+		zone, px, pz := player.ZoneID, player.PosX, player.PosZ
+		player.Mu.RUnlock()
+		zb := s.spawnZombie(world.ZombieName("Viajante Esquecido"), zone, px+6, pz+6, 400, 6, 0)
+		msg = fmt.Sprintf("🧟 %s surgiu ao seu lado (DEV).", zb.Name)
+	case protocol.DevEventDryPuddles, protocol.DevEventFillPuddles:
+		dry := ev == protocol.DevEventDryPuddles
+		for _, z := range evaporationZones {
+			s.resourceNodes.SetPuddles(z, dry)
+			s.broadcastResourceNodes(z)
+		}
+		msg = map[bool]string{true: "🏜️ Poças, orvalho e águas rasas secaram (DEV).", false: "💧 Águas rasas reabastecidas (DEV)."}[dry]
+	case protocol.DevEventFeedPlayer, protocol.DevEventStarvePlayer, protocol.DevEventFreezePlayer:
+		if player == nil {
+			return
+		}
+		switch ev {
+		case protocol.DevEventFeedPlayer:
+			player.DevSetSurvival(100, 0)
+			msg = "🍖 Fome saciada e corpo aquecido (DEV)."
+		case protocol.DevEventStarvePlayer:
+			player.DevSetSurvival(5, 0)
+			msg = "🍽️ Você está faminto (DEV)."
+		default:
+			player.DevSetSurvival(100, 95)
+			msg = "🥶 Você está quase congelando (DEV)."
+		}
+	default:
+		return
+	}
+	s.BroadcastNPCSay(0, "[DEV] "+msg)
 }

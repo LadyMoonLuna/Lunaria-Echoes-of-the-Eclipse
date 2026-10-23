@@ -1171,6 +1171,9 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		s.sendInventorySync(player)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Jogador #%d recebeu +1.000 Sollares e +50 Eclipses (total: %d / %d).", player.ID, g, e))
 
+	case protocol.DevCmdWorldEvent:
+		s.handleDevWorldEvent(player, val)
+
 	case protocol.DevCmdClearHeavy:
 		if player == nil {
 			return
@@ -4655,6 +4658,7 @@ func (s *Server) runGameLoop() {
 				s.updateNPCLife(1.0)
 				s.updateNPCConflict(1.0)
 				s.updateAfterlife()
+				s.updatePlayerSurvival(1.0)
 				if s.serverTick%(GameTickRate*10) < GameTickRate {
 					s.updateContagion(world.ContagionCheckInterval)
 				}

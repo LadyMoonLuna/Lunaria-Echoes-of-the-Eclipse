@@ -31,6 +31,7 @@ signal corpse_snapshot_received(corpses_dict: Dictionary)
 signal open_autopsy_ui_received(corpse_id: int, mob_type: int, difficulty_seed: int, organs: Array)
 signal zone_change_received(target_zone_id: int, portal_id: int)
 signal npc_friendship_received(npc_id: int, points: int, level: int)
+signal survival_received(hunger: int, cold: int, heat: int, body_temp: int, ambient_temp: int)
 
 const SERVER_HOST: String = "127.0.0.1"
 const TCP_PORT: int = 7000
@@ -263,6 +264,14 @@ func _process_tcp() -> void:
 					d_ids.append(tcp_rx_buffer[4 + i * 2] | (tcp_rx_buffer[5 + i * 2] << 8))
 				discovered_materials_received.emit(d_mode, d_ids)
 				tcp_rx_buffer = tcp_rx_buffer.slice(d_size)
+
+			elif opcode == 0x50: # PLAYER_SURVIVAL: op | fome | frio | calor | temp. sentida i8 | temp. ambiente i8
+				if tcp_rx_buffer.size() < 6:
+					break
+				var body_t: int = tcp_rx_buffer[4] - 256 if tcp_rx_buffer[4] > 127 else tcp_rx_buffer[4]
+				var amb_t: int = tcp_rx_buffer[5] - 256 if tcp_rx_buffer[5] > 127 else tcp_rx_buffer[5]
+				survival_received.emit(tcp_rx_buffer[1], tcp_rx_buffer[2], tcp_rx_buffer[3], body_t, amb_t)
+				tcp_rx_buffer = tcp_rx_buffer.slice(6)
 
 			elif opcode == 0x47: # QUEST_STATE: op | missão | etapa | tem | precisa
 				if tcp_rx_buffer.size() < 5:

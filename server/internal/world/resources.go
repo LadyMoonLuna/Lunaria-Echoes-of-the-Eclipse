@@ -264,3 +264,17 @@ func (m *ResourceNodeManager) UpdateEvaporation(zone uint8, tempC float32, raini
 	}
 	return changed
 }
+
+// SetPuddles seca (dry=true) ou enche todas as águas rasas de uma zona (comando DEV).
+func (m *ResourceNodeManager) SetPuddles(zone uint8, dry bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, n := range m.nodes {
+		if n.ZoneID == zone && IsEvaporable(n.MaterialID) {
+			n.DriedUp = dry
+			if !dry {
+				n.DepletedAt = time.Time{}
+			}
+		}
+	}
+}

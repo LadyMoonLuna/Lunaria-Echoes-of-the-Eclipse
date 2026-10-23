@@ -81,6 +81,7 @@ const (
 	PacketTypeTombstoneRequest    uint8 = 0x4D // [Client -> Server] Pedir lista de túmulos (1 byte)
 	PacketTypeTombstoneState      uint8 = 0x4E // [Server -> Client] Túmulos permanentes (tamanho variável)
 	PacketTypeCorpseRite          uint8 = 0x4F // [Client -> Server] Purificar / reviver corpo ou cova (7 bytes)
+	PacketTypePlayerSurvival      uint8 = 0x50 // [Server -> Client] Fome e temperatura do jogador (6 bytes)
 )
 
 // Tipos de Projéteis 3D
@@ -882,6 +883,7 @@ const (
 	DevCmdPortalTravel uint8 = 10 // Travessia de Portal / Mudança de Zona (Value = PortalID)
 	DevCmdGiveMoney    uint8 = 11 // +1.000 Sollares e +50 Moedas do Eclipse
 	DevCmdClearHeavy   uint8 = 12 // Remove da mochila os itens de 10 kg ou mais por unidade
+	DevCmdWorldEvent   uint8 = 13 // Evento climático/do Mundo Vivo (Value = DevEvent*)
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).
@@ -2437,4 +2439,29 @@ func DeserializeCorpseRite(data []byte, pkt *CorpseRitePacket) error {
 	pkt.ID = binary.LittleEndian.Uint32(data[2:6])
 	pkt.Rite = data[6]
 	return nil
+}
+
+// Eventos do DevCmdWorldEvent (13)
+const (
+	DevEventDryFountain  uint8 = 1
+	DevEventFillFountain uint8 = 2
+	DevEventFluEpidemic  uint8 = 3
+	DevEventDysentery    uint8 = 4
+	DevEventGreyPlague   uint8 = 5
+	DevEventCureAll      uint8 = 6
+	DevEventSpawnZombie  uint8 = 7
+	DevEventDryPuddles   uint8 = 8
+	DevEventFillPuddles  uint8 = 9
+	DevEventFeedPlayer   uint8 = 10
+	DevEventStarvePlayer uint8 = 11
+	DevEventFreezePlayer uint8 = 12
+)
+
+// --- 0x50: PLAYER_SURVIVAL (TCP: Server -> Client, 6 bytes) ---
+// op | fome (0-100) | frio (0-100) | calor (0-100) | temperatura sentida °C (i8) | temperatura ambiente °C (i8)
+
+const PlayerSurvivalPacketSize = 6
+
+func SerializePlayerSurvival(hunger, cold, heat uint8, bodyTemp, ambient int8) [PlayerSurvivalPacketSize]byte {
+	return [PlayerSurvivalPacketSize]byte{PacketTypePlayerSurvival, hunger, cold, heat, uint8(bodyTemp), uint8(ambient)}
 }

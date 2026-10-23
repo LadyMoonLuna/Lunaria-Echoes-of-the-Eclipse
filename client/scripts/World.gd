@@ -87,6 +87,16 @@ const MOON_NAMES := [
 	"LUA DE SANGUE",
 	"ECLIPSE TOTAL"
 ]
+# Eventos do menu DEV (servidor: protocol.DevEvent*)
+const DEV_WORLD_EVENTS := [
+	[1, "🏜️ Secar a Fonte", Color(0.75, 0.55, 0.25)], [2, "💧 Encher a Fonte", Color(0.25, 0.5, 0.8)],
+	[8, "🌵 Secar Poças", Color(0.7, 0.5, 0.2)], [9, "🌊 Encher Poças", Color(0.2, 0.55, 0.75)],
+	[3, "🤧 Surto de Gripe da Bruma", Color(0.5, 0.65, 0.75)], [4, "🤢 Surto de Disenteria", Color(0.55, 0.6, 0.3)],
+	[5, "☠️ Peste Cinzenta", Color(0.45, 0.45, 0.45)], [6, "✨ Curar Todas as Doenças", Color(0.9, 0.85, 0.4)],
+	[7, "🧟 Zumbi ao Meu Lado", Color(0.4, 0.6, 0.3)], [10, "🍖 Saciar Fome e Aquecer", Color(0.85, 0.55, 0.25)],
+	[11, "🍽️ Ficar Faminto", Color(0.6, 0.35, 0.2)], [12, "🥶 Quase Congelando", Color(0.4, 0.7, 0.95)],
+]
+
 const WEATHER_NAMES := ["Limpo", "Chuva", "Neblina Densa", "Névoa Carmesim", "Neve", "Nevasca",
 	"Tempestade de Raios", "Garoa", "Granizo", "Tempestade de Areia", "Chuva de Cinzas",
 	"Onda de Calor", "Vendaval", "Aurora Boreal", "Chuva de Meteoros", "Chuva Ácida",
@@ -525,6 +535,8 @@ var my_mana: int = 0
 var my_max_mana: int = 0
 var mana_bar: ProgressBar = null
 var mana_label: Label = null
+var hunger_bar: ProgressBar = null
+var survival_label: Label = null
 var weight_warning_label: Label = null
 var ground_items_nodes: Dictionary = {} # drop_id -> Node3D
 var ground_items_data: Dictionary = {} # drop_id -> {"id", "quantity", "x", "z"}
@@ -615,6 +627,7 @@ func _ready() -> void:
 	NetworkManager.resource_nodes_received.connect(_on_resource_nodes_received)
 	NetworkManager.discovered_materials_received.connect(_on_discovered_materials_received)
 	NetworkManager.quest_state_received.connect(_on_quest_state_received)
+	NetworkManager.survival_received.connect(_on_survival_received)
 	for mid in ItemDataScript.STARTING_DISCOVERED:
 		discovered_materials[mid] = true
 	NetworkManager.player_attributes_received.connect(_on_player_attributes_received)
@@ -1741,6 +1754,32 @@ func _build_dev_tab_world(tabs: TabContainer) -> void:
 		if dev_status_label: dev_status_label.text = "Clima ciclado no servidor!"
 	))
 
+	# 4. Eventos climáticos e do Mundo Vivo (Cmd 13 via 0x22)
+	var ev_card := PanelContainer.new()
+	ev_card.add_theme_stylebox_override("panel", _dev_get_card_style(Color(0.75, 0.45, 0.2)))
+	tab.add_child(ev_card)
+	var ev_vb := VBoxContainer.new()
+	ev_vb.add_theme_constant_override("separation", 6)
+	ev_card.add_child(ev_vb)
+	var ev_title := Label.new()
+	ev_title.text = "🌋 4. EVENTOS CLIMÁTICOS E DO MUNDO VIVO (0x22 Cmd 13):"
+	ev_title.add_theme_font_size_override("font_size", 12)
+	ev_title.add_theme_color_override("font_color", Color(1.0, 0.7, 0.35))
+	ev_vb.add_child(ev_title)
+	var ev_grid := GridContainer.new()
+	ev_grid.columns = 4
+	ev_grid.add_theme_constant_override("h_separation", 6)
+	ev_grid.add_theme_constant_override("v_separation", 6)
+	ev_vb.add_child(ev_grid)
+	for ev in DEV_WORLD_EVENTS:
+		var ev_id: int = ev[0]
+		var ev_name: String = ev[1]
+		ev_grid.add_child(_dev_create_btn(ev_name, ev[2], func():
+			NetworkManager.send_world_control(13, ev_id)
+			if dev_status_label: dev_status_label.text = "Evento disparado: %s" % ev_name
+			show_loot_toast(ev_name)
+		))
+
 func _build_dev_tab_items(tabs: TabContainer) -> void:
 	var tab := VBoxContainer.new()
 	tab.name = "🎒 Drops & Itens"
@@ -2817,6 +2856,31 @@ func _setup_mana_bar() -> void:
 	mana_label.add_theme_color_override("font_color", Color(0.7, 0.82, 1.0))
 	vbox.add_child(mana_label)
 	vbox.move_child(mana_label, mana_bar.get_index() + 1)
+
+	# Sobrevivência (0x50): fome e temperatura corporal
+	hunger_bar = ProgressBar.new()
+	hunger_bar.name = "HungerBar"
+	hunger_bar.custom_minimum_size = Vector2(220, 8)
+	hunger_bar.show_percentage = false
+	hunger_bar.max_value = 100
+	hunger_bar.value = 100
+	var h_bg := StyleBoxFlat.new()
+	h_bg.bg_color = Color(0.12, 0.1, 0.06, 0.85)
+	h_bg.set_corner_radius_all(3)
+	var h_fill := StyleBoxFlat.new()
+	h_fill.bg_color = Color(0.95, 0.6, 0.15)
+	h_fill.set_corner_radius_all(3)
+	hunger_bar.add_theme_stylebox_override("background", h_bg)
+	hunger_bar.add_theme_stylebox_override("fill", h_fill)
+	vbox.add_child(hunger_bar)
+	vbox.move_child(hunger_bar, mana_label.get_index() + 1)
+	survival_label = Label.new()
+	survival_label.name = "SurvivalLabel"
+	survival_label.text = "Fome: 100% | Temperatura: --"
+	survival_label.add_theme_font_size_override("font_size", 12)
+	survival_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.5))
+	vbox.add_child(survival_label)
+	vbox.move_child(survival_label, hunger_bar.get_index() + 1)
 
 func _on_player_respawn_received(player_id: int, respawn_pos: Vector3) -> void:
 	if player_id == NetworkManager.my_player_id:
@@ -5933,3 +5997,35 @@ func _build_cemetery_and_river(root: Node3D) -> void:
 	river_sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	river_sign.position = Vector3(94.0, 2.2, 18.0)
 	root.add_child(river_sign)
+
+
+# HUD de sobrevivência (0x50): fome e temperatura sentida, com alertas de frio, calor e fome
+func _on_survival_received(hunger: int, cold: int, heat: int, body_temp: int, ambient_temp: int) -> void:
+	if hunger_bar:
+		hunger_bar.value = hunger
+	if not survival_label:
+		return
+	var state := "Confortável"
+	var col := Color(1.0, 0.8, 0.5)
+	if cold >= 100:
+		state = "HIPOTERMIA!"
+		col = Color(0.4, 0.75, 1.0)
+	elif heat >= 100:
+		state = "INSOLAÇÃO!"
+		col = Color(1.0, 0.35, 0.2)
+	elif cold > 70:
+		state = "Congelando"
+		col = Color(0.55, 0.8, 1.0)
+	elif heat > 70:
+		state = "Superaquecido"
+		col = Color(1.0, 0.5, 0.3)
+	elif cold > 30:
+		state = "Com frio"
+	elif heat > 30:
+		state = "Com calor"
+	var hunger_txt := "Faminto!" if hunger < 25 else "%d%%" % hunger
+	if hunger <= 0:
+		hunger_txt = "MORRENDO DE FOME!"
+		col = Color(1.0, 0.3, 0.3)
+	survival_label.text = "Fome: %s | %d°C (ar %d°C) — %s" % [hunger_txt, body_temp, ambient_temp, state]
+	survival_label.add_theme_color_override("font_color", col)
