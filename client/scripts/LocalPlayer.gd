@@ -1,4 +1,5 @@
 extends CharacterBody3D
+const NewRaces = preload("res://scripts/NewRaces.gd")
 
 signal identity_changed(race_id: int, class_id: int)
 signal action_triggered(action_type: int)
@@ -426,7 +427,7 @@ func _get_race_color() -> Color:
 		26: return Color("#c62828") # Cambion: Vermelho Enxofre
 		27: return Color("#ffd700") # Nephilim: Ouro e Sombra
 		28: return Color("#ffd54f") # Errante Temporal: Areia Dourada
-		_: return Color("#ffd700")
+		_: return NewRaces.color(current_race_id)
 
 func _spawn_racial_aura_burst() -> void:
 	var col: Color = _get_race_color()

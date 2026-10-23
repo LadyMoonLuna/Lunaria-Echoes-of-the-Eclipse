@@ -78,6 +78,60 @@ const RACES_DATA := {
 		"order_evo": "Soberano Dracônico (Ordem: Chamas reais ancestrais, nobreza e asas de dragão)",
 		"chaos_evo": "Fera do Frenesi (Caos: Instinto sanguinário incontrolável e fúria devastadora)",
 		"npc_reaction": "Capitão Randel: 'Controle seus instintos ferozes dentro das muralhas, Varkai, e você será um grande trunfo!'"
+	},
+	29: {
+		"name": "Orc",
+		"title": "Orc — Guerreiro das Estepes Cinzentas",
+		"lore": "Clãs guerreiros das estepes cinzentas. Pele verde-musgo, presas e cicatrizes de honra.",
+		"color": Color("#558b2f"),
+		"accent": Color("#c5e1a5"),
+		"stats": {
+			"FOR": 10, "DES": 5, "CON": 9, "AGI": 5,
+			"INT": 3, "ESP": 5, "PER": 7, "SOR": 6
+		},
+		"skill_z_name": "Fúria de Sangue",
+		"skill_z_desc": "Cura 15% da Vida e ativa o buff de combate por 8s (Recarga: 25s).",
+		"passive_name": "Pele Grossa",
+		"passive_desc": "-8% de dano recebido e +12% de dano corpo a corpo.",
+		"order_evo": "Sem evolução por enquanto",
+		"chaos_evo": "Sem evolução por enquanto",
+		"npc_reaction": "Garrick: 'Braços assim nasceram para o martelo, orc!'"
+	},
+	30: {
+		"name": "Goblin",
+		"title": "Goblin — Trapaceiro das Cavernas",
+		"lore": "Pequenos, espertos e gananciosos. Mestres de armadilhas e fugas impossíveis.",
+		"color": Color("#9ccc65"),
+		"accent": Color("#ffee58"),
+		"stats": {
+			"FOR": 4, "DES": 10, "CON": 5, "AGI": 10,
+			"INT": 4, "ESP": 4, "PER": 5, "SOR": 8
+		},
+		"skill_z_name": "Bomba de Fumaça",
+		"skill_z_desc": "1s de invulnerabilidade, dano e lentidão em 3,5m (Recarga: 30s).",
+		"passive_name": "Sorte do Trapaceiro",
+		"passive_desc": "Alta Sorte e Agilidade, Stamina farta.",
+		"order_evo": "Sem evolução por enquanto",
+		"chaos_evo": "Sem evolução por enquanto",
+		"npc_reaction": "Capitão Randel: 'Mantenha as mãos longe dos bolsos alheios, goblin.'"
+	},
+	31: {
+		"name": "Elfo",
+		"title": "Elfo — Guardião das Florestas Antigas",
+		"lore": "Guardiões das florestas antigas. Olhos aguçados e longevidade de séculos.",
+		"color": Color("#81c784"),
+		"accent": Color("#ffca28"),
+		"stats": {
+			"FOR": 4, "DES": 9, "CON": 5, "AGI": 9,
+			"INT": 8, "ESP": 6, "PER": 5, "SOR": 4
+		},
+		"skill_z_name": "Flecha Precisa",
+		"skill_z_desc": "Disparo de longo alcance (12m) (Recarga: 12s).",
+		"passive_name": "Graça Élfica",
+		"passive_desc": "+8% de dano total.",
+		"order_evo": "Elfo Solar (Ordem: bênção do sol, fogo radiante)",
+		"chaos_evo": "Elfo Lunar (Caos: sombras prateadas da lua)",
+		"npc_reaction": "Lyra: 'Um elfo da floresta! As ervas falam bem de você.'"
 	}
 }
 
@@ -189,10 +243,10 @@ func _build_ui() -> void:
 	races_hbox.add_theme_constant_override("separation", 12)
 	root_vbox.add_child(races_hbox)
 
-	for rid in [1, 2, 3, 4]:
+	for rid in [1, 2, 3, 4, 29, 30, 31]:
 		var r_info: Dictionary = RACES_DATA[rid]
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(220, 56)
+		btn.custom_minimum_size = Vector2(170, 56)
 		btn.text = "%s\n[%s]" % [r_info["name"].to_upper(), r_info["title"].split("—")[0].strip_edges()]
 		btn.add_theme_font_size_override("font_size", 12)
 		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND

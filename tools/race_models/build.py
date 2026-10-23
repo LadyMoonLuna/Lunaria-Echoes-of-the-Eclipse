@@ -26,6 +26,7 @@ from mobs import MOBS  # noqa: E402
 from npcs import NPCS  # noqa: E402
 from races import ALL as LEGENDARY  # noqa: E402
 from races_base import ALL_BASE  # noqa: E402
+from races_new import ALL_NEW  # noqa: E402
 from texmap import assign  # noqa: E402
 
 GD_OUT = os.path.join(REPO, "client", "scripts", "models", "LunariaModelData.gd")
@@ -57,7 +58,7 @@ def _preview_textures(models):
 
 
 def main():
-    races = sorted((fn().to_dict() for fn in ALL_BASE + LEGENDARY), key=lambda d: d["id"])
+    races = sorted((fn().to_dict() for fn in ALL_BASE + LEGENDARY + ALL_NEW), key=lambda d: d["id"])
     models = races + [fn().to_dict() for fn in NPCS] + [fn().to_dict() for fn in MOBS] + \
         [fn().to_dict() for fn in WEAPONS] + [fn().to_dict() for fn in OUTFITS]
     plain = assign(models)

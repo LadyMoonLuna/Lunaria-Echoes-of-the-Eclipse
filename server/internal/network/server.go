@@ -31,10 +31,10 @@ const (
 
 // Server coordena conexões de rede, relógio do mundo, NPCs, Bonecos de Treino, Mobs, combate e Game Loop.
 type Server struct {
-	mu           sync.RWMutex
-	players      map[uint32]*world.Player
-	npcs         map[uint32]*world.NPC
-	dummies      map[uint32]*world.TrainingDummy
+	mu            sync.RWMutex
+	players       map[uint32]*world.Player
+	npcs          map[uint32]*world.NPC
+	dummies       map[uint32]*world.TrainingDummy
 	mobManager    *world.MobManager
 	projManager   *world.ProjectileManager
 	corpseManager *world.CorpseManager
@@ -3354,7 +3354,111 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 80, 0, 0, 0)
 		log.Printf("[RACIAL] Errante Temporal #%d ativou Rebobinar o Destino (Restaurado: %v, Pos: %.1f,%.1f, HP: %d, %d dano)!\n",
 			player.ID, restored, snap.PosX, snap.PosZ, snap.HP, dmg)
+
+	default:
+		s.handleNewRacialSkill(player, px, pz, aimX, aimZ, raceID, pSTR, pDEX, pINT, pSPI, pMAS, pLCK)
 	}
+}
+
+// handleNewRacialSkill trata o [Z] das raças 29–45 (docs/design/racas_propostas.md).
+func (s *Server) handleNewRacialSkill(player *world.Player, px, pz, aimX, aimZ float32, raceID, pSTR, pDEX, pINT, pSPI, pMAS, pLCK uint8) {
+	var healed uint16
+	name := ""
+	switch raceID {
+	case protocol.RaceOrc:
+		name = "Fúria de Sangue"
+		healed = player.HealPercent(0.15)
+		player.SetBuff(8 * time.Second)
+	case protocol.RaceGoblin:
+		name = "Bomba de Fumaça"
+		player.GrantIFrame(time.Second)
+		s.BroadcastAOETelegraph(player.ID, px, pz, 3.5, 250)
+		s.applyRacialAoEDamage(player, px, pz, 3.5, uint16(30+int(pDEX)*2+int(pLCK)*2))
+		s.applyRacialCrowdControl(px, pz, 3.5, 0, 3*time.Second, 0.6)
+	case protocol.RaceElf:
+		name = "Flecha Precisa"
+		s.applyRacialSingleTargetSnipe(player, px, pz, aimX, aimZ, 12.0, uint16(50+int(pDEX)*3+int(pINT)*2), 0)
+	case protocol.RaceSolarElf:
+		name = "Lança do Sol"
+		player.SetBuff(20 * time.Second)
+		s.BroadcastAOETelegraph(player.ID, px, pz, 8.0, 350)
+		s.applyRacialConeDamage(player, px, pz, aimX, aimZ, 8.0, 0.5, uint16(70+int(pSTR)*3+int(pSPI)*2))
+	case protocol.RaceLunarElf:
+		name = "Véu Lunar"
+		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 300)
+		s.applyRacialCrowdControl(px, pz, 6.0, 0, 4*time.Second, 0.5)
+		s.applyRacialAoEDamage(player, px, pz, 6.0, uint16(45+int(pDEX)*3+int(pINT)*2))
+	case protocol.RaceEarthDrago:
+		name = "Abraço da Terra"
+		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 350)
+		s.pullMobsToward(px, pz, 6.0, 0.5)
+		s.applyRacialAoEDamage(player, px, pz, 6.0, uint16(50+int(pSTR)*2+int(player.CON)*3))
+		healed = player.HealPercent(0.15)
+	case protocol.RaceWaterDrago:
+		name = "Maré Curativa"
+		pct := float32(0.12)
+		if _, _, _, w := s.clock.GetTime(); w == 1 {
+			pct += 0.12
+		}
+		healed = player.HealPercent(pct)
+	case protocol.RaceLightningDrago:
+		name = "Relâmpago"
+		player.SetBuff(6 * time.Second)
+		s.applyRacialSingleTargetSnipe(player, px, pz, aimX, aimZ, 12.0, uint16(60+int(pDEX)*3+int(pINT)*3), time.Second)
+	case protocol.RaceMysticDrago:
+		name = "Ruptura Arcana"
+		s.BroadcastAOETelegraph(player.ID, px, pz, 7.0, 400)
+		s.applyRacialAoEDamage(player, px, pz, 7.0, uint16(70+int(pINT)*4+int(pSPI)*2))
+	case protocol.RacePyromancer:
+		name = "Combustão Interna"
+		player.SpendHPPercent(0.4)
+		player.SetBuff(15 * time.Second)
+		s.BroadcastAOETelegraph(player.ID, px, pz, 7.0, 400)
+		s.applyRacialAoEDamage(player, px, pz, 7.0, uint16(100+int(pINT)*5+int(pSPI)*2))
+	case protocol.RaceScorpionkin:
+		name = "Ferrão Tóxico"
+		player.SpendHPPercent(0.2)
+		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 300)
+		s.applyRacialAoEDamage(player, px, pz, 5.0, uint16(70+int(pDEX)*3+int(pMAS)*3))
+		s.applyRacialCrowdControl(px, pz, 5.0, 0, 4*time.Second, 0.5)
+	case protocol.RaceTortoisekin:
+		name = "Carapaça"
+		player.GrantDamageReduction(6 * time.Second)
+		healed = player.HealPercent(0.18)
+	case protocol.RaceFairy:
+		name = "Pó de Fada"
+		healed = player.HealPercent(0.10)
+		s.healNearbyAllies(player.ID, px, pz, 7.0, uint16(float32(player.MaxHP)*0.10))
+		s.BroadcastAOETelegraph(player.ID, px, pz, 5.0, 300)
+		s.applyRacialCrowdControl(px, pz, 5.0, 0, 4*time.Second, 0.5)
+	case protocol.RaceHalfCelestial:
+		name = "Bênção Celeste"
+		player.SetBuff(12 * time.Second)
+		healed = player.HealPercent(0.15)
+		s.healNearbyAllies(player.ID, px, pz, 7.0, uint16(40+int(pSPI)*3))
+	case protocol.RaceFrostGiant:
+		name = "Inverno Eterno"
+		player.SetBuff(30 * time.Second)
+		s.BroadcastAOETelegraph(player.ID, px, pz, 6.0, 350)
+		s.applyRacialCrowdControl(px, pz, 6.0, 2*time.Second, 0, 1.0)
+		s.applyRacialAoEDamage(player, px, pz, 6.0, uint16(60+int(pSTR)*3+int(player.CON)*2))
+	case protocol.RaceSuccubus:
+		name = "Beijo Drenante"
+		s.applyRacialSingleTargetSnipe(player, px, pz, aimX, aimZ, 10.0, uint16(60+int(pINT)*3+int(pLCK)*3), 2*time.Second)
+		healed = player.HealPercent(0.08)
+	case protocol.RaceManamancer:
+		if player.HPFraction() <= 0.15 {
+			return
+		}
+		name = "Coração de Mana"
+		player.SpendHPPercent(0.15)
+		s.BroadcastAOETelegraph(player.ID, px, pz, 7.0, 400)
+		s.applyRacialAoEDamage(player, px, pz, 7.0, uint16(90+int(pINT)*6))
+	default:
+		return
+	}
+	s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, healed, 0, 0, 0)
+	log.Printf("[RACIAL] Raça %d #%d ativou %s (+%d HP)\n", raceID, player.ID, name, healed)
 }
 
 // pullMobsToward puxa mobs em volta para mais próximo do jogador.
@@ -3698,4 +3802,3 @@ func (s *Server) handleEvolutionChoice(playerID uint32, pkt protocol.EvolutionOf
 		log.Printf("[PROVAÇÃO LENDÁRIA] Jogador #%d ascendeu ao Tier 6 Lendário!\n", playerID)
 	}
 }
-

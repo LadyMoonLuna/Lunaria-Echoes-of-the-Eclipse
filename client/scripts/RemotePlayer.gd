@@ -1,4 +1,5 @@
 extends Node3D
+const NewRaces = preload("res://scripts/NewRaces.gd")
 
 var player_id: int = 0
 var target_position: Vector3 = Vector3.ZERO
@@ -690,7 +691,7 @@ func _get_race_color() -> Color:
 		26: return Color("#c62828")
 		27: return Color("#ffd700")
 		28: return Color("#ffd54f")
-		_: return Color("#ffd700")
+		_: return NewRaces.color(current_race_id)
 
 func _get_class_color() -> Color:
 	match current_class_id:

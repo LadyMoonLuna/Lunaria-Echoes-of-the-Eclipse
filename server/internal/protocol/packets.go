@@ -139,6 +139,28 @@ const (
 	RaceCambion       uint8 = 26 // Cambion (Sangue-de-Enxofre)
 	RaceNephilim      uint8 = 27 // Nephilim (Híbrido do Crepúsculo)
 	RaceTimeWanderer  uint8 = 28 // Errante Temporal (Cronomante)
+
+	// Raças da proposta de balanceamento (29 a 45) — docs/design/racas_propostas.md
+	RaceOrc            uint8 = 29 // Orc (Base)
+	RaceGoblin         uint8 = 30 // Goblin (Base)
+	RaceElf            uint8 = 31 // Elfo (Base)
+	RaceSolarElf       uint8 = 32 // Elfo Solar (Evolução de Ordem do Elfo)
+	RaceLunarElf       uint8 = 33 // Elfo Lunar (Evolução de Caos do Elfo)
+	RaceEarthDrago     uint8 = 34 // Drago da Terra (Secreta, linhagem)
+	RaceWaterDrago     uint8 = 35 // Drago da Água (Secreta, linhagem)
+	RaceLightningDrago uint8 = 36 // Drago do Raio (Secreta, linhagem)
+	RaceMysticDrago    uint8 = 37 // Drago Místico (Secreta, linhagem)
+	RacePyromancer     uint8 = 38 // Pyromante (Secreta)
+	RaceScorpionkin    uint8 = 39 // Demi-humano Escorpião (Secreta)
+	RaceTortoisekin    uint8 = 40 // Demi-humano Tartaruga (Secreta)
+	RaceFairy          uint8 = 41 // Fadinha (Secreta)
+	RaceHalfCelestial  uint8 = 42 // Meio-Celestial (Secreta)
+	RaceFrostGiant     uint8 = 43 // Gigante de Gelo (Evolução do Boreal)
+	RaceSuccubus       uint8 = 44 // Meio-Demônio Súcubo/Íncubo (Evolução de Caos do Cambion)
+	RaceManamancer     uint8 = 45 // Manamante (Secreta)
+
+	// RaceMaxID é o maior ID de raça válido.
+	RaceMaxID uint8 = 45
 )
 
 // Slots de Equipamento (Array fixo de 12 slots)

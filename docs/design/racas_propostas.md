@@ -238,3 +238,37 @@ As raças acima usam **Mana**, mas o jogo hoje só tem **Stamina**. Proposta:
 
 Com isso o jogo passa de 28 para cerca de 41 raças. Se a lista ficar grande demais para a tela de seleção, as secretas podem
 aparecer só depois de desbloqueadas.
+
+## Implementação (IDs no jogo)
+
+Todas as 17 raças estão no jogo, com os números desta proposta. Enquanto a barra de Mana não existe, o bônus de Mana soma na Stamina.
+
+| ID | Raça | Grupo |
+| ---: | :--- | :--- |
+| 29 | Orc | Base (seleção de personagem) |
+| 30 | Goblin | Base (seleção de personagem) |
+| 31 | Elfo | Base (seleção de personagem) |
+| 32 | Elfo Solar | Evolução do Elfo |
+| 33 | Elfo Lunar | Evolução do Elfo |
+| 34–37 | Drago da Terra, Água, Raio e Místico | Secretas |
+| 38 | Pyromante | Secreta |
+| 39 | Escorpião | Nova |
+| 40 | Tartaruga | Nova |
+| 41 | Fadinha | Nova |
+| 42 | Meio-Celestial | Nova |
+| 43 | Gigante de Gelo | Nova |
+| 44 | Súcubo | Nova |
+| 45 | Manamante | Secreta |
+
+| O quê | Onde |
+| :--- | :--- |
+| Atributos, Vida, Stamina, dano recebido, recarga do [Z] e Último Fôlego | `server/internal/world/races_new.go` |
+| Habilidades [Z] | `handleNewRacialSkill` em `server/internal/network/server.go` |
+| Bônus de dano (dia, noite, chuva, névoa) | `scripts/combat/combat.lua` |
+| Textos, cores e menu F10 | `client/scripts/NewRaces.gd` |
+| Modelos 3D | `tools/race_models/races_new.py` |
+
+Ainda falta:
+
+- Os itens que desbloqueiam as raças secretas. Por enquanto elas são escolhidas no menu de desenvolvedor (F10).
+- O clima de neve para o Gigante de Gelo. Até lá, o bônus dele vale à noite e na névoa.

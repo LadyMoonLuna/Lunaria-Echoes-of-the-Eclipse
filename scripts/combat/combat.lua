@@ -202,6 +202,26 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         damage_bonus = damage_bonus + 0.20
     end
 
+    -- Raças 29–45 (docs/design/racas_propostas.md)
+    if race_id == 29 and action_type == 1 then damage_bonus = damage_bonus + 0.12 end -- Orc: corpo a corpo
+    if race_id == 31 then damage_bonus = damage_bonus + 0.08 end                       -- Elfo
+    if race_id == 32 and is_day then damage_bonus = damage_bonus + 0.12 end           -- Elfo Solar
+    if race_id == 33 and is_night then damage_bonus = damage_bonus + 0.12 end         -- Elfo Lunar
+    if race_id == 35 then                                                              -- Drago da Água
+        damage_bonus = damage_bonus + 0.15
+        if weather_type == 1 then damage_bonus = damage_bonus + 0.10 end
+    end
+    if race_id == 36 then damage_bonus = damage_bonus + 0.10 end                       -- Drago do Raio
+    if race_id == 37 then damage_bonus = damage_bonus + 0.15 end                       -- Drago Místico
+    if race_id == 38 then                                                              -- Pyromante
+        damage_bonus = damage_bonus + 0.12
+        if weather_type == 1 then damage_bonus = damage_bonus - 0.15 end
+    end
+    if race_id == 41 then damage_bonus = damage_bonus + 0.15 end                       -- Fadinha
+    if race_id == 42 then damage_bonus = damage_bonus + 0.12 end                       -- Meio-Celestial
+    if race_id == 43 and (is_night or weather_type == 2) then damage_bonus = damage_bonus + 0.12 end -- Gigante de Gelo
+    if race_id == 45 then damage_bonus = damage_bonus + 0.18 end                       -- Manamante
+
     -- Buff do Ferreiro (Afiação de Combate) e Poção de Sangue Lupino (+20% Crítico)
     if buff == 1 then
         damage_bonus = damage_bonus + 0.25

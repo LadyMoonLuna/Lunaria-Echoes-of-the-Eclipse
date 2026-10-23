@@ -5,6 +5,8 @@ var current_filter: String = "ALL" # ALL, NEW, SECRET, EVOLUTION, BASE
 var cards_container: VBoxContainer = null
 var status_label: Label = null
 
+const NewRaces = preload("res://scripts/NewRaces.gd")
+
 const RACES_DATA := [
 	# Raças Base (1-4)
 	{
@@ -479,7 +481,7 @@ func _render_cards() -> void:
 	for child in cards_container.get_children():
 		child.queue_free()
 
-	for race in RACES_DATA:
+	for race in RACES_DATA + NewRaces.dev_entries():
 		if current_filter != "ALL" and race["group"] != current_filter:
 			continue
 

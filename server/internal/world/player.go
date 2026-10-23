@@ -12,6 +12,9 @@ import (
 type Player struct {
 	Mu sync.RWMutex
 
+	// LastStandAt marca o último Renascer das Cinzas / Último Fôlego (raças 38 e 34–37)
+	LastStandAt time.Time
+
 	ID       uint32
 	TCPConn  net.Conn
 	UDPAddr  *net.UDPAddr
@@ -102,6 +105,10 @@ type TimeHistorySnapshot struct {
 
 // GetBaseRaceAttributes retorna os 8 atributos iniciais autoritativos de cada uma das 28 raças.
 func GetBaseRaceAttributes(raceID uint8) (str, dex, con, agi, intStat, spi, mas, lck uint8) {
+	if d, ok := LookupNewRace(raceID); ok {
+		a := d.Attrs
+		return a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]
+	}
 	switch raceID {
 	// Raças Base (1 a 4)
 	case protocol.RaceValerian:
@@ -291,7 +298,7 @@ func CalculateStats(classID, raceID, classTier, level uint8) (uint16, uint16) {
 		modHP = 15 + 80      // +80 MaxHP da evolução Varkai
 		modStamina = 10 + 30 // +30 MaxStamina da evolução Varkai
 	case protocol.RaceRevenant: // 7 (Amaldiçoado das Cinzas / Revenant)
-		modHP = 10 + 50      // +50 MaxHP do despertar sombrio
+		modHP = 10 + 50 // +50 MaxHP do despertar sombrio
 		modStamina = 10
 	case protocol.RaceCelestine: // 8 (Celestino)
 		modHP = 25
@@ -356,6 +363,11 @@ func CalculateStats(classID, raceID, classTier, level uint8) (uint16, uint16) {
 	case protocol.RaceTimeWanderer: // 28 (Errante Temporal)
 		modHP = 20
 		modStamina = 40
+	}
+
+	if d, ok := LookupNewRace(raceID); ok {
+		modHP = d.ModHP
+		modStamina = d.ModStamina
 	}
 
 	// Bônus por nível: +5 HP e +2 Stamina por nível acima do 1
@@ -499,7 +511,6 @@ func (p *Player) RecalculateStats() {
 	p.recalculateStatsLocked()
 }
 
-
 // NewPlayer cria uma nova instância de Player com posição oficial inicial no Centro (0, 1.5, 0).
 // Inicia apenas com a Raça Valeriano como Viajante Sem Classe (ClassID = 0, ClassTier = 0).
 func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player {
@@ -592,7 +603,7 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8) {
 			}
 			p.ClassTier = protocol.TierUnique // Tier 5 Única
 			p.ClassPath = 0
-			p.Level = 1                       // RESET DE NÍVEL
+			p.Level = 1 // RESET DE NÍVEL
 			p.XP = 0
 			p.NextLevelXP = 100
 			p.StatPoints = 0
@@ -863,6 +874,9 @@ func (p *Player) CanPerformAction(actionType uint8) bool {
 	if p.RaceID == protocol.RaceTimeWanderer {
 		cd = time.Duration(float64(cd) * 0.75)
 	}
+	if d, ok := LookupNewRace(p.RaceID); ok && actionType == protocol.ActionRacialSkill {
+		cd = d.RacialCD
+	}
 
 	return time.Since(lastTime) >= cd
 }
@@ -957,7 +971,6 @@ func (p *Player) RestoreStamina(amount float32) {
 	}
 }
 
-
 // RegenerateStamina recupera estamina a 30 Hz.
 func (p *Player) RegenerateStamina(dt float32, isNight bool, moonPhase uint8) {
 	p.Mu.Lock()
@@ -1016,12 +1029,74 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		}
 	}
 
+	// Raças 29–45: resistência/fragilidade racial (Orc, Drago da Terra, Tartaruga, Gigante de Gelo, Fadinha)
+	if d, ok := LookupNewRace(p.RaceID); ok && amount > 0 && d.DamageTaken != 1.0 {
+		amount = uint16(float32(amount) * d.DamageTaken)
+		if amount == 0 {
+			amount = 1
+		}
+	}
+
 	if amount >= p.HP {
+		// Renascer das Cinzas (Pyromante) / Último Fôlego (Drago): fica com 20% de vida, recarga longa
+		if d, ok := LookupNewRace(p.RaceID); ok && d.LastStand && time.Since(p.LastStandAt) >= LastStandCooldown {
+			p.LastStandAt = time.Now()
+			p.HP = p.MaxHP / 5
+			if p.HP == 0 {
+				p.HP = 1
+			}
+			p.IFrameUntil = time.Now().Add(1500 * time.Millisecond)
+			return p.HP, false
+		}
 		p.HP = 0
 		return 0, true
 	}
 	p.HP -= amount
 	return p.HP, false
+}
+
+// SpendHPPercent consome uma porcentagem da vida atual (Combustão, Sangue Tóxico, Manamante); nunca mata.
+func (p *Player) SpendHPPercent(pct float32) uint16 {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	cost := uint16(float32(p.HP) * pct)
+	if cost >= p.HP {
+		cost = p.HP - 1
+	}
+	p.HP -= cost
+	return cost
+}
+
+// HPFraction retorna a vida atual como fração da máxima.
+func (p *Player) HPFraction() float32 {
+	p.Mu.RLock()
+	defer p.Mu.RUnlock()
+	if p.MaxHP == 0 {
+		return 0
+	}
+	return float32(p.HP) / float32(p.MaxHP)
+}
+
+// HealPercent cura uma porcentagem da vida máxima.
+func (p *Player) HealPercent(pct float32) uint16 {
+	p.Mu.RLock()
+	amount := uint16(float32(p.MaxHP) * pct)
+	p.Mu.RUnlock()
+	return p.Heal(amount)
+}
+
+// GrantIFrame concede invulnerabilidade curta (fugas e carapaças).
+func (p *Player) GrantIFrame(d time.Duration) {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	p.IFrameUntil = time.Now().Add(d)
+}
+
+// GrantDamageReduction ativa a redução de dano da Postura (70%) por um tempo (Carapaça da Tartaruga).
+func (p *Player) GrantDamageReduction(d time.Duration) {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	p.ParryUntil = time.Now().Add(d)
 }
 
 // UpdateFromMove atualiza posição, rotação e endereço UDP caso o Seq seja estritamente superior ao LastSeq.
@@ -1323,12 +1398,12 @@ func (p *Player) UnequipItem(slot string) bool {
 	}
 }
 
-// DevSetRaceAndKit define qualquer raça (1 a 28) e equipa um kit de teste com os 12 slots reais.
+// DevSetRaceAndKit define qualquer raça (1 a 45) e equipa um kit de teste com os 12 slots reais.
 func (p *Player) DevSetRaceAndKit(raceID, classID uint8) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
-	if raceID >= 1 && raceID <= 28 {
+	if raceID >= 1 && raceID <= protocol.RaceMaxID {
 		p.RaceID = raceID
 		p.ApplyBaseRaceAttributes(raceID)
 	}
@@ -1741,5 +1816,3 @@ func (p *Player) HasUnlockedRecipe(recipeID uint8) bool {
 	}
 	return p.UnlockedRecipes[recipeID]
 }
-
-
