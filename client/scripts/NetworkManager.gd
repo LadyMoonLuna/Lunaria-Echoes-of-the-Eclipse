@@ -14,6 +14,8 @@ signal player_stats_updated(player_id: int, race_id: int, class_id: int, hp: int
 signal player_stats_full_received(player_id: int, race_id: int, class_id: int, class_tier: int, level: int, hp: int, max_hp: int, stamina: int, max_stamina: int, buff_active: int)
 signal player_attributes_received(player_id: int, xp: int, next_level_xp: int, stat_points: int, str_stat: int, dex_stat: int, con_stat: int, agi_stat: int, int_stat: int, spi_stat: int, mas_stat: int, lck_stat: int)
 signal inventory_updated(equipped_slots_array: Array, items_array: Array)
+signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: float, max_weight: float, speed_mult: float)
+signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
 signal player_respawn_received(player_id: int, respawn_pos: Vector3)
 signal player_respawned(player_id: int, pos_x: float, pos_y: float, pos_z: float)
 signal mob_state_received(mobs_dict: Dictionary)
@@ -189,25 +191,55 @@ func _process_tcp() -> void:
 				player_attributes_received.emit(pid, xp, next_xp, stat_pts, str_stat, dex_stat, con_stat, agi_stat, int_stat, spi_stat, mas_stat, lck_stat)
 				tcp_rx_buffer = tcp_rx_buffer.slice(expected_len)
 
-			elif opcode == 0x38: # INVENTORY_SYNC (Header 14 bytes: opcode + 12 equipped_slots + slot_count, then count * 2)
-				if tcp_rx_buffer.size() < 14:
+			elif opcode == 0x38: # INVENTORY_SYNC: op | 14 slots | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count | count × 2
+				if tcp_rx_buffer.size() < 33:
 					break
-				var equipped_slots: Array = []
-				for i in range(12):
-					equipped_slots.append(tcp_rx_buffer[1 + i])
-				var slot_count: int = tcp_rx_buffer[13]
-				var total_size: int = 14 + slot_count * 2
+				var slot_count: int = tcp_rx_buffer[32]
+				var total_size: int = 33 + slot_count * 2
 				if tcp_rx_buffer.size() < total_size:
 					break
+				var inv_buf := StreamPeerBuffer.new()
+				inv_buf.big_endian = false
+				inv_buf.data_array = tcp_rx_buffer.slice(0, total_size)
+				var equipped_slots: Array = []
+				for i in range(14):
+					equipped_slots.append(tcp_rx_buffer[1 + i])
+				inv_buf.seek(15)
+				var gold: int = inv_buf.get_u32()
+				var eclipse_coins: int = inv_buf.get_u32()
+				var cur_weight: float = inv_buf.get_float()
+				var max_weight: float = inv_buf.get_float()
+				var speed_mult: float = float(tcp_rx_buffer[31]) / 100.0
 				var items_array: Array = []
-				var offset: int = 14
+				var offset: int = 33
 				for i in range(slot_count):
-					var item_id: int = tcp_rx_buffer[offset]
-					var qty: int = tcp_rx_buffer[offset + 1]
-					items_array.append({"id": item_id, "quantity": qty})
+					items_array.append({"id": tcp_rx_buffer[offset], "quantity": tcp_rx_buffer[offset + 1]})
 					offset += 2
 				inventory_updated.emit(equipped_slots, items_array)
+				wallet_weight_updated.emit(gold, eclipse_coins, cur_weight, max_weight, speed_mult)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
+
+			elif opcode == 0x42: # GROUND_ITEMS_SYNC: op | count u16 | count × (dropID u32, item, qtd, X f32, Z f32)
+				if tcp_rx_buffer.size() < 3:
+					break
+				var g_count: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
+				var g_size: int = 3 + g_count * 14
+				if tcp_rx_buffer.size() < g_size:
+					break
+				var g_buf := StreamPeerBuffer.new()
+				g_buf.big_endian = false
+				g_buf.data_array = tcp_rx_buffer.slice(0, g_size)
+				g_buf.seek(3)
+				var ground: Array = []
+				for i in range(g_count):
+					var drop_id: int = g_buf.get_u32()
+					var g_item: int = g_buf.get_u8()
+					var g_qty: int = g_buf.get_u8()
+					var gx: float = g_buf.get_float()
+					var gz: float = g_buf.get_float()
+					ground.append({"drop_id": drop_id, "id": g_item, "quantity": g_qty, "x": gx, "z": gz})
+				ground_items_received.emit(ground)
+				tcp_rx_buffer = tcp_rx_buffer.slice(g_size)
 
 			elif opcode == 0x23: # PORTAL_TRAVEL / ZONE_CHANGE (3 bytes)
 				if tcp_rx_buffer.size() < 3:
@@ -685,30 +717,63 @@ func send_player_action(action_type: int, aim_dir: Vector3) -> void:
 
 	udp.put_packet(buffer.data_array)
 
-# send_allocate_stat envia o pacote TCP 0x37 para alocar 1 ponto no atributo (1..8)
-func send_allocate_stat(stat_id: int) -> void:
+# send_allocate_stat envia o pacote TCP 0x37 para alocar `amount` pontos no atributo (1..8)
+func send_allocate_stat(stat_id: int, amount: int = 1) -> void:
 	if my_player_id == 0:
 		return
 
 	var buffer := StreamPeerBuffer.new()
 	buffer.big_endian = false
-	buffer.put_u8(0x37) # ALLOCATE_STAT (6 bytes)
+	buffer.put_u8(0x37) # ALLOCATE_STAT (8 bytes)
 	buffer.put_u32(my_player_id)
 	buffer.put_u8(stat_id)
+	buffer.put_u16(clampi(amount, 1, 65535))
 
 	tcp.put_data(buffer.data_array)
 
 # send_use_item envia o pacote TCP 0x39 para usar consumível ou equipar armadura/acessório
 func send_use_item(item_id: int) -> void:
+	_send_item_action(item_id, 0, 0)
+
+# send_unequip_slot envia o 0x39 com Action = Desequipar para o slot (0..13)
+func send_unequip_slot(slot_index: int) -> void:
+	_send_item_action(0, 1, slot_index)
+
+func _send_item_action(item_id: int, action: int, slot_index: int) -> void:
 	if my_player_id == 0:
 		return
 
 	var buffer := StreamPeerBuffer.new()
 	buffer.big_endian = false
-	buffer.put_u8(0x39) # USE_OR_EQUIP_ITEM (6 bytes)
+	buffer.put_u8(0x39) # USE_OR_EQUIP_ITEM (8 bytes): item, ação, slot
 	buffer.put_u32(my_player_id)
 	buffer.put_u8(item_id)
+	buffer.put_u8(action)
+	buffer.put_u8(slot_index)
 
+	tcp.put_data(buffer.data_array)
+
+# send_drop_item_ground envia o 0x41: larga `quantity` unidades do item na posição `slot_index` da mochila
+func send_drop_item_ground(slot_index: int, quantity: int) -> void:
+	if my_player_id == 0:
+		return
+	var buffer := StreamPeerBuffer.new()
+	buffer.big_endian = false
+	buffer.put_u8(0x41)
+	buffer.put_u32(my_player_id)
+	buffer.put_u8(slot_index)
+	buffer.put_u8(clampi(quantity, 1, 255))
+	tcp.put_data(buffer.data_array)
+
+# send_pickup_ground_item envia o 0x43 para pegar um item do chão (a até 4m)
+func send_pickup_ground_item(drop_id: int) -> void:
+	if my_player_id == 0:
+		return
+	var buffer := StreamPeerBuffer.new()
+	buffer.big_endian = false
+	buffer.put_u8(0x43)
+	buffer.put_u32(my_player_id)
+	buffer.put_u32(drop_id)
 	tcp.put_data(buffer.data_array)
 
 # send_evolution_choice envia a decisão de evolução (0x40: 4 bytes)

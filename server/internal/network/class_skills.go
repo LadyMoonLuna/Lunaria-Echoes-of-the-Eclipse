@@ -542,6 +542,9 @@ func applyPathDamage(damage uint16, attacker *world.Player) uint16 {
 	if attacker == nil {
 		return damage
 	}
+	if atk, _, _ := attacker.EquipBonuses(); atk > 0 {
+		damage += atk // ATK das armas equipadas
+	}
 	m := attacker.PathDamageMult() * attacker.ConsumeAmbushMult() // Caminho Evolutivo e Emboscada
 	if m != 1.0 {
 		return uint16(float32(damage) * m)

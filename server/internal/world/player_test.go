@@ -543,7 +543,7 @@ func TestNPCFriendshipAndSecretRecipe(t *testing.T) {
 	// Equipar o Malho de Batalha Rúnico
 	strBefore, _, conBefore, _, _, _, _, _ := p.GetAttributes()
 	ok, _ = p.EquipItem(protocol.ItemRunicWarhammer)
-	if !ok || p.EquippedAccessoryID != protocol.ItemRunicWarhammer {
+	if !ok || p.GetEquippedSlots()[protocol.SlotMainHand] != protocol.ItemRunicWarhammer {
 		t.Fatalf("Falha ao equipar Malho Rúnico: ok=%v", ok)
 	}
 	strAfter, _, conAfter, _, _, _, _, _ := p.GetAttributes()
@@ -681,7 +681,7 @@ func Test12EquipmentSlotsAndRingRotation(t *testing.T) {
 		t.Fatalf("Slots fixos não correspondem aos itens equipados: %+v", slots)
 	}
 
-	// Equipa 4 Anéis nos slots [7, 8, 9, 10]
+	// Equipa 4 Anéis nos slots [8, 9, 10, 11]
 	rings := []uint8{
 		protocol.ItemAncestralFangRing,
 		protocol.ItemBloodRubyRing,
@@ -697,12 +697,12 @@ func Test12EquipmentSlotsAndRingRotation(t *testing.T) {
 	}
 
 	slots = p.GetEquippedSlots()
-	if slots[7] != protocol.ItemAncestralFangRing ||
-		slots[8] != protocol.ItemBloodRubyRing ||
-		slots[9] != protocol.ItemObsidianRing ||
-		slots[10] != protocol.ItemStarlightRing {
-		t.Fatalf("Os 4 anéis deveriam ocupar slots [7, 8, 9, 10]. Obteve: %d, %d, %d, %d",
-			slots[7], slots[8], slots[9], slots[10])
+	if slots[8] != protocol.ItemAncestralFangRing ||
+		slots[9] != protocol.ItemBloodRubyRing ||
+		slots[10] != protocol.ItemObsidianRing ||
+		slots[11] != protocol.ItemStarlightRing {
+		t.Fatalf("Os 4 anéis deveriam ocupar slots [8, 9, 10, 11]. Obteve: %d, %d, %d, %d",
+			slots[8], slots[9], slots[10], slots[11])
 	}
 
 	// Equipa 5º anel (outro AncestralFangRing) para testar a rotação FIFO
@@ -714,16 +714,16 @@ func Test12EquipmentSlotsAndRingRotation(t *testing.T) {
 	slots = p.GetEquippedSlots()
 	// Esperado: antigo slot 7 (AncestralFangRing) voltou ao inventário, slots rotacionaram:
 	// novo 7 = BloodRubyRing, novo 8 = ObsidianRing, novo 9 = StarlightRing, novo 10 = AncestralFangRing
-	if slots[7] != protocol.ItemBloodRubyRing ||
-		slots[8] != protocol.ItemObsidianRing ||
-		slots[9] != protocol.ItemStarlightRing ||
-		slots[10] != protocol.ItemAncestralFangRing {
-		t.Fatalf("Rotação de anéis incorreta! Obteve: [7]=%d, [8]=%d, [9]=%d, [10]=%d",
-			slots[7], slots[8], slots[9], slots[10])
+	if slots[8] != protocol.ItemBloodRubyRing ||
+		slots[9] != protocol.ItemObsidianRing ||
+		slots[10] != protocol.ItemStarlightRing ||
+		slots[11] != protocol.ItemAncestralFangRing {
+		t.Fatalf("Rotação de anéis incorreta! Obteve: [8]=%d, [9]=%d, [10]=%d, [11]=%d",
+			slots[8], slots[9], slots[10], slots[11])
 	}
 
 	if p.GetItemCount(protocol.ItemAncestralFangRing) != 1 {
-		t.Fatalf("O anel descartado da posição 7 deveria ter retornado ao inventário!")
+		t.Fatalf("O anel descartado da posição 8 deveria ter retornado ao inventário!")
 	}
 
 	// Testa desequipar por slot index

@@ -62,6 +62,11 @@ const (
 
 	// Evolução e Provação de RPG (Marco 5)
 	PacketTypeEvolutionOffer uint8 = 0x40
+
+	// Itens no chão (0x3A a 0x3C já pertencem a drop rates/autópsia, por isso 0x41 a 0x43)
+	PacketTypeDropItemGround   uint8 = 0x41 // [Client -> Server] Descartar item da mochila no chão (7 bytes)
+	PacketTypeGroundItemsSync  uint8 = 0x42 // [Server -> Client] Lista de itens no chão da zona
+	PacketTypePickupGroundItem uint8 = 0x43 // [Client -> Server] Pegar item do chão (9 bytes)
 )
 
 // Tipos de Projéteis 3D
@@ -182,20 +187,31 @@ const (
 	RaceMaxID uint8 = 47
 )
 
-// Slots de Equipamento (Array fixo de 12 slots)
+// Slots de Equipamento (Array fixo de 14 slots)
 const (
-	SlotHelmet uint8 = 0  // Capacete
-	SlotChest  uint8 = 1  // Peitoral
-	SlotLegs   uint8 = 2  // Calças
-	SlotBoots  uint8 = 3  // Botas
-	SlotGloves uint8 = 4  // Luvas
-	SlotBelt   uint8 = 5  // Cinto
-	SlotAmulet uint8 = 6  // Colar / Relíquia
-	SlotRing1  uint8 = 7  // Anel 1
-	SlotRing2  uint8 = 8  // Anel 2
-	SlotRing3  uint8 = 9  // Anel 3
-	SlotRing4  uint8 = 10 // Anel 4
-	SlotCloak  uint8 = 11 // Capa / Manto
+	SlotHelmet   uint8 = 0  // Elmo / Cabeça
+	SlotChest    uint8 = 1  // Peitoral / Armadura
+	SlotLegs     uint8 = 2  // Calças / Pernas
+	SlotBoots    uint8 = 3  // Botas / Pés
+	SlotGloves   uint8 = 4  // Luvas / Mãos
+	SlotCloak    uint8 = 5  // Capa / Túnica
+	SlotAmulet   uint8 = 6  // Colar / Relíquia
+	SlotEarring  uint8 = 7  // Brinco / Amuleto (cintos também ocupam este acessório)
+	SlotBelt     uint8 = 7  // Alias: cinto ocupa o slot de acessório (Brinco/Amuleto)
+	SlotRing1    uint8 = 8  // Anel 1
+	SlotRing2    uint8 = 9  // Anel 2
+	SlotRing3    uint8 = 10 // Anel 3
+	SlotRing4    uint8 = 11 // Anel 4
+	SlotMainHand uint8 = 12 // Mão Principal / Arma Direita
+	SlotOffHand  uint8 = 13 // Mão Secundária / Esquerda
+
+	EquipSlotCount = 14
+)
+
+// Ações do pacote 0x39 USE_OR_EQUIP_ITEM
+const (
+	ItemActionUse     uint8 = 0 // Usar consumível ou equipar (equipar um item já equipado o desequipa)
+	ItemActionUnequip uint8 = 1 // Desequipar o slot informado em SlotIndex
 )
 
 // Catálogo de Itens Realistas (ItemID uint8)
@@ -274,6 +290,25 @@ const (
 	ItemRoyalVenomGland        uint8 = 56 // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Algoz Vorpal)
 	ItemVesperianPureBlood     uint8 = 57 // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Conde Escarlate)
 	ItemMechaBlueprint         uint8 = 58 // Diagrama do Mecha Gnarlin (Mercado Negro de Varis - requisito do Barão Engrenagem)
+
+	// Armas de Mão Principal (Slot 12) e itens de Mão Secundária (Slot 13)
+	ItemIronLongsword   uint8 = 59 // Espada Longa de Ferro (1 mão)
+	ItemOakStaff        uint8 = 60 // Cajado de Carvalho Arcano
+	ItemRecurveBow      uint8 = 61 // Arco Recurvo de Caça
+	ItemSteelDagger     uint8 = 62 // Adaga de Aço
+	ItemIronKnuckles    uint8 = 63 // Manoplas de Ferro
+	ItemForgeHammer     uint8 = 64 // Martelo de Forja
+	ItemGiantCleaver    uint8 = 65 // Cutelo Gigante
+	ItemBeastWhip       uint8 = 66 // Chicote Bestial
+	ItemSteelNeedles    uint8 = 67 // Agulhas de Aço Rúnicas
+	ItemColossalSword   uint8 = 68 // Espada Colossal (2 mãos)
+	ItemTowerShield     uint8 = 69 // Escudo de Torre (Mão Secundária)
+	ItemOffhandDagger   uint8 = 70 // Adaga Secundária
+	ItemArcaneOrb       uint8 = 71 // Orbe Arcano (Mão Secundária)
+	ItemAlchemyCatalyst uint8 = 72 // Catalisador Alquímico (Mão Secundária)
+	ItemIronWok         uint8 = 73 // Wok de Ferro (Mão Secundária)
+	ItemHuntersQuiver   uint8 = 74 // Aljava de Caçador (Mão Secundária)
+	ItemOffhandKnuckle  uint8 = 75 // Manopla Secundária
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -406,11 +441,15 @@ const (
 	CombatEventPacketSize    = 17 // uint8 (1) + 2x uint32 (8) + uint8 (1) + uint16 (2) + uint8 (1) + 2x uint16 (4) = 17 bytes
 	PlayerStatsPacketSize    = 36 // 32 bytes de status + Mana (uint16) + Mana Máxima (uint16)
 	PlayerRespawnPacketSize  = 17 // uint8 (1) + uint32 (4) + 3x float32 (12) = 17 bytes
-	AllocateStatPacketSize   = 6  // uint8 (1) + uint32 (4) + uint8 (1) = 6 bytes
+	AllocateStatPacketSize   = 8  // uint8 (1) + uint32 (4) + uint8 (1) + uint16 Amount (2) = 8 bytes
 
-	InventorySyncHeaderSize  = 14 // uint8 (1) + 12x uint8 (12) + uint8 (1) = 14 bytes
+	InventorySyncHeaderSize  = 33 // op (1) + 14 slots (14) + Gold u32 (4) + Eclipses u32 (4) + Peso f32 (4) + PesoMáx f32 (4) + Velocidade% u8 (1) + count (1)
 	InventorySlotEntrySize   = 2  // uint8 (1) + uint8 (1) = 2 bytes
-	UseOrEquipItemPacketSize = 6  // uint8 (1) + uint32 (4) + uint8 (1) = 6 bytes
+	UseOrEquipItemPacketSize = 8  // op (1) + playerID u32 (4) + itemID (1) + action (1) + slot (1) = 8 bytes
+
+	DropItemGroundPacketSize   = 7  // op (1) + playerID u32 (4) + slotIndex (1) + quantity (1)
+	PickupGroundItemPacketSize = 9  // op (1) + playerID u32 (4) + dropID u32 (4)
+	GroundItemEntrySize        = 14 // dropID u32 (4) + itemID (1) + qty (1) + X f32 (4) + Z f32 (4)
 
 	MobSnapshotHeaderSize  = 2  // uint8 (1) + uint8 (1) = 2 bytes
 	MobSnapshotEntrySize   = 26 // uint32 (4) + 2x uint8 (2) + 4x float32 (16) + 2x uint16 (4) = 26 bytes
@@ -1144,20 +1183,26 @@ func DeserializePlayerStats(data []byte, out *PlayerStatsPacket) error {
 type AllocateStatPacket struct {
 	PlayerID uint32
 	StatID   uint8
+	Amount   uint16 // Quantidade de pontos (0 = 1)
 }
 
-// SerializeAllocateStat cria o payload de 6 bytes do pacote ALLOCATE_STAT.
-func SerializeAllocateStat(playerID uint32, statID uint8) [AllocateStatPacketSize]byte {
+// SerializeAllocateStat cria o payload de 8 bytes do pacote ALLOCATE_STAT.
+func SerializeAllocateStat(playerID uint32, statID uint8, amount ...uint16) [AllocateStatPacketSize]byte {
 	var b [AllocateStatPacketSize]byte
 	b[0] = PacketTypeAllocateStat
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
 	b[5] = statID
+	amt := uint16(1)
+	if len(amount) > 0 && amount[0] > 0 {
+		amt = amount[0]
+	}
+	binary.LittleEndian.PutUint16(b[6:8], amt)
 	return b
 }
 
-// DeserializeAllocateStat decodifica o pacote ALLOCATE_STAT (6 bytes).
+// DeserializeAllocateStat decodifica o pacote ALLOCATE_STAT (8 bytes; aceita o legado de 6 com Amount = 1).
 func DeserializeAllocateStat(data []byte, out *AllocateStatPacket) error {
-	if len(data) < AllocateStatPacketSize {
+	if len(data) < 6 {
 		return ErrInvalidPacketSize
 	}
 	if data[0] != PacketTypeAllocateStat {
@@ -1165,6 +1210,12 @@ func DeserializeAllocateStat(data []byte, out *AllocateStatPacket) error {
 	}
 	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
 	out.StatID = data[5]
+	out.Amount = 1
+	if len(data) >= AllocateStatPacketSize {
+		if a := binary.LittleEndian.Uint16(data[6:8]); a > 0 {
+			out.Amount = a
+		}
+	}
 	return nil
 }
 
@@ -1383,17 +1434,28 @@ type InventorySlot struct {
 	Quantity uint8
 }
 
-// InventorySyncPacket representa o estado completo da mochila e dos 12 slots de equipamento.
+// InventoryStatus traz dinheiro e peso enviados junto com a mochila.
+type InventoryStatus struct {
+	Gold          uint32
+	EclipseCoins  uint32
+	CurrentWeight float32
+	MaxWeight     float32
+	SpeedPercent  uint8 // Multiplicador de velocidade por peso × 100 (0 = sobrecarregado/imóvel)
+}
+
+// InventorySyncPacket representa o estado completo da mochila, dos 14 slots, do dinheiro e do peso.
 type InventorySyncPacket struct {
-	EquippedSlots       [12]uint8
+	EquippedSlots       [EquipSlotCount]uint8
 	EquippedArmorID     uint8 // Helper alias -> EquippedSlots[SlotChest]
 	EquippedAccessoryID uint8 // Helper alias -> EquippedSlots[SlotRing1]
+	Status              InventoryStatus
 	SlotCount           uint8
 	Slots               []InventorySlot
 }
 
-// SerializeInventorySyncInto empacota os dados de inventário (12 slots) diretamente no buffer fornecido.
-func SerializeInventorySyncInto(buf []byte, equippedSlots [12]uint8, slots []InventorySlot) int {
+// SerializeInventorySyncInto empacota o 0x38 diretamente no buffer fornecido.
+// Layout: op | 14 slots | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 | count | count × (item, qtd)
+func SerializeInventorySyncInto(buf []byte, equippedSlots [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) int {
 	count := len(slots)
 	if count > 255 {
 		count = 255
@@ -1403,10 +1465,15 @@ func SerializeInventorySyncInto(buf []byte, equippedSlots [12]uint8, slots []Inv
 		return 0
 	}
 	buf[0] = PacketTypeInventorySync
-	for i := 0; i < 12; i++ {
+	for i := 0; i < EquipSlotCount; i++ {
 		buf[1+i] = equippedSlots[i]
 	}
-	buf[13] = uint8(count)
+	binary.LittleEndian.PutUint32(buf[15:19], status.Gold)
+	binary.LittleEndian.PutUint32(buf[19:23], status.EclipseCoins)
+	binary.LittleEndian.PutUint32(buf[23:27], math.Float32bits(status.CurrentWeight))
+	binary.LittleEndian.PutUint32(buf[27:31], math.Float32bits(status.MaxWeight))
+	buf[31] = status.SpeedPercent
+	buf[32] = uint8(count)
 
 	offset := InventorySyncHeaderSize
 	for i := 0; i < count; i++ {
@@ -1417,69 +1484,46 @@ func SerializeInventorySyncInto(buf []byte, equippedSlots [12]uint8, slots []Inv
 	return totalSize
 }
 
-// SerializeInventorySync aloca e empacota o pacote 0x38 INVENTORY_SYNC com os 12 slots.
-func SerializeInventorySync(equippedSlots [12]uint8, slots []InventorySlot) []byte {
+// SerializeInventorySync aloca e empacota o pacote 0x38 INVENTORY_SYNC.
+func SerializeInventorySync(equippedSlots [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) []byte {
 	count := len(slots)
 	if count > 255 {
 		count = 255
 	}
-	totalSize := InventorySyncHeaderSize + count*InventorySlotEntrySize
-	buf := make([]byte, totalSize)
-	SerializeInventorySyncInto(buf, equippedSlots, slots)
+	buf := make([]byte, InventorySyncHeaderSize+count*InventorySlotEntrySize)
+	SerializeInventorySyncInto(buf, equippedSlots, status, slots)
 	return buf
 }
 
-// SerializeInventorySyncLegacy serializa no formato legado de 2 slots para testes/compatibilidade.
+// SerializeInventorySyncLegacy serializa com apenas peitoral e anel preenchidos (testes/compatibilidade).
 func SerializeInventorySyncLegacy(equippedArmorID, equippedAccessoryID uint8, slots []InventorySlot) []byte {
-	var slots12 [12]uint8
-	slots12[SlotChest] = equippedArmorID
-	slots12[SlotRing1] = equippedAccessoryID
-	return SerializeInventorySync(slots12, slots)
+	var eq [EquipSlotCount]uint8
+	eq[SlotChest] = equippedArmorID
+	eq[SlotRing1] = equippedAccessoryID
+	return SerializeInventorySync(eq, InventoryStatus{SpeedPercent: 100}, slots)
 }
 
-// DeserializeInventorySync desempacota o pacote 0x38 INVENTORY_SYNC suportando 12 slots (14b) e legado (4b).
+// DeserializeInventorySync desempacota o pacote 0x38 INVENTORY_SYNC.
 func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
-	if len(data) < 4 {
+	if len(data) < InventorySyncHeaderSize {
 		return ErrInvalidPacketSize
 	}
 	if data[0] != PacketTypeInventorySync {
 		return ErrInvalidPacketType
 	}
-	if len(data) >= InventorySyncHeaderSize {
-		for i := 0; i < 12; i++ {
-			out.EquippedSlots[i] = data[1+i]
-		}
-		out.EquippedArmorID = out.EquippedSlots[SlotChest]
-		out.EquippedAccessoryID = out.EquippedSlots[SlotRing1]
-		out.SlotCount = data[13]
-
-		expectedSize := InventorySyncHeaderSize + int(out.SlotCount)*InventorySlotEntrySize
-		if len(data) < expectedSize {
-			return ErrInvalidPacketSize
-		}
-
-		if cap(out.Slots) >= int(out.SlotCount) {
-			out.Slots = out.Slots[:out.SlotCount]
-		} else {
-			out.Slots = make([]InventorySlot, out.SlotCount)
-		}
-
-		offset := InventorySyncHeaderSize
-		for i := 0; i < int(out.SlotCount); i++ {
-			out.Slots[i].ItemID = data[offset]
-			out.Slots[i].Quantity = data[offset+1]
-			offset += InventorySlotEntrySize
-		}
-		return nil
+	for i := 0; i < EquipSlotCount; i++ {
+		out.EquippedSlots[i] = data[1+i]
 	}
+	out.EquippedArmorID = out.EquippedSlots[SlotChest]
+	out.EquippedAccessoryID = out.EquippedSlots[SlotRing1]
+	out.Status.Gold = binary.LittleEndian.Uint32(data[15:19])
+	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[19:23])
+	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[23:27]))
+	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[27:31]))
+	out.Status.SpeedPercent = data[31]
+	out.SlotCount = data[32]
 
-	// Fallback legado de 4 bytes
-	out.EquippedArmorID = data[1]
-	out.EquippedAccessoryID = data[2]
-	out.EquippedSlots[SlotChest] = data[1]
-	out.EquippedSlots[SlotRing1] = data[2]
-	out.SlotCount = data[3]
-	expectedSize := 4 + int(out.SlotCount)*InventorySlotEntrySize
+	expectedSize := InventorySyncHeaderSize + int(out.SlotCount)*InventorySlotEntrySize
 	if len(data) < expectedSize {
 		return ErrInvalidPacketSize
 	}
@@ -1488,7 +1532,7 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 	} else {
 		out.Slots = make([]InventorySlot, out.SlotCount)
 	}
-	offset := 4
+	offset := InventorySyncHeaderSize
 	for i := 0; i < int(out.SlotCount); i++ {
 		out.Slots[i].ItemID = data[offset]
 		out.Slots[i].Quantity = data[offset+1]
@@ -1501,22 +1545,30 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 
 // UseOrEquipItemPacket representa a solicitação do cliente para usar consumível ou equipar armadura/acessório.
 type UseOrEquipItemPacket struct {
-	PlayerID uint32
-	ItemID   uint8
+	PlayerID  uint32
+	ItemID    uint8
+	Action    uint8 // ItemActionUse ou ItemActionUnequip
+	SlotIndex uint8 // Slot (0..13) para ItemActionUnequip
 }
 
-// SerializeUseOrEquipItem cria o payload de 6 bytes do pacote USE_OR_EQUIP_ITEM.
-func SerializeUseOrEquipItem(playerID uint32, itemID uint8) [UseOrEquipItemPacketSize]byte {
+// SerializeUseOrEquipItem cria o payload de 8 bytes do pacote USE_OR_EQUIP_ITEM.
+func SerializeUseOrEquipItem(playerID uint32, itemID uint8, actionAndSlot ...uint8) [UseOrEquipItemPacketSize]byte {
 	var b [UseOrEquipItemPacketSize]byte
 	b[0] = PacketTypeUseOrEquipItem
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
 	b[5] = itemID
+	if len(actionAndSlot) > 0 {
+		b[6] = actionAndSlot[0]
+	}
+	if len(actionAndSlot) > 1 {
+		b[7] = actionAndSlot[1]
+	}
 	return b
 }
 
-// DeserializeUseOrEquipItem decodifica o pacote USE_OR_EQUIP_ITEM (6 bytes).
+// DeserializeUseOrEquipItem decodifica o pacote USE_OR_EQUIP_ITEM (8 bytes; aceita o legado de 6).
 func DeserializeUseOrEquipItem(data []byte, out *UseOrEquipItemPacket) error {
-	if len(data) < UseOrEquipItemPacketSize {
+	if len(data) < 6 {
 		return ErrInvalidPacketSize
 	}
 	if data[0] != PacketTypeUseOrEquipItem {
@@ -1524,7 +1576,125 @@ func DeserializeUseOrEquipItem(data []byte, out *UseOrEquipItemPacket) error {
 	}
 	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
 	out.ItemID = data[5]
+	out.Action, out.SlotIndex = ItemActionUse, 0
+	if len(data) >= UseOrEquipItemPacketSize {
+		out.Action = data[6]
+		out.SlotIndex = data[7]
+	}
 	return nil
+}
+
+// --- 0x41: DROP_ITEM_GROUND / 0x42: GROUND_ITEMS_SYNC / 0x43: PICKUP_GROUND_ITEM ---
+
+// DropItemGroundPacket: o cliente descarta Quantity unidades do item na posição SlotIndex da mochila
+// (a mesma ordem da lista enviada no 0x38).
+type DropItemGroundPacket struct {
+	PlayerID  uint32
+	SlotIndex uint8
+	Quantity  uint8
+}
+
+func SerializeDropItemGround(playerID uint32, slotIndex, quantity uint8) [DropItemGroundPacketSize]byte {
+	var b [DropItemGroundPacketSize]byte
+	b[0] = PacketTypeDropItemGround
+	binary.LittleEndian.PutUint32(b[1:5], playerID)
+	b[5] = slotIndex
+	b[6] = quantity
+	return b
+}
+
+func DeserializeDropItemGround(data []byte, out *DropItemGroundPacket) error {
+	if len(data) < DropItemGroundPacketSize {
+		return ErrInvalidPacketSize
+	}
+	if data[0] != PacketTypeDropItemGround {
+		return ErrInvalidPacketType
+	}
+	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
+	out.SlotIndex = data[5]
+	out.Quantity = data[6]
+	return nil
+}
+
+// PickupGroundItemPacket: o cliente pede para pegar o item DropID do chão.
+type PickupGroundItemPacket struct {
+	PlayerID uint32
+	DropID   uint32
+}
+
+func SerializePickupGroundItem(playerID, dropID uint32) [PickupGroundItemPacketSize]byte {
+	var b [PickupGroundItemPacketSize]byte
+	b[0] = PacketTypePickupGroundItem
+	binary.LittleEndian.PutUint32(b[1:5], playerID)
+	binary.LittleEndian.PutUint32(b[5:9], dropID)
+	return b
+}
+
+func DeserializePickupGroundItem(data []byte, out *PickupGroundItemPacket) error {
+	if len(data) < PickupGroundItemPacketSize {
+		return ErrInvalidPacketSize
+	}
+	if data[0] != PacketTypePickupGroundItem {
+		return ErrInvalidPacketType
+	}
+	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
+	out.DropID = binary.LittleEndian.Uint32(data[5:9])
+	return nil
+}
+
+// GroundItemEntry é um item visível no chão (0x42).
+type GroundItemEntry struct {
+	DropID   uint32
+	ItemID   uint8
+	Quantity uint8
+	X, Z     float32
+}
+
+// SerializeGroundItemsSync: op | count u16 | count × (dropID u32, item, qtd, X f32, Z f32)
+func SerializeGroundItemsSync(items []GroundItemEntry) []byte {
+	count := len(items)
+	if count > 65535 {
+		count = 65535
+	}
+	buf := make([]byte, 3+count*GroundItemEntrySize)
+	buf[0] = PacketTypeGroundItemsSync
+	binary.LittleEndian.PutUint16(buf[1:3], uint16(count))
+	off := 3
+	for i := 0; i < count; i++ {
+		it := items[i]
+		binary.LittleEndian.PutUint32(buf[off:off+4], it.DropID)
+		buf[off+4] = it.ItemID
+		buf[off+5] = it.Quantity
+		binary.LittleEndian.PutUint32(buf[off+6:off+10], math.Float32bits(it.X))
+		binary.LittleEndian.PutUint32(buf[off+10:off+14], math.Float32bits(it.Z))
+		off += GroundItemEntrySize
+	}
+	return buf
+}
+
+// DeserializeGroundItemsSync decodifica o 0x42.
+func DeserializeGroundItemsSync(data []byte) ([]GroundItemEntry, error) {
+	if len(data) < 3 {
+		return nil, ErrInvalidPacketSize
+	}
+	if data[0] != PacketTypeGroundItemsSync {
+		return nil, ErrInvalidPacketType
+	}
+	count := int(binary.LittleEndian.Uint16(data[1:3]))
+	if len(data) < 3+count*GroundItemEntrySize {
+		return nil, ErrInvalidPacketSize
+	}
+	items := make([]GroundItemEntry, count)
+	off := 3
+	for i := range items {
+		items[i].DropID = binary.LittleEndian.Uint32(data[off : off+4])
+		items[i].ItemID = data[off+4]
+		items[i].Quantity = data[off+5]
+		items[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+6 : off+10]))
+		items[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+10 : off+14]))
+		off += GroundItemEntrySize
+	}
+	return items, nil
 }
 
 // --- 0x40: EVOLUTION_OFFER (TCP: Server -> Client / Client -> Server, 4 bytes) ---

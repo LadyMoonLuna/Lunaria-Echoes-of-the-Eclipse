@@ -38,6 +38,7 @@ type Server struct {
 	mobManager    *world.MobManager
 	projManager   *world.ProjectileManager
 	corpseManager *world.CorpseManager
+	groundItems   *world.GroundItemManager
 	nextPlayerID  uint32
 	serverTick    uint32
 
@@ -72,6 +73,7 @@ func NewServer() *Server {
 		dummies:         make(map[uint32]*world.TrainingDummy),
 		mobManager:      world.NewMobManager(),
 		projManager:     world.NewProjectileManager(),
+		groundItems:     world.NewGroundItemManager(),
 		corpseManager:   world.NewCorpseManager(),
 		guardLastAttack: make(map[uint32]time.Time),
 		clock:           clock,
@@ -519,7 +521,7 @@ func (s *Server) sendInventorySync(p *world.Player) {
 	}
 	equipped := p.GetEquippedSlots()
 	slots := p.GetInventorySlots()
-	data := protocol.SerializeInventorySync(equipped, slots)
+	data := protocol.SerializeInventorySync(equipped, p.InventoryStatus(), slots)
 
 	_ = p.TCPConn.SetWriteDeadline(time.Now().Add(100 * time.Millisecond))
 	_, _ = p.TCPConn.Write(data)
@@ -609,6 +611,7 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 
 	// 4. Envia pacote 0x38 (INVENTORY_SYNC) autoritativo na conexão inicial
 	s.sendInventorySync(player)
+	s.sendGroundItems(player)
 
 	// 5. Envia pacote 0x3E (CORPSE_SNAPSHOT) com cadáveres ativos no chão
 	s.sendCorpseSnapshots(player)
@@ -698,8 +701,34 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 					s.handleSelectIdentity(identityPkt)
 				}
 
+			case protocol.PacketTypeDropItemGround:
+				// Pacote 0x41: DROP_ITEM_GROUND (7 bytes total, 6 bytes payload)
+				payload := make([]byte, protocol.DropItemGroundPacketSize-1)
+				if _, err := io.ReadFull(conn, payload); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				full := append([]byte{header[0]}, payload...)
+				var dropPkt protocol.DropItemGroundPacket
+				if err := protocol.DeserializeDropItemGround(full, &dropPkt); err == nil {
+					s.handleDropItemGround(playerID, dropPkt)
+				}
+
+			case protocol.PacketTypePickupGroundItem:
+				// Pacote 0x43: PICKUP_GROUND_ITEM (9 bytes total, 8 bytes payload)
+				payload := make([]byte, protocol.PickupGroundItemPacketSize-1)
+				if _, err := io.ReadFull(conn, payload); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				full := append([]byte{header[0]}, payload...)
+				var pickPkt protocol.PickupGroundItemPacket
+				if err := protocol.DeserializePickupGroundItem(full, &pickPkt); err == nil {
+					s.handlePickupGroundItem(playerID, pickPkt)
+				}
+
 			case protocol.PacketTypeAllocateStat:
-				// Pacote 0x37: ALLOCATE_STAT (6 bytes total, 5 bytes payload)
+				// Pacote 0x37: ALLOCATE_STAT (8 bytes total, 7 bytes payload: playerID, statID, Amount u16)
 				payload := make([]byte, protocol.AllocateStatPacketSize-1)
 				if _, err := io.ReadFull(conn, payload); err != nil {
 					s.removePlayerAndNotify(playerID)
@@ -716,7 +745,7 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				}
 
 			case protocol.PacketTypeUseOrEquipItem:
-				// Pacote 0x39: USE_OR_EQUIP_ITEM (6 bytes total, 5 bytes payload)
+				// Pacote 0x39: USE_OR_EQUIP_ITEM (8 bytes total, 7 bytes payload: playerID, itemID, action, slot)
 				payload := make([]byte, protocol.UseOrEquipItemPacketSize-1)
 				if _, err := io.ReadFull(conn, payload); err != nil {
 					s.removePlayerAndNotify(playerID)
@@ -823,10 +852,11 @@ func (s *Server) handleAllocateStat(pkt protocol.AllocateStatPacket) {
 		return
 	}
 
-	if player.AllocateStat(pkt.StatID) {
-		log.Printf("[ATRIBUTOS] Jogador #%d alocou 1 ponto no atributo ID %d. StatPoints restantes: %d\n",
-			pkt.PlayerID, pkt.StatID, player.StatPoints)
+	if applied := player.AllocateStats(pkt.StatID, pkt.Amount); applied > 0 {
+		log.Printf("[ATRIBUTOS] Jogador #%d alocou %d ponto(s) no atributo ID %d. StatPoints restantes: %d\n",
+			pkt.PlayerID, applied, pkt.StatID, player.StatPoints)
 		s.sendPlayerStats(player)
+		s.sendInventorySync(player) // FOR/CON mudam o peso máximo
 	}
 }
 
@@ -840,7 +870,21 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 		return
 	}
 
+	// Desequipar um slot (0..13): o item volta para a mochila
+	if pkt.Action == protocol.ItemActionUnequip {
+		if player.UnequipSlot(pkt.SlotIndex) {
+			log.Printf("[EQUIPAMENTO] Jogador #%d desequipou o slot %d\n", pkt.PlayerID, pkt.SlotIndex)
+			s.sendInventorySync(player)
+			s.sendPlayerStats(player)
+		}
+		return
+	}
+
 	itemID := pkt.ItemID
+	if world.IsEquippable(itemID) {
+		s.toggleEquip(player, itemID)
+		return
+	}
 	switch itemID {
 	// Consumíveis e Tomos Secretos (2, 3, 4, 16, 17, 18, 26, 28, 29, 30)
 	case protocol.ItemRawWolfMeat, protocol.ItemCookedNobleMeat, protocol.ItemWolfBloodPotion,
@@ -854,37 +898,6 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 			s.BroadcastNPCSay(0, msg)
 		}
 
-	// Equipamentos para os 12 Slots Reais
-	case protocol.ItemAlphaWolfPelt, protocol.ItemHeavySteelPlate, protocol.ItemAncestralFangRing,
-		protocol.ItemLycanAlphaHeart, protocol.ItemRunicWarhammer,
-		protocol.ItemVigilHelmet, protocol.ItemSteelChestplate, protocol.ItemWolfLeatherPants,
-		protocol.ItemMistwalkerBoots, protocol.ItemBlacksmithGauntlets, protocol.ItemAlchemistBelt,
-		protocol.ItemSilverMoonAmulet, protocol.ItemBloodRubyRing, protocol.ItemObsidianRing,
-		protocol.ItemStarlightRing, protocol.ItemAlphaPeltCloak:
-		equipped := player.GetEquippedSlots()
-		unequipped := false
-		for slotIdx, eqID := range equipped {
-			if eqID == itemID {
-				if player.UnequipSlot(uint8(slotIdx)) {
-					s.sendInventorySync(player)
-					s.sendPlayerStats(player)
-					s.BroadcastNPCSay(0, fmt.Sprintf("[Equipamento] Jogador #%d desequipou o item ID %d.", pkt.PlayerID, itemID))
-					unequipped = true
-					break
-				}
-			}
-		}
-		if unequipped {
-			return
-		}
-
-		ok, msg := player.EquipItem(itemID)
-		if ok {
-			log.Printf("[EQUIPAMENTO] Jogador #%d equipou item ID %d: %s\n", pkt.PlayerID, itemID, msg)
-			s.sendInventorySync(player)
-			s.sendPlayerStats(player)
-			s.BroadcastNPCSay(0, fmt.Sprintf("[Equipamento] Jogador #%d equipou o item ID %d.", pkt.PlayerID, itemID))
-		}
 	}
 }
 
@@ -1197,6 +1210,7 @@ func (s *Server) handlePortalTravel(playerID uint32, targetZoneID, portalID uint
 
 	player.SetZone(newZone)
 	player.Respawn(targetX, targetY, targetZ)
+	defer s.sendGroundItems(player) // itens no chão da nova zona
 
 	// Envia pacote 0x36 (PLAYER_RESPAWN) com a nova coordenada segura (5m do portal de retorno)
 	respawnPkt := protocol.SerializePlayerRespawn(player.ID, targetX, targetY, targetZ)
@@ -2930,6 +2944,10 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 	}
 	s.mu.RUnlock()
 
+	if trialKiller != nil {
+		s.grantKillGold(trialKiller, mobType) // Sollares do abate vão para quem deu o golpe final
+	}
+
 	for _, p := range eligible {
 		leveledUp := p.AddXP(xp)
 		s.sendPlayerStats(p)
@@ -4489,6 +4507,7 @@ func (s *Server) runGameLoop() {
 				s.updateNPCRoutines(int(h))
 				s.updateClassMasterRoutines(int(h))
 				s.updatePlaceTrials()
+				s.expireGroundItems()
 				if s.serverTick%(GameTickRate*2) < GameTickRate {
 					s.updateCompanions() // Companheiros atacam sozinhos a cada 2s
 				}

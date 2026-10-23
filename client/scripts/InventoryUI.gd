@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 var is_open: bool = false
-var equipped_slots: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var equipped_slots: Array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var equipped_armor_id: int = 0
 var equipped_acc_id: int = 0
 var inventory_items: Array = [] # Array of {"id": int, "quantity": int}
@@ -11,19 +11,23 @@ var stats_bonus_label: Label = null
 var items_container: VBoxContainer = null
 var empty_label: Label = null
 
+const SLOT_COUNT := 14
+
 const SLOT_NAMES := [
-	"Capacete",
+	"Elmo",
 	"Peitoral",
 	"Calças",
 	"Botas",
 	"Luvas",
-	"Cinto",
+	"Capa / Túnica",
 	"Colar",
-	"Anel 1 (Esq)",
-	"Anel 2 (Esq)",
-	"Anel 3 (Dir)",
-	"Anel 4 (Dir)",
-	"Capa / Manto"
+	"Brinco / Amuleto",
+	"Anel 1",
+	"Anel 2",
+	"Anel 3",
+	"Anel 4",
+	"Mão Principal",
+	"Mão Secundária"
 ]
 
 const SLOT_ICONS := [
@@ -32,13 +36,15 @@ const SLOT_ICONS := [
 	"👖",
 	"👢",
 	"🧤",
-	"🥋",
+	"🧥",
 	"📿",
+	"💎",
 	"💍",
 	"💍",
 	"💍",
 	"💍",
-	"🧣"
+	"⚔️",
+	"🔰"
 ]
 
 const ITEM_CATALOG := {
@@ -411,14 +417,14 @@ func toggle_menu() -> void:
 func _on_inventory_updated(arg1, arg2 = null, arg3 = null) -> void:
 	if arg1 is Array:
 		equipped_slots = arg1.duplicate()
-		while equipped_slots.size() < 12:
+		while equipped_slots.size() < SLOT_COUNT:
 			equipped_slots.append(0)
 		if arg2 is Array:
 			inventory_items = arg2
 	else:
 		equipped_armor_id = int(arg1)
 		equipped_acc_id = int(arg2) if arg2 != null else 0
-		equipped_slots = [0, equipped_armor_id, 0, 0, 0, 0, 0, equipped_acc_id, 0, 0, 0, 0]
+		equipped_slots = [0, equipped_armor_id, 0, 0, 0, 0, 0, 0, equipped_acc_id, 0, 0, 0, 0, 0]
 		if arg3 is Array:
 			inventory_items = arg3
 	_update_display()
@@ -491,7 +497,7 @@ func _build_ui() -> void:
 	root_vbox.add_child(grid)
 
 	slot_nodes.clear()
-	for i in range(12):
+	for i in range(SLOT_COUNT):
 		var slot_card := _create_slot_card(i)
 		grid.add_child(slot_card["panel"])
 		slot_nodes.append(slot_card)
@@ -598,7 +604,7 @@ func _create_slot_card(idx: int) -> Dictionary:
 
 func _update_display() -> void:
 	# 1. Atualiza os 12 slots visuais de equipamentos
-	for i in range(12):
+	for i in range(SLOT_COUNT):
 		if i >= slot_nodes.size():
 			break
 		var node_data: Dictionary = slot_nodes[i]

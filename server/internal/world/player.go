@@ -78,10 +78,12 @@ type Player struct {
 	WolfPotionUntil  time.Time // Poção de Sangue Lupino (+20% velocidade e crítico por 20s)
 
 	// Sistema de Inventário e 12 Slots de Equipamento Real
-	Inventory           map[uint8]uint8 // ItemID -> Quantidade
-	EquippedSlots       [12]uint8       // 12 Slots Reais [0..11]
-	EquippedArmorID     uint8           // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
-	EquippedAccessoryID uint8           // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade
+	Inventory           map[uint8]uint8                // ItemID -> Quantidade
+	EquippedSlots       [protocol.EquipSlotCount]uint8 // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
+	Gold                uint32                         // Sollares de Ouro
+	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
+	EquippedArmorID     uint8                          // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
+	EquippedAccessoryID uint8                          // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade
 
 	// Mini-game de Autópsia e Proteção contra Mobs
 	InAutopsy           bool      // Flag de autópsia ativa
@@ -970,39 +972,13 @@ func (p *Player) recalculateStatsLocked() {
 	var directHPBonus uint16 = 0
 
 	for _, itemID := range p.EquippedSlots {
-		switch itemID {
-		case protocol.ItemVigilHelmet:
-			directHPBonus += 25
-			effCONBonus += 2
-		case protocol.ItemSteelChestplate:
-			directHPBonus += 60
-			effCONBonus += 5
-		case protocol.ItemAlphaWolfPelt:
-			directHPBonus += 35
-		case protocol.ItemHeavySteelPlate:
-			directHPBonus += 50
-			effCONBonus += 4
-		case protocol.ItemWolfLeatherPants:
-			directHPBonus += 30
-			effAGIBonus += 3
-		case protocol.ItemMistwalkerBoots:
-			directHPBonus += 25
-			effAGIBonus += 4
-		case protocol.ItemRunicWarhammer:
-			effCONBonus += 6
-		case protocol.ItemLycanAlphaHeart:
-			effCONBonus += 5
-			effAGIBonus += 5
-		case protocol.ItemAncestralFangRing:
-			effAGIBonus += 3
-		case protocol.ItemBloodRubyRing:
-			effCONBonus += 3
-		case protocol.ItemObsidianRing:
-			effCONBonus += 4
-		case protocol.ItemAlphaPeltCloak:
-			directHPBonus += 35
-			effAGIBonus += 3
+		if itemID == 0 {
+			continue
 		}
+		info := GetItemInfo(itemID)
+		directHPBonus += info.BonusHP
+		effCONBonus += info.BonusCON
+		effAGIBonus += info.BonusAGI
 	}
 
 	hasAnySlots := false
@@ -1076,6 +1052,8 @@ func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player
 		NextLevelXP:     100,
 		StatPoints:      0,
 		Inventory:       make(map[uint8]uint8),
+		Gold:            StartingGold,
+		EclipseCoins:    StartingEclipseCoins,
 		NPCFriendship:   make(map[uint32]int),
 		UnlockedRecipes: make(map[uint8]bool),
 		LastActionTimes: make(map[uint8]time.Time),
@@ -1424,35 +1402,55 @@ func (p *Player) AddXP(amount uint16) bool {
 
 // AllocateStat consome 1 ponto de status para incrementar o atributo especificado (1 a 8).
 func (p *Player) AllocateStat(statID uint8) bool {
+	return p.AllocateStats(statID, 1) > 0
+}
+
+// AllocateStats aplica Amount pontos de uma vez no atributo (limitado aos StatPoints disponíveis).
+// Retorna quantos pontos foram realmente aplicados.
+func (p *Player) AllocateStats(statID uint8, amount uint16) uint16 {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
-	if p.StatPoints == 0 {
-		return false
+	if amount == 0 {
+		amount = 1
+	}
+	if amount > uint16(p.StatPoints) {
+		amount = uint16(p.StatPoints)
+	}
+	if amount == 0 {
+		return 0
 	}
 
+	var target *uint8
 	switch statID {
-	case protocol.StatIDSTR: // 1: Força
-		p.AllocSTR++
+	case protocol.StatIDSTR: // 1: Força (+5 kg de carga)
+		target = &p.AllocSTR
 	case protocol.StatIDDEX: // 2: Destreza
-		p.AllocDEX++
-	case protocol.StatIDCON: // 3: Constituição (+18 MaxHP)
-		p.AllocCON++
+		target = &p.AllocDEX
+	case protocol.StatIDCON: // 3: Constituição (+18 MaxHP, +2.5 kg de carga)
+		target = &p.AllocCON
 	case protocol.StatIDAGI: // 4: Agilidade (+8 MaxStamina)
-		p.AllocAGI++
+		target = &p.AllocAGI
 	case protocol.StatIDINT: // 5: Inteligência
-		p.AllocINT++
+		target = &p.AllocINT
 	case protocol.StatIDSPI: // 6: Espírito
-		p.AllocSPI++
+		target = &p.AllocSPI
 	case protocol.StatIDMAS: // 7: Perícia
-		p.AllocMAS++
+		target = &p.AllocMAS
 	case protocol.StatIDLCK: // 8: Sorte
-		p.AllocLCK++
+		target = &p.AllocLCK
 	default:
-		return false
+		return 0
 	}
+	if room := uint16(255 - *target); amount > room {
+		amount = room // atributos são uint8
+	}
+	if amount == 0 {
+		return 0
+	}
+	*target += uint8(amount)
 
-	p.StatPoints--
+	p.StatPoints -= uint8(amount)
 	oldMaxHP := p.MaxHP
 	oldMaxMana := p.MaxMana
 	p.recalculateStatsLocked()
@@ -1468,7 +1466,7 @@ func (p *Player) AllocateStat(statID uint8) bool {
 	if p.Stamina > float32(p.MaxStamina) {
 		p.Stamina = float32(p.MaxStamina)
 	}
-	return true
+	return amount
 }
 
 func (p *Player) getAttributesLocked() (str, dex, con, agi, intStat, spi, mas, lck uint8) {
@@ -1481,61 +1479,20 @@ func (p *Player) getAttributesLocked() (str, dex, con, agi, intStat, spi, mas, l
 	mas = p.MAS
 	lck = p.LCK
 
-	// Bônus dos 12 Slots de Equipamento
+	// Bônus dos 14 Slots de Equipamento (catálogo de itens)
 	for _, itemID := range p.EquippedSlots {
-		switch itemID {
-		case protocol.ItemVigilHelmet:
-			con += 2
-		case protocol.ItemSteelChestplate:
-			con += 5
-		case protocol.ItemAlphaWolfPelt:
-			str += 3
-		case protocol.ItemHeavySteelPlate:
-			con += 4
-		case protocol.ItemWolfLeatherPants:
-			agi += 3
-		case protocol.ItemMistwalkerBoots:
-			agi += 4
-			dex += 2
-		case protocol.ItemBlacksmithGauntlets:
-			str += 4
-			mas += 3
-		case protocol.ItemRunicWarhammer:
-			str += 8
-			con += 6
-			mas += 4
-		case protocol.ItemAlchemistBelt:
-			intStat += 3
-			spi += 3
-		case protocol.ItemSilverMoonAmulet:
-			intStat += 4
-			spi += 4
-			lck += 3
-		case protocol.ItemLycanAlphaHeart:
-			str += 5
-			dex += 5
-			con += 5
-			agi += 5
-			intStat += 5
-			spi += 5
-			mas += 5
-			lck += 5
-		case protocol.ItemAncestralFangRing:
-			dex += 3
-			agi += 3
-		case protocol.ItemBloodRubyRing:
-			str += 4
-			con += 3
-		case protocol.ItemObsidianRing:
-			con += 4
-			mas += 3
-		case protocol.ItemStarlightRing:
-			intStat += 3
-			lck += 4
-		case protocol.ItemAlphaPeltCloak:
-			str += 3
-			agi += 3
+		if itemID == 0 {
+			continue
 		}
+		info := GetItemInfo(itemID)
+		str += info.BonusSTR
+		dex += info.BonusDEX
+		con += info.BonusCON
+		agi += info.BonusAGI
+		intStat += info.BonusINT
+		spi += info.BonusESP
+		mas += info.BonusMAS
+		lck += info.BonusLCK
 	}
 
 	hasAnySlots := false
@@ -1782,6 +1739,15 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 		return p.HP, false
 	}
 
+	// Defesa dos equipamentos (DEF): reduz o dano de forma fixa, nunca abaixo de 1
+	if def := p.equipDEFLocked(); def > 0 && amount > 0 {
+		if amount > def {
+			amount -= def
+		} else {
+			amount = 1
+		}
+	}
+
 	// Postura de Ferro (Parry do Espadachim): reduz todo dano em 70%
 	if time.Now().Before(p.ParryUntil) && amount > 0 {
 		amount = uint16(float32(amount) * 0.30)
@@ -1924,9 +1890,12 @@ func (p *Player) UpdateFromMove(seq uint32, posX, posY, posZ, rotY float32, addr
 	}
 
 	p.LastSeq = seq
-	p.PosX = posX
+	// Sobrecarregado (130%+ do peso máximo): imóvel no plano até soltar itens no chão
+	if p.weightSpeedLocked() > 0 {
+		p.PosX = posX
+		p.PosZ = posZ
+	}
 	p.PosY = posY
-	p.PosZ = posZ
 	p.RotY = rotY
 	p.UDPAddr = addr
 	now := time.Now()
@@ -2035,6 +2004,10 @@ func (p *Player) AddItem(itemID, qty uint8) {
 	if p.Inventory == nil {
 		p.Inventory = make(map[uint8]uint8)
 	}
+	if int(p.Inventory[itemID])+int(qty) > 255 {
+		p.Inventory[itemID] = 255
+		return
+	}
 	p.Inventory[itemID] += qty
 }
 
@@ -2097,37 +2070,26 @@ func (p *Player) GetEquipment() (armorID, accessoryID uint8) {
 	return p.EquippedSlots[protocol.SlotChest], p.EquippedSlots[protocol.SlotRing1]
 }
 
-// GetEquippedSlots retorna uma cópia dos 12 slots equipados thread-safe.
-func (p *Player) GetEquippedSlots() [12]uint8 {
+// GetEquippedSlots retorna uma cópia dos 14 slots equipados thread-safe.
+func (p *Player) GetEquippedSlots() [protocol.EquipSlotCount]uint8 {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	return p.EquippedSlots
 }
 
-// getSlotForItem retorna o slot padrão (0..11) para o itemID e se ele é equipável.
+// getSlotForItem retorna o slot padrão (0..13) do catálogo e se o item é equipável.
 func getSlotForItem(itemID uint8) (uint8, bool) {
-	switch itemID {
-	case protocol.ItemVigilHelmet:
-		return protocol.SlotHelmet, true // 0: Capacete
-	case protocol.ItemSteelChestplate, protocol.ItemAlphaWolfPelt, protocol.ItemHeavySteelPlate:
-		return protocol.SlotChest, true // 1: Peitoral
-	case protocol.ItemWolfLeatherPants:
-		return protocol.SlotLegs, true // 2: Calças
-	case protocol.ItemMistwalkerBoots:
-		return protocol.SlotBoots, true // 3: Botas
-	case protocol.ItemBlacksmithGauntlets, protocol.ItemRunicWarhammer:
-		return protocol.SlotGloves, true // 4: Luvas / Arma
-	case protocol.ItemAlchemistBelt:
-		return protocol.SlotBelt, true // 5: Cinto
-	case protocol.ItemSilverMoonAmulet, protocol.ItemLycanAlphaHeart:
-		return protocol.SlotAmulet, true // 6: Colar / Relíquia
-	case protocol.ItemAncestralFangRing, protocol.ItemBloodRubyRing, protocol.ItemObsidianRing, protocol.ItemStarlightRing:
-		return protocol.SlotRing1, true // 7: Anel 1 (gerenciado nos slots 7 a 10)
-	case protocol.ItemAlphaPeltCloak:
-		return protocol.SlotCloak, true // 11: Capa / Manto
-	default:
+	info, ok := ItemCatalog[itemID]
+	if !ok || info.Slot == NoSlot {
 		return 255, false
 	}
+	return info.Slot, true
+}
+
+// IsEquippable informa se o item ocupa algum dos 14 slots.
+func IsEquippable(itemID uint8) bool {
+	_, ok := getSlotForItem(itemID)
+	return ok
 }
 
 // EquipItem vincula um item aos 12 slots de equipamento.
@@ -2145,10 +2107,10 @@ func (p *Player) EquipItem(itemID uint8) (bool, string) {
 		return false, "Este item não pode ser equipado."
 	}
 
-	// Caso especial: Anéis ocupam os slots 7, 8, 9 ou 10
+	// Caso especial: Anéis ocupam os slots 8, 9, 10 ou 11
 	if slot == protocol.SlotRing1 {
 		targetSlot := -1
-		for _, s := range []int{7, 8, 9, 10} {
+		for _, s := range []int{8, 9, 10, 11} {
 			if p.EquippedSlots[s] == 0 {
 				targetSlot = s
 				break
@@ -2158,11 +2120,11 @@ func (p *Player) EquipItem(itemID uint8) (bool, string) {
 			p.EquippedSlots[targetSlot] = itemID
 		} else {
 			// Rotação autoritativa: devolve [7] ao inventário e rotaciona os anéis
-			oldRing := p.EquippedSlots[7]
-			p.EquippedSlots[7] = p.EquippedSlots[8]
+			oldRing := p.EquippedSlots[8]
 			p.EquippedSlots[8] = p.EquippedSlots[9]
 			p.EquippedSlots[9] = p.EquippedSlots[10]
-			p.EquippedSlots[10] = itemID
+			p.EquippedSlots[10] = p.EquippedSlots[11]
+			p.EquippedSlots[11] = itemID
 			if p.Inventory == nil {
 				p.Inventory = make(map[uint8]uint8)
 			}
@@ -2190,12 +2152,12 @@ func (p *Player) EquipItem(itemID uint8) (bool, string) {
 	return true, "Equipamento vinculado com sucesso."
 }
 
-// UnequipSlot desequipa o item de um slot específico (0 a 11) e devolve à mochila.
+// UnequipSlot desequipa o item de um slot específico (0 a 13) e devolve à mochila.
 func (p *Player) UnequipSlot(slotIdx uint8) bool {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
-	if slotIdx >= 12 || p.EquippedSlots[slotIdx] == 0 {
+	if int(slotIdx) >= protocol.EquipSlotCount || p.EquippedSlots[slotIdx] == 0 {
 		return false
 	}
 	if p.Inventory == nil {
@@ -2257,6 +2219,8 @@ func (p *Player) DevSetRaceAndKit(raceID, classID uint8) {
 	p.EquippedSlots[protocol.SlotRing3] = protocol.ItemObsidianRing
 	p.EquippedSlots[protocol.SlotRing4] = protocol.ItemStarlightRing
 	p.EquippedSlots[protocol.SlotCloak] = protocol.ItemAlphaPeltCloak
+	p.EquippedSlots[protocol.SlotMainHand] = protocol.ItemIronLongsword
+	p.EquippedSlots[protocol.SlotOffHand] = protocol.ItemTowerShield
 
 	p.EquippedArmorID = protocol.ItemSteelChestplate
 	p.EquippedAccessoryID = protocol.ItemAncestralFangRing

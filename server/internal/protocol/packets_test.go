@@ -541,7 +541,7 @@ func TestProjectileSpawnPacket(t *testing.T) {
 }
 
 func TestInventorySyncPacket(t *testing.T) {
-	var equippedSlots [12]uint8
+	var equippedSlots [EquipSlotCount]uint8
 	equippedSlots[SlotHelmet] = ItemVigilHelmet
 	equippedSlots[SlotChest] = ItemSteelChestplate
 	equippedSlots[SlotLegs] = ItemWolfLeatherPants
@@ -554,6 +554,9 @@ func TestInventorySyncPacket(t *testing.T) {
 	equippedSlots[SlotRing3] = ItemObsidianRing
 	equippedSlots[SlotRing4] = ItemStarlightRing
 	equippedSlots[SlotCloak] = ItemAlphaPeltCloak
+	equippedSlots[SlotMainHand] = ItemIronLongsword
+	equippedSlots[SlotOffHand] = ItemTowerShield
+	status := InventoryStatus{Gold: 250, EclipseCoins: 10, CurrentWeight: 42.5, MaxWeight: 105, SpeedPercent: 100}
 
 	slots := []InventorySlot{
 		{ItemID: ItemEmptyFlask, Quantity: 3},
@@ -561,7 +564,7 @@ func TestInventorySyncPacket(t *testing.T) {
 		{ItemID: ItemFreshWolfBlood, Quantity: 1},
 	}
 
-	data := SerializeInventorySync(equippedSlots, slots)
+	data := SerializeInventorySync(equippedSlots, status, slots)
 	expectedLen := InventorySyncHeaderSize + len(slots)*InventorySlotEntrySize
 	if len(data) != expectedLen {
 		t.Fatalf("esperava tamanho %d, obteve %d", expectedLen, len(data))
@@ -575,7 +578,10 @@ func TestInventorySyncPacket(t *testing.T) {
 		t.Fatalf("erro ao decodificar INVENTORY_SYNC: %v", err)
 	}
 
-	for i := 0; i < 12; i++ {
+	if parsed.Status != status {
+		t.Fatalf("dinheiro/peso divergentes: %+v vs %+v", parsed.Status, status)
+	}
+	for i := 0; i < EquipSlotCount; i++ {
 		if parsed.EquippedSlots[i] != equippedSlots[i] {
 			t.Fatalf("slot de equipamento %d divergente: %d vs %d", i, parsed.EquippedSlots[i], equippedSlots[i])
 		}
@@ -834,5 +840,26 @@ func TestFriendshipSyncPacket(t *testing.T) {
 	}
 	if pkt.NPCID != npcID || pkt.Points != points || pkt.Level != level {
 		t.Fatalf("dados divergentes: %+v vs esperado (ID: %d, Pts: %d, Lvl: %d)", pkt, npcID, points, level)
+	}
+}
+
+func TestNewInventoryPackets(t *testing.T) {
+	a := SerializeAllocateStat(7, StatIDCON, 12)
+	var ap AllocateStatPacket
+	if err := DeserializeAllocateStat(a[:], &ap); err != nil || ap.Amount != 12 || ap.StatID != StatIDCON {
+		t.Fatalf("0x37 com Amount: %+v %v", ap, err)
+	}
+	if err := DeserializeAllocateStat(a[:6], &ap); err != nil || ap.Amount != 1 {
+		t.Fatal("0x37 legado deveria assumir Amount = 1")
+	}
+	u := SerializeUseOrEquipItem(7, 0, ItemActionUnequip, SlotOffHand)
+	var up UseOrEquipItemPacket
+	if err := DeserializeUseOrEquipItem(u[:], &up); err != nil || up.Action != ItemActionUnequip || up.SlotIndex != SlotOffHand {
+		t.Fatalf("0x39 desequipar: %+v", up)
+	}
+	items := []GroundItemEntry{{DropID: 9, ItemID: ItemIronOre, Quantity: 2, X: 1.5, Z: -3}}
+	got, err := DeserializeGroundItemsSync(SerializeGroundItemsSync(items))
+	if err != nil || len(got) != 1 || got[0] != items[0] {
+		t.Fatalf("0x42: %+v %v", got, err)
 	}
 }
