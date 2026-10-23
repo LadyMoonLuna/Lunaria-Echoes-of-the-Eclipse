@@ -1,5 +1,24 @@
 extends CanvasLayer
 
+const ItemData = preload("res://scripts/ItemData.gd")
+
+# Menu Seletor de Anatomia Visceral (+18): o jogador escolhe o que extrair; nada é automático.
+# Drenar sangue é opcional (precisa ligar o seletor e ter um Frasco Vazio).
+var drain_blood_enabled: bool = false
+
+# Ordem e rótulos das ações do seletor: [tipos de órgão, rótulo]
+const ANATOMY_ACTIONS := [
+	[[4], "🩸 Drenar Sangue (Opcional)"],
+	[[1], "🧥 Esfolar Pele / Pelos / Teias / Seda"],
+	[[6], "❤️ Extrair Coração"],
+	[[7], "🥩 Extrair Fígado"],
+	[[8], "🪱 Extrair Intestinos & Tendões"],
+	[[9], "🫁 Extrair Pulmões"],
+	[[10], "👁️ Extrair Olhos"],
+	[[2], "🦷 Arrancar Presas / Garras"],
+	[[3, 11], "🧪 Extrair Bolsa de Veneno (Cuidado: Alto Risco!)"],
+]
+
 signal autopsy_completed(corpse_id: int)
 
 var is_open: bool = false
@@ -122,6 +141,8 @@ func open_autopsy(p_corpse_id: int, p_mob_type: int, p_seed: int, p_organs: Arra
 	current_mob_type = p_mob_type
 	difficulty_seed = p_seed
 	organs_data = p_organs
+	if p_corpse_id != current_corpse_id:
+		drain_blood_enabled = false
 
 	is_open = true
 	visible = true
@@ -135,7 +156,7 @@ func open_autopsy(p_corpse_id: int, p_mob_type: int, p_seed: int, p_organs: Arra
 	# Se nenhum órgão estava selecionado, seleciona o primeiro disponível
 	if selected_organ_index < 0:
 		for o in organs_data:
-			if o.get("quality_tier", 0) == 0 and o.get("type", 1) != 5:
+			if o.get("quality_tier", 0) == 0 and o.get("type", 1) != 5 and not _is_fluid(o.get("type", 1)):
 				_select_organ(o.get("index", 0))
 				break
 
@@ -208,10 +229,10 @@ func _execute_cut() -> void:
 	var otype: int = organ.get("type", 1)
 	var base_green := 0.85
 	var base_yellow := 0.50
-	if otype == 3: # Glândula
-		base_green = 0.88
-		base_yellow = 0.55
-	elif otype == 5: # Coração / Relíquia
+	if otype == 3 or otype == 11: # Glândula / Bolsa de Veneno (alto risco)
+		base_green = 0.90
+		base_yellow = 0.62
+	elif otype == 5 or otype == 6 or otype == 10: # Coração / Relíquia / Olhos (cirúrgico)
 		base_green = 0.90
 		base_yellow = 0.60
 
@@ -242,13 +263,13 @@ func _execute_cut() -> void:
 		tier = 3 # Destruído / Zona Vermelha
 
 	# Feedback visual imediato
-	var item_name: String = ITEM_NAMES.get(organ.get("item_reward", 0), "Material Anatômico")
+	var item_name: String = _item_name(organ.get("item_reward", 0))
 	match tier:
 		1:
-			feedback_text = "★ [PERFEITO] Corte Impecável na Zona Verde!\nVocê obteve: %s (Qualidade Máxima)!" % item_name
+			feedback_text = "★ [PERFEITO] Corte Impecável na Zona Verde!\nVocê obteve: %s (Qualidade Máxima)!%s" % [item_name, _forge_props(organ.get("item_reward", 0))]
 			feedback_color = Color("#00e676")
 		2:
-			feedback_text = "[COMUM] Corte Aceitável na Zona Amarela.\nMaterial com leves rasgos: %s" % item_name
+			feedback_text = "[COMUM] Corte Aceitável na Zona Amarela.\nMaterial com leves rasgos: %s%s" % [item_name, _forge_props(organ.get("item_reward", 0))]
 			feedback_color = Color("#ffb300")
 		3:
 			feedback_text = "✗ [DESTRUÍDO] O bisturi errou na Zona Vermelha!\nO tecido foi dilacerado e virou Lixo Orgânico!"
@@ -276,7 +297,7 @@ func _claim_legendary_direct(organ_index: int) -> void:
 	if organ.is_empty():
 		return
 
-	var item_name: String = ITEM_NAMES.get(organ.get("item_reward", 0), "Relíquia Lendária")
+	var item_name: String = _item_name(organ.get("item_reward", 0))
 	feedback_text = "★ [RELÍQUIA COLETADA] Você recolheu a relíquia sagrada:\n%s (Qualidade Perfeita Garantida)!" % item_name
 	feedback_color = Color("#ffd700")
 	feedback_timer = 4.0
@@ -577,7 +598,7 @@ func _update_minigame_panel() -> void:
 		return
 
 	var organ := _get_organ_by_index(selected_organ_index)
-	var item_name: String = ITEM_NAMES.get(organ.get("item_reward", 0), "Item")
+	var item_name: String = _item_name(organ.get("item_reward", 0))
 	var diff: int = organ.get("difficulty", 3)
 	organ_selected_label.text = "Extraindo: %s (Recompensa: %s | Dificuldade: %d/10)" % [organ.get("name", "Órgão"), item_name, diff]
 	cut_action_btn.disabled = false
@@ -599,78 +620,135 @@ func _refresh_display() -> void:
 			child.queue_free()
 
 		var has_legendary := false
+		var header := Label.new()
+		header.text = "🔞 Seletor de Anatomia Visceral — escolha o que extrair"
+		header.add_theme_font_size_override("font_size", 13)
+		header.add_theme_color_override("font_color", Color("#ff8a80"))
+		organs_vbox.add_child(header)
 
+		# Relíquias continuam na caixa de destaque
 		for o in organs_data:
-			var idx: int = o.get("index", 0)
-			var otype: int = o.get("type", 1)
-			var item_id: int = o.get("item_reward", 0)
-			var item_name: String = ITEM_NAMES.get(item_id, "Material")
-			var qtier: int = o.get("quality_tier", 0)
-
-			# Se for item lendário/relíquia (tipo 5), posiciona na caixa de destaque
-			if otype == 5:
-				has_legendary = true
-				if legendary_box:
-					legendary_box.visible = true
-					if qtier > 0:
-						legendary_btn.text = "✓ %s [JÁ COLETADO]" % item_name
-						legendary_btn.disabled = true
-					else:
-						legendary_btn.text = "★ Coletar Diretamente: %s ★" % item_name
-						legendary_btn.disabled = false
-						legendary_btn.pressed.disconnect(_claim_legendary_direct) if legendary_btn.pressed.is_connected(_claim_legendary_direct) else null
-						legendary_btn.pressed.connect(func(): _claim_legendary_direct(idx))
+			if int(o.get("type", 1)) != 5:
 				continue
-
-			# Card interativo de Ponto Vital
-			var organ_btn := Button.new()
-			organ_btn.custom_minimum_size = Vector2(0, 52)
-
-			var o_style := StyleBoxFlat.new()
-			o_style.set_corner_radius_all(8)
-			o_style.set_border_width_all(1)
-
-			var status_str := ""
-			if qtier == 1:
-				status_str = " [✓ PERFEITO]"
-				o_style.bg_color = Color(0.04, 0.16, 0.08, 0.9)
-				o_style.border_color = Color("#00e676")
-				organ_btn.disabled = true
-			elif qtier == 2:
-				status_str = " [✓ COMUM]"
-				o_style.bg_color = Color(0.18, 0.14, 0.04, 0.9)
-				o_style.border_color = Color("#ffb300")
-				organ_btn.disabled = true
-			elif qtier == 3:
-				status_str = " [✗ DESTRUÍDO]"
-				o_style.bg_color = Color(0.18, 0.06, 0.06, 0.9)
-				o_style.border_color = Color("#ef5350")
-				organ_btn.disabled = true
-			else:
-				if idx == selected_organ_index:
-					status_str = " ➔ [SELECIONADO]"
-					o_style.bg_color = Color(0.08, 0.25, 0.40, 0.95)
-					o_style.border_color = Color("#00e5ff")
+			has_legendary = true
+			var r_idx: int = o.get("index", 0)
+			var r_name: String = _item_name(o.get("item_reward", 0))
+			if legendary_box:
+				legendary_box.visible = true
+				if o.get("quality_tier", 0) > 0:
+					legendary_btn.text = "✓ %s [JÁ COLETADO]" % r_name
+					legendary_btn.disabled = true
 				else:
-					status_str = " [DISPONÍVEL]"
-					o_style.bg_color = Color(0.06, 0.09, 0.14, 0.9)
-					o_style.border_color = Color(0.2, 0.35, 0.5, 0.8)
+					legendary_btn.text = "★ Coletar Diretamente: %s ★" % r_name
+					legendary_btn.disabled = false
+					for conn in legendary_btn.pressed.get_connections():
+						legendary_btn.pressed.disconnect(conn["callable"])
+					legendary_btn.pressed.connect(func(): _claim_legendary_direct(r_idx))
 
-			organ_btn.add_theme_stylebox_override("normal", o_style)
-			organ_btn.add_theme_stylebox_override("hover", o_style)
-			organ_btn.add_theme_stylebox_override("disabled", o_style)
-
-			var organ_type_name := _get_organ_type_name(otype)
-			organ_btn.text = "%s: %s%s" % [organ_type_name, item_name, status_str]
-			organ_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-
-			if qtier == 0:
-				organ_btn.pressed.connect(func(): _select_organ(idx))
-
-			organs_vbox.add_child(organ_btn)
+		for action in ANATOMY_ACTIONS:
+			var types: Array = action[0]
+			var entries: Array = []
+			for o in organs_data:
+				if types.has(int(o.get("type", 1))):
+					entries.append(o)
+			if entries.is_empty():
+				continue
+			var is_blood: bool = types.has(4)
+			var sec := Button.new()
+			sec.custom_minimum_size = Vector2(0, 30)
+			sec.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			sec.add_theme_font_size_override("font_size", 13)
+			if is_blood:
+				sec.text = "%s  [%s]" % [action[1], "LIGADO — clique para desligar" if drain_blood_enabled else "desligado — clique para drenar"]
+				sec.pressed.connect(_toggle_drain_blood)
+			else:
+				sec.text = action[1]
+				sec.disabled = true
+			var sec_style := StyleBoxFlat.new()
+			sec_style.bg_color = Color(0.25, 0.05, 0.06, 0.95) if is_blood else Color(0.12, 0.08, 0.08, 0.9)
+			sec_style.set_corner_radius_all(6)
+			sec.add_theme_stylebox_override("normal", sec_style)
+			sec.add_theme_stylebox_override("disabled", sec_style)
+			sec.add_theme_stylebox_override("hover", sec_style)
+			organs_vbox.add_child(sec)
+			if is_blood and not drain_blood_enabled:
+				continue
+			for o in entries:
+				organs_vbox.add_child(_create_organ_button(o))
 
 		if not has_legendary and legendary_box:
 			legendary_box.visible = false
+
+func _create_organ_button(o: Dictionary) -> Button:
+	var idx: int = o.get("index", 0)
+	var item_id: int = o.get("item_reward", 0)
+	var qtier: int = o.get("quality_tier", 0)
+	var organ_btn := Button.new()
+	organ_btn.custom_minimum_size = Vector2(0, 44)
+	var o_style := StyleBoxFlat.new()
+	o_style.set_corner_radius_all(8)
+	o_style.set_border_width_all(1)
+	var status_str := ""
+	if qtier == 1:
+		status_str = " [✓ PERFEITO]"
+		o_style.bg_color = Color(0.04, 0.16, 0.08, 0.9)
+		o_style.border_color = Color("#00e676")
+		organ_btn.disabled = true
+	elif qtier == 2:
+		status_str = " [✓ COMUM]"
+		o_style.bg_color = Color(0.18, 0.14, 0.04, 0.9)
+		o_style.border_color = Color("#ffb300")
+		organ_btn.disabled = true
+	elif qtier == 3:
+		status_str = " [✗ DESTRUÍDO]"
+		o_style.bg_color = Color(0.18, 0.06, 0.06, 0.9)
+		o_style.border_color = Color("#ef5350")
+		organ_btn.disabled = true
+	elif idx == selected_organ_index:
+		status_str = " ➔ [SELECIONADO]"
+		o_style.bg_color = Color(0.08, 0.25, 0.40, 0.95)
+		o_style.border_color = Color("#00e5ff")
+	else:
+		o_style.bg_color = Color(0.06, 0.09, 0.14, 0.9)
+		o_style.border_color = Color(0.2, 0.35, 0.5, 0.8)
+	organ_btn.add_theme_stylebox_override("normal", o_style)
+	organ_btn.add_theme_stylebox_override("hover", o_style)
+	organ_btn.add_theme_stylebox_override("disabled", o_style)
+	var rarity_txt := ""
+	if ItemData.is_material(item_id):
+		rarity_txt = " [%s]" % ItemData.rarity_name(int(ItemData.material(item_id).get("rarity", 1)))
+	var flask_txt := " 🧪 precisa de Frasco" if _is_fluid(int(o.get("type", 1))) else ""
+	organ_btn.text = "    %s%s — Dif. %d/10%s%s" % [_item_name(item_id), rarity_txt, int(o.get("difficulty", 3)), flask_txt, status_str]
+	organ_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if qtier == 0:
+		organ_btn.pressed.connect(func(): _select_organ(idx))
+	return organ_btn
+
+func _toggle_drain_blood() -> void:
+	drain_blood_enabled = not drain_blood_enabled
+	if not drain_blood_enabled and selected_organ_index >= 0:
+		var sel := _get_organ_by_index(selected_organ_index)
+		if int(sel.get("type", 0)) == 4:
+			selected_organ_index = -1
+			is_minigame_active = false
+	_refresh_display()
+
+func _is_fluid(otype: int) -> bool:
+	return otype == 4 or otype == 3 or otype == 11
+
+func _item_name(item_id: int) -> String:
+	if ITEM_NAMES.has(item_id):
+		return ITEM_NAMES[item_id]
+	return ItemData.info(item_id)["name"]
+
+# Propriedades de Forja/Ligas do material extraído
+func _forge_props(item_id: int) -> String:
+	if not ItemData.is_material(item_id):
+		return ""
+	var m: Dictionary = ItemData.material(item_id)
+	return "\n⚒ %s • %s | Durab. %d | %s | Térm. %d%% Elét. %d%% Mág. %d%%\n%s" % [
+		ItemData.CATEGORY_NAMES.get(m["category"], m["category"]), ItemData.rarity_name(int(m["rarity"])),
+		int(m["durability"]), m["resist"], int(m["thermal"]), int(m["electric"]), int(m["magic"]), m["trait"]]
 
 func _get_organ_type_name(otype: int) -> String:
 	match otype:
@@ -679,6 +757,12 @@ func _get_organ_type_name(otype: int) -> String:
 		3: return "Glândula de Veneno"
 		4: return "Sangue / Fluidos"
 		5: return "Coração / Relíquia"
+		6: return "Coração"
+		7: return "Fígado"
+		8: return "Intestinos & Tendões"
+		9: return "Pulmões"
+		10: return "Olhos"
+		11: return "Bolsa de Veneno"
 		_: return "Ponto Vital"
 
 # Desenho visual em tempo real da Barra Colorida e do Pêndulo

@@ -989,7 +989,12 @@ func _update_inspector() -> void:
 	var rar: Array = ItemData.rarity(item_id)
 	inspector_name.text = _item_name(item_id)
 	inspector_name.add_theme_color_override("font_color", data.get("color", Color(1, 1, 1)))
-	inspector_rarity.text = "%s  •  %s" % [rar[0], data.get("category", "Item")]
+	var cat_text: String = data.get("category", "Item")
+	if ItemData.is_material(item_id):
+		cat_text = "Material de Forja — %s" % ItemData.CATEGORY_NAMES.get(ItemData.material(item_id)["category"], "")
+	elif ItemData.info(item_id).has("tool"):
+		cat_text = "Ferramenta de Coleta — Tier %d" % int(ItemData.info(item_id)["tool_tier"])
+	inspector_rarity.text = "%s  •  %s" % [rar[0], cat_text]
 	inspector_rarity.add_theme_color_override("font_color", rar[1])
 
 	var lines: Array = []
@@ -999,6 +1004,13 @@ func _update_inspector() -> void:
 			lines.append("[color=#73e673]+%d %s[/color]" % [int(b[key]), BONUS_LABELS[key]])
 	if item_id == 15:
 		lines.append("[color=#73e673]+15% Roubo de Vida[/color]")
+	if ItemData.is_material(item_id):
+		var m: Dictionary = ItemData.material(item_id)
+		lines.append("[color=#ffd54f]⚒ Propriedades de Forja / Ligas[/color]")
+		lines.append("Durabilidade: %d" % int(m["durability"]))
+		lines.append("Resistências: [color=#73e673]%s[/color]" % m["resist"])
+		lines.append("Condutividade — Térmica %d%% • Elétrica %d%% • Mágica %d%%" % [int(m["thermal"]), int(m["electric"]), int(m["magic"])])
+		lines.append("[i]%s[/i]" % m["trait"])
 	if not lines.is_empty():
 		lines.append("")
 	var desc: String = data.get("desc", "")

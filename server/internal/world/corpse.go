@@ -19,7 +19,135 @@ const (
 	OrganGland      uint8 = 3 // Glândula de Veneno (Delicado)
 	OrganBlood      uint8 = 4 // Sangue / Fluidos Vitais
 	OrganHeartRelic uint8 = 5 // Coração / Relíquia Arcana (Cirúrgico)
+
+	// Anatomia Visceral (+18): extração manual e opcional
+	OrganHeart    uint8 = 6  // Coração
+	OrganLiver    uint8 = 7  // Fígado
+	OrganGuts     uint8 = 8  // Intestinos & Tendões
+	OrganLungs    uint8 = 9  // Pulmões
+	OrganEyes     uint8 = 10 // Olhos
+	OrganVenomSac uint8 = 11 // Bolsa de Veneno (alto risco)
 )
+
+// visceralOrgan descreve um órgão da anatomia de uma criatura.
+type visceralOrgan struct {
+	organType  uint8
+	material   uint16
+	name       string
+	difficulty uint8
+}
+
+// mobAnatomy: órgãos viscerais de cada criatura (somados ao saque tradicional do cadáver).
+var mobAnatomy = map[uint8][]visceralOrgan{
+	protocol.MobTypeMistWolf: {
+		{OrganBlood, MatWolfBlood, "Sangue de Lobo", 4}, {OrganPelt, MatWolfLeather, "Couro de Lobo", 3},
+		{OrganHeart, MatPulsingHeart, "Coração do Lobo", 7}, {OrganLiver, MatFilterLiver, "Fígado do Lobo", 5},
+		{OrganGuts, MatElasticGuts, "Intestinos e Tendões", 5}, {OrganLungs, MatLungs, "Pulmões do Lobo", 6},
+		{OrganFangOrClaw, MatSharpFangs, "Presas Afiadas", 4},
+	},
+	protocol.MobTypeOutcastRaider: {
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganPelt, MatBoarLeather, "Couro de Javali (armadura)", 3},
+		{OrganHeart, MatPulsingHeart, "Coração Humano", 7}, {OrganLiver, MatFilterLiver, "Fígado", 5},
+		{OrganGuts, MatElasticGuts, "Tendões", 5}, {OrganLungs, MatLungs, "Pulmões", 6},
+	},
+	protocol.MobTypeVigilCrossbowman: {
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganPelt, MatRoughThread, "Linhas da Besta", 3},
+		{OrganHeart, MatPulsingHeart, "Coração Humano", 7}, {OrganEyes, MatFacetedEyes, "Olhos de Atirador", 8},
+		{OrganGuts, MatElasticGuts, "Tendões", 5},
+	},
+	protocol.MobTypeEclipseAcolyte: {
+		{OrganBlood, MatFreshBlood, "Sangue Profano", 4}, {OrganHeart, MatPulsingHeart, "Coração Corrompido", 7},
+		{OrganEyes, MatFacetedEyes, "Olhos do Eclipse", 8},
+	},
+	protocol.MobTypeIronEnforcer: {
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganHeart, MatPulsingHeart, "Coração de Ferro", 7},
+		{OrganGuts, MatElasticGuts, "Tendões Reforçados", 5},
+	},
+	protocol.MobTypeAlphaWolf: {
+		{OrganBlood, MatWolfBlood, "Sangue do Alfa", 4}, {OrganPelt, MatThickFur, "Pelos Espessos do Alfa", 3},
+		{OrganHeart, MatPulsingHeart, "Coração do Alfa", 7}, {OrganLiver, MatFilterLiver, "Fígado do Alfa", 5},
+		{OrganGuts, MatElasticGuts, "Intestinos e Tendões", 5}, {OrganLungs, MatLungs, "Pulmões do Alfa", 6},
+		{OrganEyes, MatFacetedEyes, "Olhos do Alfa", 8}, {OrganFangOrClaw, MatSharpFangs, "Presas do Alfa", 4},
+	},
+	protocol.MobTypeLycanthropeAlpha: {
+		{OrganBlood, MatWolfBlood, "Sangue Licantropo", 5}, {OrganPelt, MatThickFur, "Pelos Licantropos", 4},
+		{OrganHeart, MatPulsingHeart, "Coração Licantropo", 8}, {OrganLiver, MatFilterLiver, "Fígado Licantropo", 6},
+		{OrganGuts, MatElasticGuts, "Tendões Licantropos", 6}, {OrganLungs, MatLungs, "Pulmões Licantropos", 7},
+		{OrganEyes, MatFacetedEyes, "Olhos Licantropos", 8}, {OrganFangOrClaw, MatSharpFangs, "Presas Licantropas", 5},
+	},
+	protocol.MobTypeDarkCultist: {
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganHeart, MatPulsingHeart, "Coração do Cultista", 7},
+		{OrganLiver, MatFilterLiver, "Fígado", 5},
+	},
+	protocol.MobTypeInquisitorVex: {
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganHeart, MatPulsingHeart, "Coração do Inquisidor", 7},
+		{OrganLungs, MatLungs, "Pulmões", 6},
+	},
+	protocol.MobTypeCommanderVaelen: {
+		{OrganBlood, MatFreshBlood, "Sangue Fresco", 4}, {OrganHeart, MatPulsingHeart, "Coração do Traidor", 7},
+		{OrganLungs, MatLungs, "Pulmões", 6},
+	},
+	protocol.MobTypeMalakorHeraldEclipse: {
+		{OrganBlood, MatFreshBlood, "Sangue do Arauto", 5}, {OrganHeart, MatPulsingHeart, "Coração do Arauto", 8},
+		{OrganEyes, MatFacetedEyes, "Olhos do Arauto", 9},
+	},
+	protocol.MobTypeMistWeaverSpider: {
+		{OrganPelt, MatSpiderWeb, "Teias de Aranha", 3}, {OrganEyes, MatFacetedEyes, "Olhos Multifacetados", 8},
+		{OrganGuts, MatElasticGuts, "Fiandeiras e Tendões", 5},
+	},
+	protocol.MobTypeArachnaQueen: {
+		{OrganPelt, MatArachnaSilk, "Seda de Arachna", 6}, {OrganEyes, MatFacetedEyes, "Olhos da Rainha", 9},
+		{OrganHeart, MatPulsingHeart, "Coração da Rainha", 8},
+	},
+	protocol.MobTypeAbyssalScorpion: {
+		{OrganPelt, MatScorpionChitin, "Quitina de Escorpião", 6}, {OrganVenomSac, MatVorpalSac, "Bolsa de Veneno Vorpal", 9},
+		{OrganGuts, MatElasticGuts, "Tendões do Ferrão", 5},
+	},
+	protocol.MobTypeStitchedChimeraZero: {
+		{OrganBlood, MatFreshBlood, "Sangue Mutante", 4}, {OrganHeart, MatPulsingHeart, "Coração Costurado", 8},
+		{OrganLungs, MatLungs, "Pulmões Costurados", 6}, {OrganEyes, MatFacetedEyes, "Olhos Enxertados", 8},
+		{OrganGuts, MatElasticGuts, "Tendões Elásticos", 5},
+	},
+	protocol.MobTypeWildFrostDrake: {
+		{OrganBlood, MatFreshBlood, "Sangue Dracônico", 5}, {OrganHeart, MatPulsingHeart, "Coração do Draco", 8},
+		{OrganLungs, MatLungs, "Pulmões Gélidos", 7}, {OrganFangOrClaw, MatSharpFangs, "Presas do Draco", 5},
+		{OrganEyes, MatFacetedEyes, "Olhos do Draco", 8},
+	},
+	protocol.MobTypeYmirFrostPatriarch: {
+		{OrganBlood, MatFreshBlood, "Sangue de Gigante", 5}, {OrganHeart, MatPulsingHeart, "Coração de Ymir", 9},
+		{OrganLungs, MatLungs, "Pulmões de Ymir", 7},
+	},
+	protocol.MobTypeVesperianBloodGuard: {
+		{OrganBlood, MatVampireBlood, "Sangue de Vampiro", 6}, {OrganHeart, MatPulsingHeart, "Coração Morto-Vivo", 8},
+	},
+	protocol.MobTypeLordVesperianVampire: {
+		{OrganBlood, MatVampireBlood, "Sangue do Progenitor Vampiro", 7}, {OrganHeart, MatPulsingHeart, "Coração de Vesperian", 9},
+		{OrganEyes, MatFacetedEyes, "Olhos Rubros", 9}, {OrganFangOrClaw, MatSharpFangs, "Presas Vampíricas", 6},
+	},
+}
+
+// IsBloodOrgan: extrações de fluido que exigem um Frasco Vazio.
+func IsBloodOrgan(organType uint8) bool {
+	return organType == OrganBlood || organType == OrganGland || organType == OrganVenomSac
+}
+
+// appendAnatomy soma os órgãos viscerais da criatura à lista de pontos vitais.
+func appendAnatomy(organs []CorpseOrgan, mobType uint8) []CorpseOrgan {
+	next := uint8(len(organs))
+	for _, o := range organs {
+		if o.Index >= next {
+			next = o.Index + 1
+		}
+	}
+	for _, v := range mobAnatomy[mobType] {
+		organs = append(organs, CorpseOrgan{
+			Index: next, Name: v.name, OrganType: v.organType,
+			ItemReward: uint8(v.material), Quantity: 1, Difficulty: v.difficulty,
+		})
+		next++
+	}
+	return organs
+}
 
 // Tiers de Qualidade
 const (
@@ -430,7 +558,18 @@ func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 		})
 	}
 
-	return organs
+	// O Sangue do Progenitor Bestial agora só sai drenando o Licantropo à mão (0,1%)
+	if mobType == protocol.MobTypeLycanthropeAlpha && rand.Float64() < 0.001*(1.0+luckBonus) {
+		for i := range organs {
+			if organs[i].OrganType == OrganBlood {
+				organs[i].Name = "Sangue do Progenitor Bestial"
+				organs[i].ItemReward = protocol.ItemBeastProgenitorBlood
+				break
+			}
+		}
+	}
+
+	return appendAnatomy(organs, mobType)
 }
 
 // CanInteract verifica se o jogador está no raio de alcance de interação (<= 2.5m).

@@ -23,6 +23,29 @@ for m in re.finditer(r"protocol\.(Item\w+):\s*\{([^}]*)\}", go):
     bonus = ", ".join('"%s": %s' % (keymap[k], v) for k, v in re.findall(r"(Bonus\w+):\s*(\d+)", body))
     rows.append('\t%d: {"name": "%s", "weight": %s, "slot": %d, "bonus": {%s}},' % (ids[m.group(1)], name, weight, slot, bonus))
 
+# Ferramentas (tools.go): constantes ItemX uint8 = N e entradas ItemX: {Name: ...}
+tools_go = (ROOT / "server/internal/world/tools.go").read_text()
+tool_ids = {m.group(1): int(m.group(2)) for m in re.finditer(r"\t(Item\w+)\s+uint8 = (\d+)", tools_go)}
+tool_tiers = {m.group(1): (m.group(2), int(m.group(3))) for m in re.finditer(r"(Item\w+): \{(Tool\w+), (\d+)\}", tools_go)}
+for m in re.finditer(r"\t(Item\w+):\s*\{Name: \"([^\"]*)\", Weight: ([\d.]+)", tools_go):
+    kind, tier = tool_tiers.get(m.group(1), ("ToolNone", 0))
+    rows.append('\t%d: {"name": "%s", "weight": %s, "slot": -1, "bonus": {}, "tool": "%s", "tool_tier": %d},' % (
+        tool_ids[m.group(1)], m.group(2), float(m.group(3)), kind.replace("Tool", "").lower(), tier))
+
+# Materiais (materials.go)
+mat_go = (ROOT / "server/internal/world/materials.go").read_text()
+mat_ids = {m.group(1): int(m.group(2)) for m in re.finditer(r"\t(Mat\w+)\s+uint16 = (\d+)", mat_go)}
+cat_names = {m.group(1): m.group(2) for m in re.finditer(r"\t(Mat\w+)\s+= \"(\w+)\"", mat_go)}
+rar = {m.group(1): int(m.group(2)) for m in re.finditer(r"\t(Rarity\w+)\s+uint8 = (\d+)", mat_go)}
+mat_rows = []
+entry = re.compile(r'\t(Mat\w+):\s*\{Mat\w+, "([^"]*)", (Mat\w+), (Rarity\w+), (-?\d+), ([\d.]+), "([^"]*)", "([^"]*)", (\d+), (\d+), (\d+)\}')
+for m in entry.finditer(mat_go):
+    mid = mat_ids[m.group(1)]
+    mat_rows.append('\t%d: {"name": "%s", "category": "%s", "rarity": %d, "durability": %s, "weight": %s, "resist": "%s", "trait": "%s", "thermal": %s, "electric": %s, "magic": %s},' % (
+        mid, m.group(2), cat_names[m.group(3)], rar[m.group(4)], m.group(5), float(m.group(6)), m.group(7), m.group(8), m.group(9), m.group(10), m.group(11)))
+    rows.append('\t%d: {"name": "%s", "weight": %s, "slot": -1, "bonus": {}},' % (mid, m.group(2), float(m.group(6))))
+starting = [mat_ids[n] for n in re.search(r"StartingDiscoveredMaterials = \[\]uint16\{([^}]*)\}", mat_go).group(1).replace(" ", "").split(",")]
+
 out = '''extends RefCounted
 ## Dados de itens compartilhados entre Inventário e Status.
 ## GERADO por tools/gen_item_data.py a partir de server/internal/world/items.go — não edite à mão.
@@ -34,6 +57,30 @@ const RING_SLOTS := [8, 9, 10, 11]
 const ITEMS := {
 %s
 }
+
+const RARITY_NAMES := ["", "Comum", "Incomum", "Raro", "Épico", "Único", "Exótico", "Lendário", "Mítico"]
+const RARITY_COLORS := [Color("#9e9e9e"), Color("#bdbdbd"), Color("#81c784"), Color("#4fc3f7"), Color("#ba68c8"),
+	Color("#ff8a65"), Color("#26c6da"), Color("#ffb300"), Color("#ff1744")]
+const CATEGORY_NAMES := {"Madeira": "Madeira", "Pedra": "Pedra", "Metal": "Metal", "Cristal": "Cristal", "Liga": "Liga",
+	"Pele_Fio": "Pele / Fio", "Orgao_Sangue": "Órgão / Sangue", "Planta_Liquido": "Planta / Líquido"}
+const STARTING_DISCOVERED := %s
+
+## Catálogo de Materiais (MaterialsDB) com propriedades de Forja e Ligas.
+const MATERIALS := {
+%s
+}
+
+static func is_material(item_id: int) -> bool:
+	return MATERIALS.has(item_id)
+
+static func material(item_id: int) -> Dictionary:
+	return MATERIALS.get(item_id, {})
+
+static func rarity_name(r: int) -> String:
+	return RARITY_NAMES[clampi(r, 0, 8)]
+
+static func rarity_color(r: int) -> Color:
+	return RARITY_COLORS[clampi(r, 0, 8)]
 
 static func info(item_id: int) -> Dictionary:
 	return ITEMS.get(item_id, {"name": "Item #%%d" %% item_id, "weight": 0.5, "slot": -1, "bonus": {}})
@@ -47,8 +94,11 @@ static func slot_of(item_id: int) -> int:
 static func bonus(item_id: int) -> Dictionary:
 	return info(item_id).get("bonus", {})
 
-## Raridade estimada pela soma dos bônus (apenas visual).
+## Raridade: a do catálogo para materiais; para equipamentos, estimada pela soma dos bônus.
 static func rarity(item_id: int) -> Array:
+	if MATERIALS.has(item_id):
+		var r: int = int(MATERIALS[item_id]["rarity"])
+		return [rarity_name(r), rarity_color(r)]
 	var total := 0
 	var b: Dictionary = bonus(item_id)
 	for k in b.keys():
@@ -62,6 +112,6 @@ static func rarity(item_id: int) -> Array:
 	if total > 0:
 		return ["Incomum", Color("#81c784")]
 	return ["Comum", Color("#bdbdbd")]
-''' % "\n".join(rows)
+''' % ("\n".join(rows), str(starting), "\n".join(mat_rows))
 (ROOT / "client/scripts/ItemData.gd").write_text(out)
-print("ItemData.gd: %d itens" % len(rows))
+print("ItemData.gd: %d itens, %d materiais" % (len(rows), len(mat_rows)))

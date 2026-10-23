@@ -530,6 +530,15 @@ var ground_items_nodes: Dictionary = {} # drop_id -> Node3D
 var ground_items_data: Dictionary = {} # drop_id -> {"id", "quantity", "x", "z"}
 const GROUND_PICKUP_RANGE := 3.5
 const ItemDataScript = preload("res://scripts/ItemData.gd")
+
+# Coleta e materiais
+var discovered_materials: Dictionary = {} # material_id -> true (espelho do servidor)
+var resource_nodes_nodes: Dictionary = {} # node_id -> Node3D
+var resource_nodes_data: Dictionary = {} # node_id -> Dictionary
+var discovery_banner: Label = null
+var _discovery_queue: Array = []
+const HARVEST_RANGE := 3.5
+const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte"}
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -597,6 +606,10 @@ func _ready() -> void:
 	NetworkManager.player_mana_received.connect(_on_player_mana_received)
 	NetworkManager.wallet_weight_updated.connect(_on_wallet_weight_updated)
 	NetworkManager.ground_items_received.connect(_on_ground_items_received)
+	NetworkManager.resource_nodes_received.connect(_on_resource_nodes_received)
+	NetworkManager.discovered_materials_received.connect(_on_discovered_materials_received)
+	for mid in ItemDataScript.STARTING_DISCOVERED:
+		discovered_materials[mid] = true
 	NetworkManager.player_attributes_received.connect(_on_player_attributes_received)
 	NetworkManager.player_respawn_received.connect(_on_player_respawn_received)
 	NetworkManager.mob_state_received.connect(_on_mob_state_received)
@@ -617,6 +630,7 @@ func _ready() -> void:
 	_setup_burn_overlay()
 	_setup_mana_bar()
 	_setup_weight_warning()
+	_setup_discovery_banner()
 	_setup_action_bar()
 	_setup_xp_hud()
 	_setup_loot_toast()
@@ -734,7 +748,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_G:
 			_try_pickup_nearest_ground_item()
 		elif event.keycode == KEY_E:
-			if not _try_interact_corpse():
+			if _try_interact_corpse():
+				pass
+			elif _try_harvest_nearest_node():
+				pass
+			else:
 				if not _try_interact_door():
 					_try_interact_nearest_npc()
 		elif event.keycode == KEY_C or event.keycode == KEY_TAB:
@@ -2438,6 +2456,291 @@ func _create_ground_item_node(it: Dictionary) -> Node3D:
 	tw.tween_property(model, "position:y", 0.0, 1.2).set_trans(Tween.TRANS_SINE)
 	return root
 
+# ---------------------------------------------------------------------------
+# Materiais descobertos (0x46) e aviso dourado
+# ---------------------------------------------------------------------------
+
+func _setup_discovery_banner() -> void:
+	var hud := get_node_or_null("HUD")
+	if not hud:
+		return
+	discovery_banner = Label.new()
+	discovery_banner.name = "DiscoveryBanner"
+	discovery_banner.visible = false
+	discovery_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	discovery_banner.anchor_left = 0.0
+	discovery_banner.anchor_right = 1.0
+	discovery_banner.offset_top = 78
+	discovery_banner.add_theme_font_size_override("font_size", 22)
+	discovery_banner.add_theme_color_override("font_color", Color(1.0, 0.84, 0.3))
+	discovery_banner.add_theme_color_override("font_outline_color", Color(0.25, 0.15, 0.0))
+	discovery_banner.add_theme_constant_override("outline_size", 8)
+	hud.add_child(discovery_banner)
+
+func _on_discovered_materials_received(mode: int, material_ids: Array) -> void:
+	if mode == 0:
+		discovered_materials.clear()
+	for mid in material_ids:
+		discovered_materials[int(mid)] = true
+		if mode == 1:
+			_discovery_queue.append(int(mid))
+	if not _discovery_queue.is_empty() and discovery_banner and not discovery_banner.visible:
+		_show_next_discovery()
+	for nid in resource_nodes_nodes.keys():
+		if resource_nodes_data.has(nid):
+			_apply_node_state(resource_nodes_nodes[nid], resource_nodes_data[nid])
+
+func _show_next_discovery() -> void:
+	if _discovery_queue.is_empty() or discovery_banner == null:
+		return
+	var mid: int = _discovery_queue.pop_front()
+	var mat: Dictionary = ItemDataScript.material(mid)
+	var mat_name: String = mat.get("name", "Material #%d" % mid)
+	discovery_banner.text = "✨ Novo Material Descoberto para Forja: %s! ✨\n%s • %s" % [
+		mat_name, ItemDataScript.rarity_name(int(mat.get("rarity", 1))), mat.get("trait", "")]
+	discovery_banner.add_theme_color_override("font_color", Color(1.0, 0.84, 0.3))
+	discovery_banner.visible = true
+	discovery_banner.modulate.a = 1.0
+	var tw := create_tween()
+	tw.tween_interval(3.5)
+	tw.tween_property(discovery_banner, "modulate:a", 0.0, 0.8)
+	tw.tween_callback(func():
+		discovery_banner.visible = false
+		_show_next_discovery()
+	)
+
+func is_material_discovered(material_id: int) -> bool:
+	return discovered_materials.has(material_id)
+
+# ---------------------------------------------------------------------------
+# Nós de coleta (0x45 RESOURCE_NODES_SYNC / 0x44 HARVEST_NODE)
+# ---------------------------------------------------------------------------
+
+func _node_requirement_text(data: Dictionary) -> String:
+	var tier: int = int(data["tier"])
+	match int(data["kind"]):
+		1:
+			return "[E] Cortar — Machado Tier %d+" % tier
+		2, 3, 4:
+			return "[E] Minerar — Picareta Tier %d+" % tier
+		5:
+			return "[E] Colher — arma cortante (Tesoura: x2)"
+		6:
+			return "[E] Coletar — Frasco Vazio"
+	return "[E] Coletar"
+
+func _on_resource_nodes_received(nodes: Array) -> void:
+	var seen: Dictionary = {}
+	for nd in nodes:
+		var nid: int = int(nd["node_id"])
+		seen[nid] = true
+		var changed: bool = not resource_nodes_data.has(nid) or bool(resource_nodes_data[nid]["available"]) != bool(nd["available"])
+		resource_nodes_data[nid] = nd
+		if not resource_nodes_nodes.has(nid):
+			resource_nodes_nodes[nid] = _create_resource_node(nd)
+		elif changed:
+			_apply_node_state(resource_nodes_nodes[nid], nd)
+	for nid in resource_nodes_nodes.keys():
+		if not seen.has(nid):
+			var old = resource_nodes_nodes[nid]
+			if is_instance_valid(old):
+				old.queue_free()
+			resource_nodes_nodes.erase(nid)
+			resource_nodes_data.erase(nid)
+
+func _mat(col: Color, emissive: float = 0.0, rough: float = 0.85, tex: String = "") -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = col
+	m.roughness = rough
+	if emissive > 0.0:
+		m.emission_enabled = true
+		m.emission = col
+		m.emission_energy_multiplier = emissive
+	if tex != "":
+		LunariaTextures.apply(m, tex, 0.8, false)
+	return m
+
+func _add_mesh(parent: Node3D, mesh: Mesh, m: Material, pos: Vector3, rot: Vector3 = Vector3.ZERO, scl: Vector3 = Vector3.ONE) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = m
+	mi.position = pos
+	mi.rotation_degrees = rot
+	mi.scale = scl
+	parent.add_child(mi)
+	return mi
+
+# Cor de cada material no mundo (madeira, metal, cristal, líquido...)
+func _node_color(mat_id: int, kind: int) -> Color:
+	var r: int = int(ItemDataScript.material(mat_id).get("rarity", 1))
+	match kind:
+		1:
+			return [Color(0.25, 0.45, 0.2), Color(0.3, 0.42, 0.22), Color(0.35, 0.5, 0.65), Color(0.18, 0.12, 0.25), Color(0.6, 0.12, 0.12),
+				Color(0.35, 0.35, 0.3), Color(1.0, 0.75, 0.25), Color(0.4, 1.0, 0.6)][clampi(r - 1, 0, 7)]
+		3:
+			var metal := {114: Color(0.85, 0.5, 0.3), 115: Color(0.75, 0.75, 0.72), 116: Color(0.45, 0.42, 0.4), 117: Color(0.9, 0.92, 0.95),
+				118: Color(0.6, 0.65, 0.7), 119: Color(0.6, 0.8, 1.0), 120: Color(0.9, 0.25, 0.2), 121: Color(0.3, 0.3, 0.4), 122: Color(0.75, 1.0, 0.95)}
+			return metal.get(mat_id, Color(0.6, 0.6, 0.6))
+		4:
+			var crys := {123: Color(0.92, 0.92, 1.0), 124: Color(0.4, 0.6, 1.0), 125: Color(1.0, 0.2, 0.15), 126: Color(0.5, 0.85, 1.0), 127: Color(0.35, 0.1, 0.45)}
+			return crys.get(mat_id, Color(0.8, 0.8, 1.0))
+		6:
+			var liq := {145: Color(0.35, 0.65, 1.0), 146: Color(0.4, 0.8, 0.2), 147: Color(0.85, 0.9, 1.0), 153: Color(0.9, 0.9, 0.2)}
+			return liq.get(mat_id, Color(0.4, 0.6, 1.0))
+	return ItemDataScript.rarity_color(r)
+
+func _create_resource_node(nd: Dictionary) -> Node3D:
+	var kind: int = int(nd["kind"])
+	var mat_id: int = int(nd["material"])
+	var col: Color = _node_color(mat_id, kind)
+	var rarity: int = int(ItemDataScript.material(mat_id).get("rarity", 1))
+	var glow: float = 0.0 if rarity < 3 else 0.25 + 0.15 * rarity
+	var root := StaticBody3D.new()
+	root.name = "ResourceNode_%d" % int(nd["node_id"])
+	root.collision_layer = 1
+	root.collision_mask = 0
+	add_child(root)
+	root.global_position = Vector3(float(nd["x"]), 0.0, float(nd["z"]))
+	var model := Node3D.new()
+	model.name = "Model"
+	root.add_child(model)
+	var shape := CollisionShape3D.new()
+
+	match kind:
+		1: # Árvore: tronco + copas
+			var trunk := CylinderMesh.new()
+			trunk.top_radius = 0.28
+			trunk.bottom_radius = 0.4
+			trunk.height = 3.6
+			_add_mesh(model, trunk, _mat(Color(0.35, 0.24, 0.15), 0.0, 0.9, "bark"), Vector3(0, 1.8, 0))
+			var crown := SphereMesh.new()
+			crown.radius = 1.6
+			crown.height = 2.6
+			var leaf_mat := _mat(col, glow, 0.9, "leaf")
+			_add_mesh(model, crown, leaf_mat, Vector3(0, 4.2, 0))
+			_add_mesh(model, crown, leaf_mat, Vector3(0.7, 3.6, 0.4), Vector3.ZERO, Vector3(0.7, 0.7, 0.7))
+			var cyl := CylinderShape3D.new()
+			cyl.radius = 0.45
+			cyl.height = 3.6
+			shape.shape = cyl
+			shape.position = Vector3(0, 1.8, 0)
+		2, 3, 4: # Rocha / veio / cristal
+			var rock := SphereMesh.new()
+			rock.radius = 0.9
+			rock.height = 1.3
+			var rock_col := Color(0.42, 0.4, 0.38) if kind != 2 else col.lerp(Color(0.5, 0.48, 0.45), 0.6)
+			_add_mesh(model, rock, _mat(rock_col, 0.0, 0.95, "stone"), Vector3(0, 0.45, 0), Vector3(0, 20, 0), Vector3(1.3, 1.0, 1.1))
+			if kind != 2:
+				var shard := PrismMesh.new()
+				shard.size = Vector3(0.25, 0.8, 0.25)
+				var shard_mat := _mat(col, glow + (0.6 if kind == 4 else 0.1), 0.25)
+				shard_mat.metallic = 0.9 if kind == 3 else 0.1
+				for i in range(4 if kind == 4 else 3):
+					var a: float = float(i) * 1.7
+					_add_mesh(model, shard, shard_mat, Vector3(cos(a) * 0.55, 0.85, sin(a) * 0.45), Vector3(15 * cos(a), 0, 15 * sin(a)))
+			var sph := SphereShape3D.new()
+			sph.radius = 0.95
+			shape.shape = sph
+			shape.position = Vector3(0, 0.5, 0)
+		5: # Vinha / arbusto / cogumelo
+			var bush := SphereMesh.new()
+			bush.radius = 0.7
+			bush.height = 1.0
+			_add_mesh(model, bush, _mat(Color(0.2, 0.4, 0.15), 0.0, 0.9, "leaf"), Vector3(0, 0.45, 0))
+			var stem := CylinderMesh.new()
+			stem.top_radius = 0.04
+			stem.bottom_radius = 0.06
+			stem.height = 1.6
+			var vine_mat := _mat(col, glow + 0.2, 0.7)
+			for i in range(5):
+				var a2: float = float(i) * 1.25
+				_add_mesh(model, stem, vine_mat, Vector3(cos(a2) * 0.35, 0.8, sin(a2) * 0.35), Vector3(25 * sin(a2), 0, 25 * cos(a2)))
+			var sph2 := SphereShape3D.new()
+			sph2.radius = 0.6
+			shape.shape = sph2
+			shape.position = Vector3(0, 0.5, 0)
+		_: # Fonte de água / ácido / orvalho
+			var pool := CylinderMesh.new()
+			pool.top_radius = 1.0
+			pool.bottom_radius = 1.0
+			pool.height = 0.06
+			var liq_mat := _mat(col, 0.6, 0.05)
+			liq_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			liq_mat.albedo_color.a = 0.75
+			_add_mesh(model, pool, liq_mat, Vector3(0, 0.04, 0))
+			var rim := TorusMesh.new()
+			rim.inner_radius = 0.95
+			rim.outer_radius = 1.2
+			_add_mesh(model, rim, _mat(Color(0.45, 0.43, 0.4), 0.0, 0.95, "stone"), Vector3(0, 0.05, 0))
+			var sph3 := SphereShape3D.new()
+			sph3.radius = 0.3
+			shape.shape = sph3
+	root.add_child(shape)
+
+	var lbl := Label3D.new()
+	lbl.name = "Label"
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.font_size = 32
+	lbl.pixel_size = 0.0045
+	lbl.outline_size = 10
+	lbl.visibility_range_end = 22.0
+	lbl.position = Vector3(0, 5.6 if kind == 1 else 2.0, 0)
+	root.add_child(lbl)
+	root.set_meta("label", lbl)
+	_apply_node_state(root, nd)
+	return root
+
+func _apply_node_state(root: Node3D, nd: Dictionary) -> void:
+	if not is_instance_valid(root):
+		return
+	var mat_id: int = int(nd["material"])
+	var mat: Dictionary = ItemDataScript.material(mat_id)
+	var rarity: int = int(mat.get("rarity", 1))
+	var available: bool = bool(nd["available"])
+	var model: Node3D = root.get_node_or_null("Model")
+	if model:
+		model.scale = Vector3.ONE if available else Vector3(0.45, 0.45, 0.45)
+	var lbl: Label3D = root.get_meta("label")
+	if lbl:
+		var mat_name: String = mat.get("name", "Recurso")
+		if not is_material_discovered(mat_id):
+			mat_name = "??? (%s desconhecido)" % NODE_KIND_NAMES.get(int(nd["kind"]), "Recurso")
+		if available:
+			lbl.text = "%s [%s]\n%s" % [mat_name, ItemDataScript.rarity_name(rarity), _node_requirement_text(nd)]
+			lbl.modulate = ItemDataScript.rarity_color(rarity).lightened(0.2)
+		else:
+			lbl.text = "%s\n(coletado — volta a crescer em breve)" % mat_name
+			lbl.modulate = Color(0.6, 0.6, 0.6)
+
+func _clear_resource_nodes() -> void:
+	for nid in resource_nodes_nodes.keys():
+		var n = resource_nodes_nodes[nid]
+		if is_instance_valid(n):
+			n.queue_free()
+	resource_nodes_nodes.clear()
+	resource_nodes_data.clear()
+
+# Tecla E: coleta o nó disponível mais próximo (até 3,5 m)
+func _try_harvest_nearest_node() -> bool:
+	if not local_player or resource_nodes_nodes.is_empty():
+		return false
+	var best_id: int = -1
+	var best_dist: float = HARVEST_RANGE
+	for nid in resource_nodes_nodes.keys():
+		var n = resource_nodes_nodes[nid]
+		if not is_instance_valid(n):
+			continue
+		var p1: Vector3 = local_player.global_position
+		var p2: Vector3 = n.global_position
+		var d: float = Vector2(p1.x - p2.x, p1.z - p2.z).length()
+		if d <= best_dist:
+			best_dist = d
+			best_id = nid
+	if best_id < 0:
+		return false
+	NetworkManager.send_harvest_node(best_id)
+	return true
+
 func _clear_ground_items() -> void:
 	for did in ground_items_nodes.keys():
 		var n = ground_items_nodes[did]
@@ -3293,8 +3596,9 @@ func _trigger_zone_fade() -> void:
 	tween.tween_property(screen_fade_rect, "color:a", 0.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 func _cleanup_zone_entities(_target_zone_id: int) -> void:
-	# 0. Itens no chão da zona anterior (o servidor envia os da nova zona)
+	# 0. Itens no chão e nós de coleta da zona anterior (o servidor envia os da nova zona)
 	_clear_ground_items()
+	_clear_resource_nodes()
 
 	# 1. Remove cadáveres da zona anterior
 	for cid in corpses.keys():

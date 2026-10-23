@@ -39,6 +39,7 @@ type Server struct {
 	projManager   *world.ProjectileManager
 	corpseManager *world.CorpseManager
 	groundItems   *world.GroundItemManager
+	resourceNodes *world.ResourceNodeManager
 	nextPlayerID  uint32
 	serverTick    uint32
 
@@ -74,6 +75,7 @@ func NewServer() *Server {
 		mobManager:      world.NewMobManager(),
 		projManager:     world.NewProjectileManager(),
 		groundItems:     world.NewGroundItemManager(),
+		resourceNodes:   world.NewResourceNodeManager(),
 		corpseManager:   world.NewCorpseManager(),
 		guardLastAttack: make(map[uint32]time.Time),
 		clock:           clock,
@@ -526,6 +528,7 @@ func (s *Server) sendInventorySync(p *world.Player) {
 	_ = p.TCPConn.SetWriteDeadline(time.Now().Add(100 * time.Millisecond))
 	_, _ = p.TCPConn.Write(data)
 	_ = p.TCPConn.SetWriteDeadline(time.Time{})
+	s.sendDiscoveries(p, false) // aviso de materiais descobertos pela primeira vez
 }
 
 // sendFriendshipSync envia o pacote 0x24 (FRIENDSHIP_SYNC) para o jogador especificado via TCP.
@@ -612,6 +615,8 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 	// 4. Envia pacote 0x38 (INVENTORY_SYNC) autoritativo na conexão inicial
 	s.sendInventorySync(player)
 	s.sendGroundItems(player)
+	s.sendResourceNodes(player)
+	s.sendDiscoveries(player, true)
 
 	// 5. Envia pacote 0x3E (CORPSE_SNAPSHOT) com cadáveres ativos no chão
 	s.sendCorpseSnapshots(player)
@@ -712,6 +717,19 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				var dropPkt protocol.DropItemGroundPacket
 				if err := protocol.DeserializeDropItemGround(full, &dropPkt); err == nil {
 					s.handleDropItemGround(playerID, dropPkt)
+				}
+
+			case protocol.PacketTypeHarvestNode:
+				// Pacote 0x44: HARVEST_NODE (9 bytes total, 8 bytes payload)
+				payload := make([]byte, protocol.HarvestNodePacketSize-1)
+				if _, err := io.ReadFull(conn, payload); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				full := append([]byte{header[0]}, payload...)
+				var harvestPkt protocol.HarvestNodePacket
+				if err := protocol.DeserializeHarvestNode(full, &harvestPkt); err == nil {
+					s.handleHarvestNode(playerID, harvestPkt)
 				}
 
 			case protocol.PacketTypePickupGroundItem:
@@ -1228,6 +1246,7 @@ func (s *Server) handlePortalTravel(playerID uint32, targetZoneID, portalID uint
 	player.SetZone(newZone)
 	player.Respawn(targetX, targetY, targetZ)
 	defer s.sendGroundItems(player) // itens no chão da nova zona
+	defer s.sendResourceNodes(player)
 
 	// Envia pacote 0x36 (PLAYER_RESPAWN) com a nova coordenada segura (5m do portal de retorno)
 	respawnPkt := protocol.SerializePlayerRespawn(player.ID, targetX, targetY, targetZ)
@@ -3106,12 +3125,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				drops = append(drops, "Casulo de Seda Prateada [SECRETO 0.1%] x1")
 			}
 
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemFreshWolfBlood, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Sangue Lupino Fresco!]"
-			}
-
 		case protocol.MobTypeOutcastRaider, protocol.MobTypeVigilCrossbowman: // 2, 3: Saqueador / Besteiro
 			killer.AddItem(protocol.ItemEmptyFlask, 1)
 			killer.AddItem(protocol.ItemCookedNobleMeat, 1)
@@ -3141,12 +3154,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				drops = append(drops, "Casulo de Seda Prateada [SECRETO 0.1%] x1")
 			}
 
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemDarkPoisonGland, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Glândula de Veneno Sombrio!]"
-			}
-
 		case protocol.MobTypeIronEnforcer: // 5: Executor de Ferro
 			killer.AddItem(protocol.ItemHeavySteelPlate, 1)
 			killer.AddItem(protocol.ItemEmptyFlask, 1)
@@ -3169,12 +3176,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				drops = append(drops, "Anel de Presa Ancestral [RARO] x1")
 			}
 
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemPureLunarBlood, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Sangue Lunar Puro!]"
-			}
-
 		case protocol.MobTypeLycanthropeAlpha: // 7: Licantropo Alfa
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemLycanAlphaHeart, 1)
@@ -3183,17 +3184,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			if rand.Float64() < 0.07+luckBonus { // 7% Raro
 				killer.AddItem(protocol.ItemTitansHammerTome, 1)
 				drops = append(drops, "Tomo do Martelo Titânico [RARO] x1")
-			}
-
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				if rand.Float64() < secretDropChance { // 0.1% Secreto
-					killer.AddItem(protocol.ItemBeastProgenitorBlood, 1)
-					flaskMsg = " [MILAGRE! Frasco Vazio preenchido com Sangue do Progenitor Bestial (0.1%)!]"
-				} else {
-					killer.AddItem(protocol.ItemPureLunarBlood, 1)
-					flaskMsg = " [Frasco Vazio preenchido com Sangue Lunar Concentrado!]"
-				}
 			}
 
 		case protocol.MobTypeDarkCultist: // 10: Cultista Sombrio
@@ -3206,11 +3196,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemEclipseScytheTome, 1)
 				drops = append(drops, "Tomo da Foice do Eclipse [SECRETO 0.1%] x1")
-			}
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemDarkPoisonGland, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Glândula de Veneno Sombrio!]"
 			}
 
 		case protocol.MobTypeStoneGargoyle: // 11: Gárgula de Pedra
@@ -3237,11 +3222,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemRunicHourglass, 1)
 				drops = append(drops, "Ampulheta Rúnica [SECRETO 0.1%] x1")
-			}
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemDarkPoisonGland, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Glândula de Veneno Sombrio!]"
 			}
 
 		case protocol.MobTypeCommanderVaelen: // 13: Comandante Vaelen
@@ -3278,11 +3258,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 			if rand.Float64() < secretDropChance { // 0.1% Secreto
 				killer.AddItem(protocol.ItemStarforgeCore, 1)
 				drops = append(drops, "Núcleo de Forja Estelar [SECRETO 0.1%] x1")
-			}
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemPureLunarBlood, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Sangue Lunar Puro!]"
 			}
 
 		case protocol.MobTypeMistWeaverSpider: // 15: Aranha Tecelã da Bruma
@@ -3347,11 +3322,6 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 		case protocol.MobTypeVesperianBloodGuard: // 23: Guarda Sanguinário de Vesperian
 			killer.AddItem(protocol.ItemCrimsonGuardInsignia, 1)
 			drops = append(drops, "Insígnia do Guarda Carmesim x1")
-			if killer.GetItemCount(protocol.ItemEmptyFlask) > 0 {
-				killer.RemoveItem(protocol.ItemEmptyFlask, 1)
-				killer.AddItem(protocol.ItemPureLunarBlood, 1)
-				flaskMsg = " [Frasco Vazio preenchido com Sangue Lunar Puro!]"
-			}
 
 		case protocol.MobTypeLordVesperianVampire: // 24: Lorde Vesperian, o Progenitor Vampiro (Raid Boss Secreto)
 			killer.AddItem(protocol.ItemVesperianCrimsonRing, 1)
@@ -3654,6 +3624,22 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		return
 	}
 
+	// Drenar sangue/veneno é opcional e exige um Frasco Vazio (Aracne coleta veneno sem frasco)
+	var pendingType uint8
+	corpse.Mu.RLock()
+	for _, o := range corpse.Organs {
+		if o.Index == pkt.OrganIndex {
+			pendingType = o.OrganType
+		}
+	}
+	corpse.Mu.RUnlock()
+	arachneVenom := player.RaceID == protocol.RaceArachne && (pendingType == world.OrganGland || pendingType == world.OrganVenomSac)
+	if world.IsBloodOrgan(pendingType) && !arachneVenom && !player.HasItem(protocol.ItemEmptyFlask) {
+		s.sendPlayerNPCSay(player, 0, "🧪 Você precisa de um Frasco de Vidro Vazio para drenar sangue ou veneno.")
+		s.handleInteractCorpse(protocol.InteractCorpsePacket{PlayerID: pkt.PlayerID, CorpseID: pkt.CorpseID})
+		return
+	}
+
 	// Atualiza o estado do órgão no cadáver
 	organ, ok := corpse.MarkOrganExtracted(pkt.OrganIndex, pkt.ResultTier)
 	if !ok {
@@ -3702,15 +3688,16 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		resultMsg = fmt.Sprintf("[AUTÓPSIA FALHA] O bisturi atingiu a Zona Vermelha! O órgão foi dilacerado e virou Lixo Orgânico.")
 	}
 
-	// Consome Frasco Vazio se for Sangue ou Glândula extraída com sucesso (Aracne não precisa para glândulas venenosas)
-	isArachneGland := player.RaceID == protocol.RaceArachne && organ.OrganType == world.OrganGland
-	if (organ.OrganType == world.OrganBlood || organ.OrganType == world.OrganGland) && pkt.ResultTier != protocol.QualityDestroyed {
-		if isArachneGland {
+	// Consome o Frasco Vazio quando o fluido é drenado com sucesso
+	if world.IsBloodOrgan(organ.OrganType) && pkt.ResultTier != protocol.QualityDestroyed {
+		if arachneVenom {
 			resultMsg += " [Tecelão da Bruma: Veneno coletado organicamente sem frasco!]"
-		} else if player.HasItem(protocol.ItemEmptyFlask) {
-			player.RemoveItem(protocol.ItemEmptyFlask, 1)
+		} else if player.RemoveItem(protocol.ItemEmptyFlask, 1) {
 			resultMsg += " [Frasco Vazio preenchido!]"
 		}
+	}
+	if m, isMat := world.GetMaterial(itemToGive); isMat && pkt.ResultTier != protocol.QualityDestroyed {
+		resultMsg += fmt.Sprintf(" [%s • %s | Durab. %d | Resist.: %s]", m.Name, world.RarityNames[m.Rarity], m.Durability, m.Resistances)
 	}
 
 	// Verifica se a mochila está cheia (limite de 24 slots)
@@ -4528,6 +4515,7 @@ func (s *Server) runGameLoop() {
 				s.updateClassMasterRoutines(int(h))
 				s.updatePlaceTrials()
 				s.expireGroundItems()
+				s.respawnResourceNodes()
 				if s.serverTick%(GameTickRate*2) < GameTickRate {
 					s.updateCompanions() // Companheiros atacam sozinhos a cada 2s
 				}

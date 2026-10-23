@@ -16,6 +16,8 @@ signal player_attributes_received(player_id: int, xp: int, next_level_xp: int, s
 signal inventory_updated(equipped_slots_array: Array, items_array: Array)
 signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: float, max_weight: float, speed_mult: float)
 signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
+signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
+signal discovered_materials_received(mode: int, material_ids: Array) # mode 0 = lista completa, 1 = novas descobertas
 signal player_respawn_received(player_id: int, respawn_pos: Vector3)
 signal player_respawned(player_id: int, pos_x: float, pos_y: float, pos_z: float)
 signal mob_state_received(mobs_dict: Dictionary)
@@ -218,6 +220,44 @@ func _process_tcp() -> void:
 				inventory_updated.emit(equipped_slots, items_array)
 				wallet_weight_updated.emit(gold, eclipse_coins, cur_weight, max_weight, speed_mult)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
+
+			elif opcode == 0x45: # RESOURCE_NODES_SYNC: op | count u16 | count × (id u32, tipo, material, tier, disponível, X f32, Z f32)
+				if tcp_rx_buffer.size() < 3:
+					break
+				var n_count: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
+				var n_size: int = 3 + n_count * 16
+				if tcp_rx_buffer.size() < n_size:
+					break
+				var n_buf := StreamPeerBuffer.new()
+				n_buf.big_endian = false
+				n_buf.data_array = tcp_rx_buffer.slice(0, n_size)
+				n_buf.seek(3)
+				var nodes: Array = []
+				for i in range(n_count):
+					var node_id: int = n_buf.get_u32()
+					var kind: int = n_buf.get_u8()
+					var mat_id: int = n_buf.get_u8()
+					var tier: int = n_buf.get_u8()
+					var node_avail: bool = n_buf.get_u8() == 1
+					var nx: float = n_buf.get_float()
+					var nz: float = n_buf.get_float()
+					nodes.append({"node_id": node_id, "kind": kind, "material": mat_id, "tier": tier, "available": node_avail, "x": nx, "z": nz})
+				resource_nodes_received.emit(nodes)
+				tcp_rx_buffer = tcp_rx_buffer.slice(n_size)
+
+			elif opcode == 0x46: # DISCOVERED_MATERIALS: op | modo | count u16 | count × id u16
+				if tcp_rx_buffer.size() < 4:
+					break
+				var d_count: int = tcp_rx_buffer[2] | (tcp_rx_buffer[3] << 8)
+				var d_size: int = 4 + d_count * 2
+				if tcp_rx_buffer.size() < d_size:
+					break
+				var d_mode: int = tcp_rx_buffer[1]
+				var d_ids: Array = []
+				for i in range(d_count):
+					d_ids.append(tcp_rx_buffer[4 + i * 2] | (tcp_rx_buffer[5 + i * 2] << 8))
+				discovered_materials_received.emit(d_mode, d_ids)
+				tcp_rx_buffer = tcp_rx_buffer.slice(d_size)
 
 			elif opcode == 0x42: # GROUND_ITEMS_SYNC: op | count u16 | count × (dropID u32, item, qtd, X f32, Z f32)
 				if tcp_rx_buffer.size() < 3:
@@ -763,6 +803,17 @@ func send_drop_item_ground(slot_index: int, quantity: int) -> void:
 	buffer.put_u32(my_player_id)
 	buffer.put_u8(slot_index)
 	buffer.put_u8(clampi(quantity, 1, 255))
+	tcp.put_data(buffer.data_array)
+
+# send_harvest_node envia o 0x44 para coletar um nó de recurso (árvore, rocha, veio, vinha, fonte)
+func send_harvest_node(node_id: int) -> void:
+	if my_player_id == 0:
+		return
+	var buffer := StreamPeerBuffer.new()
+	buffer.big_endian = false
+	buffer.put_u8(0x44)
+	buffer.put_u32(my_player_id)
+	buffer.put_u32(node_id)
 	tcp.put_data(buffer.data_array)
 
 # send_pickup_ground_item envia o 0x43 para pegar um item do chão (a até 4m)

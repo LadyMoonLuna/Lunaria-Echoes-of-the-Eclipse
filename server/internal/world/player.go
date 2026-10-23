@@ -80,6 +80,8 @@ type Player struct {
 	// Sistema de Inventário e 12 Slots de Equipamento Real
 	Inventory           map[uint8]uint8                // ItemID -> Quantidade
 	EquippedSlots       [protocol.EquipSlotCount]uint8 // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
+	DiscoveredMaterials map[uint16]bool                // Materiais já vistos pelo jogador (Forja)
+	newDiscoveries      []uint16                       // Descobertas ainda não avisadas ao cliente
 	Gold                uint32                         // Sollares de Ouro
 	EclipseCoins        uint32                         // Moedas do Eclipse (Mercado Negro)
 	EquippedArmorID     uint8                          // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
@@ -1034,34 +1036,37 @@ func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player
 	var initLevel uint8 = 1
 
 	p := &Player{
-		ID:              id,
-		ZoneID:          ZoneVillage,
-		TCPConn:         tcpConn,
-		PosX:            initX,
-		PosY:            initY,
-		PosZ:            initZ,
-		RotY:            0,
-		LastSeen:        time.Now(),
-		RaceID:          initRace,
-		ClassID:         initClass,
-		ClassTier:       initTier,
-		ClassPath:       0,
-		SubPath:         0, // Caminho escolhido no Tier 2 (0 = ainda não escolhido)
-		Level:           initLevel,
-		XP:              0,
-		NextLevelXP:     100,
-		StatPoints:      0,
-		Inventory:       make(map[uint8]uint8),
-		Gold:            StartingGold,
-		EclipseCoins:    StartingEclipseCoins,
-		NPCFriendship:   make(map[uint32]int),
-		UnlockedRecipes: make(map[uint8]bool),
-		LastActionTimes: make(map[uint8]time.Time),
+		ID:                  id,
+		ZoneID:              ZoneVillage,
+		TCPConn:             tcpConn,
+		PosX:                initX,
+		PosY:                initY,
+		PosZ:                initZ,
+		RotY:                0,
+		LastSeen:            time.Now(),
+		RaceID:              initRace,
+		ClassID:             initClass,
+		ClassTier:           initTier,
+		ClassPath:           0,
+		SubPath:             0, // Caminho escolhido no Tier 2 (0 = ainda não escolhido)
+		Level:               initLevel,
+		XP:                  0,
+		NextLevelXP:         100,
+		StatPoints:          0,
+		Inventory:           make(map[uint8]uint8),
+		Gold:                StartingGold,
+		DiscoveredMaterials: startingDiscoveries(),
+		EclipseCoins:        StartingEclipseCoins,
+		NPCFriendship:       make(map[uint32]int),
+		UnlockedRecipes:     make(map[uint8]bool),
+		LastActionTimes:     make(map[uint8]time.Time),
 	}
 	p.ApplyBaseRaceAttributes(initRace)
 	// Todo jogador começa ao conectar com 3x Frasco de Vidro Vazio (ItemID=1) e 2x Carne Crua de Lobo (ItemID=2)
 	p.Inventory[protocol.ItemEmptyFlask] = 3
 	p.Inventory[protocol.ItemRawWolfMeat] = 2
+	p.Inventory[ItemStoneAxe] = 1 // ferramentas iniciais de coleta (Tier 1)
+	p.Inventory[ItemStonePickaxe] = 1
 
 	p.recalculateStatsLocked()
 	p.HP = p.MaxHP
@@ -2004,6 +2009,7 @@ func (p *Player) AddItem(itemID, qty uint8) {
 	if p.Inventory == nil {
 		p.Inventory = make(map[uint8]uint8)
 	}
+	p.markDiscoveredLocked(itemID) // primeiro contato com um material
 	if int(p.Inventory[itemID])+int(qty) > 255 {
 		p.Inventory[itemID] = 255
 		return

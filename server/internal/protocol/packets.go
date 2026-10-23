@@ -67,6 +67,11 @@ const (
 	PacketTypeDropItemGround   uint8 = 0x41 // [Client -> Server] Descartar item da mochila no chão (7 bytes)
 	PacketTypeGroundItemsSync  uint8 = 0x42 // [Server -> Client] Lista de itens no chão da zona
 	PacketTypePickupGroundItem uint8 = 0x43 // [Client -> Server] Pegar item do chão (9 bytes)
+
+	// Coleta e Materiais
+	PacketTypeHarvestNode         uint8 = 0x44 // [Client -> Server] Coletar nó de recurso (9 bytes)
+	PacketTypeResourceNodesSync   uint8 = 0x45 // [Server -> Client] Nós de recurso da zona
+	PacketTypeDiscoveredMaterials uint8 = 0x46 // [Server -> Client] Materiais descobertos (lista completa ou novos)
 )
 
 // Tipos de Projéteis 3D
@@ -2078,4 +2083,130 @@ func IsLegendaryClass(classID uint8) bool {
 // IsTranscendentClass informa se a classe reseta o nível ao ser assumida (Únicas e Lendárias, ID >= 19).
 func IsTranscendentClass(classID uint8) bool {
 	return IsUniqueClass(classID) || IsLegendaryClass(classID)
+}
+
+// --- 0x44: HARVEST_NODE / 0x45: RESOURCE_NODES_SYNC / 0x46: DISCOVERED_MATERIALS ---
+
+const (
+	HarvestNodePacketSize = 9  // op (1) + playerID u32 (4) + nodeID u32 (4)
+	ResourceNodeEntrySize = 16 // nodeID u32 + kind u8 + material u8 + tier u8 + available u8 + X f32 + Z f32
+)
+
+// HarvestNodePacket: o cliente pede para coletar o nó NodeID.
+type HarvestNodePacket struct {
+	PlayerID uint32
+	NodeID   uint32
+}
+
+func SerializeHarvestNode(playerID, nodeID uint32) [HarvestNodePacketSize]byte {
+	var b [HarvestNodePacketSize]byte
+	b[0] = PacketTypeHarvestNode
+	binary.LittleEndian.PutUint32(b[1:5], playerID)
+	binary.LittleEndian.PutUint32(b[5:9], nodeID)
+	return b
+}
+
+func DeserializeHarvestNode(data []byte, out *HarvestNodePacket) error {
+	if len(data) < HarvestNodePacketSize {
+		return ErrInvalidPacketSize
+	}
+	if data[0] != PacketTypeHarvestNode {
+		return ErrInvalidPacketType
+	}
+	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
+	out.NodeID = binary.LittleEndian.Uint32(data[5:9])
+	return nil
+}
+
+// ResourceNodeEntry é um nó de coleta visível na zona.
+type ResourceNodeEntry struct {
+	NodeID    uint32
+	Kind      uint8
+	Material  uint8
+	Tier      uint8
+	Available bool
+	X, Z      float32
+}
+
+// SerializeResourceNodesSync: op | count u16 | count × entrada (16 bytes)
+func SerializeResourceNodesSync(nodes []ResourceNodeEntry) []byte {
+	count := len(nodes)
+	if count > 65535 {
+		count = 65535
+	}
+	buf := make([]byte, 3+count*ResourceNodeEntrySize)
+	buf[0] = PacketTypeResourceNodesSync
+	binary.LittleEndian.PutUint16(buf[1:3], uint16(count))
+	off := 3
+	for i := 0; i < count; i++ {
+		n := nodes[i]
+		binary.LittleEndian.PutUint32(buf[off:off+4], n.NodeID)
+		buf[off+4] = n.Kind
+		buf[off+5] = n.Material
+		buf[off+6] = n.Tier
+		if n.Available {
+			buf[off+7] = 1
+		}
+		binary.LittleEndian.PutUint32(buf[off+8:off+12], math.Float32bits(n.X))
+		binary.LittleEndian.PutUint32(buf[off+12:off+16], math.Float32bits(n.Z))
+		off += ResourceNodeEntrySize
+	}
+	return buf
+}
+
+func DeserializeResourceNodesSync(data []byte) ([]ResourceNodeEntry, error) {
+	if len(data) < 3 || data[0] != PacketTypeResourceNodesSync {
+		return nil, ErrInvalidPacketSize
+	}
+	count := int(binary.LittleEndian.Uint16(data[1:3]))
+	if len(data) < 3+count*ResourceNodeEntrySize {
+		return nil, ErrInvalidPacketSize
+	}
+	out := make([]ResourceNodeEntry, count)
+	off := 3
+	for i := range out {
+		out[i].NodeID = binary.LittleEndian.Uint32(data[off : off+4])
+		out[i].Kind = data[off+4]
+		out[i].Material = data[off+5]
+		out[i].Tier = data[off+6]
+		out[i].Available = data[off+7] == 1
+		out[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+8 : off+12]))
+		out[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+12 : off+16]))
+		off += ResourceNodeEntrySize
+	}
+	return out, nil
+}
+
+// Modos do 0x46
+const (
+	DiscoveredModeFull uint8 = 0 // lista completa (login)
+	DiscoveredModeNew  uint8 = 1 // apenas as descobertas novas (mostra o aviso dourado)
+)
+
+// SerializeDiscoveredMaterials: op | modo u8 | count u16 | count × materialID u16
+func SerializeDiscoveredMaterials(mode uint8, ids []uint16) []byte {
+	count := len(ids)
+	buf := make([]byte, 4+count*2)
+	buf[0] = PacketTypeDiscoveredMaterials
+	buf[1] = mode
+	binary.LittleEndian.PutUint16(buf[2:4], uint16(count))
+	for i, id := range ids {
+		binary.LittleEndian.PutUint16(buf[4+i*2:6+i*2], id)
+	}
+	return buf
+}
+
+func DeserializeDiscoveredMaterials(data []byte) (uint8, []uint16, error) {
+	if len(data) < 4 || data[0] != PacketTypeDiscoveredMaterials {
+		return 0, nil, ErrInvalidPacketSize
+	}
+	count := int(binary.LittleEndian.Uint16(data[2:4]))
+	if len(data) < 4+count*2 {
+		return 0, nil, ErrInvalidPacketSize
+	}
+	ids := make([]uint16, count)
+	for i := range ids {
+		ids[i] = binary.LittleEndian.Uint16(data[4+i*2 : 6+i*2])
+	}
+	return data[1], ids, nil
 }
