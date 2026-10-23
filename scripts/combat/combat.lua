@@ -109,9 +109,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     elseif class_id == 1 then
         damage = 28 -- Espadachim da Aurora (Espada)
     elseif class_id == 2 then
-        damage = 32 -- Arcanista (Cajado / Orbe Arcano)
+        damage = 30 -- Arcanista (Cajado / Orbe Arcano)
     elseif class_id == 3 then
-        damage = 26 -- Sentinela dos Ventos (Arco)
+        damage = 27 -- Sentinela dos Ventos (Arco)
     elseif class_id == 4 then
         damage = 29 -- Lâmina Silente (Duas Adagas)
     elseif class_id == 5 then
@@ -168,7 +168,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     elseif class_id == 29 then
         damage = 38 -- Inquisidor da Chama Branca
     elseif class_id == 30 then
-        damage = 36 -- Arauto do Ossuário
+        damage = 39 -- Arauto do Ossuário
     elseif class_id == 35 then
         damage = 40 -- Engenheiro Rúnico
     elseif class_id == 36 then
@@ -556,9 +556,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     if class_id == 15 then
         damage_bonus = damage_bonus + 0.10
     end
-    -- ID 16 Punho Fantasma: Golpe do Ponto Vital Furtivo (+30% chance crítica, +20% dano crítico)
+    -- ID 16 Punho Fantasma: Golpe do Ponto Vital Furtivo (+20% chance crítica, +20% dano crítico)
     if class_id == 16 then
-        crit_chance = crit_chance + 0.30
+        crit_chance = crit_chance + 0.20
         crit_multiplier = crit_multiplier + 0.20
     end
     -- ID 17 Forjador Carmesim: Têmpera de Sangue (+10% dano; 25% de roubo de vida no servidor)
@@ -567,17 +567,17 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     end
 
     -- Passivas das Classes Secretas:
-    -- Rei-Fera (21): Presas de Prata Negra (+20% dano)
+    -- Rei-Fera (21): Presas de Prata Negra (+10% dano; os Lobos Espirituais atacam sozinhos no servidor)
     if class_id == 21 then
-        damage_bonus = damage_bonus + 0.20
+        damage_bonus = damage_bonus + 0.10
     end
     -- Colosso Abissal (23): Casco Continental converte 50% da Defesa em Ataque (+25% dano)
     if class_id == 23 then
         damage_bonus = damage_bonus + 0.25
     end
-    -- Conde Escarlate (25): Domínio da Noite (+40% à noite)
+    -- Conde Escarlate (25): Domínio da Noite (+30% à noite)
     if class_id == 25 and (world_hour >= 18 or world_hour < 6) then
-        damage_bonus = damage_bonus + 0.40
+        damage_bonus = damage_bonus + 0.30
     end
     -- Barão Engrenagem (26): Ganância Explosiva (+15% chance crítica)
     if class_id == 26 then
@@ -592,9 +592,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         crit_chance = crit_chance + 0.25
     end
 
-    -- Senhor da Selva Primordial (ClassID = 37): Passiva Espírito Alfa concede +25% de dano feroz constante
+    -- Senhor da Selva Primordial (ClassID = 37): Passiva Espírito Alfa concede +15% de dano feroz (o Espírito também ataca sozinho)
     if class_id == 37 then
-        damage_bonus = damage_bonus + 0.25
+        damage_bonus = damage_bonus + 0.15
     end
 
     -- Arauto do Trovão (ClassID = 39): Passiva +35% de dano elétrico durante chuva (Weather == 1)
@@ -615,9 +615,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         crit_multiplier = crit_multiplier + (mas - 5) * 0.04
     end
 
-    -- Lupharion (RaceID = 6): +30% de dano físico permanente
+    -- Lupharion (RaceID = 6): +20% de dano físico permanente
     if race_id == 6 then
-        damage_bonus = damage_bonus + 0.30
+        damage_bonus = damage_bonus + 0.20
     end
 
     -- Condição de noite: 18:00 às 05:59
@@ -659,8 +659,10 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
 
     -- Quadrante 5: Passivas das 18 Novas Raças (29 a 46)
     -- Aurelith (RaceID = 29): Passiva Ser de Luz (+100% dano durante Eclipse, Lua de Sangue ou contra Trevas)
-    if race_id == 29 and (moon_phase == 8 or moon_phase == 9 or is_night) then
+    if race_id == 29 and (moon_phase == 8 or moon_phase == 9) then
         damage_bonus = damage_bonus + 1.00
+    elseif race_id == 29 and is_night then
+        damage_bonus = damage_bonus + 0.20 -- luz contra as trevas da noite
     end
 
     -- Pyrael (RaceID = 30): Passiva Fulgor (+25% dano base de fogo, dobra dano se buff ativo sob Combustão)
@@ -692,9 +694,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         crit_chance = crit_chance + 0.20
     end
 
-    -- Arcavyrn (RaceID = 35): Passiva Sangue Místico (+30% Poder Mágico)
+    -- Arcavyrn (RaceID = 35): Passiva Sangue Místico (+20% Poder Mágico)
     if race_id == 35 then
-        damage_bonus = damage_bonus + 0.30
+        damage_bonus = damage_bonus + 0.20
     end
 
     -- Orkhan (RaceID = 36): Passiva Músculos de Aço (+25% dano físico corpo a corpo)
@@ -748,9 +750,9 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
         damage_bonus = damage_bonus + 0.25
     end
 
-    -- Ulvar (RaceID = 46): Passiva Olfato & Instinto (+30% dano bestial constante)
+    -- Ulvar (RaceID = 46): Passiva Olfato & Instinto (+20% dano bestial constante)
     if race_id == 46 then
-        damage_bonus = damage_bonus + 0.30
+        damage_bonus = damage_bonus + 0.20
     end
 
     -- Manamante (RaceID = 47): Afinidade Mágica (+18% dano, conjura com a própria Vida)

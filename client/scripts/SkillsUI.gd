@@ -899,7 +899,7 @@ const CLASS_ACTIVE_SKILLS := {
 	37: { # Senhor da Selva Primordial (Classe Secreta 37)
 		"name": "Senhor da Selva Primordial",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Avatar da Fera Ancestral)",
-		"desc": "Espadachim da Aurora feral possuído pelo Espírito Alfa, infligindo +25% de dano constante com garras devastadoras.",
+		"desc": "Espadachim da Aurora feral possuído pelo Espírito Alfa, infligindo +15% de dano constante (o Espírito Alfa também ataca sozinho) com garras devastadoras.",
 		"color": Color("#ffd740"),
 		"is_secret": true,
 		"evolved_titles": {
