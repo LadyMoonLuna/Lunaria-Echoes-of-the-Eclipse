@@ -149,6 +149,18 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
             damage = damage * 1.85 -- Alfaiate de Guerra: Teia de Fios Retalhadores (1.85x)
         elseif class_id == 12 then
             damage = damage * 1.90 -- Chef de Caça: Desossar a Vivo! (1.9x)
+        elseif class_id == 13 then
+            damage = damage * 2.00 -- Espadachim Rúnico: Corte Flamígero/Glacial (2.0x)
+        elseif class_id == 14 then
+            damage = damage * 1.90 -- Caçador de Vampiros: Virote de Prata (1.9x)
+        elseif class_id == 15 then
+            damage = damage * 2.00 -- Valquíria da Égide: Estocada do Trovão (2.0x)
+        elseif class_id == 16 then
+            damage = damage * 2.00 -- Monge das Sombras: Palma das Sombras (2.0x)
+        elseif class_id == 17 then
+            damage = damage * 2.00 -- Forjador Amaldiçoado: Martelo Hemorrágico (2.0x)
+        elseif class_id == 18 then
+            damage = damage * 1.90 -- Médico da Peste: Bisturi Cirúrgico (1.9x)
         elseif class_id == 22 then
             damage = damage * 2.00 -- Dançarino: Corte Cadente (2.0x)
         elseif class_id == 23 then
@@ -190,6 +202,12 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
             damage = damage * 1.60 -- Alfaiate de Guerra: Costurar Sombras
         elseif class_id == 12 then
             damage = damage * 1.40 -- Chef de Caça: Banquete na Wok Flamejante
+        elseif class_id == 14 then
+            damage = damage * 1.70 -- Caçador de Vampiros: Corrente de Exorcismo
+        elseif class_id == 15 then
+            damage = damage * 1.80 -- Valquíria da Égide: Salto da Valquíria
+        elseif class_id == 16 then
+            damage = damage * 1.60 -- Monge das Sombras: Passo Fantasma
         elseif class_id == 22 then
             damage = damage * 1.80 -- Dançarino: Valsa dos Espelhos
         elseif class_id == 23 then
@@ -231,6 +249,18 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
             damage = damage * 2.70 -- Alfaiate de Guerra: Gaiola de Fios Carmesins (2.7x)
         elseif class_id == 12 then
             damage = damage * 2.80 -- Chef de Caça: Trinchar o Behemoth (2.8x)
+        elseif class_id == 13 then
+            damage = damage * 2.80 -- Espadachim Rúnico: Cometa da Espada Arcana (2.8x)
+        elseif class_id == 14 then
+            damage = damage * 2.80 -- Caçador de Vampiros: Julgamento da Cruz Solar (2.8x)
+        elseif class_id == 15 then
+            damage = damage * 2.80 -- Valquíria da Égide: Chuva de Lanças Douradas (2.8x)
+        elseif class_id == 16 then
+            damage = damage * 3.00 -- Monge das Sombras: Toque da Morte de Cinco Passos (3.0x + explosão em 5s)
+        elseif class_id == 17 then
+            damage = damage * 2.90 -- Forjador Amaldiçoado: Despertar da Espada Demoníaca (2.9x)
+        elseif class_id == 18 then
+            damage = damage * 2.60 -- Médico da Peste: Nuvem da Peste Negra (2.6x + peste)
         elseif class_id == 22 then
             damage = damage * 3.00 -- Dançarino: Constelação de Mil Lâminas (3.0x)
         elseif class_id == 23 then
@@ -355,6 +385,25 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     -- ID 12 Chef de Caça: Células Gourmet (+15% dano, +30% se com buff)
     if class_id == 12 then
         damage_bonus = damage_bonus + (buff == 1 and 0.30 or 0.15)
+    end
+
+    -- Passivas das Variantes Secretas (13 a 18); as que dependem do alvo ficam no servidor
+    -- ID 13 Espadachim Rúnico: Lâmina Elemental (+15% dano; golpes gelam o alvo no servidor)
+    if class_id == 13 then
+        damage_bonus = damage_bonus + 0.15
+    end
+    -- ID 15 Valquíria da Égide: Voo da Valquíria (+10% dano; esquiva custa metade da stamina no servidor)
+    if class_id == 15 then
+        damage_bonus = damage_bonus + 0.10
+    end
+    -- ID 16 Monge das Sombras: Golpe do Ponto Vital Furtivo (+30% chance crítica, +20% dano crítico)
+    if class_id == 16 then
+        crit_chance = crit_chance + 0.30
+        crit_multiplier = crit_multiplier + 0.20
+    end
+    -- ID 17 Forjador de Armas Amaldiçoadas: Têmpera de Sangue (+10% dano; 25% de roubo de vida no servidor)
+    if class_id == 17 then
+        damage_bonus = damage_bonus + 0.10
     end
 
     -- Passivas das Classes Secretas:

@@ -78,7 +78,7 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 
 	// Evoluir Classe (ActionMode 1): Tier 1 -> Tier 2 (Incomum: 1.20x)
 	// Level DEVE SER MANTIDO em 6!
-	// 175 * 1.20 = 210 HP, 120 * 1.20 = 144 Stam; a partir do Tier 2 o Caminho padrão (Gladiador) aplica +10% de HP -> 231
+	// 175 * 1.20 = 210 HP, 120 * 1.20 = 144 Stam (Caminho Evolutivo ainda não escolhido: sem multiplicador)
 	p.SetIdentityMode(0, 0, protocol.IdentityModeEvolveClass)
 	if p.ClassTier != protocol.TierUncommon {
 		t.Fatalf("Esperava Tier 2 Incomum, obteve %d", p.ClassTier)
@@ -86,8 +86,8 @@ func TestClassTiersAndLevelProgression(t *testing.T) {
 	if p.Level != 6 {
 		t.Fatalf("Evolução de classe base deve MANTER o nível! Esperava 6, obteve %d", p.Level)
 	}
-	if p.MaxHP != 231 || p.MaxStamina != 144 {
-		t.Fatalf("Esperava (231, 144) no Tier 2 Level 6, obteve (%d, %d)", p.MaxHP, p.MaxStamina)
+	if p.MaxHP != 210 || p.MaxStamina != 144 {
+		t.Fatalf("Esperava (210, 144) no Tier 2 Level 6, obteve (%d, %d)", p.MaxHP, p.MaxStamina)
 	}
 
 	// Evoluir para Tier 3 (Rara: 1.45x)
@@ -1082,5 +1082,72 @@ func TestIdentityOfferRequiresConfirmation(t *testing.T) {
 	}
 	if p.ClassID != protocol.ClassEclipseReaper || p.ClassTier != protocol.TierUnique || p.Level != 1 {
 		t.Fatalf("esperava Ceifador Tier 5 no nível 1, obteve classe %d tier %d nível %d", p.ClassID, p.ClassTier, p.Level)
+	}
+}
+
+func TestEvolutionPathsMultipliersAndChoice(t *testing.T) {
+	p := NewPlayer(1, nil, 0, 0, 0)
+	p.SetIdentity(protocol.RaceValerian, protocol.ClassShieldBearer)
+	if p.NeedsPathChoice() {
+		t.Fatal("no Tier 1 ainda não há Caminho a escolher")
+	}
+	p.AddLevel(9) // Nível 10 -> Tier 2 Incomum
+	if p.ClassTier != protocol.TierUncommon || !p.NeedsPathChoice() {
+		t.Fatalf("no Tier 2 o jogador deve escolher o Caminho (tier %d, precisa=%v)", p.ClassTier, p.NeedsPathChoice())
+	}
+	baseHP := p.MaxHP
+
+	// Escudeiro Caminho 1 (Guardião ➔ Égide Imortal): +30% HP, +25% Defesa, -15% Dano
+	p.SetIdentityMode(protocol.TierUncommon, protocol.ClassShieldBearer, protocol.IdentityModeDevDirect, 1)
+	if p.SubPath != 1 || p.NeedsPathChoice() {
+		t.Fatalf("Caminho 1 deveria estar ativo, obteve %d", p.SubPath)
+	}
+	if p.MaxHP != uint16(float32(baseHP)*1.30) {
+		t.Fatalf("Guardião: esperava HP %d (+30%%), obteve %d", uint16(float32(baseHP)*1.30), p.MaxHP)
+	}
+	if m := p.PathDamageMult(); m != 0.85 {
+		t.Fatalf("Guardião: esperava dano x0.85, obteve %.2f", m)
+	}
+	hp := p.HP
+	// 100 de dano: defesa do caminho (/1.25 = 80) e depois a passiva do Escudeiro (x0.65 = 52)
+	if newHP, _ := p.TakeDamage(100); newHP != hp-52 {
+		t.Fatalf("Guardião: esperava HP %d após 100 de dano, obteve %d", hp-52, newHP)
+	}
+
+	// Trocar de classe exige escolher o Caminho de novo
+	p.SetIdentityMode(0, protocol.ClassWarrior, protocol.IdentityModeInitialChange)
+	if p.SubPath != 0 || !p.NeedsPathChoice() {
+		t.Fatalf("depois de trocar de classe o Caminho deveria zerar (SubPath %d)", p.SubPath)
+	}
+}
+
+func TestSecretVariantRequirementsKeepLevel(t *testing.T) {
+	p := NewPlayer(1, nil, 0, 0, 0)
+	p.SetIdentity(protocol.RaceValerian, protocol.ClassBlacksmith)
+	p.AddLevel(29) // Nível 30
+
+	if ok, _ := p.CanAwakenVariant(protocol.ClassRunicSpellblade); ok {
+		t.Fatal("Ferreiro não pode despertar o Espadachim Rúnico (exige Guerreiro ou Mago)")
+	}
+	if ok, why := p.CanAwakenVariant(protocol.ClassCursedSmith); !ok {
+		t.Fatalf("Ferreiro nível 30 deveria poder despertar o Forjador Amaldiçoado: %s", why)
+	}
+
+	p.SetIdentityMode(0, protocol.ClassCursedSmith, protocol.IdentityModeInitialChange)
+	if p.ClassID != protocol.ClassCursedSmith || p.Level != 30 || p.ClassTier != protocol.TierRare {
+		t.Fatalf("Variante deve manter o nível e entrar no Tier 3: classe %d nível %d tier %d", p.ClassID, p.Level, p.ClassTier)
+	}
+	if p.SubPath != 0 {
+		t.Fatalf("Variantes não usam Caminho Evolutivo, SubPath %d", p.SubPath)
+	}
+	p.AddLevel(15) // Nível 45 -> Épico, +9 pts/nível
+	if p.ClassTier != protocol.TierEpic || p.StatPointsPerLevel() != 9 {
+		t.Fatalf("no nível 45 a Variante vira Épica com +9 pts/nível: tier %d, pts %d", p.ClassTier, p.StatPointsPerLevel())
+	}
+
+	low := NewPlayer(2, nil, 0, 0, 0)
+	low.SetIdentity(protocol.RaceValerian, protocol.ClassWarrior)
+	if ok, _ := low.CanAwakenVariant(protocol.ClassRunicSpellblade); ok {
+		t.Fatal("Guerreiro nível 1 não deveria despertar Variante (exige nível 25)")
 	}
 }

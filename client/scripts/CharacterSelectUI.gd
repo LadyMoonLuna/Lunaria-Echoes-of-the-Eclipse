@@ -2,6 +2,8 @@ extends CanvasLayer
 
 signal identity_confirmed(race_id: int, class_id: int)
 
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
+var current_identity_label: Label = null # Classe, Tier e Caminho Evolutivo atuais
 var selected_race: int = 1
 var is_open: bool = false
 
@@ -526,9 +528,29 @@ func open_menu() -> void:
 	is_open = true
 	visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_update_current_identity()
 	var world_node := get_parent()
 	if world_node and world_node.get("local_player") and is_instance_valid(world_node.local_player):
 		world_node.local_player.set("is_menu_open", true)
+
+## Mostra a Classe, o Tier e o Caminho Evolutivo atuais do jogador no topo da janela.
+func _update_current_identity() -> void:
+	if not current_identity_label:
+		return
+	var world_node := get_parent()
+	if not world_node or not world_node.has_method("_get_evolved_class_name"):
+		current_identity_label.text = ""
+		return
+	var cid: int = world_node.my_class_id
+	var tier: int = world_node.my_class_tier
+	var sub_path: int = world_node.my_sub_path
+	var tier_names: Array = ["Sem Classe", "Comum", "Incomum", "Rara", "Épica", "Única", "Lendária"]
+	var text: String = "Classe atual: %s [Tier %d %s]" % [world_node._get_evolved_class_name(cid, tier), tier, tier_names[clampi(tier, 0, 6)]]
+	if sub_path >= 1 and ClassPaths.has_paths(cid):
+		text += "\n🧭 Caminho %d: %s — %s" % [sub_path, ClassPaths.path_full_name(cid, sub_path), ClassPaths.pros_cons(cid, sub_path)]
+	elif ClassPaths.is_variant(cid):
+		text += "\n🔮 Variante Secreta: %s" % ClassPaths.VARIANTS[cid]["weapon"]
+	current_identity_label.text = text
 
 func close_menu() -> void:
 	is_open = false
@@ -583,6 +605,13 @@ func _build_ui() -> void:
 	title_lbl.add_theme_font_size_override("font_size", 22)
 	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
 	header_vbox.add_child(title_lbl)
+
+	current_identity_label = Label.new()
+	current_identity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	current_identity_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	current_identity_label.add_theme_font_size_override("font_size", 13)
+	current_identity_label.add_theme_color_override("font_color", Color(0.75, 0.9, 1.0))
+	header_vbox.add_child(current_identity_label)
 
 	var subtitle_lbl := Label.new()
 	subtitle_lbl.text = "Escolha sua Raça Ancestral. Seu sangue ditará suas habilidades inatas e provações divinas."

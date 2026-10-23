@@ -284,7 +284,176 @@ def outfit_chef():
     return m
 
 
+# ---------------------------------------------------------------------------
+# Armas das Classes Secretas Variantes (13 a 18)
+# ---------------------------------------------------------------------------
+
+def runic_sword():
+    m = W("runic_sword", "Espada Rúnica", "Lâmina longa gravada com runas de fogo e gelo que brilham alternadas.", "#40c4ff")
+    steel = m.mat("blade_steel", "#d6dde3", rough=0.15, metal=0.95)
+    fire = m.mat("rune_fire", "#ffccbc", emit="#ff5722", energy=3.0, anim={"type": "glow", "speed": 1.6, "min": 0.5, "max": 1.3})
+    ice = m.mat("rune_ice", "#e1f5fe", emit="#40c4ff", energy=3.0, anim={"type": "glow", "speed": 1.6, "min": 1.3, "max": 0.5})
+    grip = m.mat("grip_leather", "#2a1f33", rough=0.8)
+    m.part("cylinder", [0.022, 0.024, 0.22], (0, 0.0, 0), grip)
+    m.part("box", [0.26, 0.04, 0.05], (0, 0.13, 0), steel)
+    m.part("box", [0.07, 0.95, 0.018], (0, 0.62, 0), steel)
+    m.part("prism", [0.07, 0.1, 0.018], (0, 1.15, 0), steel)
+    for i in range(5):
+        m.part("box", [0.03, 0.06, 0.022], (0, 0.3 + i * 0.16, 0), fire if i % 2 == 0 else ice)
+    return m
+
+
+def arcane_orb():
+    m = W("arcane_orb", "Orbe Arcano Flutuante", "Esfera de cristal com chama e geada girando dentro, flutuando sobre a mão.", "#7c4dff")
+    glass = m.mat("crystal_orb", "#e8eaf6", rough=0.02, alpha=0.45)
+    core = m.mat("orb_core", "#b388ff", emit="#7c4dff", energy=4.5, anim={"type": "glow", "speed": 2.2, "min": 0.6, "max": 1.4})
+    m.group("float", (0, 0.14, 0), anim={"type": "bob", "amp": 0.03, "speed": 2.0})
+    m.part("sphere", [0.09], (0, 0.16, -0.02), glass, group="float")
+    m.part("sphere", [0.05], (0, 0.16, -0.02), core, group="float")
+    m.light("#7c4dff", 0.4, 1.5, (0, 0.16, -0.02))
+    return m
+
+
+def silver_crossbow():
+    m = W("silver_crossbow", "Besta de Prata", "Besta de prata com cruz sagrada gravada e virotes de prata.", "#eceff1")
+    silver = m.mat("silver", "#dfe3e6", rough=0.15, metal=1.0)
+    wood = m.mat("dark_wood", "#3e2723", rough=0.7)
+    string = m.mat("string", "#cfd8dc", rough=0.9)
+    m.part("box", [0.05, 0.05, 0.55], (0, 0.04, -0.22), wood)
+    m.part("box", [0.6, 0.03, 0.04], (0, 0.06, -0.42), silver)
+    m.part("cylinder", [0.004, 0.004, 0.58], (0, 0.08, -0.36), string, rot=(0, 0, 90))
+    m.part("box", [0.012, 0.012, 0.36], (0, 0.09, -0.28), silver)
+    m.part("box", [0.06, 0.008, 0.02], (0, 0.075, -0.1), silver)
+    m.part("box", [0.02, 0.06, 0.02], (0, 0.075, -0.1), silver)
+    return m
+
+
+def holy_stake():
+    m = W("holy_stake", "Estaca Sagrada", "Estaca de freixo com ponta de prata e fita benta.", "#d7ccc8")
+    wood = m.mat("ash_wood", "#a1887f", rough=0.8)
+    silver = m.mat("silver", "#dfe3e6", rough=0.15, metal=1.0)
+    ribbon = m.mat("blessed_ribbon", "#fff8e1", emit="#ffd54f", energy=1.0)
+    m.part("cylinder", [0.022, 0.026, 0.3], (0, 0.1, 0), wood)
+    m.part("cylinder", [0.0, 0.022, 0.08], (0, 0.29, 0), silver)
+    m.part("torus", [0.024, 0.032], (0, 0.02, 0), ribbon)
+    return m
+
+
+def golden_spear():
+    m = W("golden_spear", "Lança Dourada da Valquíria", "Lança longa de ouro com lâmina em asa e faíscas de trovão.", "#ffd54f")
+    gold = m.mat("gold", "#ffca28", rough=0.15, metal=1.0)
+    shaft = m.mat("white_shaft", "#f5f5f5", rough=0.4)
+    spark = m.mat("thunder", "#fffde7", emit="#ffee58", energy=4.0, anim={"type": "flicker", "speed": 8.0, "min": 0.4, "max": 1.0})
+    m.part("cylinder", [0.02, 0.022, 1.7], (0, 0.45, 0), shaft)
+    m.part("cylinder", [0.0, 0.05, 0.32], (0, 1.45, 0), gold)
+    m.part("box", [0.18, 0.04, 0.02], (0, 1.28, 0), gold)
+    m.part("box", [0.006, 0.26, 0.006], (0.03, 1.45, 0), spark, rot=(0, 0, 10))
+    return m
+
+
+def winged_shield():
+    m = W("winged_shield", "Escudo Alado", "Escudo redondo dourado com asas de penas brancas nas laterais.", "#fff59d")
+    gold = m.mat("gold", "#ffca28", rough=0.2, metal=1.0)
+    feather = m.mat("feather_white", "#ffffff", rough=0.8)
+    m.part("cylinder", [0.3, 0.3, 0.05], (0, 0.1, -0.08), gold, rot=(90, 0, 0))
+    m.part("sphere", [0.07], (0, 0.1, -0.11), gold)
+    for side in (-1, 1):
+        for k in range(3):
+            m.part("box", [0.24 - k * 0.04, 0.05, 0.012], (side * (0.36 + k * 0.03), 0.18 - k * 0.07, -0.08), feather,
+                   rot=(0, 0, side * (25 + k * 12)))
+    return m
+
+
+def shadow_gauntlet():
+    m = W("shadow_gauntlet", "Manopla Sombria", "Manopla negra de couro e aço com névoa violeta nos nós dos dedos (usada em par).", "#7e57c2")
+    leather = m.mat("black_leather", "#1d1a22", rough=0.7)
+    steel = m.mat("dark_steel", "#3a3442", rough=0.3, metal=0.85)
+    mist = m.mat("shadow_mist", "#b39ddb", emit="#673ab7", energy=2.5, alpha=0.7, anim={"type": "glow", "speed": 1.5, "min": 0.5, "max": 1.2})
+    m.part("sphere", [0.07], (0, 0.02, 0), leather, scale=(1.0, 1.15, 1.05))
+    m.part("cylinder", [0.066, 0.058, 0.15], (0, -0.08, 0), leather)
+    for i in range(4):
+        m.part("box", [0.028, 0.03, 0.03], ((i - 1.5) * 0.032, 0.085, -0.05), steel)
+    m.part("sphere", [0.06], (0, 0.09, -0.06), mist)
+    return m
+
+
+def crimson_hammer():
+    m = W("crimson_hammer", "Martelo Carmesim", "Martelo de forja de ferro sangrento com veias pulsantes.", "#c62828")
+    iron = m.mat("blood_iron", "#4a1414", rough=0.4, metal=0.85)
+    vein = m.mat("blood_vein", "#ff8a80", emit="#d50000", energy=2.5, anim={"type": "glow", "speed": 1.2, "min": 0.5, "max": 1.3})
+    wood = m.mat("dark_wood", "#2b1b17", rough=0.8)
+    m.part("cylinder", [0.024, 0.028, 0.7], (0, 0.15, 0), wood)
+    m.part("box", [0.18, 0.16, 0.32], (0, 0.56, 0), iron)
+    for i in range(3):
+        m.part("box", [0.006, 0.14, 0.008], ((i - 1) * 0.05, 0.56, -0.162), vein, rot=(0, 0, (i - 1) * 20))
+    return m
+
+
+def living_sword():
+    m = W("living_sword", "Espada Viva", "Espada demoníaca com olho no guarda-mão e lâmina orgânica dentada.", "#b71c1c")
+    flesh = m.mat("blade_flesh", "#5d1010", rough=0.35, metal=0.4)
+    bone = m.mat("bone_teeth", "#e6dccb", rough=0.4)
+    eye = m.mat("demon_eye", "#ffeb3b", emit="#ff6f00", energy=5.0)
+    m.part("cylinder", [0.022, 0.024, 0.2], (0, 0.0, 0), m.mat("grip_wrap", "#1a0d0d", rough=0.9))
+    m.part("sphere", [0.05], (0, 0.13, 0), flesh, scale=(1.6, 0.8, 0.8))
+    m.part("sphere", [0.02], (0, 0.13, -0.035), eye)
+    m.part("box", [0.08, 0.8, 0.02], (0, 0.55, 0), flesh)
+    for i in range(6):
+        m.part("cylinder", [0.0, 0.012, 0.035], (0.045, 0.25 + i * 0.11, 0), bone, rot=(0, 0, -90))
+    return m
+
+
+def scalpel():
+    m = W("scalpel", "Bisturi Cirúrgico", "Bisturi fino de aço polido usado pelo Doutor Corvo.", "#cfd8dc")
+    steel = m.mat("surgical_steel", "#e3e9ee", rough=0.1, metal=1.0)
+    m.part("cylinder", [0.012, 0.014, 0.14], (0, 0.0, 0), steel)
+    m.part("box", [0.02, 0.07, 0.004], (0.004, 0.1, 0), steel)
+    m.part("prism", [0.02, 0.03, 0.004], (0.004, 0.15, 0), steel)
+    return m
+
+
+def censer():
+    m = W("censer", "Incensário do Corvo", "Incensário de latão pendurado em correntes, soltando fumaça verde purificadora.", "#7cb342")
+    brass = m.mat("brass", "#c9a24a", rough=0.3, metal=0.95)
+    smoke = m.mat("green_smoke", "#c5e1a5", emit="#7cb342", energy=1.5, alpha=0.4, anim={"type": "glow", "speed": 1.0, "min": 0.4, "max": 1.0})
+    m.part("cylinder", [0.004, 0.004, 0.3], (0, -0.12, 0), brass)
+    m.group("swing", (0, 0, 0), anim={"type": "sway", "axis": [1, 0, 0], "amp": 12.0, "speed": 1.8})
+    m.part("sphere", [0.07], (0, -0.32, 0), brass, group="swing", scale=(1, 1.2, 1))
+    m.part("sphere", [0.09], (0, -0.2, 0), smoke, group="swing")
+    return m
+
+
+def outfit_plague_doctor():
+    m = O("plague_doctor", "Médico da Peste", "Sobretudo de couro encerado, chapéu de aba larga e máscara de corvo com lentes.", "#7cb342")
+    coat = m.mat("waxed_leather", "#2b2622", rough=0.55)
+    hat = m.mat("black_hat", "#1a1714", rough=0.7)
+    mask = m.mat("crow_mask", "#d7ccc8", rough=0.6)
+    lens = m.mat("lens_glass", "#a5d6a7", emit="#7cb342", energy=1.5)
+    _shell(m, coat, coat, coat, m.mat("leather_boots", "#1b1410", rough=0.6))
+    m.part("cylinder", [0.24, 0.34, 0.75], (0, 0.82, 0), coat, group="pose")
+    m.part("cylinder", [0.0, 0.05, 0.22], (0, 1.68, -0.2), mask, rot=(-80, 0, 0))
+    m.part("sphere", [0.025], (0.045, 1.74, -0.12), lens, mirror=True)
+    m.part("cylinder", [0.25, 0.25, 0.02], (0, 1.86, 0.02), hat)
+    m.part("cylinder", [0.13, 0.14, 0.14], (0, 1.93, 0.02), hat)
+    return m
+
+
+def outfit_valkyrie():
+    m = O("valkyrie", "Valquíria da Égide", "Armadura dourada e branca com elmo alado e saia de placas.", "#fff59d")
+    gold = m.mat("gold_plate", "#e0b84a", rough=0.25, metal=0.95)
+    white = m.mat("white_cloth", "#f5f5f5", rough=0.8)
+    feather = m.mat("feather_white", "#ffffff", rough=0.8)
+    _shell(m, gold, white, white, m.mat("steel_boots", "#c9b58a", rough=0.3, metal=0.85))
+    m.part("cylinder", [0.24, 0.32, 0.32], (0, 0.88, 0), gold, group="pose")
+    m.part("sphere", [0.14], (0, 1.78, 0.02), gold, scale=(1.05, 0.8, 1.05))
+    for side in (-1, 1):
+        m.part("box", [0.16, 0.05, 0.012], (side * 0.17, 1.84, 0.0), feather, rot=(0, 0, side * 30))
+    return m
+
+
 WEAPONS_CLASSES = [assassin_dagger, heavy_gauntlet, colossal_shield, short_mace, sculptor_chisel, coiled_whip,
-                   golden_needle, giant_cleaver, iron_wok, guardian_statue, tamed_beast]
+                   golden_needle, giant_cleaver, iron_wok, guardian_statue, tamed_beast,
+                   runic_sword, arcane_orb, silver_crossbow, holy_stake, golden_spear, winged_shield,
+                   shadow_gauntlet, crimson_hammer, living_sword, scalpel, censer]
 OUTFITS_CLASSES = [outfit_assassin, outfit_fighter, outfit_shieldbearer, outfit_sculptor, outfit_tamer, outfit_tailor,
-                   outfit_chef]
+                   outfit_chef, outfit_plague_doctor, outfit_valkyrie]

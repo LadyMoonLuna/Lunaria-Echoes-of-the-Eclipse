@@ -9,6 +9,10 @@ const JUMP_VELOCITY: float = 6.0
 const MOUSE_SENSITIVITY: float = 0.003
 const NETWORK_TICK_INTERVAL: float = 0.05 # 20 Hz (a cada 50ms)
 
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
+var current_class_tier: int = 0
+var current_sub_path: int = 0 # Caminho Evolutivo (1 a 4) — muda a velocidade de movimento
+
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 var network_timer: float = 0.0
 
@@ -1425,6 +1429,15 @@ func apply_identity(race_id: int, class_id: int) -> void:
 	_apply_race_visuals()
 	_apply_class_visuals()
 	identity_changed.emit(current_race_id, current_class_id)
+
+## Tier e Caminho Evolutivo vindos do servidor (PLAYER_STATS).
+func set_path_info(class_tier: int, sub_path: int) -> void:
+	current_class_tier = class_tier
+	current_sub_path = sub_path
+
+## Multiplicador de velocidade do Caminho Evolutivo ativo (1.0 sem caminho).
+func _path_speed_mult() -> float:
+	return float(ClassPaths.active_mult(current_class_id, current_class_tier, current_sub_path)[3])
 
 func _change_class(class_id: int) -> void:
 	if current_class_id == class_id:
@@ -3956,8 +3969,9 @@ func _physics_process(delta: float) -> void:
 			var move_dir: Vector3 = (forward * -input_dir.y + right * input_dir.x).normalized()
 
 			if move_dir != Vector3.ZERO:
-				velocity.x = move_dir.x * SPEED
-				velocity.z = move_dir.z * SPEED
+				var move_speed: float = SPEED * _path_speed_mult()
+				velocity.x = move_dir.x * move_speed
+				velocity.z = move_dir.z * move_speed
 				if not is_attacking:
 					var target_yaw := atan2(-move_dir.x, -move_dir.z)
 					rotation.y = lerp_angle(rotation.y, target_yaw, 15.0 * delta)

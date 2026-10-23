@@ -4,6 +4,7 @@ var is_open: bool = false
 var current_npc_id: int = 0
 var current_npc_name: String = ""
 var view_mode: String = "main" # "main" ou "trade"
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
 
 static func get_hearts_string(points: int) -> String:
 	if points >= 100:
@@ -568,28 +569,48 @@ func _render_main_view(m_info: Dictionary) -> void:
 		status_lbl.add_theme_color_override("font_color", Color(0.7, 0.88, 1.0))
 		options_vbox.add_child(status_lbl)
 
-		if my_level >= 10 and my_tier < 4:
-			var evo_prompt := Label.new()
-			evo_prompt.text = "Seu domínio avançou! Escolha a especialização do seu Caminho:"
-			evo_prompt.add_theme_font_size_override("font_size", 11)
-			evo_prompt.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
-			options_vbox.add_child(evo_prompt)
+		var my_sub_path: int = 0
+		if world and world.get("my_sub_path"):
+			my_sub_path = world.my_sub_path
+		if ClassPaths.has_paths(my_class) and my_tier >= 2:
+			if my_sub_path >= 1:
+				var path_lbl := Label.new()
+				path_lbl.text = "🧭 Caminho %d: %s — %s" % [my_sub_path, ClassPaths.path_full_name(my_class, my_sub_path), ClassPaths.pros_cons(my_class, my_sub_path)]
+				path_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				path_lbl.add_theme_font_size_override("font_size", 11)
+				path_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+				options_vbox.add_child(path_lbl)
+			else:
+				var evo_prompt := Label.new()
+				evo_prompt.text = "Seu domínio avançou! Escolha 1 dos 4 Caminhos Evolutivos (vale até o Tier 4 Épico):"
+				evo_prompt.add_theme_font_size_override("font_size", 11)
+				evo_prompt.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+				options_vbox.add_child(evo_prompt)
+				for sub_path in range(1, 5):
+					var path_id: int = sub_path
+					var path_btn := Button.new()
+					path_btn.custom_minimum_size = Vector2(0, 38)
+					path_btn.text = "🧭 Caminho %d: %s (%s)" % [path_id, ClassPaths.path_full_name(my_class, path_id), ClassPaths.pros_cons(my_class, path_id)]
+					path_btn.add_theme_font_size_override("font_size", 11)
+					path_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+					path_btn.pressed.connect(func(): _choose_path(path_id))
+					options_vbox.add_child(path_btn)
 
-			var path_a_btn := Button.new()
-			path_a_btn.custom_minimum_size = Vector2(0, 38)
-			path_a_btn.text = "⚖️ Evoluir: Caminho da Ordem (Caminho A — Defesa & Liderança)"
-			path_a_btn.add_theme_font_size_override("font_size", 11)
-			path_a_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-			path_a_btn.pressed.connect(func(): _choose_path(1))
-			options_vbox.add_child(path_a_btn)
-
-			var path_b_btn := Button.new()
-			path_b_btn.custom_minimum_size = Vector2(0, 38)
-			path_b_btn.text = "🔥 Evoluir: Caminho do Caos (Caminho B — Dano Ofensivo & Crítico)"
-			path_b_btn.add_theme_font_size_override("font_size", 11)
-			path_b_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-			path_b_btn.pressed.connect(func(): _choose_path(2))
-			options_vbox.add_child(path_b_btn)
+		# Variantes Secretas (13 a 18) que esta classe básica pode despertar (nível 25+, sem reset de nível)
+		for variant_id in ClassPaths.variants_for_base(my_class):
+			var v_id: int = variant_id
+			var v_info: Dictionary = ClassPaths.VARIANTS[v_id]
+			var v_btn := Button.new()
+			v_btn.custom_minimum_size = Vector2(0, 38)
+			v_btn.add_theme_font_size_override("font_size", 11)
+			if my_level >= ClassPaths.VARIANT_MIN_LEVEL:
+				v_btn.text = "🔮 Despertar Variante Secreta: %s (%s) — mantém o nível" % [v_info["name"], v_info["subtitle"]]
+				v_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+				v_btn.pressed.connect(func(): _learn_class(my_race, v_id))
+			else:
+				v_btn.text = "🔒 Variante Secreta: %s (requer nível %d)" % [v_info["name"], ClassPaths.VARIANT_MIN_LEVEL]
+				v_btn.disabled = true
+			options_vbox.add_child(v_btn)
 
 		if my_tier == 5 and my_level >= 45:
 			var leg_btn := Button.new()
@@ -804,7 +825,9 @@ func _learn_class(race_id: int, new_class_id: int) -> void:
 	var world := get_parent()
 	var class_name_str := "Classe #%d" % new_class_id
 	var master_name := current_npc_name if current_npc_name != "" else ("Mestre #%d" % current_npc_id)
-	if MASTER_DATA.has(current_npc_id):
+	if ClassPaths.is_variant(new_class_id):
+		class_name_str = ClassPaths.VARIANTS[new_class_id]["name"]
+	elif MASTER_DATA.has(current_npc_id):
 		class_name_str = MASTER_DATA[current_npc_id].get("class_name", class_name_str)
 	if world and world.has_method("request_class_or_race_change"):
 		# Únicas/Lendárias (19 a 27) entram no Tier 5; Variantes Secretas (13 a 18) no Tier 3; básicas no Tier 1

@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
 var is_open: bool = false
 var active_tab_index: int = 0
 
@@ -1148,6 +1149,13 @@ func _switch_tab(idx: int) -> void:
 
 	_refresh_current_tab()
 
+## Dados da classe no Grimório: tabela própria, Variantes Secretas (13 a 18) do ClassPaths ou Viajante.
+func _class_info(class_id: int) -> Dictionary:
+	if CLASS_ACTIVE_SKILLS.has(class_id):
+		return CLASS_ACTIVE_SKILLS[class_id]
+	var variant: Dictionary = ClassPaths.variant_skill_info(class_id)
+	return variant if not variant.is_empty() else CLASS_ACTIVE_SKILLS[0]
+
 func _refresh_current_tab() -> void:
 	var world := get_parent()
 	var my_race: int = 1
@@ -1268,7 +1276,7 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.add_child(vbox)
 
-	var c_info: Dictionary = CLASS_ACTIVE_SKILLS.get(class_id, CLASS_ACTIVE_SKILLS[0])
+	var c_info: Dictionary = _class_info(class_id)
 	var clamped_tier: int = clampi(class_tier, 1, 6)
 	var ev_titles: Dictionary = c_info.get("evolved_titles", {})
 	var evolved_title: String = ev_titles.get(clamped_tier, c_info.get("tier_name", "Tier %d" % clamped_tier))
@@ -1293,6 +1301,17 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 	bvbox.add_theme_constant_override("separation", 3)
 	banner.add_child(bvbox)
 
+	# Caminho Evolutivo (Classes Básicas a partir do Tier 2): substitui o título genérico
+	var world := get_parent()
+	var my_sub_path: int = 0
+	if world and world.get("my_sub_path"):
+		my_sub_path = world.my_sub_path
+	var path_title: String = ClassPaths.path_title(class_id, clamped_tier, my_sub_path)
+	if path_title != "":
+		evolved_title = "Caminho %d: %s" % [my_sub_path, path_title]
+	elif ClassPaths.has_paths(class_id) and clamped_tier >= 2:
+		evolved_title = "Caminho ainda não escolhido"
+
 	var c_title := Label.new()
 	c_title.text = "Classe Atual: %s — %s [%s] (Nível %d)" % [c_info["name"], evolved_title, tier_badge, level]
 	c_title.add_theme_font_size_override("font_size", 15)
@@ -1305,6 +1324,15 @@ func _build_tab_2_class_actives(class_id: int, class_tier: int, level: int) -> v
 	c_desc.add_theme_font_size_override("font_size", 11)
 	c_desc.add_theme_color_override("font_color", Color(0.8, 0.85, 0.92))
 	bvbox.add_child(c_desc)
+
+	if my_sub_path >= 1 and ClassPaths.has_paths(class_id):
+		var path_lbl := Label.new()
+		var active_note: String = "" if clamped_tier >= 2 else " (ativo a partir do Tier 2)"
+		path_lbl.text = "🧭 %s — %s%s" % [ClassPaths.path_full_name(class_id, my_sub_path), ClassPaths.pros_cons(class_id, my_sub_path), active_note]
+		path_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		path_lbl.add_theme_font_size_override("font_size", 11)
+		path_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+		bvbox.add_child(path_lbl)
 
 	# Card da Passiva Exclusiva da Classe
 	var pass_info: Dictionary = c_info.get("passive", {
@@ -1437,7 +1465,7 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 	p_title.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	pvbox.add_child(p_title)
 
-	var my_c_info: Dictionary = CLASS_ACTIVE_SKILLS.get(class_id, CLASS_ACTIVE_SKILLS[0])
+	var my_c_info: Dictionary = _class_info(class_id)
 	var p_desc := Label.new()
 	if class_id == 0:
 		p_desc.text = "Viajantes não possuem especialização marcial ativa. Visite os Mestres na Vila do Refúgio para aprender uma Classe Básica."
@@ -1719,7 +1747,7 @@ func _build_tab_4_customize_slots(race_id: int, class_id: int) -> void:
 	h_vbox.add_child(h_sub)
 
 	# Catálogo de Habilidades disponíveis para o jogador
-	var class_info: Dictionary = CLASS_ACTIVE_SKILLS.get(class_id, CLASS_ACTIVE_SKILLS[0])
+	var class_info: Dictionary = _class_info(class_id)
 	var race_info: Dictionary = RACIAL_DETAILS.get(race_id, RACIAL_DETAILS[1])
 
 	var available_skills := [

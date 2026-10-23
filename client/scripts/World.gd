@@ -56,6 +56,8 @@ var dev_btn_top: Button = null
 var dev_status_label: Label = null
 var dev_selected_tier: int = 1
 var dev_tier_buttons: Array[Button] = []
+var dev_selected_path: int = 0 # Caminho Evolutivo enviado pelo Dev Manager (0 = manter)
+var dev_path_buttons: Array[Button] = []
 var autopsy_ui: CanvasLayer = null
 var house_doors: Array = []
 var zone_marker_nodes: Array = []
@@ -134,6 +136,8 @@ const RACE_NAMES := [
 	"Meio-Demônio (Succubus)",
 	"Demi-Humano Lobo"
 ]
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
+
 const CLASS_NAMES := [
 	"Viajante (Sem Classe)",
 	"Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
@@ -472,6 +476,7 @@ var screen_fade_rect: ColorRect = null
 var my_race_id: int = 1
 var my_class_id: int = 0
 var my_class_tier: int = 0
+var my_sub_path: int = 0 # Caminho Evolutivo (1 a 4; 0 = ainda não escolhido)
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -778,6 +783,12 @@ const DEV_CLASSES := [
 	{"id": 10, "name": "Domador", "desc": "Senhor da matilha com chicote bestial. [Passiva] Luta acompanhado por Fera Domada. [Q] Estalo do Chicote: Investida!, [R] Fusão & Uivo Bestial, [F] Debandada das Feras.", "col": Color("#ffd740")},
 	{"id": 11, "name": "Alfaiate de Guerra", "desc": "Tecelão com fios de aço e agulhas rúnicas. [Passiva] Fios Monofilamento & Seda Blindada. [Q] Teia de Fios Retalhadores, [R] Costurar Sombras, [F] Gaiola de Fios Carmesins.", "col": Color("#ce93d8")},
 	{"id": 12, "name": "Chef de Caça", "desc": "Gourmet com cutelo gigante e wok de ferro. [Passiva] Células Gourmet. [Q] Desossar a Vivo! (+35 HP), [R] Banquete na Wok Flamejante, [F] Trinchar o Behemoth.", "col": Color("#ff7043")},
+	{"id": 13, "name": "Espadachim Rúnico", "desc": "Variante Secreta (Guerreiro/Mago, nv. 25+, sem reset). Espada Rúnica + Orbe. [Passiva] Lâmina Elemental. [Q] Corte Flamígero/Glacial, [R] Escudo de Runas, [F] Cometa da Espada Arcana.", "col": Color("#40c4ff")},
+	{"id": 14, "name": "Caçador de Vampiros", "desc": "Variante Secreta (Arqueiro/Assassino, nv. 25+, sem reset). Besta de Prata + Estaca. [Passiva] Exterminador Noturno (+40% em criaturas sombrias). [Q] Virote de Prata, [R] Corrente de Exorcismo, [F] Julgamento da Cruz Solar.", "col": Color("#eceff1")},
+	{"id": 15, "name": "Valquíria da Égide", "desc": "Variante Secreta (Escudeiro/Guerreiro, nv. 25+, sem reset). Lança Dourada + Escudo Alado. [Passiva] Voo da Valquíria. [Q] Estocada do Trovão, [R] Salto da Valquíria, [F] Chuva de Lanças Douradas.", "col": Color("#fff59d")},
+	{"id": 16, "name": "Monge das Sombras", "desc": "Variante Secreta (Lutador/Assassino, nv. 25+, sem reset). Manoplas Sombrias. [Passiva] Golpe do Ponto Vital Furtivo. [Q] Palma das Sombras, [R] Passo Fantasma, [F] Toque da Morte de Cinco Passos.", "col": Color("#7e57c2")},
+	{"id": 17, "name": "Forjador de Armas Amaldiçoadas", "desc": "Variante Secreta (Ferreiro, nv. 25+, sem reset). Martelo Carmesim + Espada Viva. [Passiva] Têmpera de Sangue (25% roubo de vida). [Q] Martelo Hemorrágico, [R] Sacrifício da Bigorna, [F] Despertar da Espada Demoníaca.", "col": Color("#c62828")},
+	{"id": 18, "name": "Médico da Peste", "desc": "Variante Secreta (Alquimista/Chef de Caça, nv. 25+, sem reset). Máscara de Corvo + Bisturi + Incensário. [Passiva] Imunidade & Cura Tóxica. [Q] Bisturi Cirúrgico, [R] Incenso Purificador, [F] Nuvem da Peste Negra.", "col": Color("#7cb342")},
 	{"id": 19, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
 	{"id": 20, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
 	{"id": 21, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
@@ -1063,6 +1074,11 @@ func _dev_update_tier_buttons() -> void:
 		else:
 			btn.modulate = Color(0.8, 0.8, 0.8)
 
+func _dev_update_path_buttons() -> void:
+	for idx in range(dev_path_buttons.size()):
+		var btn: Button = dev_path_buttons[idx]
+		btn.modulate = Color(1.0, 0.9, 0.3) if idx == dev_selected_path else Color(0.8, 0.8, 0.8)
+
 var _active_class_or_race_modal: PanelContainer = null
 
 # Modal de Confirmação Obrigatória para Mudança de Classe ou Raça
@@ -1218,8 +1234,8 @@ func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: i
 			current_rid = local_player.current_race_id
 		if NetworkManager:
 			if source_desc.begins_with("DEV"):
-				# Modo 98 (Dev Direto): o servidor lê o Tier no campo da raça
-				NetworkManager.send_select_identity(target_tier, target_id, 98)
+				# Modo 98 (Dev Direto): o servidor lê o Tier no campo da raça; o 4º campo é o Caminho
+				NetworkManager.send_select_identity(target_tier, target_id, 98, dev_selected_path)
 			elif target_tier >= 5:
 				NetworkManager.send_select_identity(current_rid, target_id, 2) # IdentityModeSecretReset
 			else:
@@ -1232,7 +1248,11 @@ func _on_dev_activate_race(race_id: int, race_name: String) -> void:
 	request_class_or_race_change(true, race_id, 1, race_name, "DEV F9")
 
 func _on_dev_activate_class(class_id: int, target_class_name: String) -> void:
-	request_class_or_race_change(false, class_id, dev_selected_tier, target_class_name, "DEV F9")
+	var shown_name: String = target_class_name
+	var title: String = ClassPaths.path_title(class_id, dev_selected_tier, dev_selected_path)
+	if title != "":
+		shown_name = "%s — %s" % [target_class_name, title]
+	request_class_or_race_change(false, class_id, dev_selected_tier, shown_name, "DEV F9")
 
 func _build_dev_tab_races(tabs: TabContainer) -> void:
 	var tab := VBoxContainer.new()
@@ -1367,6 +1387,36 @@ func _build_dev_tab_classes(tabs: TabContainer) -> void:
 		dev_tier_buttons.append(t_btn)
 		tier_hb.add_child(t_btn)
 	_dev_update_tier_buttons()
+
+	# 2.1 Seletor de Caminho Evolutivo (Classes Básicas 1 a 12, vale a partir do Tier 2)
+	var path_title := Label.new()
+	path_title.text = "🧭 CAMINHO EVOLUTIVO (Classes 1 a 12, a partir do Tier 2 — 48 caminhos):"
+	path_title.add_theme_font_size_override("font_size", 12)
+	path_title.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
+	tier_vb.add_child(path_title)
+
+	var path_hb := HBoxContainer.new()
+	path_hb.add_theme_constant_override("separation", 6)
+	tier_vb.add_child(path_hb)
+
+	dev_path_buttons.clear()
+	for p in range(0, 5):
+		var p_idx: int = p
+		var p_btn := Button.new()
+		p_btn.text = "[Manter Caminho]" if p == 0 else "[Caminho %d]" % p
+		p_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		p_btn.pressed.connect(func():
+			dev_selected_path = p_idx
+			_dev_update_path_buttons()
+			if dev_status_label:
+				if p_idx == 0:
+					dev_status_label.text = "Caminho: mantém o atual (ou nenhum)"
+				else:
+					dev_status_label.text = "Caminho %d selecionado — escolha a classe abaixo (Tier 2 a 4)" % p_idx
+		)
+		dev_path_buttons.append(p_btn)
+		path_hb.add_child(p_btn)
+	_dev_update_path_buttons()
 
 	# 3. Lista das 15 Classes
 	var scroll := ScrollContainer.new()
@@ -1990,6 +2040,7 @@ func _on_player_stats_full_received(player_id: int, race_id: int, class_id: int,
 		my_race_id = race_id
 		my_class_id = class_id
 		my_class_tier = class_tier
+		my_sub_path = int(NetworkManager.player_sub_paths.get(player_id, 0))
 		my_level = level
 		my_hp = hp
 		my_max_hp = max_hp
@@ -1998,6 +2049,7 @@ func _on_player_stats_full_received(player_id: int, race_id: int, class_id: int,
 		my_buff_active = buff_active
 		if local_player and is_instance_valid(local_player):
 			local_player.apply_identity(race_id, class_id)
+			local_player.set_path_info(class_tier, my_sub_path)
 		_update_hud()
 
 func _on_player_respawn_received(player_id: int, respawn_pos: Vector3) -> void:
@@ -2013,6 +2065,12 @@ func _on_player_respawn_received(player_id: int, respawn_pos: Vector3) -> void:
 func _get_evolved_class_name(cid: int, tier: int) -> String:
 	if cid == 0:
 		return "Viajante (Sem Classe)"
+	# Classes Básicas a partir do Tier 2: título do Caminho Evolutivo escolhido
+	if ClassPaths.has_paths(cid) and tier >= 2 and cid < CLASS_NAMES.size():
+		var path_name: String = ClassPaths.path_title(cid, tier, my_sub_path)
+		if path_name != "":
+			return "%s — %s" % [CLASS_NAMES[cid], path_name]
+		return "%s (escolha seu Caminho)" % CLASS_NAMES[cid]
 	if EVOLVED_CLASS_NAMES.has(cid):
 		var names_list: Array = EVOLVED_CLASS_NAMES[cid]
 		var safe_tier: int = clamp(tier, 1, names_list.size() - 1)

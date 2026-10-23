@@ -355,3 +355,28 @@ func TestSecretClasses10to15CombatMultipliers(t *testing.T) {
 }
 
 
+
+func TestSecretVariantSkillMultipliers(t *testing.T) {
+	clock := world.NewWorldClock(12.0)
+	engine := NewEngine(clock)
+	defer engine.Close()
+	if err := engine.LoadCombatScript(filepath.Join(FindCombatScriptsDir(), "combat.lua")); err != nil {
+		t.Fatalf("falha ao carregar combat.lua: %v", err)
+	}
+	// Espadachim Rúnico (base 34, +15% Lâmina Elemental): F = 2.8x. Compara só resultados sem crítico.
+	nonCrit := func(action uint8) uint16 {
+		for i := 0; i < 200; i++ {
+			dmg, crit := engine.CallCalculateDamage(protocol.RaceValerian, protocol.ClassRunicSpellblade, action,
+				100.0, 12, world.MoonPhaseWaxingCrescent, world.WeatherClear, protocol.TierRare, 1, 0)
+			if crit == 0 {
+				return dmg
+			}
+		}
+		t.Fatal("nenhum resultado sem crítico em 200 tentativas")
+		return 0
+	}
+	basic, ult := nonCrit(protocol.ActionBasicAttack), nonCrit(protocol.ActionSkillF)
+	if basic == 0 || float64(ult) < float64(basic)*2.6 || float64(ult) > float64(basic)*3.0 {
+		t.Fatalf("o Cometa da Espada Arcana deveria causar ~2.8x o básico: básico %d, F %d", basic, ult)
+	}
+}

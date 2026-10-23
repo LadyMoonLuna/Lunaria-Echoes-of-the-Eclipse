@@ -21,7 +21,7 @@ func TestBasicClassSkillAreaHitsEveryTargetInRange(t *testing.T) {
 	far := addTestMob(s, 3, 6, 0, 1000)
 
 	// Guerreiro F (Julgamento da Espada): círculo de 4.5m
-	shape, ok := basicClassSkillShape(protocol.ClassWarrior, protocol.ActionSkillF)
+	shape, ok := classSkillShape(protocol.ClassWarrior, protocol.ActionSkillF)
 	if !ok {
 		t.Fatal("Julgamento da Espada deveria ter área")
 	}
@@ -37,7 +37,7 @@ func TestWarriorUltimateExecutesLowHPTargets(t *testing.T) {
 	healthy := addTestMob(s, 1, 2, 0, 1000)
 	wounded := addTestMob(s, 2, -2, 0, 300) // 30% de vida
 
-	shape, _ := basicClassSkillShape(protocol.ClassWarrior, protocol.ActionSkillF)
+	shape, _ := classSkillShape(protocol.ClassWarrior, protocol.ActionSkillF)
 	s.applyBasicClassSkill(player, protocol.ClassWarrior, protocol.ActionSkillF, 0, 0, 0, 0, 0, -1, shape, 100, 0)
 	if healthy.HP != 900 {
 		t.Fatalf("alvo saudável deveria levar 100, ficou com %d", healthy.HP)
@@ -55,14 +55,14 @@ func TestBasicClassSkillConeAndSingleTarget(t *testing.T) {
 	behind := addTestMob(s, 3, 0, 5, 1000)
 
 	// Alfaiate Q (Teia de Fios): cone de 8m à frente, mirando para -Z
-	shape, _ := basicClassSkillShape(protocol.ClassWarTailor, protocol.ActionSkillQ)
+	shape, _ := classSkillShape(protocol.ClassWarTailor, protocol.ActionSkillQ)
 	s.applyBasicClassSkill(player, protocol.ClassWarTailor, protocol.ActionSkillQ, 0, 0, 0, 0, 0, -1, shape, 50, 0)
 	if front.HP != 950 || front2.HP != 950 || behind.HP != 1000 {
 		t.Fatalf("cone deveria atingir só os da frente: HP %d, %d, %d", front.HP, front2.HP, behind.HP)
 	}
 
 	// Domador Q (Estalo do Chicote): só o alvo mais próximo, a até 9m
-	shape, _ = basicClassSkillShape(protocol.ClassTamer, protocol.ActionSkillQ)
+	shape, _ = classSkillShape(protocol.ClassTamer, protocol.ActionSkillQ)
 	s.applyBasicClassSkill(player, protocol.ClassTamer, protocol.ActionSkillQ, 0, 0, 0, 0, 0, -1, shape, 50, 0)
 	if front.HP != 900 || front2.HP != 950 {
 		t.Fatalf("chicote deveria atingir só o mais próximo: HP %d, %d", front.HP, front2.HP)
@@ -74,7 +74,7 @@ func TestBlacksmithAnvilCracksArmor(t *testing.T) {
 	player := world.NewPlayer(1, nil, 0, 1.5, 0)
 	mob := addTestMob(s, 1, 0, -2, 1000)
 
-	shape, _ := basicClassSkillShape(protocol.ClassBlacksmith, protocol.ActionSkillQ)
+	shape, _ := classSkillShape(protocol.ClassBlacksmith, protocol.ActionSkillQ)
 	s.applyBasicClassSkill(player, protocol.ClassBlacksmith, protocol.ActionSkillQ, 0, 0, 0, 0, 0, -1, shape, 100, 0)
 	if dealt, _, _, _ := mob.TakeDamage(100); dealt != 130 {
 		t.Fatalf("depois da Bigorna o alvo deveria receber +30%%: esperava 130, obteve %d", dealt)
@@ -92,5 +92,32 @@ func TestShadowStepLandsBehindTarget(t *testing.T) {
 	}
 	if _, _, ok := s.shadowStepTarget(player, 0, 0, 0, 1); ok {
 		t.Fatal("não deveria achar alvo mirando para o lado oposto")
+	}
+}
+
+func TestVampireHunterAndCursedSmithPassives(t *testing.T) {
+	s := setupMockServer()
+	player := world.NewPlayer(1, nil, 0, 1.5, 0)
+
+	vampire := addTestMob(s, 1, 0, -3, 1000)
+	vampire.MobType = protocol.MobTypeVesperianBloodGuard
+	wolf := addTestMob(s, 2, 0, -3.5, 1000)
+	wolf.MobType = protocol.MobTypeMistWolf
+
+	// Caçador de Vampiros F (Julgamento da Cruz Solar): +40% só em criaturas sombrias
+	shape, _ := classSkillShape(protocol.ClassVampireHunter, protocol.ActionSkillF)
+	s.applyBasicClassSkill(player, protocol.ClassVampireHunter, protocol.ActionSkillF, 0, 0, 0, 0, 0, -1, shape, 100, 0)
+	if vampire.HP != 860 || wolf.HP != 900 {
+		t.Fatalf("esperava 140 no vampiro e 100 no lobo: HP %d, %d", vampire.HP, wolf.HP)
+	}
+
+	// Forjador Amaldiçoado: 25% do dano volta como vida
+	player.Mu.Lock()
+	player.HP = 50
+	player.Mu.Unlock()
+	shape, _ = classSkillShape(protocol.ClassCursedSmith, protocol.ActionSkillF)
+	s.applyBasicClassSkill(player, protocol.ClassCursedSmith, protocol.ActionSkillF, 0, 0, 0, 0, 0, -1, shape, 100, 0)
+	if player.HP != 100 { // 2 alvos x 100 de dano x 25%
+		t.Fatalf("Têmpera de Sangue: esperava HP 100, obteve %d", player.HP)
 	}
 }

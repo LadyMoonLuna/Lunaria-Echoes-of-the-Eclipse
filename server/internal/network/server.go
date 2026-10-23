@@ -919,6 +919,15 @@ func (s *Server) handleSelectIdentity(pkt protocol.SelectIdentityPacket) {
 		return
 	}
 
+	// Variantes Secretas (13 a 18) exigem a classe básica de origem e o nível Raro (25+)
+	if pkt.ClassID >= protocol.ClassRunicSpellblade && pkt.ClassID <= protocol.ClassPlagueDoctor && pkt.ClassID != player.ClassID {
+		if ok, reason := player.CanAwakenVariant(pkt.ClassID); !ok {
+			s.BroadcastNPCSay(0, fmt.Sprintf("[VARIANTE SECRETA] Jogador #%d: %s", pkt.PlayerID, reason))
+			log.Printf("[VARIANTE] Jogador #%d não pode despertar a Classe %d: %s\n", pkt.PlayerID, pkt.ClassID, reason)
+			return
+		}
+	}
+
 	player.SetIdentityMode(pkt.RaceID, pkt.ClassID, pkt.ActionMode, pkt.SubPath)
 	log.Printf("[IDENTIDADE] Jogador #%d aplicou Raça %d, Classe %d, Modo %d (Tier %d, Nível %d)\n",
 		pkt.PlayerID, player.RaceID, player.ClassID, pkt.ActionMode, player.ClassTier, player.Level)
@@ -1577,7 +1586,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		staminaCost = 0.0
 	case protocol.ActionDodgeRoll: // 2: Esquiva (20 stamina, 10 para Thalassiano e Dançarino Astral)
 		staminaCost = 20.0
-		if player.RaceID == protocol.RaceThalassian || player.ClassID == protocol.ClassAstralDancer {
+		if player.RaceID == protocol.RaceThalassian || player.ClassID == protocol.ClassAstralDancer || player.ClassID == protocol.ClassAegisValkyrie {
 			staminaCost = 10.0
 		}
 	case protocol.ActionSkillQ: // 3: Habilidade 1 [Q] (15 stamina)
@@ -2152,6 +2161,14 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		}
 	}
 
+	// 3.75. Variantes Secretas (13 a 18): efeitos de R que vêm antes do dano (ou no lugar dele)
+	if classID >= protocol.ClassRunicSpellblade && classID <= protocol.ClassPlagueDoctor {
+		if s.handleVariantPreEffects(player, classID, pkt.ActionType, px, pz, aimX, aimZ) {
+			s.sendPlayerStats(player)
+			return
+		}
+	}
+
 	// 3.8. Disparo de Projéteis 3D
 	isProjectileAttack := false
 	if classID == protocol.ClassArcher || classID == protocol.ClassAlchemist ||
@@ -2159,7 +2176,8 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 		(classID == protocol.ClassRunicArtificer && pkt.ActionType >= protocol.ActionSkillQ) ||
 		(classID == protocol.ClassHomunculusCreator) ||
 		(classID == protocol.ClassBoneNecromancer && pkt.ActionType == protocol.ActionSkillQ) ||
-		(classID == protocol.ClassStormHerald && pkt.ActionType == protocol.ActionSkillQ) {
+		(classID == protocol.ClassStormHerald && pkt.ActionType == protocol.ActionSkillQ) ||
+		(classID == protocol.ClassVampireHunter && (pkt.ActionType == protocol.ActionBasicAttack || pkt.ActionType == protocol.ActionSkillQ)) {
 		isProjectileAttack = true
 	}
 
@@ -2244,6 +2262,16 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 			speed = 22.0
 			maxRange = 16.0
 
+		case protocol.ClassVampireHunter:
+			// Besta de Prata: virotes perfurantes; Q = Virote de Prata (22m)
+			projType = protocol.ProjTypePiercingArrow
+			speed = 30.0
+			maxRange = 18.0
+			if pkt.ActionType == protocol.ActionSkillQ {
+				speed = 36.0
+				maxRange = 22.0
+			}
+
 		case protocol.ClassStormHerald:
 			// Skill Q: Lança do Trovão (ProjType = 8, 18m)
 			projType = protocol.ProjTypeLightningSpear
@@ -2262,11 +2290,12 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 	}
 
 	// 3.9. Classes Básicas (1 a 12): Q/R/F atingem todos os alvos da área descrita na habilidade
-	if shape, ok := basicClassSkillShape(classID, pkt.ActionType); ok {
+	if shape, ok := classSkillShape(classID, pkt.ActionType); ok {
 		h, _, moon, weather := s.clock.GetTime()
 		hpPct := float32(hp) / float32(maxHP) * 100.0
 		damage, isCrit := s.luaEngine.CallCalculateDamage(raceID, classID, pkt.ActionType, hpPct, int(h), moon, weather,
 			classTier, level, buffVal, pSTR, pDEX, pINT, pSPI, pMAS, pLCK)
+		damage = applyPathDamage(damage, player) // Caminho Evolutivo (Dano)
 		cx, cz := px+aimX*shape.offset, pz+aimZ*shape.offset
 		originX, originZ := px, pz
 		if shape.centerOnSelf {
@@ -2382,6 +2411,7 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 			pMAS,
 			pLCK,
 		)
+		damage = applyPathDamage(damage, player) // Caminho Evolutivo (Dano)
 
 		newHP, reset := targetDummy.TakeDamage(damage)
 		_, maxDummyHP := targetDummy.GetHP()
@@ -2437,8 +2467,12 @@ func (s *Server) handlePlayerAction(pkt protocol.PlayerActionPacket) {
 			pMAS,
 			pLCK,
 		)
+		damage = applyPathDamage(damage, player) // Caminho Evolutivo (Dano)
+
+		damage = variantDamageAgainst(classID, targetMob, damage)
 
 		finalDamage, wasBlocked, newHP, isDead := targetMob.TakeDamage(damage, player.ID)
+		s.applyVariantOnHitPassives(player, classID, targetMob, finalDamage, isDead)
 
 		log.Printf("[COMBATE] Jogador #%d causou %d dano (Crítico: %d, Bloqueado: %v) no Mob #%d (%s) | HP: %d/%d\n",
 			player.ID, finalDamage, isCrit, wasBlocked, targetMob.ID, targetMob.Name, newHP, targetMob.MaxHP)
@@ -3822,6 +3856,7 @@ func (s *Server) updateProjectiles(dt float32) {
 					oMAS,
 					oLCK,
 				)
+				damage = applyPathDamage(damage, owner) // Caminho Evolutivo (Dano)
 
 				newHP, reset := dummy.TakeDamage(damage)
 				_, maxDummyHP := dummy.GetHP()
@@ -3901,9 +3936,12 @@ func (s *Server) updateProjectiles(dt float32) {
 						oMAS,
 						oLCK,
 					)
+					damage = applyPathDamage(damage, owner) // Caminho Evolutivo (Dano)
+					damage = variantDamageAgainst(ownerClass, mob, damage)
 
 					finalDamage, wasBlocked, newHP, isDead := mob.TakeDamage(damage, p.OwnerID)
 					s.BroadcastCombatEvent(p.OwnerID, mob.ID, actionType, finalDamage, isCrit, newHP, mob.MaxHP)
+					s.applyVariantOnHitPassives(owner, ownerClass, mob, finalDamage, isDead)
 
 					// Lifesteal
 					if ownerRace == protocol.RaceDhampir {
@@ -5305,26 +5343,13 @@ func (s *Server) checkProgressionMilestones(player *world.Player) {
 		}
 	}
 
-	// 2. Oferta de Especialização de Caminho de Classe Básica (Níveis 10, 25, 45)
-	if classID >= 1 && classID <= 12 {
-		// Nível 10 (Tier 2 Incomum)
-		if lvl >= 10 && classTier < protocol.TierUncommon {
-			s.sendEvolutionOffer(player, protocol.OfferTypeBasicClass, 1, 2)
-			s.BroadcastNPCSay(0, fmt.Sprintf("[MESTRE DA GUILDA] Guerreiro #%d atingiu o Nível 10! Escolha seu Caminho de Especialização (Tier 2 Incomum)!", player.ID))
-			return
-		}
-		// Nível 25 (Tier 3 Rara)
-		if lvl >= 25 && classTier < protocol.TierRare {
-			s.sendEvolutionOffer(player, protocol.OfferTypeBasicClass, 1, 2)
-			s.BroadcastNPCSay(0, fmt.Sprintf("[MESTRE DA GUILDA] Guerreiro #%d atingiu o Nível 25! Evolua seu Caminho para Tier 3 (Rara)!", player.ID))
-			return
-		}
-		// Nível 45 (Tier 4 Épica)
-		if lvl >= 45 && classTier < protocol.TierEpic {
-			s.sendEvolutionOffer(player, protocol.OfferTypeBasicClass, 1, 2)
-			s.BroadcastNPCSay(0, fmt.Sprintf("[MESTRE DA GUILDA] Guerreiro #%d atingiu o Nível 45! Alcance o ápice como Classe Épica (Tier 4)!", player.ID))
-			return
-		}
+	// 2. Escolha do Caminho Evolutivo das Classes Básicas. O Tier sobe sozinho nos níveis 10, 25 e 45
+	// (checkLevelMilestoneTierEvolutionLocked); a partir do Tier 2 o jogador escolhe 1 dos 4 Caminhos,
+	// que vale até o Tier 4 Épico. A oferta (A=1, B=4) pede a escolha entre os Caminhos 1 a 4.
+	if player.NeedsPathChoice() {
+		s.sendEvolutionOffer(player, protocol.OfferTypeBasicClass, 1, 4)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[MESTRE DA GUILDA] O aventureiro #%d alcançou o Tier %d! Escolha 1 dos 4 Caminhos Evolutivos da sua classe.", player.ID, classTier))
+		return
 	}
 
 	// 3. Provação Lendária para Classes Únicas (Tier 5 no Nível 45+)
@@ -5371,25 +5396,21 @@ func (s *Server) handleEvolutionChoice(playerID uint32, pkt protocol.EvolutionOf
 			log.Printf("[EVOLUÇÃO RACIAL] Jogador #%d evoluiu para Raça %d!\n", playerID, chosenRace)
 		}
 
-	case protocol.OfferTypeBasicClass: // 2: Especialização de Caminho de Classe Básica
+	case protocol.OfferTypeBasicClass: // 2: Escolha do Caminho Evolutivo (1 a 4) das Classes Básicas
 		chosenPath := pkt.OptionAID
-		if chosenPath == 0 {
-			chosenPath = pkt.OptionBID
+		if chosenPath < 1 || chosenPath > 4 || !player.NeedsPathChoice() {
+			log.Printf("[CAMINHO] Jogador #%d escolheu o Caminho %d sem poder escolher (ou inválido) — ignorado\n", playerID, chosenPath)
+			return
 		}
 		player.Mu.Lock()
+		player.SubPath = chosenPath
 		player.ClassPath = chosenPath
-		if chosenPath >= 1 && chosenPath <= 4 {
-			player.SubPath = chosenPath
-		}
-		if player.ClassTier < protocol.TierEpic {
-			player.ClassTier++
-		}
 		player.Mu.Unlock()
 		player.RecalculateStats()
 
 		s.sendPlayerStats(player)
-		s.BroadcastNPCSay(0, fmt.Sprintf("[EVOLUÇÃO DE CLASSE] O guerreiro #%d escolheu o Caminho %d e ascendeu ao Tier %d!", playerID, chosenPath, player.ClassTier))
-		log.Printf("[EVOLUÇÃO DE CLASSE] Jogador #%d escolheu Caminho %d, ClassTier agora é %d!\n", playerID, chosenPath, player.ClassTier)
+		s.BroadcastNPCSay(0, fmt.Sprintf("[CAMINHO EVOLUTIVO] O aventureiro #%d seguiu o Caminho %d (Tier %d)!", playerID, chosenPath, player.ClassTier))
+		log.Printf("[CAMINHO] Jogador #%d escolheu o Caminho %d no Tier %d\n", playerID, chosenPath, player.ClassTier)
 
 	case protocol.OfferTypeIdentityChange: // 4: Troca de Classe/Raça confirmada no modal do cliente
 		if !player.AcceptIdentityOffer(pkt.OptionAID) {

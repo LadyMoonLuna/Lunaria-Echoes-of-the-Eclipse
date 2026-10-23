@@ -2,6 +2,7 @@ extends CanvasLayer
 
 signal evolution_accepted(offer_type: int, chosen_option: int)
 
+const ClassPaths = preload("res://scripts/ClassPaths.gd")
 var is_open: bool = false
 var current_offer_type: int = 1
 var option_a_id: int = 0
@@ -118,6 +119,8 @@ var entity_title_label: Label = null
 var entity_lore_label: Label = null
 var card_a_container: PanelContainer = null
 var card_b_container: PanelContainer = null
+var card_c_container: PanelContainer = null # Caminhos Evolutivos 3 e 4 (só na escolha de Caminho)
+var card_d_container: PanelContainer = null
 
 func _ready() -> void:
 	layer = 30
@@ -240,7 +243,19 @@ func _build_ui() -> void:
 	card_b_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cards_hbox.add_child(card_b_container)
 
+	card_c_container = PanelContainer.new()
+	card_c_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card_c_container.visible = false
+	cards_hbox.add_child(card_c_container)
+
+	card_d_container = PanelContainer.new()
+	card_d_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card_d_container.visible = false
+	cards_hbox.add_child(card_d_container)
+
 func _update_offer_content(offer_type: int, player_race: int, opt_a: int, opt_b: int) -> void:
+	card_c_container.visible = false
+	card_d_container.visible = false
 	if offer_type == 1: # Evolução de Raça
 		var safe_race: int = player_race
 		if not ENTITY_LORE.has(safe_race):
@@ -253,26 +268,27 @@ func _update_offer_content(offer_type: int, player_race: int, opt_a: int, opt_b:
 		_build_choice_card(card_a_container, lore_data["opt_a"], true, opt_a if opt_a > 0 else lore_data["opt_a"]["id"])
 		_build_choice_card(card_b_container, lore_data["opt_b"], false, opt_b if opt_b > 0 else lore_data["opt_b"]["id"])
 
-	elif offer_type == 2: # Especialização de Classe Básica
-		entity_title_label.text = "Bifurcação de Especialização da Guilda"
-		entity_lore_label.text = "\"Seu domínio de combate atingiu um novo ápice. Escolha qual caminho da lâmina e magia guiará seu destino!\""
-
-		var opt_a_info := {
-			"name": "Caminho da Ordem (Caminho A)",
-			"path": "Foco em Defesa, Suporte Sagrado & Controle",
-			"color": Color("#4fc3f7"),
-			"skill_z": "Aprimoramento Tático: Fortalece habilidades defensivas e concede regeneração de grupo.",
-			"passive": "+15% de Armadura e Resistência Mágica."
-		}
-		var opt_b_info := {
-			"name": "Caminho do Caos (Caminho B)",
-			"path": "Foco em Dano Devastador, Crítico & Penetração",
-			"color": Color("#ff5252"),
-			"skill_z": "Fúria Ofensiva: Disparos e golpes passam a quebrar defesas e queimar alvos.",
-			"passive": "+20% de Dano Crítico e Tenacidade."
-		}
-		_build_choice_card(card_a_container, opt_a_info, true, 1)
-		_build_choice_card(card_b_container, opt_b_info, false, 2)
+	elif offer_type == 2: # Escolha de 1 dos 4 Caminhos Evolutivos da Classe Básica
+		var world := get_parent()
+		var my_class: int = 1
+		if world and world.get("my_class_id"):
+			my_class = world.my_class_id
+		entity_title_label.text = "Os 4 Caminhos Evolutivos da Guilda"
+		entity_lore_label.text = "\"Seu domínio de combate atingiu um novo ápice. Escolha o Caminho que guiará sua classe até o Tier 4 Épico — a escolha é definitiva!\""
+		var cards: Array = [card_a_container, card_b_container, card_c_container, card_d_container]
+		var path_colors: Array = [Color("#ff7043"), Color("#4fc3f7"), Color("#ffd54f"), Color("#ab47bc")]
+		for sub_path in range(1, 5):
+			var p_info: Dictionary = ClassPaths.PATHS.get(my_class, {}).get(sub_path, {})
+			if p_info.is_empty():
+				cards[sub_path - 1].visible = false
+				continue
+			_build_choice_card(cards[sub_path - 1], {
+				"name": "Caminho %d: %s" % [sub_path, p_info["rare"]],
+				"path": "%s ➔ %s" % [p_info["rare"], p_info["epic"]],
+				"color": path_colors[sub_path - 1],
+				"skill_z": "Foco: %s" % p_info["focus"],
+				"passive": ClassPaths.pros_cons(my_class, sub_path),
+			}, sub_path % 2 == 1, sub_path)
 
 	elif offer_type == 3: # Provação Lendária (Tier 6)
 		entity_title_label.text = "Ascensão ao Cataclismo Cósmico (Tier 6)"

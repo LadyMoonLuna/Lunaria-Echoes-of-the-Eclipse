@@ -1,6 +1,7 @@
 package world
 
 import (
+	"fmt"
 	"math/rand"
 	"net"
 	"sync"
@@ -302,6 +303,68 @@ func (p *Player) ApplyBaseRaceAttributes(raceID uint8) {
 	p.recalculateStatsLocked()
 }
 
+// pathMultipliersLocked retorna os multiplicadores do Caminho Evolutivo ativo (HP, Stamina, Defesa,
+// Velocidade, Dano). Valem só nas 12 Classes Básicas, a partir do Tier 2 e com um caminho escolhido.
+func (p *Player) pathMultipliersLocked() (hp, stam, def, spd, dmg float32) {
+	if p.ClassID < 1 || p.ClassID > 12 || p.ClassTier < protocol.TierUncommon {
+		return 1.0, 1.0, 1.0, 1.0, 1.0
+	}
+	return GetSubPathMultipliers(p.ClassID, p.SubPath)
+}
+
+// PathDamageMult retorna o multiplicador de dano do Caminho Evolutivo ativo.
+func (p *Player) PathDamageMult() float32 {
+	p.Mu.RLock()
+	defer p.Mu.RUnlock()
+	_, _, _, _, dmg := p.pathMultipliersLocked()
+	return dmg
+}
+
+// VariantBaseClasses lista as Classes Básicas que podem despertar cada Variante Secreta (13 a 18).
+var VariantBaseClasses = map[uint8][]uint8{
+	protocol.ClassRunicSpellblade: {protocol.ClassWarrior, protocol.ClassMage},
+	protocol.ClassVampireHunter:   {protocol.ClassArcher, protocol.ClassAssassin},
+	protocol.ClassAegisValkyrie:   {protocol.ClassShieldBearer, protocol.ClassWarrior},
+	protocol.ClassShadowMonk:      {protocol.ClassFighter, protocol.ClassAssassin},
+	protocol.ClassCursedSmith:     {protocol.ClassBlacksmith},
+	protocol.ClassPlagueDoctor:    {protocol.ClassAlchemist, protocol.ClassHuntingChef},
+}
+
+// VariantMinLevel é o nível mínimo (Tier 3 Raro) para despertar uma Variante Secreta.
+const VariantMinLevel = 25
+
+// CanAwakenVariant informa se o jogador pode despertar a Variante Secreta, com o motivo quando não pode.
+func (p *Player) CanAwakenVariant(variantID uint8) (bool, string) {
+	bases, ok := VariantBaseClasses[variantID]
+	if !ok {
+		return false, "classe não é uma Variante Secreta"
+	}
+	p.Mu.RLock()
+	classID, level := p.ClassID, p.Level
+	p.Mu.RUnlock()
+	isBase := false
+	for _, b := range bases {
+		if b == classID {
+			isBase = true
+			break
+		}
+	}
+	if !isBase {
+		return false, "esta Variante exige outra classe básica de origem"
+	}
+	if level < VariantMinLevel {
+		return false, fmt.Sprintf("é preciso chegar ao nível %d (Tier 3 Raro)", VariantMinLevel)
+	}
+	return true, ""
+}
+
+// NeedsPathChoice informa se o jogador já pode (e ainda não) escolheu o Caminho Evolutivo.
+func (p *Player) NeedsPathChoice() bool {
+	p.Mu.RLock()
+	defer p.Mu.RUnlock()
+	return p.ClassID >= 1 && p.ClassID <= 12 && p.ClassTier >= protocol.TierUncommon && p.SubPath == 0
+}
+
 // StatPointsPerLevel retorna os pontos de atributo concedidos por nível com base no Tier de Raridade da Classe (Tier 0 a Tier 6).
 func StatPointsPerLevel(classTier uint8) uint8 {
 	switch classTier {
@@ -345,7 +408,7 @@ func GetSubPathMultipliers(classID, subPath uint8) (hpMult, stamMult, defMult, s
 		return 1.0, 1.0, 1.0, 1.0, 1.0
 	}
 	if subPath < 1 || subPath > 4 {
-		subPath = 1
+		return 1.0, 1.0, 1.0, 1.0, 1.0 // Caminho ainda não escolhido
 	}
 
 	switch classID {
@@ -904,7 +967,7 @@ func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player
 		ClassID:         initClass,
 		ClassTier:       initTier,
 		ClassPath:       0,
-		SubPath:         1,
+		SubPath:         0, // Caminho escolhido no Tier 2 (0 = ainda não escolhido)
 		Level:           initLevel,
 		XP:              0,
 		NextLevelXP:     100,
@@ -951,11 +1014,7 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
-	if len(subPathOpts) > 0 && subPathOpts[0] >= 1 && subPathOpts[0] <= 4 {
-		p.SubPath = subPathOpts[0]
-	} else if p.SubPath == 0 {
-		p.SubPath = 1
-	}
+	prevClass := p.ClassID
 
 	switch actionMode {
 	case protocol.IdentityModeInitialChange: // 0: Troca Inicial / Escolha de Classe no Mestre
@@ -1049,6 +1108,15 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 				p.ClassTier = protocol.TierCommon
 			}
 		}
+	}
+
+	// Caminho Evolutivo: só nas 12 Classes Básicas; trocar de classe exige escolher de novo.
+	// SubPath 0 no pacote = manter o caminho atual.
+	if p.ClassID != prevClass || p.ClassID < 1 || p.ClassID > 12 {
+		p.SubPath = 0
+	}
+	if len(subPathOpts) > 0 && subPathOpts[0] >= 1 && subPathOpts[0] <= 4 && p.ClassID >= 1 && p.ClassID <= 12 {
+		p.SubPath = subPathOpts[0]
 	}
 
 	p.recalculateStatsLocked()
@@ -1633,6 +1701,22 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 	// Passiva Succubus (Aparência Inofensiva): 25% de chance de anular o ataque
 	if p.RaceID == protocol.RaceHalfDemon && rand.Float32() < 0.25 {
 		return p.HP, false
+	}
+
+	// Caminho Evolutivo: defesa maior reduz o dano recebido, menor aumenta (ex.: 1.25 -> dano / 1.25)
+	if _, _, def, _, _ := p.pathMultipliersLocked(); def != 1.0 && amount > 0 {
+		amount = uint16(float32(amount) / def)
+		if amount == 0 {
+			amount = 1
+		}
+	}
+
+	// Passiva Médico da Peste (Imunidade & Cura Tóxica): -15% de dano recebido
+	if p.ClassID == protocol.ClassPlagueDoctor && amount > 0 {
+		amount = uint16(float32(amount) * 0.85)
+		if amount == 0 {
+			amount = 1
+		}
 	}
 
 	// Passiva Assassino (Lâmina Silenciosa): 15% de chance de esquivar do golpe
