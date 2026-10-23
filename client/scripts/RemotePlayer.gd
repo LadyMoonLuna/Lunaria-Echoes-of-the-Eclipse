@@ -78,7 +78,7 @@ func update_label() -> void:
 			"Meio-Celestial", "Pyromante", "Gigante de Gelo", "Drago Terra", "Drago Água",
 			"Drago Raio", "Drago Místico", "Orc", "Anão", "Elfo",
 			"Elfo Solar", "Elfo Lunar", "Fadinha", "Goblin", "Demi-Humano Escorpião",
-			"Demi-Humano Tartaruga", "Meio-Demônio", "Demi-Humano Lobo"
+			"Demi-Humano Tartaruga", "Meio-Demônio", "Demi-Humano Lobo", "Manamante"
 		]
 		var c_names: Array[String] = [
 			"", "Espadachim", "Batedor", "Iniciado", "Acólito",
@@ -751,6 +751,11 @@ func _apply_race_visuals() -> void:
 			mat.roughness = 0.7
 			if visor_mesh:
 				visor_mesh.material_override = _create_emissive_mat(Color("#90a4ae"), 2.8)
+		47: # Manamante - Robe cobalto e veias de mana
+			mat.albedo_color = Color("#1a2a80")
+			mat.roughness = 0.6
+			if visor_mesh:
+				visor_mesh.material_override = _create_emissive_mat(Color("#2979ff"), 3.4)
 
 	body_mesh.material_override = mat
 	_update_race_model()
@@ -765,6 +770,9 @@ func _update_race_model() -> void:
 	if LunariaModel.has_model(LunariaModel.race_uid(current_race_id)):
 		race_model = LunariaModel.create_race(current_race_id, current_class_id) as LunariaModel
 		race_model.position = Vector3(0, -0.9, 0)
+		# O modelo já tem a estatura da raça; desfaz a escala aplicada à cápsula
+		var bs: float = maxf(body_mesh.scale.x, 0.01)
+		race_model.scale = Vector3.ONE / bs
 		body_mesh.add_child(race_model)
 		body_mesh.mesh = null
 		if visor_mesh:
@@ -773,6 +781,10 @@ func _update_race_model() -> void:
 		body_mesh.mesh = _capsule_mesh
 		if visor_mesh:
 			visor_mesh.visible = true
+	# Acessórios de cápsula (asas, chifres, caudas) só aparecem sem o modelo 3D
+	for child in body_mesh.get_children():
+		if String(child.name).begins_with("RaceAccessory") and not child.is_queued_for_deletion():
+			child.visible = race_model == null
 
 func _update_class_weapon() -> void:
 	_apply_class_visuals()
@@ -2259,6 +2271,7 @@ func _get_race_color() -> Color:
 		44: return Color("#33691e") # Demi-Humano Tartaruga
 		45: return Color("#c2185b") # Meio-Demônio (Succubus)
 		46: return Color("#78909c") # Demi-Humano Lobo
+		47: return Color("#3d5afe") # Manamante
 		_: return Color("#ffd700")
 
 func _get_class_color() -> Color:

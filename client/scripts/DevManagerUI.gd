@@ -545,6 +545,12 @@ const RACES_DATA := [
 		"stats": "FOR: 12 | DES: 9 | CON: 10 | AGI: 11 | INT: 3 | ESP: 4 | MAS: 8 | SOR: 7",
 		"passive": "Instinto Lupino: +15% de dano físico e rastreamento de alvos com baixa integridade.",
 		"skill_z": "Despertar Forma Bestial [Z]: Uivo brutal liberando +35% de velocidade e garras vorazes."
+	},
+	{
+		"id": 47, "group": "SECRET", "name": "Manamante", "badge": "Sangue Azul", "color": Color("#3d5afe"),
+		"stats": "FOR: 3 | DES: 6 | CON: 8 | AGI: 6 | INT: 13 | ESP: 11 | MAS: 7 | SOR: 4",
+		"passive": "Afinidade Mágica: +18% de dano. Sangue Azul: Vida e Mana são uma só reserva (Vida alta, Stamina baixa).",
+		"skill_z": "Coração de Mana [Z]: Queima 15% da Vida máxima numa explosão arcana de 7m (escala com INT)."
 	}
 ]
 

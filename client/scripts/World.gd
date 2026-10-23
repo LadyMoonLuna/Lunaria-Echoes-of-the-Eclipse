@@ -447,7 +447,8 @@ const RACIAL_SKILL_NAMES := {
 	43: "Aguilhão de Toxina Vorpal",
 	44: "Lar Doce Casca",
 	45: "Drenar Força Vital",
-	46: "Despertar Forma Bestial"
+	46: "Despertar Forma Bestial",
+	47: "Coração de Mana"
 }
 
 var current_world_hour: int = 16
@@ -752,7 +753,8 @@ const DEV_RACES := [
 	{"id": 43, "name": "Demi-Humano Escorpião", "badge": "RPG Peçonha", "col": Color("#6a1b9a"), "desc": "Aguilhão de Toxina Vorpal [Z]: Estocada venenosa de dano corrosivo contínuo."},
 	{"id": 44, "name": "Demi-Humano Tartaruga", "badge": "RPG Blindado (1.35x)", "col": Color("#33691e"), "desc": "Lar Doce Casca [Z]: Casulo impenetrável (-45% dano passivo e absorção 85%)."},
 	{"id": 45, "name": "Meio-Demônio (Succubus)", "badge": "RPG Vampírico", "col": Color("#c2185b"), "desc": "Drenar Força Vital [Z]: Sifão demoníaco com roubo de 55 HP e 25% evasão passiva."},
-	{"id": 46, "name": "Demi-Humano Lobo", "badge": "RPG Feral", "col": Color("#78909c"), "desc": "Despertar Forma Bestial [Z]: Uivo lupino brutal com +35% velocidade e garras vorazes."}
+	{"id": 46, "name": "Demi-Humano Lobo", "badge": "RPG Feral", "col": Color("#78909c"), "desc": "Despertar Forma Bestial [Z]: Uivo lupino brutal com +35% velocidade e garras vorazes."},
+	{"id": 47, "name": "Manamante", "badge": "Secreta Sangue Azul", "col": Color("#3d5afe"), "desc": "Coração de Mana [Z]: Queima 15% da Vida numa explosão arcana de 7m (+18% dano passivo)."}
 ]
 
 const DEV_CLASSES := [

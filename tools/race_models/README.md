@@ -15,7 +15,7 @@ em Python como um conjunto de primitivas com pivôs animáveis. Um único build 
 | :--- | :--- | :--- |
 | Raças 1–18 (base, evoluções e secretas) | 18 | `races_base.py` |
 | Raças lendárias 19–28 | 10 | `races.py` |
-| Raças 29–45 (Orc, Goblin, Elfos, Dragos, Pyromante, demi-humanos, Manamante) | 17 | `races_new.py` |
+| Raças 29–47 (Meio-Celestial, Pyromante, Gigante de Gelo, Dragos, Orc, Anão, Elfos, Fadinha, Goblin, demi-humanos, Súcubo, Manamante) | 19 | `races_new.py` |
 | NPCs (Garrick 100, Lyra 103, Varis 104, Randel 105, Valen 106, Alquimista Fantasma 107) | 6 | `npcs.py` |
 | Criaturas / mobs 1–14 (pelagem em tufos, asas de penas e membrana, armas próprias) | 12 | `mobs.py` |
 | Armas (pivô na empunhadura, +Y ao longo da lâmina) + Mini-Homúnculo | 24 + 1 | `gear.py` |

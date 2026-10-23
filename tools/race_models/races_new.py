@@ -1,6 +1,7 @@
-"""Raças 29-45 de Lunaria (docs/design/racas_propostas.md).
+"""Raças 29-47 de Lunaria (docs/design/racas_propostas.md).
 
-IDs iguais a server/internal/protocol/packets.go (RaceOrc=29 ... RaceManamancer=45).
+IDs iguais a server/internal/protocol/packets.go (RaceHalfCelestial=29 ... RaceWolfDemi=46, RaceManamancer=47).
+A estatura (scale) segue _get_race_scale() do cliente.
 """
 
 import math
@@ -76,7 +77,7 @@ def _wing_group(m, name, side):
 # ---------------------------------------------------------------------------
 
 def orc():
-    m = Model(29, "orc", "Orc", "Guerreiro das Estepes Cinzentas",
+    m = Model(36, "orc", "Orc", "Guerreiro das Estepes Cinzentas",
               "Corpo largo e musculoso de pele verde-musgo, presas inferiores salientes, cicatrizes de honra, "
               "trança guerreira e ombreira de osso.", "#558b2f", scale=1.08, seed=29)
     skin, leather, metal = _dressed(m, "#6b8e3d", w=1.15, iris_col="#c62828")
@@ -97,9 +98,9 @@ def orc():
 
 
 def goblin():
-    m = Model(30, "goblin", "Goblin", "Trapaceiro das Cavernas",
+    m = Model(42, "goblin", "Goblin", "Trapaceiro das Cavernas",
               "Baixinho e magro, pele verde-limão, orelhas enormes e pontudas, nariz adunco, sorriso cheio de "
-              "dentes e bolsas de bugigangas penduradas no cinto.", "#9ccc65", scale=0.72, seed=30)
+              "dentes e bolsas de bugigangas penduradas no cinto.", "#9ccc65", scale=0.75, seed=30)
     skin, leather, metal = _dressed(m, "#8bc34a", w=0.9, iris_col="#ffd600")
     pointed_ears(m, skin, length=0.22, up=-80)
     nose = m.mat("skin_nose", "#7cb342", rough=0.55)
@@ -116,7 +117,7 @@ def goblin():
 
 
 def elfo():
-    m = Model(31, "elfo", "Elfo", "Guardião das Florestas Antigas",
+    m = Model(38, "elfo", "Elfo", "Guardião das Florestas Antigas",
               "Esguio e elegante, orelhas longas e pontudas, cabelos longos loiro-claros, túnica verde-floresta "
               "e braçadeiras de couro gravadas com folhas.", "#81c784", scale=1.02, seed=31)
     skin, leather, metal = _dressed(m, "#f1d3b6", w=0.92, iris_col="#2e7d32", vest=False)
@@ -138,7 +139,7 @@ def elfo():
 # ---------------------------------------------------------------------------
 
 def elfo_solar():
-    m = Model(32, "elfo_solar", "Elfo Solar", "Bênção do Sol",
+    m = Model(39, "elfo_solar", "Elfo Solar", "Bênção do Sol",
               "Elfo de cabelos de ouro, armadura branca e dourada com um disco solar no peito e um halo de "
               "raios atrás da cabeça.", "#ffca28", scale=1.05, seed=32)
     skin, leather, metal = _dressed(m, "#f3cfa6", w=0.95, iris_col="#ff8f00", vest=False)
@@ -163,7 +164,7 @@ def elfo_solar():
 
 
 def elfo_lunar():
-    m = Model(33, "elfo_lunar", "Elfo Lunar", "Bênção da Lua",
+    m = Model(40, "elfo_lunar", "Elfo Lunar", "Bênção da Lua",
               "Elfo de pele pálida e cabelos prateados, manto azul-noite com crescentes bordados e um "
               "diadema de lua crescente na testa.", "#90caf9", scale=1.03, seed=33)
     skin, leather, metal = _dressed(m, "#e3e8f0", w=0.9, iris_col="#90caf9", vest=False)
@@ -187,7 +188,7 @@ def elfo_lunar():
 # ---------------------------------------------------------------------------
 
 def drago_terra():
-    m = Model(34, "drago_terra", "Drago da Terra", "Escamas de Rocha",
+    m = Model(32, "drago_terra", "Drago da Terra", "Escamas de Rocha",
               "Dracônico atarracado de escamas marrom-terra que viram placas de pedra nos ombros, chifres "
               "grossos e cristais de âmbar brotando das costas.", "#8d6e63", scale=1.1, seed=34)
     scale, horn = _drago(m, "#6d4c41", "#bcaaa4", "#4e342e", "#ffb300")
@@ -203,7 +204,7 @@ def drago_terra():
 
 
 def drago_agua():
-    m = Model(35, "drago_agua", "Drago da Água", "Fluxo das Marés",
+    m = Model(33, "drago_agua", "Drago da Água", "Fluxo das Marés",
               "Dracônico esguio de escamas azul-turquesa, barbatanas translúcidas nos braços e na cabeça e "
               "gotas de água flutuando em volta.", "#29b6f6", scale=1.02, seed=35)
     _drago(m, "#0288d1", "#b3e5fc", "#e1f5fe", "#00e5ff")
@@ -220,7 +221,7 @@ def drago_agua():
 
 
 def drago_raio():
-    m = Model(36, "drago_raio", "Drago do Raio", "Carga Estática",
+    m = Model(34, "drago_raio", "Drago do Raio", "Carga Estática",
               "Dracônico ágil de escamas amarelo-elétrico e preto, chifres em zigue-zague e arcos de "
               "eletricidade saltando entre os espinhos.", "#ffee58", scale=1.0, seed=36)
     _drago(m, "#f9a825", "#212121", "#212121", "#fff176")
@@ -237,7 +238,7 @@ def drago_raio():
 
 
 def drago_mistico():
-    m = Model(37, "drago_mistico", "Drago Místico", "Sangue Arcano",
+    m = Model(35, "drago_mistico", "Drago Místico", "Sangue Arcano",
               "Dracônico de escamas violeta com runas luminosas, chifres de cristal e três orbes arcanos "
               "girando em volta do corpo.", "#ab47bc", scale=1.0, seed=37)
     _drago(m, "#6a1b9a", "#ce93d8", "#e1bee7", "#ea80fc")
@@ -257,7 +258,7 @@ def drago_mistico():
 # ---------------------------------------------------------------------------
 
 def pyromante():
-    m = Model(38, "pyromante", "Pyromante", "Pacto da Chama",
+    m = Model(30, "pyromante", "Pyromante", "Pacto da Chama",
               "Humano de pele morena rachada por veios de brasa, cabelo como labaredas, manto carmesim "
               "chamuscado e chamas dançando nas mãos.", "#ff5722", scale=1.0, seed=38)
     skin, leather, metal = _dressed(m, "#a1775a", w=1.0, iris_col="#ff6d00", vest=False)
@@ -283,7 +284,7 @@ def pyromante():
 # ---------------------------------------------------------------------------
 
 def escorpiao():
-    m = Model(39, "escorpiao", "Escorpião", "Carapaça do Deserto",
+    m = Model(43, "escorpiao", "Escorpião", "Carapaça do Deserto",
               "Demi-humano de carapaça âmbar segmentada sobre o tronco e os braços, olhos múltiplos e uma "
               "cauda articulada que se curva sobre a cabeça com um ferrão venenoso.", "#bf8f00", scale=1.02, seed=39)
     skin, leather, metal = _dressed(m, "#c8a272", w=1.0, iris_col="#1b1b1b", vest=False)
@@ -300,9 +301,9 @@ def escorpiao():
 
 
 def tartaruga():
-    m = Model(40, "tartaruga", "Tartaruga", "Casco Ancestral",
+    m = Model(44, "tartaruga", "Tartaruga", "Casco Ancestral",
               "Demi-humano robusto e baixo, pele verde-oliva, casco hexagonal enorme nas costas, plastrão "
-              "no peito e olhar sereno de quem já viu séculos.", "#2e7d32", scale=0.98, seed=40)
+              "no peito e olhar sereno de quem já viu séculos.", "#2e7d32", scale=1.35, seed=40)
     skin = m.mat("skin", "#7a8f4a", rough=0.7)
     shell = m.mat("shell_bone", "#5d4a2e", rough=0.6)
     plastron = m.mat("plastron_bone", "#d7c58f", rough=0.6)
@@ -325,7 +326,7 @@ def tartaruga():
 def fadinha():
     m = Model(41, "fadinha", "Fadinha", "Asas de Cristal",
               "Pequenina e brilhante, cabelos rosa em coque, vestido de pétalas, orelhas pontudas e quatro "
-              "asas de cristal translúcido que soltam pó cintilante.", "#f48fb1", scale=0.6, seed=41)
+              "asas de cristal translúcido que soltam pó cintilante.", "#f48fb1", scale=0.55, seed=41)
     skin = m.mat("skin", "#ffe0d0", rough=0.5)
     dress = m.mat("petal_cloth", "#f8bbd0", rough=0.7)
     hair = m.mat("hair", "#f06292", rough=0.45)
@@ -350,7 +351,7 @@ def fadinha():
 
 
 def meio_celestial():
-    m = Model(42, "meio_celestial", "Meio-Celestial", "Graça Celeste",
+    m = Model(29, "meio_celestial", "Meio-Celestial", "Graça Celeste",
               "Filho de anjo e mortal: pele clara com leve brilho, cabelos brancos, túnica branca com "
               "bordas douradas, halo tênue e asas de penas brancas.", "#fff59d", scale=1.04, seed=42)
     skin, leather, metal = _dressed(m, "#f6e3d0", w=0.96, iris_col="#ffca28", vest=False)
@@ -372,9 +373,9 @@ def meio_celestial():
 
 
 def gigante_gelo():
-    m = Model(43, "gigante_gelo", "Gigante de Gelo", "Sangue Glacial",
+    m = Model(31, "gigante_gelo", "Gigante de Gelo", "Sangue Glacial",
               "Colosso de pele azul-pálida, barba e cabelos de gelo, ombreiras de pele de urso branco e "
-              "cristais de gelo crescendo nos ombros e antebraços.", "#b3e5fc", scale=1.35, seed=43)
+              "cristais de gelo crescendo nos ombros e antebraços.", "#b3e5fc", scale=1.45, seed=43)
     skin = m.mat("skin", "#a7c4d6", rough=0.6)
     fur = m.mat("fur_white", "#eceff1", rough=1.0)
     beard = m.mat("beard_ice", "#e1f5fe", rough=0.4)
@@ -397,7 +398,7 @@ def gigante_gelo():
 
 
 def sucubo():
-    m = Model(44, "sucubo", "Súcubo", "Encanto Infernal",
+    m = Model(45, "sucubo", "Súcubo", "Encanto Infernal",
               "Meio-demônio de pele lavanda, chifres curvos negros, cabelos vinho longos, asas de morcego e "
               "uma cauda fina terminada em ponta de coração.", "#d81b60", scale=1.0, seed=44)
     skin, leather, metal = _dressed(m, "#c9a3c9", w=0.92, iris_col="#ff1744", vest=False)
@@ -421,7 +422,7 @@ def sucubo():
 
 
 def manamante():
-    m = Model(45, "manamante", "Manamante", "Sangue Azul",
+    m = Model(47, "manamante", "Manamante", "Sangue Azul",
               "Humano de pele pálida com veias azuis luminosas, olhos de mana pura, robe azul-cobalto com "
               "runas e um cristal-coração pulsando no peito.", "#3d5afe", scale=1.0, seed=45)
     skin = m.mat("skin", "#e8e4f0", rough=0.5)
@@ -445,5 +446,50 @@ def manamante():
     return m
 
 
-ALL_NEW = [orc, goblin, elfo, elfo_solar, elfo_lunar, drago_terra, drago_agua, drago_raio, drago_mistico,
+def anao():
+    m = Model(37, "anao", "Anão", "Resistência da Montanha",
+              "Baixo e largo, barba ruiva longa e trançada com anéis de bronze, avental de couro de forja, "
+              "braços grossos marcados por fuligem e um elmo de ferro com abas.", "#d7ccc8", scale=0.82, seed=37)
+    skin, leather, metal = _dressed(m, "#d9a98a", w=1.2, iris_col="#5d4037")
+    beard = m.mat("beard", "#b5542a", rough=0.8)
+    bronze = m.mat("bronze_ring", "#c58b3a", rough=0.3, metal=0.9)
+    iron = m.mat("iron_helm", "#6d7378", rough=0.4, metal=0.85)
+    apron = m.mat("apron", "#5a3d2b", rough=0.85)
+    m.part("sphere", [0.138], (0, 1.78, 0.02), iron, scale=(1.05, 0.75, 1.05))
+    m.part("torus", [0.13, 0.15], (0, 1.74, 0.02), iron, scale=(1, 1, 1))
+    m.part("sphere", [0.11], (0, 1.6, -0.08), beard, scale=(1.1, 1.0, 0.7))
+    for x in (-0.04, 0.04):
+        m.chain([(x, 1.55, -0.12), (x, 1.38, -0.14), (x * 0.8, 1.22, -0.13)], [0.035, 0.03, 0.02], beard)
+        m.part("torus", [0.025, 0.035], (x, 1.38, -0.14), bronze, rot=(90, 0, 0))
+    m.part("box", [0.34, 0.6, 0.02], (0, 1.05, -0.2), apron)
+    m.light("#ff8a50", 0.25, 2.0, (0, 1.4, -0.7))
+    return m
+
+
+def lobo():
+    m = Model(46, "lobo", "Demi-Humano Lobo", "Olfato & Instinto",
+              "Demi-humano de pelagem cinza, orelhas de lobo eretas, focinho curto, olhos prateados, cauda "
+              "espessa e armadura leve de couro com dentes de lobo pendurados.", "#78909c", scale=1.02, seed=46)
+    skin = m.mat("skin", "#b9a18a", rough=0.6)
+    fur = m.mat("fur", "#78909c", rough=1.0)
+    leather = m.mat("leather", "#3e3a36", rough=0.8)
+    fang = m.mat("fang", "#f5f0e6", rough=0.4)
+    eye = m.mat("eye_silver", "#eceff1", emit="#b0bec5", energy=4.0)
+    humanoid(m, skin, leather, leather, leather, eye=eye, w=1.05)
+    m.part("sphere", [0.135], (0, 1.75, 0.025), fur, scale=(1.04, 0.95, 1.06))
+    m.part("box", [0.08, 0.06, 0.1], (0, 1.67, -0.13), fur)
+    m.part("sphere", [0.018], (0, 1.68, -0.185), leather)
+    m.part("cylinder", [0.0, 0.05, 0.14], (0.08, 1.9, 0.02), fur, rot=(-5, 0, -15), scale=(1, 1, 0.5), mirror=True)
+    m.part("sphere", [0.2], (0, 1.3, -0.01), leather, scale=(1.22, 1.2, 0.8))
+    for i in range(4):
+        m.part("cylinder", [0.0, 0.012, 0.05], (-0.09 + i * 0.06, 1.42, -0.17), fang, rot=(180, 0, 0))
+    last = tail(m, [(0, 0.98, 0.12), (0, 0.82, 0.3), (0.04, 0.62, 0.46), (0.08, 0.48, 0.62)],
+                [0.06, 0.07, 0.06, 0.04], fur)
+    fur_tufts(m, (0.04, 0.7, 0.4), (0.06, 0.1, 0.1), 22, fur, group="tail1", length=0.05, bias=(0, -0.3, 0.6))
+    fur_tufts(m, (0, 1.5, 0.05), (0.2, 0.08, 0.15), 24, fur, length=0.05)
+    m.light("#b0bec5", 0.3, 2.0, (0, 1.6, -0.7))
+    return m
+
+
+ALL_NEW = [anao, lobo, orc, goblin, elfo, elfo_solar, elfo_lunar, drago_terra, drago_agua, drago_raio, drago_mistico,
            pyromante, escorpiao, tartaruga, fadinha, meio_celestial, gigante_gelo, sucubo, manamante]

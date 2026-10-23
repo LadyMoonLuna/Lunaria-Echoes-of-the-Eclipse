@@ -4970,6 +4970,17 @@ func (s *Server) handleRacialSkill(player *world.Player, px, py, pz, aimX, aimZ 
 		s.applyRacialAoEDamage(player, px, pz, 5.5, dmg)
 		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 45, 0, 0, 0)
 		log.Printf("[RACIAL] Demi Lobo #%d ativou Despertar Forma Bestial (+45 HP, Buff 15s, %d dano)!\n", player.ID, dmg)
+
+	case protocol.RaceManamancer: // 47 Manamante
+		// Coração de Mana: queima 15% da Vida máxima numa explosão arcana de 7m (falha se a Vida não cobrir o custo)
+		if !player.SpendHPPercent(0.15) {
+			return
+		}
+		s.BroadcastAOETelegraph(player.ID, px, pz, 7.0, 400)
+		dmg := uint16(90 + int(pINT)*6)
+		s.applyRacialAoEDamage(player, px, pz, 7.0, dmg)
+		s.BroadcastCombatEvent(player.ID, 0, protocol.ActionRacialSkill, 0, 0, 0, 0)
+		log.Printf("[RACIAL] Manamante #%d ativou Coração de Mana (-15%% Vida, %d dano arcano em 7m)!\n", player.ID, dmg)
 	}
 }
 

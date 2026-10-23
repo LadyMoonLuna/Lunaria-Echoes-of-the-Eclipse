@@ -215,6 +215,8 @@ func GetBaseRaceAttributes(raceID uint8) (str, dex, con, agi, intStat, spi, mas,
 		return 8, 10, 7, 10, 11, 4, 8, 8
 	case protocol.RaceWolfDemi: // 46: Demi-Humano Lobo
 		return 12, 9, 10, 11, 3, 4, 8, 7
+	case protocol.RaceManamancer: // 47: Manamante
+		return 3, 6, 8, 6, 13, 11, 7, 4
 
 	default:
 		return 6, 6, 6, 6, 6, 6, 7, 7
@@ -724,6 +726,9 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 	case protocol.RaceWolfDemi: // 46: Demi-Humano Lobo
 		modHP = 50
 		modStamina = 35
+	case protocol.RaceManamancer: // 47: Manamante (Sangue Azul: Vida e Mana são uma só reserva)
+		modHP = 60
+		modStamina = 10
 	}
 
 	// Bônus por nível: +5 HP e +2 Stamina por nível acima do 1
@@ -1481,6 +1486,19 @@ func (p *Player) Respawn(safeX, safeY, safeZ float32) {
 }
 
 // RestoreStamina recupera estamina instantaneamente até o limite MaxStamina.
+// SpendHPPercent consome uma fração da Vida máxima como custo de habilidade (nunca mata: mínimo 1 HP).
+// Retorna false, sem gastar nada, se a Vida atual não cobrir o custo.
+func (p *Player) SpendHPPercent(pct float32) bool {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	cost := uint16(float32(p.MaxHP) * pct)
+	if cost == 0 || p.HP <= cost {
+		return false
+	}
+	p.HP -= cost
+	return true
+}
+
 func (p *Player) RestoreStamina(amount float32) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -1926,7 +1944,7 @@ func (p *Player) DevSetRaceAndKit(raceID, classID uint8) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
-	if raceID >= 1 && raceID <= 46 {
+	if raceID >= 1 && raceID <= protocol.RaceMaxID {
 		p.RaceID = raceID
 		p.ApplyBaseRaceAttributes(raceID)
 	}

@@ -241,34 +241,31 @@ aparecer só depois de desbloqueadas.
 
 ## Implementação (IDs no jogo)
 
-Todas as 17 raças estão no jogo, com os números desta proposta. Enquanto a barra de Mana não existe, o bônus de Mana soma na Stamina.
+A main implementou as raças desta proposta com a própria numeração e os próprios números (atributos, passivas e [Z] em `server/internal/world/player.go`, `server/internal/network/server.go` e `scripts/combat/combat.lua`). Os valores da main valem; esta proposta fica como referência de design.
 
-| ID | Raça | Grupo |
-| ---: | :--- | :--- |
-| 29 | Orc | Base (seleção de personagem) |
-| 30 | Goblin | Base (seleção de personagem) |
-| 31 | Elfo | Base (seleção de personagem) |
-| 32 | Elfo Solar | Evolução do Elfo |
-| 33 | Elfo Lunar | Evolução do Elfo |
-| 34–37 | Drago da Terra, Água, Raio e Místico | Secretas |
-| 38 | Pyromante | Secreta |
-| 39 | Escorpião | Nova |
-| 40 | Tartaruga | Nova |
-| 41 | Fadinha | Nova |
-| 42 | Meio-Celestial | Nova |
-| 43 | Gigante de Gelo | Nova |
-| 44 | Súcubo | Nova |
-| 45 | Manamante | Secreta |
+| ID | Raça | ID | Raça |
+| ---: | :--- | ---: | :--- |
+| 29 | Meio-Celestial | 39 | Elfo Solar |
+| 30 | Pyromante | 40 | Elfo Lunar |
+| 31 | Gigante de Gelo | 41 | Fadinha |
+| 32 | Drago da Terra | 42 | Goblin |
+| 33 | Drago da Água | 43 | Demi-Humano Escorpião |
+| 34 | Drago do Raio | 44 | Demi-Humano Tartaruga |
+| 35 | Drago Místico | 45 | Meio-Demônio (Súcubo) |
+| 36 | Orc | 46 | Demi-Humano Lobo |
+| 37 | Anão | 47 | Manamante |
+| 38 | Elfo | | |
 
-| O quê | Onde |
-| :--- | :--- |
-| Atributos, Vida, Stamina, dano recebido, recarga do [Z] e Último Fôlego | `server/internal/world/races_new.go` |
-| Habilidades [Z] | `handleNewRacialSkill` em `server/internal/network/server.go` |
-| Bônus de dano (dia, noite, chuva, névoa) | `scripts/combat/combat.lua` |
-| Textos, cores e menu F10 | `client/scripts/NewRaces.gd` |
-| Modelos 3D | `tools/race_models/races_new.py` |
+O Manamante (47) não existia na main e foi adicionado no mesmo estilo:
+
+- Atributos 3/6/8/6/13/11/7/4, +60 de Vida e +10 de Stamina (Sangue Azul: Vida e Mana são uma só reserva).
+- +18% de dano (Afinidade Mágica).
+- Coração de Mana [Z]: gasta 15% da Vida máxima numa explosão arcana de 7 m (dano 90 + INT × 6). Não funciona se a Vida não cobrir o custo.
+- Aparece no Dev Manager (F9/F10), no grupo das secretas.
+
+Modelos 3D das raças 29–47: `tools/race_models/races_new.py`. A estatura segue `_get_race_scale()` do cliente.
 
 Ainda falta:
 
-- Os itens que desbloqueiam as raças secretas. Por enquanto elas são escolhidas no menu de desenvolvedor (F10).
-- O clima de neve para o Gigante de Gelo. Até lá, o bônus dele vale à noite e na névoa.
+- Os itens que desbloqueiam as raças secretas (incluindo o Manamante). Por enquanto, só pelo Dev Manager.
+- A barra de Mana. O bônus de Mana segue somado à Vida ou à Stamina.
