@@ -146,7 +146,10 @@ func _setup_collision() -> void:
 	collision_shape.disabled = (not is_alive or current_hp <= 0 or current_state == 5)
 
 func _build_visuals() -> void:
-	# Limpa nós visuais existentes caso reconfigurado
+	# Limpa nós visuais existentes caso reconfigurado. O modelo 3D antigo morre junto com o BodyPivot:
+	# a referência precisa ser zerada, senão criaturas sem modelo próprio ficam com um ponteiro solto
+	# (o _ready monta com o tipo padrão antes do setup) e o motor cai no quadro seguinte.
+	creature_model = null
 	if body_pivot != null:
 		body_pivot.queue_free()
 
@@ -1504,7 +1507,7 @@ func _apply_creature_model() -> void:
 func update_network_data(new_pos: Vector3, new_rot_y: float, state: int, hp: int, p_max_hp: int) -> void:
 	target_position = new_pos
 	target_rotation_y = new_rot_y
-	if creature_model and state != current_state:
+	if creature_model and is_instance_valid(creature_model) and state != current_state:
 		if state == 2:
 			creature_model.play_creature("attack")
 		elif state == 3:
@@ -1674,6 +1677,6 @@ func _process(delta: float) -> void:
 	var prev_pos := position
 	position = position.lerp(target_position, INTERPOLATION_SPEED * delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
-	if creature_model and delta > 0.0:
+	if creature_model and is_instance_valid(creature_model) and delta > 0.0:
 		var step := position - prev_pos
 		creature_model.set_move_speed(Vector2(step.x, step.z).length() / delta)

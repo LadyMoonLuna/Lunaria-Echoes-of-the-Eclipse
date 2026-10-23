@@ -1148,7 +1148,7 @@ func _process(delta: float) -> void:
 	time_accum += delta
 	var prev_pos: Vector3 = global_position
 	global_position = global_position.lerp(target_position, INTERPOLATION_SPEED * delta)
-	if npc_model and delta > 0.0:
+	if npc_model and is_instance_valid(npc_model) and delta > 0.0:
 		var step := global_position - prev_pos
 		npc_model.set_move_speed(Vector2(step.x, step.z).length() / delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)

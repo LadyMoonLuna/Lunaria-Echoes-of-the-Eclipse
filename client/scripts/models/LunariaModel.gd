@@ -168,7 +168,11 @@ static func create_mob(mob_type: int, with_lights: bool = true) -> Node3D:
 
 ## Velocidade horizontal (m/s): mistura idle, walk e run automaticamente.
 func set_move_speed(speed: float) -> void:
-	_move_speed = speed
+	# Um salto de posição (spawn, teleporte, troca de zona) gera velocidades absurdas num único quadro;
+	# sem limite, o ciclo de passos explode e derruba o motor. Valores inválidos viram parado.
+	if is_nan(speed) or is_inf(speed):
+		speed = 0.0
+	_move_speed = clampf(speed, 0.0, 14.0)
 
 
 ## Toca um clipe uma vez. hold_last = mantém o último quadro (ex.: death_fall).

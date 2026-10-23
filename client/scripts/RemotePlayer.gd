@@ -99,7 +99,7 @@ func update_network_transform(new_pos: Vector3, new_rot_y: float) -> void:
 func _process(delta: float) -> void:
 	var prev_pos: Vector3 = global_position
 	global_position = global_position.lerp(target_position, INTERPOLATION_SPEED * delta)
-	if race_model and delta > 0.0:
+	if race_model and is_instance_valid(race_model) and delta > 0.0:
 		var step := global_position - prev_pos
 		race_model.set_move_speed(Vector2(step.x, step.z).length() / delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
@@ -816,7 +816,7 @@ func _update_legendary_aura() -> void:
 		ring.material_override = mat
 		ring.position = Vector3(0, -0.85 + ring_i * 0.9, 0)
 		aura.add_child(ring)
-		var spin := create_tween().set_loops()
+		var spin := ring.create_tween().set_loops() # morre junto com o anel (evita loop infinito)
 		spin.tween_property(ring, "rotation:y", TAU * (1 if ring_i == 0 else -1), 3.0 + ring_i).as_relative()
 	var glow := OmniLight3D.new()
 	glow.light_color = aura_col
@@ -2260,7 +2260,7 @@ func _build_storm_halberd() -> void:
 		offhand_pivot.add_child(bracer)
 
 func play_skill_animation(action_type: int) -> void:
-	if race_model:
+	if race_model and is_instance_valid(race_model):
 		race_model.play_action(action_type)
 	match action_type:
 		1:

@@ -4496,8 +4496,8 @@ func _create_rebirth_crystal(parent: Node3D = null) -> void:
 	light.omni_range = 9.5
 	crystal.add_child(light)
 
-	# Animação flutuante do Cristal
-	var tw := create_tween().set_loops()
+	# Animação flutuante do Cristal (o tween pertence ao cristal: some junto ao trocar de zona)
+	var tw := crystal.create_tween().set_loops()
 	tw.tween_property(crystal, "position:y", 2.15, 1.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(crystal, "position:y", 1.65, 1.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 

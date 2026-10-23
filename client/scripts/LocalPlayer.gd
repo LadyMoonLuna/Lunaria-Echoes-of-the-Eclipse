@@ -1242,7 +1242,7 @@ func _spawn_chrono_dial_fx(pos: Vector3) -> void:
 	tw.chain().tween_callback(dial.queue_free)
 
 func _animate_racial_skill_visual() -> void:
-	if race_model:
+	if race_model and is_instance_valid(race_model):
 		race_model.play_action(6)
 	var tw := create_tween().set_parallel(false)
 	tw.tween_property(self, "scale", Vector3(1.15, 1.15, 1.15), 0.18).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
@@ -1250,7 +1250,7 @@ func _animate_racial_skill_visual() -> void:
 	tw.finished.connect(func(): is_attacking = false)
 
 func _animate_attack_visual(action_type: int) -> void:
-	if race_model:
+	if race_model and is_instance_valid(race_model):
 		race_model.play_action(action_type)
 	if not weapon_pivot:
 		is_attacking = false
@@ -1434,7 +1434,7 @@ func _perform_dodge_roll() -> void:
 	if NetworkManager and NetworkManager.my_player_id > 0:
 		NetworkManager.send_player_action(2, dodge_direction)
 
-	if race_model:
+	if race_model and is_instance_valid(race_model):
 		# O clipe dodge_roll do modelo faz o rolamento; o timer só libera a esquiva
 		race_model.play_action(2)
 		var tw_dodge := create_tween()
@@ -2174,7 +2174,7 @@ func _update_legendary_aura() -> void:
 		ring.material_override = mat
 		ring.position = Vector3(0, -0.85 + ring_i * 0.9, 0)
 		aura.add_child(ring)
-		var spin := create_tween().set_loops()
+		var spin := ring.create_tween().set_loops() # morre junto com o anel (evita loop infinito)
 		spin.tween_property(ring, "rotation:y", TAU * (1 if ring_i == 0 else -1), 3.0 + ring_i).as_relative()
 	var glow := OmniLight3D.new()
 	glow.light_color = aura_col
@@ -4068,7 +4068,7 @@ func _physics_process(delta: float) -> void:
 				velocity.z = move_toward(velocity.z, 0.0, SPEED * 2.0 * delta)
 
 	move_and_slide()
-	if race_model:
+	if race_model and is_instance_valid(race_model):
 		race_model.set_move_speed(Vector2(velocity.x, velocity.z).length())
 
 	network_timer += delta
