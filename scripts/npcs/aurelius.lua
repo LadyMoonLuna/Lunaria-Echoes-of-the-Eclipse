@@ -5,12 +5,21 @@
 local current_routine = "in_tower"
 
 function OnTick(world_hour, npc_id, pos_x, pos_z)
-    -- Mestre Aurelius estuda anomalias cósmicas e cristais na torre
     npc_set_active(true)
     if world_hour >= 6 and world_hour < 18 then
+        -- Horário Diurno (06h às 17h59): Dentro da Torre Arcana (ZoneID 6 em 0.0, 15.0)
         current_routine = "day_study"
+        if npc_get_zone() ~= 6 then
+            npc_set_zone(6)
+            npc_teleport(0.0, 0.0, 15.0)
+        end
     else
+        -- Horário Noturno (18h às 05h59): Usa o portal para observar as estrelas no pátio da Torre (ZoneID 0 em 50.0, -38.0)
         current_routine = "night_astronomy"
+        if npc_get_zone() ~= 0 then
+            npc_set_zone(0)
+            npc_teleport(50.0, 0.0, -38.0)
+        end
     end
 end
 

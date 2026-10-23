@@ -3,13 +3,21 @@
 -- OnTick é chamado a cada segundo para alternar o ciclo de atividade noturna
 function OnTick(world_hour, npc_id, pos_x, pos_z)
     if world_hour >= 18 or world_hour < 6 then
-        -- Ativo à noite (18h às 05h): Beco Escuro / Entrada dos Esgotos atrás da Taverna em (-19.0, 0.0, 17.0)
+        -- Ativo à noite (18h às 05h59): Abre loja dentro do Mercado Negro (ZoneID 7 em 0.0, 10.0)
+        npc_set_zone(7)
         npc_set_active(true)
-        npc_teleport(-19.0, 0.0, 17.0)
+        npc_set_shop_open(true)
+        npc_set_state(2) -- Atendendo na tenda sombria
+        if pos_x ~= 0.0 or pos_z ~= 10.0 then
+            npc_teleport(0.0, 0.0, 10.0)
+        end
     else
-        -- De dia (06h às 17h): Escondido nos Esgotos em (-22.0, 0.0, -22.0), inativo
-        npc_teleport(-22.0, 0.0, -22.0)
+        -- De dia (06h às 17h59): Fora de serviço e escondido
+        npc_set_zone(0)
+        npc_set_shop_open(false)
         npc_set_active(false)
+        npc_set_state(255)
+        npc_teleport(-50.0, 0.0, 48.0)
     end
 end
 

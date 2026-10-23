@@ -5,14 +5,21 @@
 local current_routine = "in_church"
 
 function OnTick(world_hour, npc_id, pos_x, pos_z)
-    -- Irmã Seraphina mantém vigília sagrada constante no altar da Igreja
     npc_set_active(true)
     if world_hour >= 6 and world_hour < 18 then
-        -- Horário Diurno: Oração diante do Altar Solar
+        -- Horário Diurno (06h às 17h59): Oração diante do Altar Solar dentro da Igreja (ZoneID 5 em 0.0, 15.0)
         current_routine = "day_prayer"
+        if npc_get_zone() ~= 5 then
+            npc_set_zone(5)
+            npc_teleport(0.0, 0.0, 15.0)
+        end
     else
-        -- Horário Noturno: Vigília das Velas contra as sombras do Eclipse
+        -- Ao Entardecer e Noite (18h às 05h59): Usa o portal e fica na porta da Igreja na Vila (ZoneID 0 em -50.0, -36.0)
         current_routine = "night_vigil"
+        if npc_get_zone() ~= 0 then
+            npc_set_zone(0)
+            npc_teleport(-50.0, 0.0, -36.0)
+        end
     end
 end
 

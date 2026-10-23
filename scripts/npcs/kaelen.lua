@@ -5,11 +5,12 @@
 local current_routine = "in_post"
 
 function OnTick(world_hour, npc_id, pos_x, pos_z)
-    -- Kaelen cuida da fogueira e inspeciona a saída para o Bosque Sussurrante
     npc_set_active(true)
     if world_hour >= 6 and world_hour < 18 then
+        -- Horário Diurno: Patrulha entre o Posto do Caçador (25.0, -95.0) e a estrada do Portal Sul
         current_routine = "day_training"
     else
+        -- Horário Noturno: Patrulha avançada vigiando a fronteira do Bosque Sussurrante (ZoneID 1)
         current_routine = "night_hunting"
     end
 end

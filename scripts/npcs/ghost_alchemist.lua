@@ -6,9 +6,13 @@
 local current_routine = "asleep_in_sewers"
 
 function OnTick(world_hour, npc_id, pos_x, pos_z)
-    -- Só surge como espírito etéreo entre 00h e 04h da madrugada
+    -- Só surge como espírito etéreo entre 00h e 04h da madrugada nos Esgotos Antigos (ZoneID 8 em -110.0, 110.0)
     if world_hour >= 0 and world_hour <= 4 then
+        npc_set_zone(8)
         npc_set_active(true)
+        if pos_x ~= -110.0 or pos_z ~= 110.0 then
+            npc_teleport(-110.0, 0.0, 110.0)
+        end
         current_routine = "manifested_spirit"
     else
         -- Durante as demais horas (05h às 23h), fica adormecido e invisível nas profundezas dos esgotos
