@@ -57,6 +57,10 @@ type Mob struct {
 	// Efeitos de controle (Crowd Control: Lentidão e Congelamento/Atordoamento)
 	SlowUntil time.Time
 	StunUntil time.Time
+
+	// Quebra de Armadura (Ferreiro, Alquimista, Escultor, Chef de Caça): +X% de dano recebido até ArmorBreakUntil
+	ArmorBreakPct   float32
+	ArmorBreakUntil time.Time
 }
 
 // NewMob cria uma nova entidade de Mob inicializada no mapa.
@@ -99,6 +103,27 @@ func (m *Mob) ApplySlow(duration time.Duration, factor float32) {
 	m.MoveSpeed = m.BaseSpeed * (1.0 - factor)
 }
 
+// ApplyArmorBreak reduz a defesa do monstro: ele recebe +pct de dano por um tempo.
+// Efeitos simultâneos não se somam; vale o mais forte, e a duração é renovada.
+func (m *Mob) ApplyArmorBreak(duration time.Duration, pct float32) {
+	m.Mu.Lock()
+	defer m.Mu.Unlock()
+	if !time.Now().Before(m.ArmorBreakUntil) || pct > m.ArmorBreakPct {
+		m.ArmorBreakPct = pct
+	}
+	m.ArmorBreakUntil = time.Now().Add(duration)
+}
+
+// HPFraction retorna a fração de vida atual do monstro (0.0 a 1.0).
+func (m *Mob) HPFraction() float32 {
+	m.Mu.RLock()
+	defer m.Mu.RUnlock()
+	if m.MaxHP == 0 {
+		return 0
+	}
+	return float32(m.HP) / float32(m.MaxHP)
+}
+
 // ApplyStun aplica atordoamento/congelamento no monstro por um tempo determinado.
 func (m *Mob) ApplyStun(duration time.Duration) {
 	m.Mu.Lock()
@@ -121,9 +146,14 @@ func (m *Mob) TakeDamage(rawDamage uint16, attackerIDs ...uint32) (uint16, bool,
 	finalDamage := rawDamage
 	wasBlocked := false
 
+	// Armadura rachada/derretida: o monstro recebe mais dano enquanto o efeito durar
+	if m.ArmorBreakPct > 0 && time.Now().Before(m.ArmorBreakUntil) {
+		finalDamage = uint16(float32(finalDamage) * (1.0 + m.ArmorBreakPct))
+	}
+
 	// Saqueador Deserdado com escudo levantado reduz dano em 50%
 	if m.MobType == protocol.MobTypeOutcastRaider && m.State == protocol.MobStateBlocking {
-		finalDamage = rawDamage / 2
+		finalDamage = finalDamage / 2
 		if finalDamage == 0 && rawDamage > 0 {
 			finalDamage = 1
 		}

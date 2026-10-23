@@ -138,6 +138,8 @@ const CLASS_NAMES := [
 	"Viajante (Sem Classe)",
 	"Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
 	"Ferreiro", "Alquimista", "Escultor", "Domador", "Alfaiate de Guerra", "Chef de Caça",
+	"Espadachim Rúnico", "Caçador de Vampiros", "Valquíria da Égide", "Monge das Sombras",
+	"Forjador de Armas Amaldiçoadas", "Médico da Peste",
 	"Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos", "Dançarino Astral",
 	"Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial", "Cavaleiro da Ruptura",
 	"Arauto da Tempestade"
@@ -157,15 +159,21 @@ const EVOLVED_CLASS_NAMES := {
 	10: ["", "Domador", "Senhor das Feras", "Alfa da Matilha", "Grão-Mestre da Selva", "Grão-Mestre da Selva", "Grão-Mestre da Selva"],
 	11: ["", "Alfaiate de Guerra", "Tecelão de Aço", "Mestre Marionetista", "Tecelão da Realidade", "Tecelão da Realidade", "Tecelão da Realidade"],
 	12: ["", "Chef de Caça", "Açougueiro de Monstros", "Mestre Culinário Feral", "Grão-Chef Supremo", "Grão-Chef Supremo", "Grão-Chef Supremo"],
-	13: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
-	14: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
-	15: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
-	16: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
-	17: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
-	18: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
-	19: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
-	20: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
-	21: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
+	13: ["", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico", "Espadachim Rúnico"],
+	14: ["", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros", "Caçador de Vampiros"],
+	15: ["", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide", "Valquíria da Égide"],
+	16: ["", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras", "Monge das Sombras"],
+	17: ["", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas", "Forjador de Armas Amaldiçoadas"],
+	18: ["", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste", "Médico da Peste"],
+	19: ["", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Ceifador do Eclipse", "Soberano da Meia-Noite"],
+	20: ["", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Artífice Rúnico", "Engenheiro Arcano Supremo"],
+	21: ["", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Criador de Homúnculos", "Demiurgo da Vida Sintética"],
+	22: ["", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Dançarino Astral", "Soberano das Constelações"],
+	23: ["", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Inquisidor das Cinzas", "Grão-Inquisidor das Chamas"],
+	24: ["", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Necromante de Ossos", "Lorde do Ossuário Eterno"],
+	25: ["", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Domador Primordial", "Avatar da Fera Ancestral"],
+	26: ["", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Cavaleiro da Ruptura", "Guardião da Singularidade"],
+	27: ["", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Arauto da Tempestade", "Soberano dos Relâmpagos"]
 }
 
 const TIER_COLORS := [
@@ -309,7 +317,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.",
 		"f_desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade."
 	},
-	13: { # Ceifador do Eclipse
+	19: { # Ceifador do Eclipse
 		"basic": "Foice das Sombras",
 		"q": "Colheita Noturna",
 		"r": "Drenagem Abissal",
@@ -319,7 +327,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.",
 		"f_desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida (2.4x dano)."
 	},
-	14: { # Artífice Rúnico
+	20: { # Artífice Rúnico
 		"basic": "Canhonada Rúnica",
 		"q": "Salva Rúnica",
 		"r": "Sobrecarga Eletrostática",
@@ -329,7 +337,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.",
 		"f_desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano)."
 	},
-	15: { # Criador de Homúnculos
+	21: { # Criador de Homúnculos
 		"basic": "Pulso Quimérico",
 		"q": "Infusão Mutagênica",
 		"r": "Névoa de Bioplasma",
@@ -339,7 +347,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.",
 		"f_desc": "O homúnculo cresce e desfere explosão de garras e ácido colossais (2.4x dano)."
 	},
-	16: { # Dançarino Astral
+	22: { # Dançarino Astral
 		"basic": "Corte Astral",
 		"q": "Corte Cadente",
 		"r": "Valsa dos Espelhos",
@@ -349,7 +357,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.",
 		"f_desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano)."
 	},
-	17: { # Inquisidor das Cinzas
+	23: { # Inquisidor das Cinzas
 		"basic": "Chama Penitente",
 		"q": "Chicote de Penitência",
 		"r": "Selo de Excomunhão",
@@ -359,7 +367,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.",
 		"f_desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano)."
 	},
-	18: { # Necromante de Ossos
+	24: { # Necromante de Ossos
 		"basic": "Toque do Sepulcro",
 		"q": "Lança de Fêmur",
 		"r": "Explosão Óssea & Escudo",
@@ -369,7 +377,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Detona fragmentos ósseos em 5.0m e ergue barreira de ossos protetora.",
 		"f_desc": "Ergue vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal."
 	},
-	19: { # Domador Primordial
+	25: { # Domador Primordial
 		"basic": "Patada Selvagem",
 		"q": "Investida do Alfa",
 		"r": "Uivo da Alcateia",
@@ -379,7 +387,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.",
 		"f_desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano)."
 	},
-	20: { # Cavaleiro da Ruptura
+	26: { # Cavaleiro da Ruptura
 		"basic": "Golpe de Fenda",
 		"q": "Esmagamento Gravitacional",
 		"r": "Singularidade Reversa",
@@ -389,7 +397,7 @@ const CLASS_SKILLS := {
 		"r_desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.",
 		"f_desc": "Cria um buraco negro em 6.5m que atordoa inimigos e desintegra matéria (2.8x dano)."
 	},
-	21: { # Arauto da Tempestade
+	27: { # Arauto da Tempestade
 		"basic": "Faísca Elétrica",
 		"q": "Lança do Trovão",
 		"r": "Passo de Relâmpago",
@@ -770,15 +778,15 @@ const DEV_CLASSES := [
 	{"id": 10, "name": "Domador", "desc": "Senhor da matilha com chicote bestial. [Passiva] Luta acompanhado por Fera Domada. [Q] Estalo do Chicote: Investida!, [R] Fusão & Uivo Bestial, [F] Debandada das Feras.", "col": Color("#ffd740")},
 	{"id": 11, "name": "Alfaiate de Guerra", "desc": "Tecelão com fios de aço e agulhas rúnicas. [Passiva] Fios Monofilamento & Seda Blindada. [Q] Teia de Fios Retalhadores, [R] Costurar Sombras, [F] Gaiola de Fios Carmesins.", "col": Color("#ce93d8")},
 	{"id": 12, "name": "Chef de Caça", "desc": "Gourmet com cutelo gigante e wok de ferro. [Passiva] Células Gourmet. [Q] Desossar a Vivo! (+35 HP), [R] Banquete na Wok Flamejante, [F] Trinchar o Behemoth.", "col": Color("#ff7043")},
-	{"id": 13, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
-	{"id": 14, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
-	{"id": 15, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
-	{"id": 16, "name": "Dançarino Astral", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
-	{"id": 17, "name": "Inquisidor das Cinzas", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
-	{"id": 18, "name": "Necromante de Ossos", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
-	{"id": 19, "name": "Domador Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
-	{"id": 20, "name": "Cavaleiro da Ruptura", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
-	{"id": 21, "name": "Arauto da Tempestade", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")}
+	{"id": 19, "name": "Ceifador do Eclipse", "desc": "Classe Secreta (Tier 5). Foice colossal com colheita de almas. [Q] Colheita Noturna, [R] Drenagem Abissal, [F] Dança do Eclipse Total.", "col": Color("#d500f9")},
+	{"id": 20, "name": "Artífice Rúnico", "desc": "Classe Secreta (Tier 5). Martelo-canhão estelar. [Q] Salva Rúnica, [R] Sobrecarga, [F] Bombardeio Titanomecânico.", "col": Color("#ff6d00")},
+	{"id": 21, "name": "Criador de Homúnculos", "desc": "Classe Secreta (Tier 5). Orbe alquímico e quimera regenerativa. [Q] Infusão Mutagênica, [R] Névoa Bioplasma, [F] Frenesi Quimérico.", "col": Color("#00b0ff")},
+	{"id": 22, "name": "Dançarino Astral", "desc": "Classe Secreta (Tier 5). Lâminas estelares finas. [Q] Corte Cadente, [R] Valsa dos Espelhos (I-Frame), [F] Mil Lâminas.", "col": Color("#80d8ff")},
+	{"id": 23, "name": "Inquisidor das Cinzas", "desc": "Classe Secreta (Tier 5). Correntes incandescentes. [Q] Chicote de Penitência, [R] Selo de Excomunhão, [F] Crucificação.", "col": Color("#ff5252")},
+	{"id": 24, "name": "Necromante de Ossos", "desc": "Classe Secreta (Tier 5). Manipulador profano de esqueletos. [Q] Lança de Fêmur, [R] Explosão Óssea, [F] Legião do Ossuário.", "col": Color("#ccff90")},
+	{"id": 25, "name": "Domador Primordial", "desc": "Classe Secreta (Tier 5). Lança selvagem e Lobo Espiritual Alfa. [Q] Investida do Alfa, [R] Uivo da Alcateia, [F] Fúria do Behemoth.", "col": Color("#ffd740")},
+	{"id": 26, "name": "Cavaleiro da Ruptura", "desc": "Classe Secreta (Tier 5). Colosso de gravidade e vazio. [Q] Esmagamento Gravitacional, [R] Singularidade Reversa, [F] Colapso Estelar.", "col": Color("#7c4dff")},
+	{"id": 27, "name": "Arauto da Tempestade", "desc": "Classe Secreta (Tier 5). Alabarda dourada de relâmpagos. [Q] Lança do Trovão, [R] Passo de Relâmpago, [F] Ira dos Céus.", "col": Color("#40c4ff")}
 ]
 
 const DEV_ITEMS := [
@@ -1109,7 +1117,8 @@ func request_class_or_race_change(is_race: bool, target_id: int, target_tier: in
 		title_lbl.text = "⚠️ ATENÇÃO: MUDANÇA DE CLASSE / RAÇA"
 		title_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 		var category_name: String = "raça" if is_race else "classe"
-		var desc_tag: String = source_desc if source_desc != "" else (TIER_NAMES[target_tier] if target_tier < TIER_NAMES.size() else "Comum")
+		# Entre parênteses: o Tier da classe (Comum, Incomum, Rara, Épica) ou "Raça"
+		var desc_tag: String = "Raça" if is_race else (TIER_NAMES[target_tier] if target_tier >= 1 and target_tier < TIER_NAMES.size() else "Comum")
 		body_lbl.text = "Você está prestes a mudar sua %s atual para [%s] (%s).\nSuas habilidades atuais serão substituídas.\nVocê sabe o que está fazendo e deseja confirmar?" % [category_name, target_name, desc_tag]
 	else:
 		modal_style.border_color = Color(1.0, 0.2, 0.2, 0.98)
@@ -1175,6 +1184,24 @@ func request_class_or_race_change(is_race: bool, target_id: int, target_tier: in
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: int, target_name: String, source_desc: String) -> void:
+	# Oferta do servidor (NPC Mestre, Altar, desafio secreto ou evolução racial): o servidor só aplica
+	# a troca quando recebe esta confirmação (0x40), então nada é enviado por 0x30 aqui.
+	if source_desc.begins_with("OFFER:"):
+		var offer_type: int = int(source_desc.replace("OFFER:", ""))
+		if NetworkManager:
+			NetworkManager.send_evolution_choice(offer_type, target_id)
+		show_loot_toast("%s [%s] confirmada!" % ["Raça" if is_race else "Classe", target_name])
+		return
+
+	# Item da mochila: o servidor consome o item e aplica o efeito dele (troca de raça/classe incluída).
+	# Mandar 0x30 junto mudaria a identidade mesmo que o servidor recusasse o item.
+	if source_desc.begins_with("ITEM:"):
+		var item_id_val: int = int(source_desc.replace("ITEM:", ""))
+		if NetworkManager:
+			NetworkManager.send_use_item(item_id_val)
+		show_loot_toast("%s [%s] confirmada!" % ["Raça" if is_race else "Classe", target_name])
+		return
+
 	if is_race:
 		var current_cid: int = 1
 		if local_player and is_instance_valid(local_player) and local_player.get("current_class_id") != null:
@@ -1182,10 +1209,6 @@ func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: i
 		var act_mode: int = 99 if source_desc.begins_with("DEV") else 0
 		if NetworkManager:
 			NetworkManager.send_select_identity(target_id, current_cid, act_mode)
-		if source_desc.begins_with("ITEM:"):
-			var item_id_val: int = int(source_desc.replace("ITEM:", ""))
-			if NetworkManager:
-				NetworkManager.send_use_item(item_id_val)
 		if dev_status_label:
 			dev_status_label.text = "Raça confirmada: #%d %s" % [target_id, target_name]
 		show_loot_toast("Raça [%s] confirmada!" % target_name)
@@ -1193,19 +1216,14 @@ func _execute_class_or_race_change(is_race: bool, target_id: int, target_tier: i
 		var current_rid: int = 1
 		if local_player and is_instance_valid(local_player) and local_player.get("current_race_id") != null:
 			current_rid = local_player.current_race_id
-		var act_mode: int = 0
-		if source_desc.begins_with("DEV"):
-			act_mode = 98
-		elif target_tier >= 5:
-			act_mode = 2 # IdentityModeSecretReset
-		else:
-			act_mode = 0 # IdentityModeInitialChange
 		if NetworkManager:
-			NetworkManager.send_select_identity(current_rid, target_id, act_mode)
-		if source_desc.begins_with("ITEM:"):
-			var item_id_val: int = int(source_desc.replace("ITEM:", ""))
-			if NetworkManager:
-				NetworkManager.send_use_item(item_id_val)
+			if source_desc.begins_with("DEV"):
+				# Modo 98 (Dev Direto): o servidor lê o Tier no campo da raça
+				NetworkManager.send_select_identity(target_tier, target_id, 98)
+			elif target_tier >= 5:
+				NetworkManager.send_select_identity(current_rid, target_id, 2) # IdentityModeSecretReset
+			else:
+				NetworkManager.send_select_identity(current_rid, target_id, 0) # IdentityModeInitialChange
 		if dev_status_label:
 			dev_status_label.text = "Classe confirmada: #%d %s (Tier %d)" % [target_id, target_name, target_tier]
 		show_loot_toast("Classe [%s] confirmada!" % target_name)
@@ -2001,7 +2019,7 @@ func _get_evolved_class_name(cid: int, tier: int) -> String:
 		return names_list[safe_tier]
 	if cid >= 1 and cid < CLASS_NAMES.size():
 		return CLASS_NAMES[cid]
-	return "Espadachim"
+	return "Classe #%d" % cid
 
 func _update_hud() -> void:
 	if identity_label:

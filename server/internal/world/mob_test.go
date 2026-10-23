@@ -258,3 +258,19 @@ func TestMobDamageDealers(t *testing.T) {
 		t.Fatalf("rastreamento de dano incorreto: %+v", dealers)
 	}
 }
+
+func TestMobArmorBreak(t *testing.T) {
+	m := &Mob{ID: 1, HP: 1000, MaxHP: 1000, IsAlive: true, IsActive: true}
+	m.ApplyArmorBreak(5*time.Second, 0.30)
+	if dealt, _, _, _ := m.TakeDamage(100); dealt != 130 {
+		t.Fatalf("armadura rachada em 30%%: esperava 130 de dano, obteve %d", dealt)
+	}
+	// Um efeito mais fraco não substitui o mais forte enquanto ele dura
+	m.ApplyArmorBreak(5*time.Second, 0.10)
+	if dealt, _, _, _ := m.TakeDamage(100); dealt != 130 {
+		t.Fatalf("o efeito mais forte deveria valer: esperava 130, obteve %d", dealt)
+	}
+	if f := m.HPFraction(); f != 0.74 {
+		t.Fatalf("esperava 74%% de vida, obteve %.2f", f)
+	}
+}

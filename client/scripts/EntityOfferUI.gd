@@ -154,6 +154,11 @@ func close_menu() -> void:
 			world.local_player.set("is_menu_open", false)
 
 func display_offer(offer_type: int, opt_a: int, opt_b: int) -> void:
+	# Tipo 4: troca de Classe/Raça oferecida pelo servidor (NPC Mestre, Altar, desafio secreto).
+	# Vai direto para o modal de confirmação obrigatória do World (A = Classe, B = Raça).
+	if offer_type == 4:
+		_request_identity_offer_confirmation(opt_a, opt_b)
+		return
 	current_offer_type = offer_type
 	option_a_id = opt_a
 	option_b_id = opt_b
@@ -378,8 +383,45 @@ func _on_accept_choice(chosen_id: int) -> void:
 	print("[EntityOfferUI] Escolha confirmada! OfferType: %d, ID Escolhido: %d" % [current_offer_type, chosen_id])
 	evolution_accepted.emit(current_offer_type, chosen_id)
 
+	# Evolução de Raça (tipo 1) troca a raça: passa pelo modal de confirmação obrigatória
+	var world := get_parent()
+	if current_offer_type == 1 and world and world.has_method("request_class_or_race_change"):
+		var race_name: String = "Raça #%d" % chosen_id
+		var race_names: Array = _world_const(world, "RACE_NAMES")
+		if chosen_id < race_names.size():
+			race_name = race_names[chosen_id]
+		world.request_class_or_race_change(true, chosen_id, 1, race_name, "OFFER:1")
+		close_menu()
+		return
+
 	var nm := get_node_or_null("/root/NetworkManager")
 	if nm:
 		nm.send_evolution_choice(current_offer_type, chosen_id)
 
 	close_menu()
+
+func _request_identity_offer_confirmation(offered_class_id: int, offered_race_id: int) -> void:
+	var world := get_parent()
+	if not world or not world.has_method("request_class_or_race_change"):
+		return
+	var is_race_offer: bool = offered_class_id == 0
+	var target_id: int = offered_race_id if is_race_offer else offered_class_id
+	var target_tier: int = 1
+	if not is_race_offer:
+		if offered_class_id >= 19:
+			target_tier = 5 # Classe Secreta Única: reset para o nível 1
+		elif offered_class_id >= 13:
+			target_tier = 3 # Variante Secreta
+	var target_name: String = "#%d" % target_id
+	var names: Array = _world_const(world, "RACE_NAMES" if is_race_offer else "CLASS_NAMES")
+	if target_id < names.size():
+		target_name = names[target_id]
+	world.request_class_or_race_change(is_race_offer, target_id, target_tier, target_name, "OFFER:4")
+
+# Lê uma lista constante do script do World (RACE_NAMES, CLASS_NAMES); vazia se não existir.
+func _world_const(world: Node, const_name: String) -> Array:
+	var scr = world.get_script()
+	if scr == null:
+		return []
+	var consts: Dictionary = scr.get_script_constant_map()
+	return consts.get(const_name, [])

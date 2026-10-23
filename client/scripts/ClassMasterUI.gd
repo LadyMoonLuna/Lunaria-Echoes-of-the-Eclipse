@@ -78,7 +78,7 @@ const MASTER_DATA := {
 	104: { # Varis, o Mercador Sombrio
 		"title": "Varis, o Mercador do Beco Sombrio",
 		"sub": "Ceifador do Eclipse & Pactos Proibidos",
-		"class_id": 13,
+		"class_id": 19,
 		"class_name": "Ceifador do Eclipse",
 		"greeting": "Pssiu... A luz da vila é fraca demais contra o que rasteja lá fora. Se você não tem medo de ceifar almas com uma foice colossal, as sombras o acolherão...",
 		"color": Color("#d500f9"),
@@ -807,7 +807,12 @@ func _learn_class(race_id: int, new_class_id: int) -> void:
 	if MASTER_DATA.has(current_npc_id):
 		class_name_str = MASTER_DATA[current_npc_id].get("class_name", class_name_str)
 	if world and world.has_method("request_class_or_race_change"):
-		var target_tier: int = 5 if new_class_id >= 13 else 1
+		# Únicas/Lendárias (19 a 27) entram no Tier 5; Variantes Secretas (13 a 18) no Tier 3; básicas no Tier 1
+		var target_tier: int = 1
+		if new_class_id >= 19:
+			target_tier = 5
+		elif new_class_id >= 13:
+			target_tier = 3
 		world.request_class_or_race_change(false, new_class_id, target_tier, class_name_str, master_name)
 	else:
 		var nm := get_node_or_null("/root/NetworkManager")

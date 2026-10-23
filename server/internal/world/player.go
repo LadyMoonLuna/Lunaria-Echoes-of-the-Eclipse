@@ -99,6 +99,10 @@ type Player struct {
 
 	// Cooldowns das Habilidades
 	LastActionTimes map[uint8]time.Time
+
+	// PendingIdentity guarda uma troca de Classe/Raça oferecida pelo servidor (NPC Mestre, Altar,
+	// desafio secreto) que só é aplicada depois que o jogador confirma no modal do cliente.
+	PendingIdentity *PendingIdentityOffer
 }
 
 // TimeHistorySnapshot armazena uma captura instantânea da posição e integridade do jogador para rebobinar.
@@ -1057,6 +1061,41 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 	}
 }
 
+// PendingIdentityOffer é uma troca de identidade aguardando a confirmação do jogador.
+type PendingIdentityOffer struct {
+	RaceID  uint8
+	ClassID uint8
+	Mode    uint8
+	Expires time.Time
+}
+
+// IdentityOfferTTL é quanto tempo uma oferta de troca de Classe/Raça espera pela confirmação.
+const IdentityOfferTTL = 2 * time.Minute
+
+// OfferIdentity registra uma troca de Classe/Raça pendente (substitui qualquer oferta anterior).
+func (p *Player) OfferIdentity(raceID, classID, mode uint8) {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	p.PendingIdentity = &PendingIdentityOffer{RaceID: raceID, ClassID: classID, Mode: mode, Expires: time.Now().Add(IdentityOfferTTL)}
+}
+
+// AcceptIdentityOffer aplica a oferta pendente se ela ainda vale e corresponde ao que o jogador confirmou.
+// targetID é a Classe confirmada (ou a Raça, quando a oferta só troca a raça).
+func (p *Player) AcceptIdentityOffer(targetID uint8) bool {
+	p.Mu.Lock()
+	offer := p.PendingIdentity
+	p.PendingIdentity = nil
+	p.Mu.Unlock()
+	if offer == nil || time.Now().After(offer.Expires) {
+		return false
+	}
+	if targetID != offer.ClassID && !(offer.ClassID == 0 && targetID == offer.RaceID) {
+		return false
+	}
+	p.SetIdentityMode(offer.RaceID, offer.ClassID, offer.Mode)
+	return true
+}
+
 // SetIdentity mantém compatibilidade chamando SetIdentityMode com ActionMode 0.
 func (p *Player) SetIdentity(raceID, classID uint8) {
 	p.SetIdentityMode(raceID, classID, protocol.IdentityModeInitialChange)
@@ -1594,6 +1633,27 @@ func (p *Player) TakeDamage(amount uint16) (uint16, bool) {
 	// Passiva Succubus (Aparência Inofensiva): 25% de chance de anular o ataque
 	if p.RaceID == protocol.RaceHalfDemon && rand.Float32() < 0.25 {
 		return p.HP, false
+	}
+
+	// Passiva Assassino (Lâmina Silenciosa): 15% de chance de esquivar do golpe
+	if p.ClassID == protocol.ClassAssassin && amount > 0 && rand.Float32() < 0.15 {
+		return p.HP, false
+	}
+
+	// Passiva Guerreiro (Sangue de Batalha): +15% de Defesa Física
+	if p.ClassID == protocol.ClassWarrior && amount > 0 {
+		amount = uint16(float32(amount) * 0.85)
+		if amount == 0 {
+			amount = 1
+		}
+	}
+
+	// Passiva Escudeiro (Fortaleza Viva): +35% de Defesa Total (o reflexo de 20% é aplicado em handleMobAttack)
+	if p.ClassID == protocol.ClassShieldBearer && amount > 0 {
+		amount = uint16(float32(amount) * 0.65)
+		if amount == 0 {
+			amount = 1
+		}
 	}
 
 	// Passiva Cavaleiro da Ruptura (Classe 14): reduz todo dano recebido em 30%

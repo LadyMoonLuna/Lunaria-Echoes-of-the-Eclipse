@@ -173,7 +173,7 @@ const ITEM_CATALOG := {
 	17: {
 		"name": "Tomo da Foice do Eclipse",
 		"category": "Artefato Proibido",
-		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 13 — Ceifador do Eclipse!",
+		"desc": "Tomo místico selado com as runas da escuridão. Ao consumir, desperta a Classe Secreta 19 — Ceifador do Eclipse!",
 		"color": Color("#aa00ff"),
 		"usable": true,
 		"btn_text": "[Consumir (Despertar Ceifador)]"
@@ -737,11 +737,11 @@ func _on_item_used(item_id: int) -> void:
 			16: # Sangue do Progenitor Bestial -> Raça 5 Dhampir
 				world.request_class_or_race_change(true, 5, 1, "Dhampir", "ITEM:16")
 				return
-			17: # Tomo da Foice do Eclipse -> Classe 13 Ceifador do Eclipse (Tier 5)
-				world.request_class_or_race_change(false, 13, 5, "Ceifador do Eclipse", "ITEM:17")
+			17: # Tomo da Foice do Eclipse -> Classe 19 Ceifador do Eclipse (Tier 5)
+				world.request_class_or_race_change(false, 19, 5, "Ceifador do Eclipse", "ITEM:17")
 				return
 			18: # Núcleo de Forja Estelar -> Classe 14 Artífice Rúnico (Tier 5)
-				world.request_class_or_race_change(false, 14, 5, "Artífice Rúnico", "ITEM:18")
+				world.request_class_or_race_change(false, 20, 5, "Artífice Rúnico", "ITEM:18")
 				return
 			29: # Ampulheta Rúnica -> Raça 28 Errante Temporal
 				world.request_class_or_race_change(true, 28, 1, "Errante Temporal", "ITEM:29")

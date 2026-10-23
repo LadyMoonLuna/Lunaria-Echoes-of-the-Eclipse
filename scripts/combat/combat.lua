@@ -208,10 +208,7 @@ function CalculateDamage(race_id, class_id, action_type, hp_pct, world_hour, moo
     elseif action_type == 5 then
         -- Habilidade 3 [Tecla F] - Ultimate
         if class_id == 1 then
-            damage = damage * 2.60 -- Guerreiro: Julgamento da Espada (2.6x)
-            if hp_pct < 35.0 then
-                damage = damage * 1.40 -- +40% dano em alvos com <35% HP
-            end
+            damage = damage * 2.60 -- Guerreiro: Julgamento da Espada (2.6x; +40% em alvos com <35% HP, aplicado por alvo no servidor)
         elseif class_id == 2 then
             damage = damage * 2.80 -- Mago: Chuva de Meteoros (2.8x)
         elseif class_id == 3 then

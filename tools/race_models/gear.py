@@ -1,4 +1,4 @@
-"""Armas, trajes de classe, companheiro homúnculo e loadouts das 10 classes.
+"""Armas, trajes de classe, companheiros e loadouts das classes 0 a 27 (IDs de server/internal/protocol/packets.go).
 
 Armas: origem (pivô) exatamente na empunhadura, lâmina/haste ao longo de +Y,
 frente em -Z — prontas para serem presas na mão (âncoras hand_r / hand_l).
@@ -9,6 +9,7 @@ eixo X pela largura do corpo (body_w) de cada raça ao vestir.
 import math
 
 from modelkit import Model, v_add, v_lerp
+from gear_classes import OUTFITS_CLASSES, WEAPONS_CLASSES
 
 
 def W(key, name, desc, color):
@@ -414,7 +415,7 @@ MOB_WEAPONS = [raider_short_sword, raider_round_shield, heavy_crossbow, shadow_o
                executioner_mace, traitor_greatsword, primordial_scythe]
 
 
-WEAPONS = WEAPONS_BASE + MOB_WEAPONS
+WEAPONS = WEAPONS_BASE + MOB_WEAPONS + WEAPONS_CLASSES
 
 
 # ---------------------------------------------------------------------------
@@ -650,7 +651,7 @@ def outfit_homunculus():
 
 
 OUTFITS = [outfit_traveler, outfit_swordsman, outfit_scout, outfit_initiate, outfit_acolyte, outfit_blacksmith,
-           outfit_alchemist, outfit_reaper, outfit_artificer, outfit_homunculus]
+           outfit_alchemist, outfit_reaper, outfit_artificer, outfit_homunculus] + OUTFITS_CLASSES
 
 
 # ---------------------------------------------------------------------------
@@ -667,38 +668,107 @@ LOADOUTS = {
     "0": {"name": "Viajante", "outfit": "outfit_traveler",
           "hand_r": _hand("iron_dagger", (-70, 0, 0)),
           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_spin"}},
-    "1": {"name": "Espadachim", "outfit": "outfit_swordsman",
+    # --- 6 Classes Básicas de Combate ---
+    "1": {"name": "Guerreiro", "outfit": "outfit_swordsman",
           "hand_r": _hand("knight_longsword", (-62, 0, 0)),
-          "hand_l": _hand("heater_shield", (0, 40, 0), (-0.1, 0.12, 0.02)),
-          "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_spin"}},
-    "2": {"name": "Batedor", "outfit": "outfit_scout",
+          "actions": {"1": "attack_1h", "3": "attack_2h_sweep", "4": "skill_q", "5": "skill_f_slam"}},
+    "2": {"name": "Mago", "outfit": "outfit_initiate",
+          "hand_r": _hand("crystal_staff", (-8, 0, 0), (0, 0.05, 0)),
+          "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_q_support", "5": "skill_f_slam"}},
+    "3": {"name": "Arqueiro", "outfit": "outfit_scout",
           "hand_l": _hand("recurve_bow", (0, 0, 0)),
           "hand_r": _hand("steel_arrow", (-80, 0, 0)),
           "actions": {"1": "attack_bow", "3": "attack_bow", "4": "skill_r_backflip", "5": "attack_bow"}},
-    "3": {"name": "Iniciado", "outfit": "outfit_initiate",
-          "hand_r": _hand("crystal_staff", (-8, 0, 0), (0, 0.05, 0)),
-          "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_q_support", "5": "skill_f_slam"}},
-    "4": {"name": "Acólito", "outfit": "outfit_acolyte",
-          "hand_r": _hand("holy_mace", (-55, 0, 0)),
-          "hand_l": _hand("solar_talisman", (0, 0, 0)),
-          "actions": {"1": "attack_1h", "3": "skill_q_support", "4": "skill_r_shield", "5": "skill_f_slam"}},
-    "5": {"name": "Ferreiro", "outfit": "outfit_blacksmith",
+    "4": {"name": "Assassino", "outfit": "outfit_assassin",
+          "hand_r": _hand("assassin_dagger", (-70, 0, 0)),
+          "hand_l": _hand("assassin_dagger", (-70, 0, 0)),
+          "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
+    "5": {"name": "Lutador", "outfit": "outfit_fighter",
+          "hand_r": _hand("heavy_gauntlet", (0, 0, 0)),
+          "hand_l": _hand("heavy_gauntlet", (0, 0, 0)),
+          "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_slam"}},
+    "6": {"name": "Escudeiro", "outfit": "outfit_shieldbearer",
+          "hand_r": _hand("short_mace", (-55, 0, 0)),
+          "hand_l": _hand("colossal_shield", (0, 40, 0), (-0.12, 0.1, 0.02)),
+          "actions": {"1": "attack_1h", "3": "skill_r_shield", "4": "skill_r_shield", "5": "skill_f_slam"}},
+    # --- 6 Classes Básicas de Produção Combatentes ---
+    "7": {"name": "Ferreiro", "outfit": "outfit_blacksmith",
           "hand_r": _hand("forge_warhammer", (160, 0, -8)),
-          "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_slam"}},
-    "6": {"name": "Alquimista", "outfit": "outfit_alchemist",
+          "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_spin"}},
+    "8": {"name": "Alquimista", "outfit": "outfit_alchemist",
           "hand_r": _hand("alchemy_flask", (0, 0, 0)),
           "hand_l": _hand("injector_gauntlet", (0, 0, 0)),
-          "actions": {"1": "attack_throw", "3": "skill_q_support", "4": "attack_throw", "5": "skill_f_slam"}},
-    "7": {"name": "Ceifador do Eclipse", "outfit": "outfit_reaper",
-          "hand_r": _hand("eclipse_scythe", (-20, 0, 20)),
-          "actions": {"1": "attack_2h_sweep", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
-    "8": {"name": "Artífice Rúnico", "outfit": "outfit_artificer",
-          "hand_r": _hand("hammer_cannon", (160, 0, -8)),
-          "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_slam"}},
-    "9": {"name": "Criador de Homúnculos", "outfit": "outfit_homunculus_creator",
-          "hand_r": _hand("philosopher_chalice", (0, 0, 0)),
-          "companion": "companion_homunculus",
-          "actions": {"1": "attack_cast", "3": "skill_q_support", "4": "attack_cast", "5": "skill_f_slam"}},
+          "actions": {"1": "attack_throw", "3": "attack_throw", "4": "attack_throw", "5": "skill_f_slam"}},
+    "9": {"name": "Escultor", "outfit": "outfit_sculptor",
+          "hand_r": _hand("sculptor_chisel", (-70, 0, 0)),
+          "companion": "companion_guardian_statue",
+          "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_q_support", "5": "skill_f_spin"}},
+    "10": {"name": "Domador", "outfit": "outfit_tamer",
+           "hand_r": _hand("coiled_whip", (0, 0, 0)),
+           "companion": "companion_tamed_beast",
+           "actions": {"1": "attack_1h", "3": "attack_throw", "4": "skill_q_support", "5": "skill_f_slam"}},
+    "11": {"name": "Alfaiate de Guerra", "outfit": "outfit_tailor",
+           "hand_r": _hand("golden_needle", (-80, 0, 0)),
+           "hand_l": _hand("golden_needle", (-80, 0, 0)),
+           "actions": {"1": "attack_cast", "3": "attack_2h_sweep", "4": "attack_cast", "5": "skill_f_spin"}},
+    "12": {"name": "Chef de Caça", "outfit": "outfit_chef",
+           "hand_r": _hand("giant_cleaver", (-50, 0, 0)),
+           "hand_l": _hand("iron_wok", (0, 40, 0), (-0.1, 0.1, 0.02)),
+           "actions": {"1": "attack_2h_heavy", "3": "attack_2h_heavy", "4": "skill_r_shield", "5": "skill_f_slam"}},
+    # --- Variantes Secretas (13 a 18) ---
+    "13": {"name": "Espadachim Rúnico", "outfit": "outfit_swordsman",
+           "hand_r": _hand("knight_longsword", (-62, 0, 0)),
+           "actions": {"1": "attack_1h", "3": "attack_cast", "4": "skill_q", "5": "skill_f_spin"}},
+    "14": {"name": "Caçador de Vampiros", "outfit": "outfit_scout",
+           "hand_r": _hand("heavy_crossbow", (0, 0, 0)),
+           "actions": {"1": "attack_bow", "3": "attack_bow", "4": "skill_r_backflip", "5": "attack_bow"}},
+    "15": {"name": "Valquíria da Égide", "outfit": "outfit_shieldbearer",
+           "hand_r": _hand("knight_longsword", (-62, 0, 0)),
+           "hand_l": _hand("heater_shield", (0, 40, 0), (-0.1, 0.12, 0.02)),
+           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_slam"}},
+    "16": {"name": "Monge das Sombras", "outfit": "outfit_fighter",
+           "hand_r": _hand("heavy_gauntlet", (0, 0, 0)),
+           "hand_l": _hand("heavy_gauntlet", (0, 0, 0)),
+           "actions": {"1": "attack_1h", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
+    "17": {"name": "Forjador de Armas Amaldiçoadas", "outfit": "outfit_blacksmith",
+           "hand_r": _hand("forge_warhammer", (160, 0, -8)),
+           "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_slam"}},
+    "18": {"name": "Médico da Peste", "outfit": "outfit_alchemist",
+           "hand_r": _hand("alchemy_flask", (0, 0, 0)),
+           "hand_l": _hand("injector_gauntlet", (0, 0, 0)),
+           "actions": {"1": "attack_throw", "3": "attack_throw", "4": "skill_q_support", "5": "skill_f_slam"}},
+    # --- Classes Secretas Únicas / Lendárias (19 a 27) ---
+    "19": {"name": "Ceifador do Eclipse", "outfit": "outfit_reaper",
+           "hand_r": _hand("eclipse_scythe", (-20, 0, 20)),
+           "actions": {"1": "attack_2h_sweep", "3": "skill_q", "4": "skill_r_backflip", "5": "skill_f_spin"}},
+    "20": {"name": "Artífice Rúnico", "outfit": "outfit_artificer",
+           "hand_r": _hand("hammer_cannon", (160, 0, -8)),
+           "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_sharpen", "5": "skill_f_slam"}},
+    "21": {"name": "Criador de Homúnculos", "outfit": "outfit_homunculus_creator",
+           "hand_r": _hand("philosopher_chalice", (0, 0, 0)),
+           "companion": "companion_homunculus",
+           "actions": {"1": "attack_cast", "3": "skill_q_support", "4": "attack_cast", "5": "skill_f_slam"}},
+    "22": {"name": "Dançarino Astral", "outfit": "outfit_assassin",
+           "hand_r": _hand("assassin_dagger", (-70, 0, 0)),
+           "hand_l": _hand("assassin_dagger", (-70, 0, 0)),
+           "actions": {"1": "attack_1h", "3": "skill_f_spin", "4": "skill_r_backflip", "5": "skill_f_spin"}},
+    "23": {"name": "Inquisidor das Cinzas", "outfit": "outfit_acolyte",
+           "hand_r": _hand("executioner_mace", (-55, 0, 0)),
+           "actions": {"1": "attack_2h_heavy", "3": "attack_2h_sweep", "4": "skill_q_support", "5": "skill_f_slam"}},
+    "24": {"name": "Necromante de Ossos", "outfit": "outfit_initiate",
+           "hand_r": _hand("shadow_orb_staff", (-8, 0, 0), (0, 0.05, 0)),
+           "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_q_support", "5": "skill_f_slam"}},
+    "25": {"name": "Domador Primordial", "outfit": "outfit_tamer",
+           "hand_r": _hand("primordial_scythe", (-20, 0, 20)),
+           "companion": "companion_tamed_beast",
+           "actions": {"1": "attack_2h_sweep", "3": "skill_q", "4": "skill_q_support", "5": "skill_f_slam"}},
+    "26": {"name": "Cavaleiro da Ruptura", "outfit": "outfit_shieldbearer",
+           "hand_r": _hand("traitor_greatsword", (-62, 0, 0)),
+           "hand_l": _hand("colossal_shield", (0, 40, 0), (-0.12, 0.1, 0.02)),
+           "actions": {"1": "attack_2h_heavy", "3": "skill_q", "4": "skill_r_shield", "5": "skill_f_slam"}},
+    "27": {"name": "Arauto da Tempestade", "outfit": "outfit_initiate",
+           "hand_r": _hand("crystal_staff", (-8, 0, 0), (0, 0.05, 0)),
+           "actions": {"1": "attack_cast", "3": "attack_cast", "4": "skill_r_backflip", "5": "skill_f_slam"}},
 }
 for _l in LOADOUTS.values():
     _l["actions"].update({"2": "dodge_roll", "6": "skill_z"})

@@ -745,7 +745,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Banquete na Wok Flamejante [R]", "desc": "Bloqueia projéteis com a frigideira e serve prato que cura +55 HP e dá +25% Dano ao grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Trinchar o Behemoth [F]", "desc": "Salta com cutelo flamejante com 2.8x dano em 5.5m e reduz a defesa do Boss pela metade!", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	13: { # Ceifador do Eclipse (Classe Secreta 13)
+	19: { # Ceifador do Eclipse (Classe Secreta 19)
 		"name": "Ceifador do Eclipse",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano da Meia-Noite)",
 		"desc": "Espírito das sombras portando uma foice colossal. Cada golpe ceifa as almas e o sangue dos inimigos.",
@@ -770,7 +770,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Drenagem Abissal [R]", "desc": "Vórtice escuro que paralisa alvos e restaura +45 HP contínuos ao usuário.", "range": "Pessoal 5m", "cost": "20 Stamina", "cd": "6.5s"},
 		"f": {"name": "Dança do Eclipse Total [F]", "desc": "Giro fatal de foice cobrindo 6.0m com dano devastador e roubo de vida pleno (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	14: { # Artífice Rúnico (Classe Secreta 14)
+	20: { # Artífice Rúnico (Classe Secreta 20)
 		"name": "Artífice Rúnico",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Engenheiro Arcano Supremo)",
 		"desc": "Híbrido mecânico armado com martelo-canhão movido a núcleos de forja estelar.",
@@ -795,7 +795,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Sobrecarga Eletrostática [R]", "desc": "Pulso elétrico que concede raios nas armas do grupo por 8s.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Bombardeio Titanomecânico [F]", "desc": "Disparo orbital com estilhaços energizados de 6.5m (2.4x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	15: { # Criador de Homúnculos (Classe Secreta 15)
+	21: { # Criador de Homúnculos (Classe Secreta 21)
 		"name": "Criador de Homúnculos",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Demiurgo da Vida Sintética)",
 		"desc": "Mestre da vida sintética acompanhado por uma quimera flutuante transmissora de elixires.",
@@ -820,7 +820,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Névoa de Bioplasma [R]", "desc": "Nuvem esverdeada curando aliados continuamente e cegando monstros.", "range": "4.5m Área", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Frenesi do Quimera Supremo [F]", "desc": "O homúnculo cresce e desfere uma explosão de garras e ácido colossais (2.4x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	16: { # Dançarino Astral (Classe Secreta 16)
+	22: { # Dançarino Astral (Classe Secreta 22)
 		"name": "Dançarino Astral",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano das Constelações)",
 		"desc": "Duelista cósmico mestre de esquivas fluidas e cortes críticos que brilham como cometas estelares.",
@@ -845,7 +845,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Valsa dos Espelhos [R]", "desc": "Janela de 1.5s de invulnerabilidade total (I-Frame) seguida de contra-ataque refletor.", "range": "Pessoal", "cost": "20 Stamina", "cd": "6.0s"},
 		"f": {"name": "Constelação de Mil Lâminas [F]", "desc": "Dança de cortes omnidirecionais devastando inimigos em raio de 5.5m (3.0x dano).", "range": "5.5m Radial", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	17: { # Inquisidor das Cinzas (Classe Secreta 17)
+	23: { # Inquisidor das Cinzas (Classe Secreta 23)
 		"name": "Inquisidor das Cinzas",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Grão-Inquisidor das Chamas)",
 		"desc": "Executor fanático cuja força cresce exponencialmente quanto mais próximo estiver da morte.",
@@ -870,7 +870,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Selo de Excomunhão [R]", "desc": "Purificação sagrada que regenera +35 HP e incendeia inimigos em raio de 5.0m.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Crucificação de Cinzas [F]", "desc": "Pilares de cinzas incandescentes que incineram uma área de 6.0m (3.2x dano).", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	18: { # Necromante de Ossos (Classe Secreta 18)
+	24: { # Necromante de Ossos (Classe Secreta 24)
 		"name": "Necromante de Ossos",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Lorde do Ossuário Eterno)",
 		"desc": "Manipulador anatômico que canaliza a essência dos ossos e extrai vitalidade de cada abate (+20 HP).",
@@ -895,7 +895,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Explosão Óssea & Escudo [R]", "desc": "Detona fragmentos ósseos em 5.0m e ergue uma barreira de ossos protetora.", "range": "5.0m Radial", "cost": "20 Stamina", "cd": "7.5s"},
 		"f": {"name": "Legião do Ossuário [F]", "desc": "Ergue um vórtice de ossatura profana cobrindo 6.0m com 3.0x de dano letal.", "range": "6.0m Radial", "cost": "25 Stamina", "cd": "13.0s"}
 	},
-	19: { # Domador Primordial (Classe Secreta 19)
+	25: { # Domador Primordial (Classe Secreta 25)
 		"name": "Domador Primordial",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Avatar da Fera Ancestral)",
 		"desc": "Guerreiro feral possuído pelo Espírito Alfa, infligindo +25% de dano constante com garras devastadoras.",
@@ -920,7 +920,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Uivo da Alcateia [R]", "desc": "Uivo ressonante que cura +50 HP e concede buff de ataque crítico a todo o grupo.", "range": "Grupo 10m", "cost": "20 Stamina", "cd": "8.0s"},
 		"f": {"name": "Fúria do Behemoth [F]", "desc": "Impacto frontal titânico gerando onda de choque sísmica devastadora (3.0x dano).", "range": "5.0m Frontal", "cost": "25 Stamina", "cd": "12.0s"}
 	},
-	20: { # Cavaleiro da Ruptura (Classe Secreta 20)
+	26: { # Cavaleiro da Ruptura (Classe Secreta 26)
 		"name": "Cavaleiro da Ruptura",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Guardião da Singularidade)",
 		"desc": "Colosso dimensional envolto em malha espacial. Reduz 30% de todo o dano recebido e dobra a gravidade.",
@@ -945,7 +945,7 @@ const CLASS_ACTIVE_SKILLS := {
 		"r": {"name": "Singularidade Reversa [R]", "desc": "Postura de bloqueio que absorve 80% do dano e implode o espaço ao redor.", "range": "4.5m Radial", "cost": "20 Stamina", "cd": "7.0s"},
 		"f": {"name": "Colapso Estelar [F]", "desc": "Cria um buraco negro em 6.5m que atordoa todos os inimigos e desintegra matéria (2.8x dano).", "range": "6.5m Radial", "cost": "25 Stamina", "cd": "14.0s"}
 	},
-	21: { # Arauto da Tempestade (Classe Secreta 21)
+	27: { # Arauto da Tempestade (Classe Secreta 27)
 		"name": "Arauto da Tempestade",
 		"tier_name": "Tier 5 (Única) -> Tier 6 (Soberano dos Relâmpagos)",
 		"desc": "Avatar dos trovões cuja fúria cresce em +35% durante chuvas, empunhando dardos de relâmpago puro.",
@@ -1479,10 +1479,10 @@ func _build_tab_3_passives_and_trials(class_id: int, class_tier: int, level: int
 
 		var quest_name: String = "As Três Colheitas sob o Sol Negro"
 		var quest_lore: String = "Abata 3 Criaturas de Elite ou Chefes (Lobo Alfa, Licantropo Alfa, Executor) sem tombar em batalha para provar seu valor perante o cosmos e ascender ao TIER 6 LENDÁRIO."
-		if class_id == 14:
+		if class_id == 20: # Artífice Rúnico
 			quest_name = "O Metal que Caiu do Céu"
 			quest_lore = "Colete a liga divina do cosmos abatendo 3 Monstros de Elite sem morrer para ascender a Engenheiro Arcano Supremo (Tier 6)."
-		elif class_id == 15:
+		elif class_id == 21: # Criador de Homúnculos
 			quest_name = "Magnum Opus Transmutacional"
 			quest_lore = "Transmute a centelha da vida sintética definitiva com a essência de 3 Criaturas de Elite para despertar como Demiurgo (Tier 6)."
 

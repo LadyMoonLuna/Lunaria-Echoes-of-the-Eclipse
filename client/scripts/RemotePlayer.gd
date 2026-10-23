@@ -81,16 +81,19 @@ func update_label() -> void:
 			"Demi-Humano Tartaruga", "Meio-Demônio", "Demi-Humano Lobo", "Manamante"
 		]
 		var c_names: Array[String] = [
-			"", "Espadachim", "Batedor", "Iniciado", "Acólito",
-			"Ferreiro", "Alquimista", "Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos",
-			"Dançarino Astral", "Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial",
-			"Cavaleiro da Ruptura", "Arauto da Tempestade"
+			"Viajante", "Guerreiro", "Mago", "Arqueiro", "Assassino", "Lutador", "Escudeiro",
+			"Ferreiro", "Alquimista", "Escultor", "Domador", "Alfaiate de Guerra", "Chef de Caça",
+			"Espadachim Rúnico", "Caçador de Vampiros", "Valquíria da Égide", "Monge das Sombras",
+			"Forjador de Armas Amaldiçoadas", "Médico da Peste",
+			"Ceifador do Eclipse", "Artífice Rúnico", "Criador de Homúnculos", "Dançarino Astral",
+			"Inquisidor das Cinzas", "Necromante de Ossos", "Domador Primordial", "Cavaleiro da Ruptura",
+			"Arauto da Tempestade"
 		]
 		var r_str: String = r_names[current_race_id] if current_race_id < r_names.size() else "Valeriano"
 		var race_info := LunariaModel.get_info(LunariaModel.race_uid(current_race_id))
 		if not race_info.is_empty():
 			r_str = race_info["name"]
-		var c_str: String = c_names[current_class_id] if current_class_id < c_names.size() else "Espadachim"
+		var c_str: String = c_names[current_class_id] if current_class_id < c_names.size() else "Viajante"
 		label.text = "Player #%d\n[%s - %s]" % [player_id, r_str, c_str]
 
 func update_network_transform(new_pos: Vector3, new_rot_y: float) -> void:
@@ -105,7 +108,7 @@ func _process(delta: float) -> void:
 		race_model.set_move_speed(Vector2(step.x, step.z).length() / delta)
 	rotation.y = lerp_angle(rotation.y, target_rotation_y, INTERPOLATION_SPEED * delta)
 
-	if (current_class_id == 9 or current_class_id == 15) and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
+	if current_class_id == 21 and homunculus_orbiter and is_instance_valid(homunculus_orbiter):
 		homunculus_anim_time += delta
 		var orbit_r: float = 1.15
 		var orbit_spd: float = 3.2
@@ -115,7 +118,7 @@ func _process(delta: float) -> void:
 			sin(homunculus_anim_time * orbit_spd) * orbit_r
 		)
 
-	if (current_class_id == 10 or current_class_id == 19) and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
+	if (current_class_id == 10 or current_class_id == 25) and spirit_wolf_companion and is_instance_valid(spirit_wolf_companion):
 		spirit_wolf_anim_time += delta
 		var wolf_bob: float = sin(spirit_wolf_anim_time * 3.2) * 0.12
 		spirit_wolf_companion.position = Vector3(
@@ -836,23 +839,35 @@ func _apply_class_visuals() -> void:
 			_build_war_tailor_needles()
 		12: # Chef de Caça: Cutelo de Açougueiro Gigante na mão direita + Wok de Ferro
 			_build_hunting_chef_cleaver_and_wok()
-		13: # Ceifador do Eclipse
+		13: # Espadachim Rúnico (variante do Guerreiro)
+			_build_sword_long()
+		14: # Caçador de Vampiros (variante do Arqueiro)
+			_build_bow()
+		15: # Valquíria da Égide (variante do Escudeiro)
+			_build_shield_and_mace()
+		16: # Monge das Sombras (variante do Lutador)
+			_build_heavy_gauntlets()
+		17: # Forjador de Armas Amaldiçoadas (variante do Ferreiro)
+			_build_blacksmith_hammer()
+		18: # Médico da Peste (variante do Alquimista)
+			_build_alchemist_flasks()
+		19: # Ceifador do Eclipse
 			_build_scythe()
-		14: # Artífice Rúnico
+		20: # Artífice Rúnico
 			_build_hammer_cannon()
-		15: # Criador de Homúnculos
+		21: # Criador de Homúnculos
 			_build_homunculus_orb()
-		16: # Dançarino Astral
+		22: # Dançarino Astral
 			_build_astral_blades()
-		17: # Inquisidor das Cinzas
+		23: # Inquisidor das Cinzas
 			_build_ash_flail_and_chains()
-		18: # Necromante de Ossos
+		24: # Necromante de Ossos
 			_build_bone_staff()
-		19: # Domador Primordial
+		25: # Domador Primordial
 			_build_primordial_spear_and_wolf()
-		20: # Cavaleiro da Ruptura
+		26: # Cavaleiro da Ruptura
 			_build_void_greatsword_and_shield()
-		21: # Arauto da Tempestade
+		27: # Arauto da Tempestade
 			_build_storm_halberd()
 
 func _build_sword_long() -> void:
@@ -2276,21 +2291,33 @@ func _get_race_color() -> Color:
 
 func _get_class_color() -> Color:
 	match current_class_id:
-		1: return Color("#29b6f6") # Espadachim
-		2: return Color("#66bb6a") # Batedor
-		3: return Color("#ab47bc") # Iniciado
-		4: return Color("#ffee58") # Acólito
-		5: return Color("#ff7043") # Ferreiro
-		6: return Color("#00e676") # Alquimista
-		7: return Color("#d50000") # Ceifador do Eclipse
-		8: return Color("#00e5ff") # Artífice Rúnico
-		9: return Color("#ea80fc") # Criador de Homúnculos
-		10: return Color("#00e5ff") # Dançarino Astral
-		11: return Color("#ff1744") # Inquisidor das Cinzas
-		12: return Color("#00e676") # Necromante de Ossos
-		13: return Color("#80d8ff") # Domador Primordial
-		14: return Color("#7c4dff") # Cavaleiro da Ruptura
-		15: return Color("#00b0ff") # Arauto da Tempestade
+		1: return Color("#64b5f6") # Guerreiro: Azul Aço
+		2: return Color("#00e5ff") # Mago: Ciano Arcano
+		3: return Color("#69f0ae") # Arqueiro: Verde Falcão
+		4: return Color("#7c4dff") # Assassino: Violeta Sombrio
+		5: return Color("#ffab40") # Lutador: Laranja Chi
+		6: return Color("#ffd54f") # Escudeiro: Dourado Bastião
+		7: return Color("#ff6d00") # Ferreiro: Brasa da Forja
+		8: return Color("#00e676") # Alquimista: Verde Ácido
+		9: return Color("#e1f5fe") # Escultor: Prata do Luar
+		10: return Color("#a1887f") # Domador: Castanho Bestial
+		11: return Color("#ff1744") # Alfaiate de Guerra: Carmesim dos Fios
+		12: return Color("#ff7043") # Chef de Caça: Chama da Wok
+		13: return Color("#40c4ff") # Espadachim Rúnico
+		14: return Color("#eceff1") # Caçador de Vampiros
+		15: return Color("#fff59d") # Valquíria da Égide
+		16: return Color("#4a148c") # Monge das Sombras
+		17: return Color("#b71c1c") # Forjador de Armas Amaldiçoadas
+		18: return Color("#558b2f") # Médico da Peste
+		19: return Color("#d500f9") # Ceifador do Eclipse
+		20: return Color("#ffb300") # Artífice Rúnico
+		21: return Color("#ea80fc") # Criador de Homúnculos
+		22: return Color("#00e5ff") # Dançarino Astral
+		23: return Color("#ff1744") # Inquisidor das Cinzas
+		24: return Color("#00e676") # Necromante de Ossos
+		25: return Color("#80d8ff") # Domador Primordial
+		26: return Color("#7c4dff") # Cavaleiro da Ruptura
+		27: return Color("#00b0ff") # Arauto da Tempestade
 		_: return Color("#ffffff")
 
 func _animate_attack() -> void:

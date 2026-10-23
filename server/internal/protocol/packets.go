@@ -1512,6 +1512,7 @@ const (
 	OfferTypeRace           uint8 = 1 // Evolução de Raça (Nível 10+)
 	OfferTypeBasicClass     uint8 = 2 // Evolução de Classe Básica (Nível 10, 25, 45)
 	OfferTypeLegendaryTrial uint8 = 3 // Provação Lendária (Tier 5 -> Tier 6 Nível 45+)
+	OfferTypeIdentityChange uint8 = 4 // Troca de Classe/Raça oferecida pelo servidor (A = ClassID, B = RaceID); o cliente confirma no modal
 )
 
 const EvolutionOfferPacketSize = 4

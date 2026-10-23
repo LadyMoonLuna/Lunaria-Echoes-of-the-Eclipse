@@ -42,7 +42,7 @@ const TIER_COLORS := [
 ]
 
 # ------------------------------------------------------------------------------
-# BANCO DE DADOS: 15 CLASSES & HABILIDADES
+# BANCO DE DADOS: 12 CLASSES BÁSICAS + 9 CLASSES SECRETAS ÚNICAS (19 A 27) & HABILIDADES
 # ------------------------------------------------------------------------------
 const CLASSES_DEV_DATA := [
 	{
@@ -166,7 +166,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#ff7043")
 	},
 	{
-		"id": 13,
+		"id": 19,
 		"name": "Ceifador do Eclipse",
 		"desc": "Classe Secreta (Tier 5): Foice colossal com colheita de almas e roubo de vida pleno.",
 		"passive": "Sede Abissal (10% roubo de vida, +40% na Lua de Sangue, +20% no Eclipse)",
@@ -176,7 +176,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#d500f9")
 	},
 	{
-		"id": 14,
+		"id": 20,
 		"name": "Artífice Rúnico",
 		"desc": "Classe Secreta (Tier 5): Martelo-canhão movido a núcleos estelares e engrenagens.",
 		"passive": "Ignição Titanomecânica (Dano híbrido físico/elétrico por FOR e INT)",
@@ -186,7 +186,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#ff6d00")
 	},
 	{
-		"id": 15,
+		"id": 21,
 		"name": "Criador de Homúnculos",
 		"desc": "Classe Secreta (Tier 5): Vida sintética e quimera transmissora de bioplasma regenerativo.",
 		"passive": "Vínculo Quimérico (Mini-Homúnculo regenera mestre e ataca alvos)",
@@ -196,7 +196,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#00b0ff")
 	},
 	{
-		"id": 16,
+		"id": 22,
 		"name": "Dançarino Astral",
 		"desc": "Classe Secreta (Tier 5): Duelista cósmico com lâminas estelares duplas em prata e ciano.",
 		"passive": "Graça das Constelações (+25% crítico inato e esquiva ao custo de 10 stamina)",
@@ -206,7 +206,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#80d8ff")
 	},
 	{
-		"id": 17,
+		"id": 23,
 		"name": "Inquisidor das Cinzas",
 		"desc": "Classe Secreta (Tier 5): Executor fanático com mangual e correntes incandescentes carmesins.",
 		"passive": "Fervor do Mártir (Até +60% de dano adicional quanto menor for a sua vida atual)",
@@ -216,7 +216,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#ff5252")
 	},
 	{
-		"id": 18,
+		"id": 24,
 		"name": "Necromante de Ossos",
 		"desc": "Classe Secreta (Tier 5): Manipulador sombrio de ossos e crânio de cristal verde-esmeralda.",
 		"passive": "Colheita de Ossos (Cura +20 HP instantâneos por monstro abatido)",
@@ -226,7 +226,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#ccff90")
 	},
 	{
-		"id": 19,
+		"id": 25,
 		"name": "Domador Primordial",
 		"desc": "Classe Secreta (Tier 5): Guerreiro feral com lança e Lobo Espiritual Prateado leal ao seu lado.",
 		"passive": "Espírito Alfa (+25% dano constante de todas as fontes de ataque)",
@@ -236,7 +236,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#ffd740")
 	},
 	{
-		"id": 20,
+		"id": 26,
 		"name": "Cavaleiro da Ruptura",
 		"desc": "Classe Secreta (Tier 5): Colosso espacial com espada de obsidiana e escudo gravitacional do Vazio.",
 		"passive": "Armadura Singular (-30% de todo dano físico e mágico recebido)",
@@ -246,7 +246,7 @@ const CLASSES_DEV_DATA := [
 		"color": Color("#7c4dff")
 	},
 	{
-		"id": 21,
+		"id": 27,
 		"name": "Arauto da Tempestade",
 		"desc": "Classe Secreta (Tier 5): Avatar dos trovões com alabarda de ouro e relâmpagos celestiais.",
 		"passive": "Condutividade Celestial (+35% de dano na Chuva e choque estático ao ser atacado)",
@@ -1848,7 +1848,7 @@ func _build_tab_teleports() -> void:
 	sec3_card.add_child(vb3)
 
 	var s3_title := Label.new()
-	s3_title.text = "🏆 3. MONITOR DE PROVAÇÕES SECRETAS (CLASSES SECRETAS 10 A 15):"
+	s3_title.text = "🏆 3. MONITOR DE PROVAÇÕES SECRETAS (CLASSES SECRETAS 19 A 27):"
 	s3_title.add_theme_font_size_override("font_size", 13)
 	s3_title.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
 	vb3.add_child(s3_title)

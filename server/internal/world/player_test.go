@@ -164,7 +164,7 @@ func TestPlayerRespawnMechanics(t *testing.T) {
 
 func TestKharadDamageReduction(t *testing.T) {
 	p := NewPlayer(1, nil, 0, 0, 0)
-	p.SetIdentity(protocol.RaceKharad, protocol.ClassSwordsman)
+	p.SetIdentity(protocol.RaceKharad, protocol.ClassMage) // classe sem passiva defensiva: isola a redução da raça
 
 	initialHP := p.HP
 	// Dano bruto de 100 deve ser reduzido em 20% para 80
@@ -1037,3 +1037,50 @@ func TestDevControlLevelAndStats(t *testing.T) {
 }
 
 
+
+func TestBasicClassDefensivePassives(t *testing.T) {
+	// Guerreiro (Sangue de Batalha): +15% de Defesa Física -> 100 vira 85
+	w := NewPlayer(1, nil, 0, 0, 0)
+	w.SetIdentity(protocol.RaceValerian, protocol.ClassWarrior)
+	hp := w.HP
+	if newHP, _ := w.TakeDamage(100); newHP != hp-85 {
+		t.Fatalf("Guerreiro: esperava HP %d, obteve %d", hp-85, newHP)
+	}
+
+	// Escudeiro (Fortaleza Viva): +35% de Defesa Total -> 100 vira 65
+	sb := NewPlayer(2, nil, 0, 0, 0)
+	sb.SetIdentity(protocol.RaceValerian, protocol.ClassShieldBearer)
+	hp = sb.HP
+	if newHP, _ := sb.TakeDamage(100); newHP != hp-65 {
+		t.Fatalf("Escudeiro: esperava HP %d, obteve %d", hp-65, newHP)
+	}
+}
+
+func TestIdentityOfferRequiresConfirmation(t *testing.T) {
+	p := NewPlayer(1, nil, 0, 0, 0)
+	p.SetIdentity(protocol.RaceValerian, protocol.ClassWarrior)
+	p.AddLevel(9)
+
+	// Oferta pendente não muda nada sozinha (equivale a Cancelar no modal)
+	p.OfferIdentity(p.RaceID, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset)
+	if p.ClassID != protocol.ClassWarrior || p.Level != 10 {
+		t.Fatalf("a oferta não deveria mudar nada antes da confirmação: classe %d, nível %d", p.ClassID, p.Level)
+	}
+
+	// Confirmar outra classe é recusado e descarta a oferta
+	if p.AcceptIdentityOffer(protocol.ClassAstralDancer) {
+		t.Fatal("confirmação de classe diferente da oferecida deveria ser recusada")
+	}
+	if p.AcceptIdentityOffer(protocol.ClassEclipseReaper) {
+		t.Fatal("a oferta já descartada não deveria valer de novo")
+	}
+
+	// Oferta confirmada: Classe Única com reset para o nível 1
+	p.OfferIdentity(p.RaceID, protocol.ClassEclipseReaper, protocol.IdentityModeSecretReset)
+	if !p.AcceptIdentityOffer(protocol.ClassEclipseReaper) {
+		t.Fatal("a confirmação da classe oferecida deveria ser aceita")
+	}
+	if p.ClassID != protocol.ClassEclipseReaper || p.ClassTier != protocol.TierUnique || p.Level != 1 {
+		t.Fatalf("esperava Ceifador Tier 5 no nível 1, obteve classe %d tier %d nível %d", p.ClassID, p.ClassTier, p.Level)
+	}
+}
