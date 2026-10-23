@@ -43,16 +43,16 @@ type Mob struct {
 	DamageDealers map[uint32]int
 
 	// Estado tático e temporizadores
-	BlockedHits      int
-	LastActionTime   time.Time
-	LastCounterTime  time.Time
-	LastHealTime     time.Time
-	TelegraphActive  bool
-	TelegraphUntil   time.Time
-	TelegraphX       float32
-	TelegraphZ       float32
-	VulnerableUntil  time.Time
-	TargetPlayerID   uint32
+	BlockedHits     int
+	LastActionTime  time.Time
+	LastCounterTime time.Time
+	LastHealTime    time.Time
+	TelegraphActive bool
+	TelegraphUntil  time.Time
+	TelegraphX      float32
+	TelegraphZ      float32
+	VulnerableUntil time.Time
+	TargetPlayerID  uint32
 
 	// Efeitos de controle (Crowd Control: Lentidão e Congelamento/Atordoamento)
 	SlowUntil time.Time
@@ -594,4 +594,3 @@ func (m *Mob) SetZone(zoneID uint8) {
 	defer m.Mu.Unlock()
 	m.ZoneID = zoneID
 }
-

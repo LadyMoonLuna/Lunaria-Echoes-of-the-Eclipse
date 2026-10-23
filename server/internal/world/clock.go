@@ -6,7 +6,7 @@ import (
 
 // Constantes de Fases da Lua (10 estados: 0 a 9)
 const (
-	MoonPhaseNew           uint8 = 0 // Lua Nova
+	MoonPhaseNew            uint8 = 0 // Lua Nova
 	MoonPhaseWaxingCrescent uint8 = 1 // Lua Crescente
 	MoonPhaseFirstQuarter   uint8 = 2 // Quarto Crescente
 	MoonPhaseWaxingGibbous  uint8 = 3 // Gibosa Crescente
@@ -48,7 +48,7 @@ func NewWorldClock(startHour float64) *WorldClock {
 	return &WorldClock{
 		currentHour:    h,
 		moonPhase:      MoonPhaseWaxingCrescent, // Inicia na Lua Crescente (1)
-		weatherType:    WeatherClear,           // Clima Limpo (0)
+		weatherType:    WeatherClear,            // Clima Limpo (0)
 		lastLoggedHour: int(h) % 24,
 	}
 }
@@ -183,4 +183,3 @@ func (c *WorldClock) SetWeather(weather uint8) uint8 {
 	c.weatherType = weather % 4
 	return c.weatherType
 }
-

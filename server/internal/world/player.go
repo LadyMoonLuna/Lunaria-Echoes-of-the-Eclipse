@@ -31,6 +31,7 @@ type Player struct {
 	ClassTier   uint8
 	ClassPath   uint8 // 0=Base, 1=Caminho A, 2=Caminho B
 	SubPath     uint8 // 1, 2, 3 ou 4 (Caminhos Evolutivos das 12 classes básicas)
+	PathTier    uint8 // Tier em que o Caminho atual foi escolhido (subir de Tier libera a troca)
 	Level       uint8
 	HP          uint16
 	MaxHP       uint16
@@ -91,12 +92,12 @@ type Player struct {
 	UnlockedRecipes map[uint8]bool // RecipeID -> Desbloqueada
 
 	// Desafios de Obtenção das Classes Secretas (10 a 15)
-	UntouchedKills         int  // Abates sem sofrer dano (Dançarino Astral - Classe 10)
-	LowHPKills             int  // Abates com HP <= 30% (Inquisidor das Cinzas - Classe 11)
-	PerfectAutopsiesStreak int  // Sequência de autópsias perfeitas na Zona Verde (Necromante de Ossos - Classe 12)
-	SoloAlphaWolfKilled    bool // Lobo Alfa derrotado 100% Solo (Domador Primordial - Classe 13)
-	BlockedBossRupture     bool // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro da Ruptura - Classe 14)
-	PyromancerRevived      bool // Passiva Chama da Vida (Pyromante - Raça 30)
+	UntouchedKills         int       // Abates sem sofrer dano (Dançarino Astral - Classe 10)
+	LowHPKills             int       // Abates com HP <= 30% (Inquisidor das Cinzas - Classe 11)
+	PerfectAutopsiesStreak int       // Sequência de autópsias perfeitas na Zona Verde (Necromante de Ossos - Classe 12)
+	SoloAlphaWolfKilled    bool      // Lobo Alfa derrotado 100% Solo (Domador Primordial - Classe 13)
+	BlockedBossRupture     bool      // Bloqueou Boss/Executor com CON >= 20 durante Eclipse/Lua de Sangue (Cavaleiro da Ruptura - Classe 14)
+	PyromancerRevived      bool      // Passiva Chama da Vida (Pyromante - Raça 30)
 	AristocratRevivedAt    time.Time // Passiva Imortalidade do Sangue (Aristocrata Carmesim - Classe 25)
 
 	// Cooldowns das Habilidades
@@ -389,7 +390,18 @@ func (p *Player) CanAwakenVariant(variantID uint8) (bool, string) {
 func (p *Player) NeedsPathChoice() bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
-	return p.ClassID >= 1 && p.ClassID <= 12 && p.ClassTier >= protocol.TierUncommon && p.SubPath == 0
+	return p.ClassID >= 1 && p.ClassID <= 12 && p.ClassTier >= protocol.TierUncommon &&
+		(p.SubPath == 0 || p.PathTier < p.ClassTier)
+}
+
+// ChoosePath define o Caminho Evolutivo (1 a 4) e registra o Tier da escolha.
+func (p *Player) ChoosePath(path uint8) {
+	p.Mu.Lock()
+	p.SubPath = path
+	p.ClassPath = path
+	p.PathTier = p.ClassTier
+	p.Mu.Unlock()
+	p.RecalculateStats()
 }
 
 // StatPointsPerLevel retorna os pontos de atributo concedidos por nível com base no Tier de Raridade da Classe (Tier 0 a Tier 6).
@@ -737,7 +749,7 @@ func CalculateStats(classID, raceID, classTier, level uint8, subPathOpts ...uint
 		modHP = 15 + 80      // +80 MaxHP da evolução Varkai
 		modStamina = 10 + 30 // +30 MaxStamina da evolução Varkai
 	case protocol.RaceRevenant: // 7 (Amaldiçoado das Cinzas / Revenant)
-		modHP = 10 + 50      // +50 MaxHP do despertar sombrio
+		modHP = 10 + 50 // +50 MaxHP do despertar sombrio
 		modStamina = 10
 	case protocol.RaceCelestine: // 8 (Celestino)
 		modHP = 25
@@ -1019,7 +1031,6 @@ func (p *Player) RecalculateStats() {
 	p.recalculateStatsLocked()
 }
 
-
 // NewPlayer cria uma nova instância de Player com posição oficial inicial no Centro (0, 1.5, 0).
 // Inicia apenas com a Raça Valeriano como Viajante Sem Classe (ClassID = 0, ClassTier = 0).
 func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player {
@@ -1186,9 +1197,11 @@ func (p *Player) SetIdentityMode(raceID, classID, actionMode uint8, subPathOpts 
 	// SubPath 0 no pacote = manter o caminho atual.
 	if p.ClassID != prevClass || p.ClassID < 1 || p.ClassID > 12 {
 		p.SubPath = 0
+		p.PathTier = 0
 	}
 	if len(subPathOpts) > 0 && subPathOpts[0] >= 1 && subPathOpts[0] <= 4 && p.ClassID >= 1 && p.ClassID <= 12 {
 		p.SubPath = subPathOpts[0]
+		p.PathTier = p.ClassTier
 	}
 
 	p.recalculateStatsLocked()
@@ -1360,7 +1373,6 @@ func (p *Player) DevControlLevelAndStats(val uint8) {
 		p.Stamina = float32(p.MaxStamina)
 	}
 }
-
 
 // AddXP adiciona experiência ao jogador e processa subida de nível quando XP >= NextLevelXP.
 // O ganho de StatPoints escala conforme a raridade da classe (Tier 0 a 6).
@@ -1695,7 +1707,6 @@ func (p *Player) RestoreStamina(amount float32) {
 		p.Stamina = float32(p.MaxStamina)
 	}
 }
-
 
 // RegenerateStamina recupera estamina a 30 Hz.
 func (p *Player) RegenerateStamina(dt float32, isNight bool, moonPhase uint8) {
@@ -2627,5 +2638,3 @@ func (p *Player) HasUnlockedRecipe(recipeID uint8) bool {
 	}
 	return p.UnlockedRecipes[recipeID]
 }
-
-

@@ -575,14 +575,14 @@ func _render_main_view(m_info: Dictionary) -> void:
 		if ClassPaths.has_paths(my_class) and my_tier >= 2:
 			if my_sub_path >= 1:
 				var path_lbl := Label.new()
-				path_lbl.text = "🧭 Caminho %d: %s — %s" % [my_sub_path, ClassPaths.path_full_name(my_class, my_sub_path), ClassPaths.pros_cons(my_class, my_sub_path)]
+				path_lbl.text = "🧭 Caminho %d: %s — %s\n(Ao subir de Tier, nos níveis 25 e 45, você poderá trocar de Caminho.)" % [my_sub_path, ClassPaths.path_full_name(my_class, my_sub_path), ClassPaths.pros_cons(my_class, my_sub_path)]
 				path_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				path_lbl.add_theme_font_size_override("font_size", 11)
 				path_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 				options_vbox.add_child(path_lbl)
 			else:
 				var evo_prompt := Label.new()
-				evo_prompt.text = "Seu domínio avançou! Escolha 1 dos 4 Caminhos Evolutivos (vale até o Tier 4 Épico):"
+				evo_prompt.text = "Seu domínio avançou! Escolha 1 dos 4 Caminhos Evolutivos (pode trocar a cada novo Tier):"
 				evo_prompt.add_theme_font_size_override("font_size", 11)
 				evo_prompt.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 				options_vbox.add_child(evo_prompt)

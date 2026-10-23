@@ -90,4 +90,3 @@ func (d *TrainingDummy) SetZone(zoneID uint8) {
 	defer d.mu.Unlock()
 	d.ZoneID = zoneID
 }
-

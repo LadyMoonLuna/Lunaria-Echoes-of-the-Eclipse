@@ -1099,6 +1099,19 @@ func TestEvolutionPathsMultipliersAndChoice(t *testing.T) {
 		t.Fatalf("Guardião: esperava HP %d após 100 de dano, obteve %d", hp-52, newHP)
 	}
 
+	// O Caminho fica até o próximo Tier; ao subir de Tier, pode trocar
+	if p.NeedsPathChoice() {
+		t.Fatal("no mesmo Tier o Caminho já escolhido não deve ser oferecido de novo")
+	}
+	p.AddLevel(15) // nível 25 -> Tier 3
+	if !p.NeedsPathChoice() {
+		t.Fatal("ao subir para o Tier 3 o jogador deve poder trocar de Caminho")
+	}
+	p.ChoosePath(3)
+	if p.SubPath != 3 || p.NeedsPathChoice() {
+		t.Fatalf("troca para o Caminho 3 no Tier 3 falhou (SubPath %d)", p.SubPath)
+	}
+
 	// Trocar de classe exige escolher o Caminho de novo
 	p.SetIdentityMode(0, protocol.ClassWarrior, protocol.IdentityModeInitialChange)
 	if p.SubPath != 0 || !p.NeedsPathChoice() {

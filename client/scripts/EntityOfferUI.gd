@@ -274,7 +274,7 @@ func _update_offer_content(offer_type: int, player_race: int, opt_a: int, opt_b:
 		if world and world.get("my_class_id"):
 			my_class = world.my_class_id
 		entity_title_label.text = "Os 4 Caminhos Evolutivos da Guilda"
-		entity_lore_label.text = "\"Seu domínio de combate atingiu um novo ápice. Escolha o Caminho que guiará sua classe até o Tier 4 Épico — a escolha é definitiva!\""
+		entity_lore_label.text = "\"Seu domínio de combate atingiu um novo ápice. Escolha o Caminho deste Tier — a cada novo Tier (níveis 10, 25 e 45) você poderá trocar!\""
 		var cards: Array = [card_a_container, card_b_container, card_c_container, card_d_container]
 		var path_colors: Array = [Color("#ff7043"), Color("#4fc3f7"), Color("#ffd54f"), Color("#ab47bc")]
 		for sub_path in range(1, 5):

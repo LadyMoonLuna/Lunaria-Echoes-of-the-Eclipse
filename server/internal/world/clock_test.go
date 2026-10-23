@@ -104,4 +104,3 @@ func TestWorldClockSetExact(t *testing.T) {
 		t.Fatalf("esperava Clima 2 (Neblina Densa), obteve %d", w)
 	}
 }
-

@@ -660,4 +660,3 @@ func (c *Corpse) SetZone(zoneID uint8) {
 	defer c.Mu.Unlock()
 	c.ZoneID = zoneID
 }
-

@@ -184,7 +184,7 @@ func TestNPCSayPacket(t *testing.T) {
 func TestWorldTimePacket(t *testing.T) {
 	hour := uint8(16)
 	minute := uint8(45)
-	moonPhase := uint8(4) // Lua Cheia
+	moonPhase := uint8(4)   // Lua Cheia
 	weatherType := uint8(2) // Neblina Densa
 
 	data := SerializeWorldTime(hour, minute, moonPhase, weatherType)
@@ -835,4 +835,3 @@ func TestFriendshipSyncPacket(t *testing.T) {
 		t.Fatalf("dados divergentes: %+v vs esperado (ID: %d, Pts: %d, Lvl: %d)", pkt, npcID, points, level)
 	}
 }
-

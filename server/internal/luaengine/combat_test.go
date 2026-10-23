@@ -354,8 +354,6 @@ func TestSecretClasses10to15CombatMultipliers(t *testing.T) {
 	}
 }
 
-
-
 func TestSecretVariantSkillMultipliers(t *testing.T) {
 	clock := world.NewWorldClock(12.0)
 	engine := NewEngine(clock)

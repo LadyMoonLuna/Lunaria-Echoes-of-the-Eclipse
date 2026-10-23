@@ -17,13 +17,13 @@ import (
 
 // Engine gerencia a inicialização das VMs Lua dos NPCs, combate e o sistema de Hot-Reload.
 type Engine struct {
-	mu          sync.RWMutex
-	clock       *world.WorldClock
-	watcher     *fsnotify.Watcher
-	watchedDirs []string
+	mu           sync.RWMutex
+	clock        *world.WorldClock
+	watcher      *fsnotify.Watcher
+	watchedDirs  []string
 	npcsByScript map[string][]*world.NPC
-	lastReload  map[string]time.Time
-	stopChan    chan struct{}
+	lastReload   map[string]time.Time
+	stopChan     chan struct{}
 
 	combatMu         sync.RWMutex
 	combatState      *lua.LState

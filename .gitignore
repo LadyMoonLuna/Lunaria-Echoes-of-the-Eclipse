@@ -21,3 +21,7 @@ server/server.exe
 Thumbs.db
 *.swp
 *.swo
+
+# Backups grandes e pacotes gerados (não versionar)
+client/assets/bundles/
+*.bundle

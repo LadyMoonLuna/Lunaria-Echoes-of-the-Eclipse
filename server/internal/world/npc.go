@@ -395,4 +395,3 @@ func (npc *NPC) SetShopOpen(open bool) {
 	defer npc.mu.Unlock()
 	npc.ShopOpen = open
 }
-

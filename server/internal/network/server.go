@@ -31,10 +31,10 @@ const (
 
 // Server coordena conexões de rede, relógio do mundo, NPCs, Bonecos de Treino, Mobs, combate e Game Loop.
 type Server struct {
-	mu           sync.RWMutex
-	players      map[uint32]*world.Player
-	npcs         map[uint32]*world.NPC
-	dummies      map[uint32]*world.TrainingDummy
+	mu            sync.RWMutex
+	players       map[uint32]*world.Player
+	npcs          map[uint32]*world.NPC
+	dummies       map[uint32]*world.TrainingDummy
 	mobManager    *world.MobManager
 	projManager   *world.ProjectileManager
 	corpseManager *world.CorpseManager
@@ -216,11 +216,11 @@ func (s *Server) Start() error {
 		s.BroadcastNPCSay,
 	)
 	guard1.SetPatrolRoute([]world.Waypoint{
-		{X: 0.0, Z: 48.0},  // Quartel da Guarda
-		{X: 15.0, Z: 48.0}, // Pátio Leste
-		{X: 0.0, Z: 30.0},  // Avenida Norte
-		{X: -15.0, Z: 48.0},// Pátio Oeste
-		{X: 0.0, Z: 48.0},  // Quartel da Guarda
+		{X: 0.0, Z: 48.0},   // Quartel da Guarda
+		{X: 15.0, Z: 48.0},  // Pátio Leste
+		{X: 0.0, Z: 30.0},   // Avenida Norte
+		{X: -15.0, Z: 48.0}, // Pátio Oeste
+		{X: 0.0, Z: 48.0},   // Quartel da Guarda
 	}, 2.8, 3.0)
 
 	// 5. Guarda Valen (ID 106)
@@ -5405,8 +5405,8 @@ func (s *Server) checkProgressionMilestones(player *world.Player) {
 	}
 
 	// 2. Escolha do Caminho Evolutivo das Classes Básicas. O Tier sobe sozinho nos níveis 10, 25 e 45
-	// (checkLevelMilestoneTierEvolutionLocked); a partir do Tier 2 o jogador escolhe 1 dos 4 Caminhos,
-	// que vale até o Tier 4 Épico. A oferta (A=1, B=4) pede a escolha entre os Caminhos 1 a 4.
+	// (checkLevelMilestoneTierEvolutionLocked); a cada novo Tier o jogador escolhe (ou troca) 1 dos 4
+	// Caminhos. A oferta (A=1, B=4) pede a escolha entre os Caminhos 1 a 4.
 	if player.NeedsPathChoice() {
 		s.sendEvolutionOffer(player, protocol.OfferTypeBasicClass, 1, 4)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[MESTRE DA GUILDA] O aventureiro #%d alcançou o Tier %d! Escolha 1 dos 4 Caminhos Evolutivos da sua classe.", player.ID, classTier))
@@ -5462,11 +5462,7 @@ func (s *Server) handleEvolutionChoice(playerID uint32, pkt protocol.EvolutionOf
 			log.Printf("[CAMINHO] Jogador #%d escolheu o Caminho %d sem poder escolher (ou inválido) — ignorado\n", playerID, chosenPath)
 			return
 		}
-		player.Mu.Lock()
-		player.SubPath = chosenPath
-		player.ClassPath = chosenPath
-		player.Mu.Unlock()
-		player.RecalculateStats()
+		player.ChoosePath(chosenPath)
 
 		s.sendPlayerStats(player)
 		s.BroadcastNPCSay(0, fmt.Sprintf("[CAMINHO EVOLUTIVO] O aventureiro #%d seguiu o Caminho %d (Tier %d)!", playerID, chosenPath, player.ClassTier))
@@ -5493,4 +5489,3 @@ func (s *Server) handleEvolutionChoice(playerID uint32, pkt protocol.EvolutionOf
 		s.offerLegendaryClass(player)
 	}
 }
-

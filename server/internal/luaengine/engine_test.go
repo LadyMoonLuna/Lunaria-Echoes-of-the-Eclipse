@@ -265,5 +265,3 @@ func TestNPCFriendshipAndClassRestrictionsLua(t *testing.T) {
 		t.Errorf("esperava segredo do mestre traído às 03:00 da manhã, obteve: %s", lyraSaid)
 	}
 }
-
-
