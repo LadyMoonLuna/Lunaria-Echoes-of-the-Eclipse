@@ -1085,3 +1085,42 @@ func send_register_custom_weapon(weapon_name: String, pieces: Array) -> void:
 	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
 	data.append_array(body)
 	tcp.put_data(data)
+
+# Mini-Games da Forja: notas (0.0 a 1.20) viajam como u8 = nota × 200, na ordem
+# Derreter, Ponto de Fusão, Formas, Escória, Bigorna, Têmpera, Montagem.
+func _score_bytes(scores: Array) -> PackedByteArray:
+	var out := PackedByteArray()
+	for k in range(7):
+		var v: float = float(scores[k]) if k < scores.size() else 0.0
+		out.append(clampi(int(round(v * 200.0)), 0, 240))
+	return out
+
+func send_forge_alloy_scored(ids: Array, scores: Array) -> void:
+	var data := PackedByteArray([0x58, 0, 0, 0, 0])
+	for k in range(mini(4, ids.size())):
+		data[1 + k] = int(ids[k])
+	data.append_array(_score_bytes(scores))
+	tcp.put_data(data)
+
+func send_forge_blueprint_scored(bp_id: int, picks: Array, scores: Array) -> void:
+	var data := PackedByteArray([0x59, bp_id, 0, 0, 0, 0, 0, 0])
+	for k in range(mini(6, picks.size())):
+		data[2 + k] = int(picks[k])
+	data.append_array(_score_bytes(scores))
+	tcp.put_data(data)
+
+## 0x55 com as notas no fim do corpo.
+func send_register_custom_weapon_scored(weapon_name: String, pieces: Array, scores: Array) -> void:
+	var name_bytes := weapon_name.to_utf8_buffer()
+	if name_bytes.size() > 64:
+		name_bytes = name_bytes.slice(0, 64)
+	var body := PackedByteArray([name_bytes.size()])
+	body.append_array(name_bytes)
+	body.append(pieces.size())
+	for pc in pieces:
+		for v in pc:
+			body.append(int(v))
+	body.append_array(_score_bytes(scores))
+	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
+	data.append_array(body)
+	tcp.put_data(data)

@@ -377,7 +377,16 @@ func _on_register() -> void:
 	var pieces: Array = []
 	for p in placements:
 		pieces.append([int(p["module"]), int(p["x"]), int(p["y"]), int(p["rot"]), int(p["material"])])
-	NetworkManager.send_register_custom_weapon(name_edit.text.strip_edges(), pieces)
+	var weapon_name := name_edit.text.strip_edges()
+	if forge.quick_forge.button_pressed:
+		NetworkManager.send_register_custom_weapon(weapon_name, pieces)
+		return
+	var picks: Array = []
+	for p in placements:
+		picks.append(int(p["material"]))
+	forge.start_forge_minigames(["melt", "mold", "prep"], forge._mats_of(picks), func(sc: Dictionary):
+		NetworkManager.send_register_custom_weapon_scored(weapon_name, pieces, forge._score_list(sc))
+	)
 
 func _load_exclusive() -> void:
 	if exclusive_pick.selected < 0 or exclusive_pick.item_count == 0:

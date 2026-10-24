@@ -26,6 +26,7 @@ var forge_btn: Button
 var buy_btn: Button
 var current_bp: Dictionary = {}
 var puzzle_tab: Control
+var quick_forge: CheckBox
 # Alerta grande (patente negada em vermelho; obra-prima em dourado)
 var alert_layer: CanvasLayer
 var alert_panel: PanelContainer
@@ -129,6 +130,10 @@ func _build_ui() -> void:
 	close_btn.text = "✖"
 	close_btn.pressed.connect(close_menu)
 	header.add_child(close_btn)
+	quick_forge = CheckBox.new()
+	quick_forge.text = "⚡ Forja rápida (sem mini-games, atributos sem modificador)"
+	quick_forge.add_theme_font_size_override("font_size", 12)
+	root.add_child(quick_forge)
 	tabs = TabContainer.new()
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(tabs)
@@ -138,6 +143,7 @@ func _build_ui() -> void:
 	puzzle_tab.forge = self
 	tabs.add_child(puzzle_tab)
 	_build_alert()
+	_build_minigame_modal()
 
 func _label(text: String, size: int = 13, col: Color = Color(0.92, 0.88, 0.8)) -> Label:
 	var l := Label.new()
@@ -369,8 +375,18 @@ func _material_card(m: Dictionary, qty: int, mid: int) -> String:
 
 func _on_smelt() -> void:
 	var ids := _crucible_ids()
-	if ids.size() >= 2:
+	if ids.size() < 2:
+		return
+	if quick_forge.button_pressed:
 		NetworkManager.send_forge_alloy(ids)
+		return
+	var mats: Array = []
+	for mid in ids:
+		mats.append(ItemData.material(mid))
+	# Liga: Derreter, Ponto de Fusão, Formas (lingote) e Escória
+	start_forge_minigames(["melt", "fusion", "mold", "prep"], mats, func(sc: Dictionary):
+		NetworkManager.send_forge_alloy_scored(ids, _score_list(sc))
+	)
 
 # --- Blueprints ---
 
@@ -567,7 +583,14 @@ func _update_bp_preview() -> void:
 func _on_forge() -> void:
 	if current_bp.is_empty():
 		return
-	NetworkManager.send_forge_blueprint(int(current_bp["id"]), _picks())
+	var bp_id := int(current_bp["id"])
+	var picks := _picks()
+	if quick_forge.button_pressed:
+		NetworkManager.send_forge_blueprint(bp_id, picks)
+		return
+	start_forge_minigames(["melt", "mold", "prep"], _mats_of(picks), func(sc: Dictionary):
+		NetworkManager.send_forge_blueprint_scored(bp_id, picks, _score_list(sc))
+	)
 
 func _on_buy() -> void:
 	if not current_bp.is_empty():
@@ -619,3 +642,495 @@ func show_alert(kind: int, message: String) -> void:
 	tw.tween_interval(3.5)
 	tw.tween_property(alert_panel, "modulate:a", 0.0, 0.6)
 	tw.tween_callback(func(): alert_panel.visible = false)
+
+
+# =============================================================================
+# MINI-GAMES DA FORJA (Parte 2: 1 a 4). As notas vão de 0.0 a 1.20 e seguem para o servidor,
+# que calcula a Nota de Criação. Os mini-games 5 a 7 (Bigorna, Têmpera, Montagem) chegam na
+# Parte 3; até lá eles entram com a nota neutra MG_PENDING_SCORE.
+# =============================================================================
+const MG_PENDING_SCORE := 0.85
+const MG_TITLES := {
+	"melt": "🔥 Mini-Game 1: Derreter os Metais",
+	"fusion": "⚗️ Mini-Game 2: Ponto de Fusão da Liga",
+	"mold": "🏺 Mini-Game 3: Colocar nas Formas",
+	"prep": "🔨 Mini-Game 4: Preparar o Metal (Escória e Dobras)",
+}
+const MG_HINTS := {
+	"melt": "Segure [💨 Soprar Fole] (ou Espaço) para esquentar. Mantenha a temperatura na faixa dourada até a fusão chegar a 100%. Não deixe chegar no vermelho!",
+	"fusion": "As três ondas correm conforme a diferença de condutividade dos materiais. Trave cada uma no Ponto de Fusão central com [⚡ Travar Frequência] (ou Espaço).",
+	"mold": "A pressão esfria e puxa para a esquerda. Segure [🏺 Inclinar Cadinho] (ou Espaço) para manter o jato na Zona de Fluxo Perfeito até o molde encher.",
+	"prep": "Martele (clique) cada ponto de escória antes que ele esfrie e suma. Quanto maior o ponto na hora do golpe, melhor.",
+}
+const MG_TIME_LIMIT := {"melt": 14.0, "fusion": 16.0, "mold": 14.0, "prep": 0.0}
+const MAX_TEMP := 2500.0
+const OVERHEAT_TEMP := 2300.0
+
+var mg_layer: CanvasLayer
+var mg_panel: PanelContainer
+var mg_title: Label
+var mg_hint: Label
+var mg_canvas: Control
+var mg_info: Label
+var mg_action: Button
+var mg_next_btn: Button
+var mg_queue: Array = []
+var mg_game := ""
+var mg_scores := {}
+var mg_done_cb: Callable
+var mg_running := false
+var mg_finished_game := false
+var mg_t := 0.0
+var mg_rarity := 1
+var mg_mats: Array = []
+var mg_diff := {}
+var mg_holding := false
+var mg_space_was := false
+var mg_state := {}
+
+## Dificuldade pela raridade do material (1 Comum ... 8 Mítico) e pela Maestria (MAS) do jogador.
+func _get_minigame_difficulty(material_rarity: int, player_mas: int) -> Dictionary:
+	var sweet_spot_width: float = clampf(0.30 - (material_rarity * 0.03) + (player_mas * 0.003), 0.05, 0.32)
+	var cursor_speed: float = (1.0 + (material_rarity * 0.28)) * maxf(0.6, 1.0 - (player_mas * 0.005))
+	return {"sweet_spot_width": sweet_spot_width, "cursor_speed": cursor_speed}
+
+func _player_mas() -> int:
+	var world := get_parent()
+	if world and world.get("inventory_ui") and world.inventory_ui.get("stat_totals") != null:
+		return int(world.inventory_ui.stat_totals.get("mas", 0))
+	return 0
+
+func _mats_of(picks: Array) -> Array:
+	var out: Array = []
+	for mid in picks:
+		if int(mid) > 0:
+			out.append(ItemData.material(int(mid)))
+	return out
+
+## Notas na ordem do servidor; os mini-games ainda não jogados entram neutros.
+func _score_list(sc: Dictionary) -> Array:
+	var out: Array = []
+	for key in ["melt", "fusion", "mold", "prep", "shape", "temper", "assembly"]:
+		out.append(float(sc.get(key, 0.0 if key == "fusion" else MG_PENDING_SCORE)))
+	return out
+
+func _build_minigame_modal() -> void:
+	mg_layer = CanvasLayer.new()
+	mg_layer.layer = 30
+	mg_layer.visible = false
+	add_child(mg_layer)
+	var scrim := ColorRect.new()
+	scrim.color = Color(0, 0, 0, 0.55)
+	scrim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	mg_layer.add_child(scrim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scrim.add_child(center)
+	mg_panel = PanelContainer.new()
+	mg_panel.custom_minimum_size = Vector2(720, 520)
+	center.add_child(mg_panel)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 8)
+	mg_panel.add_child(vb)
+	mg_title = _label("", 18, Color(1.0, 0.85, 0.45))
+	vb.add_child(mg_title)
+	mg_hint = _label("", 12, Color(0.85, 0.82, 0.75))
+	vb.add_child(mg_hint)
+	mg_canvas = Control.new()
+	mg_canvas.custom_minimum_size = Vector2(680, 320)
+	mg_canvas.mouse_filter = Control.MOUSE_FILTER_STOP
+	mg_canvas.draw.connect(_mg_draw)
+	mg_canvas.gui_input.connect(_mg_canvas_input)
+	vb.add_child(mg_canvas)
+	mg_info = _label("", 13, Color(0.95, 0.92, 0.85))
+	vb.add_child(mg_info)
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 10)
+	vb.add_child(hb)
+	mg_action = Button.new()
+	mg_action.custom_minimum_size = Vector2(320, 44)
+	mg_action.button_down.connect(_mg_action_down)
+	mg_action.button_up.connect(func(): mg_holding = false)
+	hb.add_child(mg_action)
+	mg_next_btn = Button.new()
+	mg_next_btn.custom_minimum_size = Vector2(200, 44)
+	mg_next_btn.pressed.connect(_mg_next)
+	hb.add_child(mg_next_btn)
+	var cancel := Button.new()
+	cancel.text = "Cancelar forja"
+	cancel.pressed.connect(func():
+		mg_running = false
+		mg_layer.visible = false
+	)
+	hb.add_child(cancel)
+
+## Começa a sequência de mini-games; on_done recebe {"melt": nota, ...}.
+func start_forge_minigames(games: Array, mats: Array, on_done: Callable) -> void:
+	mg_mats = mats
+	mg_rarity = 1
+	for m in mats:
+		mg_rarity = maxi(mg_rarity, int(m.get("rarity", 1)))
+	mg_diff = _get_minigame_difficulty(mg_rarity, _player_mas())
+	mg_queue = games.duplicate()
+	mg_scores = {}
+	mg_done_cb = on_done
+	mg_layer.visible = true
+	_mg_begin(mg_queue.pop_front())
+
+func _mg_begin(game: String) -> void:
+	mg_game = game
+	mg_t = 0.0
+	mg_running = true
+	mg_finished_game = false
+	mg_holding = false
+	mg_title.text = "%s   (raridade %s)" % [MG_TITLES[game], ItemData.rarity_name(mg_rarity)]
+	mg_hint.text = MG_HINTS[game]
+	mg_next_btn.visible = false
+	mg_action.visible = game != "prep"
+	var sweet: float = mg_diff["sweet_spot_width"]
+	match game:
+		"melt":
+			mg_action.text = "💨 Soprar Fole (Espaço / Clique)"
+			mg_state = {"temp": 300.0, "progress": 0.0, "in_band": 0.0, "overheat": 0.0, "band_c": 1500.0, "band_w": sweet * MAX_TEMP}
+		"fusion":
+			mg_action.text = "⚡ Travar Frequência (Espaço)"
+			var cd := _cond_diffs(mg_mats)
+			var speed: float = mg_diff["cursor_speed"]
+			mg_state = {"pos": [0.1, 0.45, 0.8], "dir": [1.0, -1.0, 1.0], "locked": [-1.0, -1.0, -1.0], "current": 0,
+				"speed": [0.35 * speed * (1.0 + cd[0] / 45.0), 0.35 * speed * (1.0 + cd[1] / 45.0), 0.35 * speed * (1.0 + cd[2] / 45.0)],
+				"diff": cd, "zone": sweet}
+		"mold":
+			mg_action.text = "🏺 Inclinar Cadinho (Espaço / Segurar)"
+			mg_state = {"pressure": 0.5, "fill": 0.0, "in_zone": 0.0, "bubbles": 0.0, "zone": sweet, "noise_t": 0.0}
+		"prep":
+			var total := clampi(5 + (mg_rarity - 1) / 2, 5, 8)
+			mg_state = {"spots": [], "spawned": 0, "total": total, "hits": 0.0, "misses": 0, "next_spawn": 0.4,
+				"life": 1.9 / float(mg_diff["cursor_speed"]) * 1.4}
+	mg_canvas.queue_redraw()
+
+## Diferença média de condutividade (térmica, elétrica, mágica) entre os materiais escolhidos.
+func _cond_diffs(mats: Array) -> Array:
+	var sums := [0.0, 0.0, 0.0]
+	var pairs := 0
+	for i in range(mats.size()):
+		for j in range(i + 1, mats.size()):
+			sums[0] += absf(float(mats[i]["thermal"]) - float(mats[j]["thermal"]))
+			sums[1] += absf(float(mats[i]["electric"]) - float(mats[j]["electric"]))
+			sums[2] += absf(float(mats[i]["magic"]) - float(mats[j]["magic"]))
+			pairs += 1
+	if pairs == 0:
+		return [0.0, 0.0, 0.0]
+	return [sums[0] / pairs, sums[1] / pairs, sums[2] / pairs]
+
+func _mg_action_down() -> void:
+	mg_holding = true
+	if mg_game == "fusion":
+		_mg_lock_wave()
+
+func _mg_canvas_input(event: InputEvent) -> void:
+	if not mg_running or mg_finished_game:
+		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if mg_game == "prep":
+			_mg_hammer(event.position)
+
+func _process(delta: float) -> void:
+	if not mg_running or mg_finished_game or mg_layer == null or not mg_layer.visible:
+		return
+	# Espaço funciona como o botão de ação (segurar ou travar)
+	var space := Input.is_key_pressed(KEY_SPACE)
+	if mg_game == "fusion" and space and not mg_space_was:
+		_mg_lock_wave()
+	mg_space_was = space
+	var hold: bool = mg_holding or space
+	mg_t += delta
+	match mg_game:
+		"melt":
+			_mg_tick_melt(delta, hold)
+		"fusion":
+			_mg_tick_fusion(delta)
+		"mold":
+			_mg_tick_mold(delta, hold)
+		"prep":
+			_mg_tick_prep(delta)
+	var limit: float = MG_TIME_LIMIT[mg_game]
+	if limit > 0.0 and mg_t >= limit and not mg_finished_game:
+		_mg_finish()
+	mg_canvas.queue_redraw()
+
+# --- 1: Derreter os Metais ---
+func _mg_tick_melt(delta: float, hold: bool) -> void:
+	var st := mg_state
+	var speed: float = mg_diff["cursor_speed"]
+	# Faixa ideal oscila devagar (turbulência térmica maior em metais raros)
+	st["band_c"] = 1500.0 + sin(mg_t * 0.9 * speed) * 380.0
+	if hold:
+		st["temp"] = minf(MAX_TEMP, float(st["temp"]) + 950.0 * speed * delta)
+	else:
+		st["temp"] = maxf(0.0, float(st["temp"]) - 620.0 * delta)
+	var lo: float = float(st["band_c"]) - float(st["band_w"]) / 2.0
+	var hi: float = float(st["band_c"]) + float(st["band_w"]) / 2.0
+	if float(st["temp"]) >= lo and float(st["temp"]) <= hi:
+		st["in_band"] = float(st["in_band"]) + delta
+		st["progress"] = minf(1.0, float(st["progress"]) + delta / 4.0)
+	if float(st["temp"]) >= OVERHEAT_TEMP:
+		st["overheat"] = float(st["overheat"]) + delta
+	mg_info.text = "🌡 %d °C   •   Faixa ideal: %d–%d °C   •   Progresso de Fusão: %d%%   •   %.0fs" % [
+		int(st["temp"]), int(lo), int(hi), int(float(st["progress"]) * 100.0), maxf(0.0, MG_TIME_LIMIT["melt"] - mg_t)]
+	if float(st["progress"]) >= 1.0:
+		_mg_finish()
+
+func _melt_score() -> float:
+	var st := mg_state
+	var precision: float = float(st["in_band"]) / maxf(mg_t, 0.01)
+	return clampf(float(st["progress"]) * 0.9 + precision * 0.3 - float(st["overheat"]) * 0.25, 0.0, 1.2)
+
+# --- 2: Ponto de Fusão ---
+func _mg_tick_fusion(delta: float) -> void:
+	var st := mg_state
+	for k in range(3):
+		if float(st["locked"][k]) >= 0.0:
+			continue
+		var p: float = float(st["pos"][k]) + float(st["dir"][k]) * float(st["speed"][k]) * delta
+		if p > 1.0 or p < 0.0:
+			st["dir"][k] = -float(st["dir"][k])
+			p = clampf(p, 0.0, 1.0)
+		st["pos"][k] = p
+	var names := ["🔥 Térmica", "⚡ Elétrica", "✨ Mágica"]
+	var cur: int = int(st["current"])
+	mg_info.text = "Onda atual: %s   •   Diferença de condutividade: T %.0f / E %.0f / M %.0f   •   %.0fs" % [
+		names[mini(cur, 2)], float(st["diff"][0]), float(st["diff"][1]), float(st["diff"][2]), maxf(0.0, MG_TIME_LIMIT["fusion"] - mg_t)]
+
+func _mg_lock_wave() -> void:
+	if mg_game != "fusion" or mg_finished_game:
+		return
+	var st := mg_state
+	var cur: int = int(st["current"])
+	if cur > 2:
+		return
+	st["locked"][cur] = float(st["pos"][cur])
+	st["current"] = cur + 1
+	if cur + 1 > 2:
+		_mg_finish()
+
+func _fusion_score() -> float:
+	var st := mg_state
+	var half: float = float(st["zone"]) / 2.0
+	var total := 0.0
+	for k in range(3):
+		var p: float = float(st["locked"][k])
+		if p < 0.0:
+			continue
+		var dist := absf(p - 0.5)
+		if dist <= half:
+			total += 1.2 - 0.35 * (dist / maxf(half, 0.001))
+		else:
+			total += maxf(0.0, 0.6 - (dist - half) * 2.0)
+	return clampf(total / 3.0, 0.0, 1.2)
+
+# --- 3: Colocar nas Formas ---
+func _mg_tick_mold(delta: float, hold: bool) -> void:
+	var st := mg_state
+	var speed: float = mg_diff["cursor_speed"]
+	st["noise_t"] = float(st["noise_t"]) + delta
+	var drift: float = (0.30 + 0.12 * sin(float(st["noise_t"]) * 2.3 * speed)) * speed
+	var p: float = float(st["pressure"]) - drift * delta
+	if hold:
+		p += 0.75 * speed * delta
+	st["pressure"] = clampf(p, 0.0, 1.0)
+	var half: float = float(st["zone"]) / 2.0
+	var dist := absf(float(st["pressure"]) - 0.5)
+	if dist <= half:
+		st["in_zone"] = float(st["in_zone"]) + delta
+		st["fill"] = minf(1.0, float(st["fill"]) + delta / 4.5)
+	elif dist <= half * 2.0:
+		st["fill"] = minf(1.0, float(st["fill"]) + delta / 12.0)
+	if float(st["pressure"]) >= 0.92:
+		st["bubbles"] = float(st["bubbles"]) + delta
+	mg_info.text = "Molde: %d%% cheio   •   Bolhas: %.1fs   •   %.0fs" % [int(float(st["fill"]) * 100.0), float(st["bubbles"]), maxf(0.0, MG_TIME_LIMIT["mold"] - mg_t)]
+	if float(st["fill"]) >= 1.0:
+		_mg_finish()
+
+func _mold_score() -> float:
+	var st := mg_state
+	var precision: float = float(st["in_zone"]) / maxf(mg_t, 0.01)
+	return clampf(float(st["fill"]) * 0.85 + precision * 0.35 - float(st["bubbles"]) * 0.2, 0.0, 1.2)
+
+# --- 4: Preparar o Metal ---
+func _ingot_rect() -> Rect2:
+	return Rect2(Vector2(130, 110), Vector2(420, 120))
+
+func _mg_tick_prep(delta: float) -> void:
+	var st := mg_state
+	st["next_spawn"] = float(st["next_spawn"]) - delta
+	var alive: Array = []
+	for sp in st["spots"]:
+		sp["age"] = float(sp["age"]) + delta
+		if float(sp["age"]) < float(st["life"]):
+			alive.append(sp)
+	st["spots"] = alive
+	if int(st["spawned"]) < int(st["total"]) and float(st["next_spawn"]) <= 0.0 and alive.size() < 2:
+		var r := _ingot_rect()
+		alive.append({"pos": Vector2(randf_range(r.position.x + 24, r.end.x - 24), randf_range(r.position.y + 20, r.end.y - 20)), "age": 0.0})
+		st["spawned"] = int(st["spawned"]) + 1
+		st["next_spawn"] = 0.55 / float(mg_diff["cursor_speed"]) + 0.25
+	mg_info.text = "Escória purificada: %d de %d   •   Golpes errados: %d" % [_prep_hits(), int(st["total"]), int(st["misses"])]
+	if int(st["spawned"]) >= int(st["total"]) and alive.is_empty():
+		_mg_finish()
+
+func _prep_hits() -> int:
+	return int(mg_state.get("hit_count", 0))
+
+func _mg_hammer(pos: Vector2) -> void:
+	var st := mg_state
+	for sp in st["spots"]:
+		var ratio: float = 1.0 - float(sp["age"]) / float(st["life"])
+		if pos.distance_to(sp["pos"]) <= 8.0 + 26.0 * ratio:
+			st["hits"] = float(st["hits"]) + ratio
+			st["hit_count"] = int(st.get("hit_count", 0)) + 1
+			(st["spots"] as Array).erase(sp)
+			return
+	st["misses"] = int(st["misses"]) + 1
+
+func _prep_score() -> float:
+	var st := mg_state
+	return clampf(float(st["hits"]) / float(st["total"]) * 1.25 - int(st["misses"]) * 0.04, 0.0, 1.2)
+
+# --- Fim de cada mini-game ---
+func _mg_finish() -> void:
+	mg_finished_game = true
+	mg_holding = false
+	var score := 0.0
+	match mg_game:
+		"melt":
+			score = _melt_score()
+		"fusion":
+			score = _fusion_score()
+		"mold":
+			score = _mold_score()
+		"prep":
+			score = _prep_score()
+	mg_scores[mg_game] = score
+	var verdict := "Defeituoso"
+	if score >= 1.10:
+		verdict = "Divino"
+	elif score >= 0.95:
+		verdict = "Obra-Prima"
+	elif score >= 0.75:
+		verdict = "Firme"
+	elif score >= 0.50:
+		verdict = "Imperfeito"
+	var extra := ""
+	if mg_game == "fusion" and score >= 0.95:
+		extra = "   ✨ Harmonia Híbrida garantida!"
+	mg_info.text = "Nota: %.2f / 1.20  (%s)%s" % [score, verdict, extra]
+	mg_action.visible = false
+	mg_next_btn.visible = true
+	mg_next_btn.text = "Próximo mini-game ▶" if not mg_queue.is_empty() else "🔨 Concluir forja"
+	mg_canvas.queue_redraw()
+
+func _mg_next() -> void:
+	if not mg_queue.is_empty():
+		_mg_begin(mg_queue.pop_front())
+		return
+	mg_running = false
+	mg_layer.visible = false
+	if mg_done_cb.is_valid():
+		mg_done_cb.call(mg_scores)
+
+# --- Desenho (60 FPS) ---
+func _mg_draw() -> void:
+	var c := mg_canvas
+	var size := c.size
+	c.draw_rect(Rect2(Vector2.ZERO, size), Color(0.06, 0.05, 0.05))
+	match mg_game:
+		"melt":
+			_draw_melt(c, size)
+		"fusion":
+			_draw_fusion(c, size)
+		"mold":
+			_draw_mold(c, size)
+		"prep":
+			_draw_prep(c, size)
+
+func _draw_melt(c: Control, size: Vector2) -> void:
+	var st := mg_state
+	var bar := Rect2(Vector2(size.x * 0.5 - 30, 20), Vector2(60, size.y - 40))
+	c.draw_rect(bar, Color(0.15, 0.13, 0.12))
+	var to_y := func(t: float) -> float: return bar.end.y - t / MAX_TEMP * bar.size.y
+	# Topo vermelho (superaquecimento) e faixa ideal dourada
+	var red_y: float = to_y.call(OVERHEAT_TEMP)
+	c.draw_rect(Rect2(bar.position, Vector2(bar.size.x, red_y - bar.position.y)), Color(0.75, 0.1, 0.08, 0.7))
+	var band_top: float = to_y.call(float(st["band_c"]) + float(st["band_w"]) / 2.0)
+	var band_bot: float = to_y.call(float(st["band_c"]) - float(st["band_w"]) / 2.0)
+	c.draw_rect(Rect2(Vector2(bar.position.x, band_top), Vector2(bar.size.x, band_bot - band_top)), Color(1.0, 0.65, 0.15, 0.55))
+	var ty: float = to_y.call(float(st["temp"]))
+	c.draw_rect(Rect2(Vector2(bar.position.x + 18, ty), Vector2(24, bar.end.y - ty)), Color(1.0, 0.35 + float(st["temp"]) / MAX_TEMP * 0.4, 0.1))
+	c.draw_line(Vector2(bar.position.x - 14, ty), Vector2(bar.end.x + 14, ty), Color.WHITE, 3.0)
+	for t in [0, 500, 1000, 1500, 2000, 2500]:
+		c.draw_string(c.get_theme_default_font(), Vector2(bar.end.x + 18, to_y.call(float(t)) + 4), "%d°C" % t, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.8, 0.78, 0.7))
+	# Barra de progresso de fusão
+	var pr := Rect2(Vector2(40, size.y - 50), Vector2(200, 22))
+	c.draw_rect(pr, Color(0.15, 0.13, 0.12))
+	c.draw_rect(Rect2(pr.position, Vector2(pr.size.x * float(st["progress"]), pr.size.y)), Color(1.0, 0.75, 0.25))
+	c.draw_string(c.get_theme_default_font(), pr.position + Vector2(0, -6), "Progresso de Fusão", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1.0, 0.85, 0.5))
+
+func _draw_fusion(c: Control, size: Vector2) -> void:
+	var st := mg_state
+	var cols := [Color(1.0, 0.45, 0.2), Color(0.4, 0.75, 1.0), Color(0.8, 0.5, 1.0)]
+	var names := ["🔥 Térmica", "⚡ Elétrica", "✨ Mágica"]
+	var zone: float = float(st["zone"])
+	for k in range(3):
+		var y := 50.0 + k * 95.0
+		var x0 := 60.0
+		var w := size.x - 120.0
+		# Onda decorativa: mais nervosa quanto maior a diferença de condutividade
+		var pts := PackedVector2Array()
+		for i in range(61):
+			var fx := float(i) / 60.0
+			pts.append(Vector2(x0 + fx * w, y + sin(fx * TAU * (2.0 + float(st["diff"][k]) / 20.0) + mg_t * 3.0) * 14.0))
+		c.draw_polyline(pts, Color(cols[k], 0.5), 2.0)
+		c.draw_rect(Rect2(Vector2(x0 + (0.5 - zone / 2.0) * w, y - 22), Vector2(zone * w, 44)), Color(0.3, 0.9, 0.4, 0.25))
+		c.draw_line(Vector2(x0 + 0.5 * w, y - 26), Vector2(x0 + 0.5 * w, y + 26), Color(0.4, 1.0, 0.5), 2.0)
+		var locked: float = float(st["locked"][k])
+		var p: float = locked if locked >= 0.0 else float(st["pos"][k])
+		var cx := x0 + p * w
+		c.draw_circle(Vector2(cx, y), 9.0 if locked < 0.0 else 7.0, cols[k] if locked < 0.0 else Color.WHITE)
+		var label: String = names[k] + ("  ✔ travada" if locked >= 0.0 else ("  ◀ agora" if int(st["current"]) == k else ""))
+		c.draw_string(c.get_theme_default_font(), Vector2(x0, y - 28), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, cols[k])
+
+func _draw_mold(c: Control, size: Vector2) -> void:
+	var st := mg_state
+	# Cadinho despejando no molde
+	var mold := Rect2(Vector2(size.x * 0.5 - 70, 150), Vector2(140, 130))
+	c.draw_rect(mold, Color(0.25, 0.22, 0.2))
+	var fill: float = float(st["fill"])
+	c.draw_rect(Rect2(Vector2(mold.position.x, mold.end.y - mold.size.y * fill), Vector2(mold.size.x, mold.size.y * fill)), Color(1.0, 0.55, 0.1))
+	var jet_x := mold.position.x + mold.size.x * float(st["pressure"])
+	c.draw_line(Vector2(size.x * 0.5, 40), Vector2(jet_x, mold.end.y - mold.size.y * fill), Color(1.0, 0.7, 0.2), 6.0)
+	c.draw_rect(Rect2(Vector2(size.x * 0.5 - 40, 20), Vector2(80, 30)), Color(0.45, 0.42, 0.4))
+	if float(st["pressure"]) >= 0.92:
+		for i in range(4):
+			c.draw_circle(Vector2(mold.position.x + randf() * mold.size.x, mold.end.y - mold.size.y * fill - randf() * 10.0), 4.0, Color(1, 1, 1, 0.7))
+	# Barra de pressão com a Zona de Fluxo Perfeito
+	var bar := Rect2(Vector2(60, 100), Vector2(size.x - 120, 24))
+	c.draw_rect(bar, Color(0.15, 0.13, 0.12))
+	var zone: float = float(st["zone"])
+	c.draw_rect(Rect2(Vector2(bar.position.x + (0.5 - zone / 2.0) * bar.size.x, bar.position.y), Vector2(zone * bar.size.x, bar.size.y)), Color(0.3, 0.9, 0.4, 0.45))
+	c.draw_rect(Rect2(Vector2(bar.position.x + 0.92 * bar.size.x, bar.position.y), Vector2(0.08 * bar.size.x, bar.size.y)), Color(0.8, 0.15, 0.1, 0.6))
+	var px := bar.position.x + float(st["pressure"]) * bar.size.x
+	c.draw_line(Vector2(px, bar.position.y - 6), Vector2(px, bar.end.y + 6), Color.WHITE, 3.0)
+	c.draw_string(c.get_theme_default_font(), bar.position + Vector2(0, -8), "Pressão de Vazamento  (esfriando ◀   ▶ inclinar)", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1.0, 0.85, 0.5))
+
+func _draw_prep(c: Control, _size: Vector2) -> void:
+	var st := mg_state
+	var anvil := Rect2(Vector2(160, 230), Vector2(360, 50))
+	c.draw_rect(anvil, Color(0.25, 0.25, 0.28))
+	var ing := _ingot_rect()
+	c.draw_rect(ing, Color(0.95, 0.45, 0.12))
+	c.draw_rect(Rect2(ing.position + Vector2(10, 10), ing.size - Vector2(20, 20)), Color(1.0, 0.65, 0.25))
+	for sp in st["spots"]:
+		var ratio: float = 1.0 - float(sp["age"]) / float(st["life"])
+		var blink := 0.6 + 0.4 * sin(float(sp["age"]) * 18.0)
+		c.draw_circle(sp["pos"], 8.0 + 26.0 * ratio, Color(0.2, 0.18, 0.15, blink))
+		c.draw_arc(sp["pos"], 8.0 + 26.0 * ratio, 0.0, TAU, 24, Color(1, 1, 0.6, blink), 2.0)
