@@ -81,6 +81,8 @@ type Player struct {
 	Inventory           map[uint8]uint8                // ItemID -> Quantidade
 	EquippedSlots       [protocol.EquipSlotCount]uint8 // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
 	DiscoveredMaterials map[uint16]bool                // Materiais já vistos pelo jogador (Forja)
+	CustomItems         map[uint8]*CustomItem          // Ligas sintéticas e equipamentos forjados (IDs 200-254)
+	KnownBlueprints     map[uint8]bool                 // Blueprints avançadas aprendidas (as básicas todos sabem)
 	ItemUnits           map[uint8][]uint8              // Qualidade de cada unidade da mochila (melhor -> pior)
 	EquippedQuality     [protocol.EquipSlotCount]uint8 // Condição de cada item equipado
 	EquippedQualitySet  [protocol.EquipSlotCount]bool  // slot com Condição registrada (senão vale a padrão do item)
@@ -996,7 +998,7 @@ func (p *Player) recalculateStatsLocked() {
 		if itemID == 0 {
 			continue
 		}
-		info := GetItemInfo(itemID)
+		info := p.itemInfoLocked(itemID)
 		directHPBonus += uint16(float32(info.BonusHP)*qualityStatMult(p.slotQualityLocked(uint8(slotIdx))) + 0.5)
 		effCONBonus += info.BonusCON
 		effAGIBonus += info.BonusAGI
@@ -1506,7 +1508,7 @@ func (p *Player) getAttributesLocked() (str, dex, con, agi, intStat, spi, mas, l
 		if itemID == 0 {
 			continue
 		}
-		info := GetItemInfo(itemID)
+		info := p.itemInfoLocked(itemID)
 		str += info.BonusSTR
 		dex += info.BonusDEX
 		con += info.BonusCON
@@ -2140,7 +2142,7 @@ func (p *Player) EquipItemQuality(itemID, quality uint8) (bool, string) {
 		return false, "Item não encontrado no inventário."
 	}
 
-	slot, ok := getSlotForItem(itemID)
+	slot, ok := p.slotForItemLocked(itemID)
 	if !ok {
 		return false, "Este item não pode ser equipado."
 	}

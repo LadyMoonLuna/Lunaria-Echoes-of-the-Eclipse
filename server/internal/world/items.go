@@ -122,6 +122,15 @@ var ItemCatalog = map[uint8]ItemInfo{
 	protocol.ItemOffhandKnuckle:  {Name: "Manopla Secundária", Weight: 2.2, Slot: protocol.SlotOffHand, BonusSTR: 1, BonusATK: 5, BonusDEF: 1},
 }
 
+func init() {
+	// Blueprints Antigas (drops de ruínas e chefes): usar ensina a blueprint
+	for _, b := range Blueprints {
+		if b.ScrollID != 0 {
+			ItemCatalog[b.ScrollID] = ItemInfo{Name: "Blueprint Antiga: " + b.Name, Weight: 0.2, Slot: NoSlot}
+		}
+	}
+}
+
 // GetItemInfo devolve os dados do item (itens desconhecidos pesam 0.5 kg e não equipam).
 func GetItemInfo(itemID uint8) ItemInfo {
 	if info, ok := ItemCatalog[itemID]; ok {

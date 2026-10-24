@@ -54,3 +54,26 @@ lines += ["]", "",
 out = ROOT / "client/scripts/world/WorldData.gd"
 out.write_text("\n".join(lines))
 print("WorldData.gd: %d zonas, %d portais, %d covis" % (len(d["zones"]), len(d["portals"]), len(d["dangers"])))
+
+# ForgeData.gd: receitas de ligas, blueprints e etiquetas (server/internal/world/forge.go)
+f = d["forge"]
+def gd(v):
+    return json.dumps(v, ensure_ascii=False)
+fl = ["# ARQUIVO GERADO por tools/gen_world_data.py a partir de tools/world_dump.json — não edite à mão.",
+      "# Fonte: server/internal/world/forge.go (mesmas regras do servidor).",
+      "extends RefCounted", "",
+      "## Receitas fixas da Fornalha: cada grupo é um ingrediente (qualquer material da lista serve).",
+      "const RECIPES := " + gd(f["recipes"]), "",
+      "## Blueprints por partes (role: dano/defesa/estrutura/nucleo; share = peso da peça na média).",
+      "const BLUEPRINTS := " + gd(f["blueprints"]), "",
+      "## Etiquetas que cada material satisfaz (id -> lista).",
+      "const TAGS := {" + ", ".join('%s: %s' % (k, gd(v or [])) for k, v in sorted(f["tags"].items(), key=lambda kv: int(kv[0]))) + "}", "",
+      "const TAG_NAMES := " + gd(f["tag_names"]), "",
+      "## Características especiais que as ligas passam para o equipamento.",
+      "const SPECIALS := {" + ", ".join('%s: %s' % (k, gd(v)) for k, v in sorted(f["specials"].items(), key=lambda kv: int(kv[0]))) + "}", "",
+      "const STAT_CAP := %d" % f["stat_cap"],
+      "const ANVIL := Vector3(%.1f, 0.0, %.1f)" % (f["anvil"][0], f["anvil"][1]), ""]
+fo = ROOT / "client/scripts/forge/ForgeData.gd"
+fo.parent.mkdir(parents=True, exist_ok=True)
+fo.write_text("\n".join(fl))
+print("ForgeData.gd: %d receitas, %d blueprints" % (len(f["recipes"]), len(f["blueprints"])))

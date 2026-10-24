@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"os"
 	"sort"
@@ -109,6 +110,56 @@ func main() {
 	out["buildings"] = buildings
 	out["interior"] = map[string]float32{"half": world.InteriorHalf, "door_z": world.InteriorDoorZ, "arrive_z": world.InteriorArriveZ,
 		"forge_fire_x": world.ForgeFirePos[0], "forge_fire_z": world.ForgeFirePos[1], "forge_fire_r": world.ForgeFireRadius}
+	// Forja (forge.go): receitas de ligas, blueprints por partes e etiquetas dos materiais
+	type partOut struct {
+		Name     string   `json:"name"`
+		Tags     []string `json:"tags"`
+		Role     string   `json:"role"`
+		Share    float32  `json:"share"`
+		Optional bool     `json:"optional"`
+	}
+	type bpOut struct {
+		ID        uint8     `json:"id"`
+		Name      string    `json:"name"`
+		Kind      uint8     `json:"kind"`
+		Slot      uint8     `json:"slot"`
+		Tool      uint8     `json:"tool"`
+		BaseATK   int       `json:"base_atk"`
+		BaseDEF   int       `json:"base_def"`
+		MassScale float32   `json:"mass_scale"`
+		DurScale  float32   `json:"dur_scale"`
+		Basic     bool      `json:"basic"`
+		Price     uint32    `json:"price"`
+		Scroll    uint8     `json:"scroll"`
+		Parts     []partOut `json:"parts"`
+	}
+	var bps []bpOut
+	for _, b := range world.Blueprints {
+		o := bpOut{b.ID, b.Name, b.Kind, b.Slot, uint8(b.Tool), b.BaseATK, b.BaseDEF, b.MassScale, b.DurScale, b.Basic, b.Price, b.ScrollID, nil}
+		for _, pt := range b.Parts {
+			o.Parts = append(o.Parts, partOut{pt.Name, pt.Tags, pt.Role, pt.Share, pt.Optional})
+		}
+		bps = append(bps, o)
+	}
+	type recipeOut struct {
+		Output uint16     `json:"output"`
+		Qty    uint8      `json:"qty"`
+		Groups [][]uint16 `json:"groups"`
+	}
+	var recipes []recipeOut
+	for _, r := range world.AlloyRecipes {
+		recipes = append(recipes, recipeOut{r.Output, r.Qty, r.Groups})
+	}
+	tags := map[string][]string{}
+	for id, m := range world.MaterialsDB {
+		tags[fmt.Sprint(id)] = world.MaterialTags(m)
+	}
+	specials := map[string]string{}
+	for id, sp := range world.AlloySpecial {
+		specials[fmt.Sprint(id)] = sp
+	}
+	out["forge"] = map[string]interface{}{"blueprints": bps, "recipes": recipes, "tags": tags, "tag_names": world.TagNames,
+		"specials": specials, "stat_cap": 600, "anvil": world.ForgeAnvilPos}
 	out["river"] = map[string]float64{
 		"source_gz": world.RiverSourceGZ, "mouth_gz": world.RiverMouthGZ, "mouth_lake_r": world.RiverMouthLakeR,
 		"span": world.ZoneSpan,

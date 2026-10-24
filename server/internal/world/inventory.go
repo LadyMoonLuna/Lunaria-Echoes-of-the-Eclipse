@@ -13,12 +13,12 @@ func (p *Player) currentWeightLocked() float32 {
 	var w float32
 	for id, qty := range p.Inventory {
 		if qty > 0 {
-			w += GetItemInfo(id).Weight * float32(qty)
+			w += p.itemInfoLocked(id).Weight * float32(qty)
 		}
 	}
 	for _, id := range p.EquippedSlots {
 		if id > 0 {
-			w += GetItemInfo(id).Weight
+			w += p.itemInfoLocked(id).Weight
 		}
 	}
 	return w
@@ -102,7 +102,7 @@ func (p *Player) RemoveHeavyItems() int {
 	defer p.Mu.Unlock()
 	removed := 0
 	for id, qty := range p.Inventory {
-		if GetItemInfo(id).Weight >= HeavyItemWeight {
+		if p.itemInfoLocked(id).Weight >= HeavyItemWeight {
 			removed += int(qty)
 			delete(p.Inventory, id)
 		}
@@ -115,7 +115,7 @@ func (p *Player) equipDEFLocked() uint16 {
 	var def float32
 	for slotIdx, id := range p.EquippedSlots {
 		if id > 0 {
-			def += float32(GetItemInfo(id).BonusDEF) * qualityStatMult(p.slotQualityLocked(uint8(slotIdx)))
+			def += float32(p.itemInfoLocked(id).BonusDEF) * qualityStatMult(p.slotQualityLocked(uint8(slotIdx)))
 		}
 	}
 	return uint16(def + 0.5)
@@ -127,7 +127,7 @@ func (p *Player) EquipBonuses() (atk, def, mdef uint16) {
 	defer p.Mu.RUnlock()
 	for slotIdx, id := range p.EquippedSlots {
 		if id > 0 {
-			info := GetItemInfo(id)
+			info := p.itemInfoLocked(id)
 			m := qualityStatMult(p.slotQualityLocked(uint8(slotIdx)))
 			atk += uint16(float32(info.BonusATK)*m + 0.5)
 			def += uint16(float32(info.BonusDEF)*m + 0.5)

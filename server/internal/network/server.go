@@ -630,6 +630,7 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 	s.sendGroundItems(player)
 	s.sendResourceNodes(player)
 	s.sendDiscoveries(player, true)
+	s.sendForgeState(player)
 	s.sendQuestState(player)
 
 	// 5. Envia pacote 0x3E (CORPSE_SNAPSHOT) com cadáveres ativos no chão
@@ -886,6 +887,23 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				}
 				s.handleConflictPacket(playerID, full)
 
+			case protocol.PacketTypeForgeAlloy, protocol.PacketTypeForgeBlueprint, protocol.PacketTypeForgeAction:
+				// Pacotes 0x51 / 0x52 / 0x53: Fornalha de Ligas e Forja por Blueprints
+				size := protocol.ForgeAlloyPacketSize
+				switch header[0] {
+				case protocol.PacketTypeForgeBlueprint:
+					size = protocol.ForgeBlueprintPacketSize
+				case protocol.PacketTypeForgeAction:
+					size = protocol.ForgeActionPacketSize
+				}
+				full := make([]byte, size)
+				full[0] = header[0]
+				if _, err := io.ReadFull(conn, full[1:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				s.handleForgePacket(playerID, full)
+
 			case protocol.PacketTypeShopRequest, protocol.PacketTypeShopTrade:
 				// Pacotes 0x48 / 0x49: loja viva dos NPCs (Mundo Vivo)
 				size := protocol.ShopRequestPacketSize
@@ -958,7 +976,11 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 	}
 
 	itemID := pkt.ItemID
-	if world.IsEquippable(itemID) {
+	if bp, ok := world.BlueprintByScroll(itemID); ok {
+		s.useBlueprintScroll(player, itemID, bp)
+		return
+	}
+	if player.IsEquippableFor(itemID) {
 		s.toggleEquip(player, itemID, pkt.SlotIndex) // SlotIndex = Qualidade da unidade escolhida
 		return
 	}
@@ -3147,6 +3169,10 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 				p.ID, p.Level, p.XP, p.NextLevelXP, p.StatPoints)
 			s.checkProgressionMilestones(p)
 		}
+	}
+
+	if trialKiller != nil {
+		s.rollBlueprintScroll(trialKiller, mob)
 	}
 
 	// Evolução Solo Varkai: derrota solitária do Licantropo Alfa (MobType 7)

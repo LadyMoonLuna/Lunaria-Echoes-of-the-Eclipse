@@ -28,6 +28,7 @@ var (
 	ForgeFirePos             = [2]float32{-7, 7} // fornalha acesa da Forja: só queima quem pisa nas brasas
 	ForgeFireRadius  float32 = 1.6
 	GarrickForgePost         = [2]float32{1.5, 3} // atrás da bigorna
+	ForgeAnvilPos            = [2]float32{0, 1.6} // bigorna da Forja: abre a interface de forja
 	LyraLabPost              = [2]float32{0, 4}   // bancada de alquimia
 	TavernSeatA              = [2]float32{-4, 2}  // mesas da taverna (à noite)
 	TavernSeatB              = [2]float32{4, 2}

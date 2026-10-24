@@ -1063,6 +1063,11 @@ func _update_inspector() -> void:
 	var cat_text: String = data.get("category", "Item")
 	if ItemData.is_material(item_id):
 		cat_text = "Material de Forja — %s" % ItemData.CATEGORY_NAMES.get(ItemData.material(item_id)["category"], "")
+	elif ItemData.FORGED.has(item_id):
+		var fslot: int = int(ItemData.info(item_id).get("slot", -1))
+		cat_text = "Forjado por Blueprint — %s" % (SLOT_NAMES[fslot] if fslot >= 0 else "Ferramenta Tier %d" % int(ItemData.FORGED[item_id]["tool_tier"]))
+	elif ItemData.info(item_id).has("blueprint"):
+		cat_text = "Blueprint Antiga — use para aprender"
 	elif ItemData.info(item_id).has("tool"):
 		cat_text = "Ferramenta de Coleta — Tier %d" % int(ItemData.info(item_id)["tool_tier"])
 	inspector_rarity.text = "%s  •  %s" % [rar[0], cat_text]
@@ -1085,6 +1090,8 @@ func _update_inspector() -> void:
 	if not lines.is_empty():
 		lines.append("")
 	var desc: String = data.get("desc", "")
+	if ItemData.FORGED.has(item_id):
+		desc = String(ItemData.FORGED[item_id]["desc"])
 	if desc != "":
 		lines.append("[i]%s[/i]" % desc)
 		lines.append("")
@@ -1099,13 +1106,16 @@ func _update_inspector() -> void:
 	else:
 		lines.append("⚖️ Peso: %.1f kg" % unit_w)
 	if ItemData.slot_of(item_id) >= 0:
-		lines.append("🛠 Durabilidade: 100/100")
+		if ItemData.FORGED.has(item_id):
+			lines.append("🛠 Durabilidade: %d" % int(ItemData.FORGED[item_id]["durability"]))
+		else:
+			lines.append("🛠 Durabilidade: 100/100")
 		lines.append("📍 Slot: %s" % SLOT_NAMES[ItemData.slot_of(item_id)])
 	inspector_body.text = "\n".join(lines)
 
 	var is_equipped: bool = selected["source"] == "equip"
 	unequip_btn.visible = is_equipped
-	use_btn.visible = not is_equipped and (data.get("usable", false) or ItemData.slot_of(item_id) >= 0)
+	use_btn.visible = not is_equipped and (data.get("usable", false) or ItemData.slot_of(item_id) >= 0 or ItemData.info(item_id).has("blueprint"))
 	use_btn.text = "⬆️ Equipar" if ItemData.slot_of(item_id) >= 0 else "⬆️ Usar"
 	drop_btn.get_parent().visible = not is_equipped
 	drop_qty.max_value = max(1, qty)

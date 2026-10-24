@@ -156,14 +156,40 @@ const ITEMS := {
 	154: {"name": "Carvão", "weight": 1.0, "slot": -1, "bonus": {}},
 	156: {"name": "Barro", "weight": 1.2, "slot": -1, "bonus": {}},
 	157: {"name": "Argila", "weight": 1.0, "slot": -1, "bonus": {}},
+	158: {"name": "Zinco", "weight": 4.2, "slot": -1, "bonus": {}},
+	159: {"name": "Ouro", "weight": 7.0, "slot": -1, "bonus": {}},
+	86: {"name": "Ossos de Fera", "weight": 1.5, "slot": -1, "bonus": {}},
+	175: {"name": "Aço Temperado", "weight": 5.0, "slot": -1, "bonus": {}},
+	176: {"name": "Bronze", "weight": 4.6, "slot": -1, "bonus": {}},
+	177: {"name": "Bronze Rúnico", "weight": 4.3, "slot": -1, "bonus": {}},
+	178: {"name": "Latão", "weight": 4.4, "slot": -1, "bonus": {}},
+	179: {"name": "Ouro Rosé", "weight": 6.2, "slot": -1, "bonus": {}},
+	180: {"name": "Prata Consagrada", "weight": 5.0, "slot": -1, "bonus": {}},
+	181: {"name": "Aço de Damasco", "weight": 5.0, "slot": -1, "bonus": {}},
+	182: {"name": "Titânio Glacial", "weight": 3.6, "slot": -1, "bonus": {}},
+	183: {"name": "Aço Trovejante", "weight": 4.8, "slot": -1, "bonus": {}},
+	184: {"name": "Aço Venenoso", "weight": 5.0, "slot": -1, "bonus": {}},
+	185: {"name": "Prata Lunar", "weight": 4.0, "slot": -1, "bonus": {}},
+	186: {"name": "Aço Sanguíneo", "weight": 5.2, "slot": -1, "bonus": {}},
+	187: {"name": "Mithril Vivo", "weight": 1.0, "slot": -1, "bonus": {}},
+	188: {"name": "Tungstênio Reforçado", "weight": 8.5, "slot": -1, "bonus": {}},
+	189: {"name": "Oricalco Flamejante", "weight": 4.0, "slot": -1, "bonus": {}},
+	190: {"name": "Adamantino Divino", "weight": 6.0, "slot": -1, "bonus": {}},
 	155: {"name": "Ervas Medicinais", "weight": 0.2, "slot": -1, "bonus": {}},
+	87: {"name": "Blueprint Antiga: Espada Longa Imperial", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 6},
+	88: {"name": "Blueprint Antiga: Foice de Guerra", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 7},
+	89: {"name": "Blueprint Antiga: Martelo de Batalha", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 8},
+	90: {"name": "Blueprint Antiga: Arco Composto", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 9},
+	91: {"name": "Blueprint Antiga: Manoplas de Impacto", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 10},
+	92: {"name": "Blueprint Antiga: Escudo Bastião", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 11},
+	93: {"name": "Blueprint Antiga: Peitoral de Placas", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": 12},
 }
 
 const RARITY_NAMES := ["", "Comum", "Incomum", "Raro", "Épico", "Único", "Exótico", "Lendário", "Mítico"]
 const RARITY_COLORS := [Color("#9e9e9e"), Color("#bdbdbd"), Color("#81c784"), Color("#4fc3f7"), Color("#ba68c8"),
 	Color("#ff8a65"), Color("#26c6da"), Color("#ffb300"), Color("#ff1744")]
 const CATEGORY_NAMES := {"Madeira": "Madeira", "Pedra": "Pedra", "Metal": "Metal", "Cristal": "Cristal", "Liga": "Liga",
-	"Pele_Fio": "Pele / Fio", "Orgao_Sangue": "Órgão / Sangue", "Planta_Liquido": "Planta / Líquido"}
+	"Pele_Fio": "Pele / Fio", "Orgao_Sangue": "Órgão / Sangue", "Planta_Liquido": "Planta / Líquido", "Osso": "Osso"}
 const STARTING_DISCOVERED := [100, 108, 114, 116]
 
 ## Catálogo de Materiais (MaterialsDB) com propriedades de Forja e Ligas.
@@ -225,13 +251,38 @@ const MATERIALS := {
 	154: {"name": "Carvão", "category": "Pedra", "rarity": 1, "durability": 10, "weight": 1.0, "resist": "Fogo +10%", "trait": "Combustível da forja; queima mais quente que a madeira.", "thermal": 90, "electric": 30, "magic": 5},
 	156: {"name": "Barro", "category": "Pedra", "rarity": 1, "durability": 10, "weight": 1.2, "resist": "Vedação +10%", "trait": "Lama grossa das margens do Rio Prateado; tapa frestas e molda tijolos.", "thermal": 20, "electric": 10, "magic": 5},
 	157: {"name": "Argila", "category": "Pedra", "rarity": 2, "durability": 25, "weight": 1.0, "resist": "Cerâmica +20%", "trait": "Argila fina e plástica que vira cerâmica, moldes de fundição e cadinhos.", "thermal": 45, "electric": 15, "magic": 10},
+	158: {"name": "Zinco", "category": "Metal", "rarity": 1, "durability": 50, "weight": 4.2, "resist": "Ácido +10%", "trait": "Metal azulado e quebradiço; com Cobre vira Latão.", "thermal": 65, "electric": 75, "magic": 15},
+	159: {"name": "Ouro", "category": "Metal", "rarity": 3, "durability": 60, "weight": 7.0, "resist": "Magia +20%, Sorte +10%", "trait": "Macio e pesado; conduz mana melhor que qualquer metal comum.", "thermal": 75, "electric": 95, "magic": 80},
+	86: {"name": "Ossos de Fera", "category": "Osso", "rarity": 1, "durability": 55, "weight": 1.5, "resist": "Impacto +10%", "trait": "Ossos grandes e secos; cabos, guardas e reforços de arco.", "thermal": 15, "electric": 5, "magic": 35},
+	175: {"name": "Aço Temperado", "category": "Liga", "rarity": 2, "durability": 140, "weight": 5.0, "resist": "Corte +25%, Impacto +15%", "trait": "Ferro e carvão temperados na água pura: o aço de todo ferreiro.", "thermal": 70, "electric": 55, "magic": 15},
+	176: {"name": "Bronze", "category": "Liga", "rarity": 1, "durability": 90, "weight": 4.6, "resist": "Impacto +15%", "trait": "Cobre endurecido com estanho; não enferruja.", "thermal": 80, "electric": 80, "magic": 25},
+	177: {"name": "Bronze Rúnico", "category": "Liga", "rarity": 3, "durability": 110, "weight": 4.3, "resist": "Raio +35%, Magia +15%", "trait": "Bronze com pó de quartzo: conduz eletricidade como nenhum outro.", "thermal": 75, "electric": 92, "magic": 55},
+	178: {"name": "Latão", "category": "Liga", "rarity": 1, "durability": 80, "weight": 4.4, "resist": "Ácido +15%", "trait": "Dourado e fácil de moldar; bom para guardas e pomos.", "thermal": 75, "electric": 85, "magic": 20},
+	179: {"name": "Ouro Rosé", "category": "Liga", "rarity": 2, "durability": 85, "weight": 6.2, "resist": "Magia +25%, Sorte +10%", "trait": "Ouro com cobre: bonito e ótimo condutor de mana.", "thermal": 70, "electric": 90, "magic": 75},
+	180: {"name": "Prata Consagrada", "category": "Liga", "rarity": 3, "durability": 120, "weight": 5.0, "resist": "Trevas +50%, Mortos-vivos +60%", "trait": "Prata fundida com água pura e ervas sob oração.", "thermal": 85, "electric": 85, "magic": 75},
+	181: {"name": "Aço de Damasco", "category": "Liga", "rarity": 3, "durability": 170, "weight": 5.0, "resist": "Corte +45%", "trait": "Camadas de aço e obsidiana dobradas cem vezes.", "thermal": 65, "electric": 50, "magic": 20},
+	182: {"name": "Titânio Glacial", "category": "Liga", "rarity": 4, "durability": 210, "weight": 3.6, "resist": "Gelo +55%, Corte +25%", "trait": "Titânio resfriado com safira: sempre gelado ao toque.", "thermal": 10, "electric": 20, "magic": 50},
+	183: {"name": "Aço Trovejante", "category": "Liga", "rarity": 4, "durability": 180, "weight": 4.8, "resist": "Raio +60%", "trait": "Aço com cobre e cristal de mana; faísca a cada golpe.", "thermal": 60, "electric": 98, "magic": 55},
+	184: {"name": "Aço Venenoso", "category": "Liga", "rarity": 4, "durability": 190, "weight": 5.0, "resist": "Veneno +60%", "trait": "Aço temperado em veneno, fungos e água tóxica.", "thermal": 55, "electric": 50, "magic": 40},
+	185: {"name": "Prata Lunar", "category": "Liga", "rarity": 4, "durability": 200, "weight": 4.0, "resist": "Magia +55%, Trevas +40%", "trait": "Prata banhada em orvalho lunar; brilha à noite.", "thermal": 70, "electric": 80, "magic": 95},
+	186: {"name": "Aço Sanguíneo", "category": "Liga", "rarity": 5, "durability": 280, "weight": 5.2, "resist": "Necrose +40%, Vida +30%", "trait": "Aço que bebeu sangue e um coração ainda pulsante.", "thermal": 50, "electric": 60, "magic": 80},
+	187: {"name": "Mithril Vivo", "category": "Liga", "rarity": 6, "durability": 320, "weight": 1.0, "resist": "Magia +50%, Natureza +40%", "trait": "Mithril atravessado por micélio vivo; cresce e se fecha sozinho.", "thermal": 40, "electric": 55, "magic": 95},
+	188: {"name": "Tungstênio Reforçado", "category": "Liga", "rarity": 6, "durability": 360, "weight": 8.5, "resist": "Impacto +70%, Fogo +40%", "trait": "Tungstênio com carvão e basalto: quase impossível de entortar.", "thermal": 45, "electric": 30, "magic": 25},
+	189: {"name": "Oricalco Flamejante", "category": "Liga", "rarity": 7, "durability": 480, "weight": 4.0, "resist": "Fogo +80%, Corte +40%", "trait": "Oricalco fundido com rubi e presas de fera: arde por dentro.", "thermal": 100, "electric": 60, "magic": 80},
+	190: {"name": "Adamantino Divino", "category": "Liga", "rarity": 8, "durability": 9999, "weight": 6.0, "resist": "Todas +80%", "trait": "Adamantino com o Sol Negro e a Raiz da Árvore do Mundo. Não se quebra.", "thermal": 100, "electric": 100, "magic": 100},
 	155: {"name": "Ervas Medicinais", "category": "Planta_Liquido", "rarity": 1, "durability": 0, "weight": 0.2, "resist": "Cura +15%", "trait": "Folhas amargas que fecham feridas; base das poções de Lyra.", "thermal": 10, "electric": 5, "magic": 35},
 }
 
+## Peças únicas do jogador (ligas sintéticas e equipamentos forjados, IDs 200-254): preenchido
+## pelo pacote 0x54 (FORGE_STATE). Têm prioridade sobre o catálogo fixo.
+static var FORGED := {}
+
 static func is_material(item_id: int) -> bool:
-	return MATERIALS.has(item_id)
+	return MATERIALS.has(item_id) or (FORGED.has(item_id) and int(FORGED[item_id]["kind"]) == 1)
 
 static func material(item_id: int) -> Dictionary:
+	if FORGED.has(item_id) and int(FORGED[item_id]["kind"]) == 1:
+		return FORGED[item_id]["material"]
 	return MATERIALS.get(item_id, {})
 
 static func rarity_name(r: int) -> String:
@@ -241,6 +292,8 @@ static func rarity_color(r: int) -> Color:
 	return RARITY_COLORS[clampi(r, 0, 8)]
 
 static func info(item_id: int) -> Dictionary:
+	if FORGED.has(item_id):
+		return FORGED[item_id]["info"]
 	return ITEMS.get(item_id, {"name": "Item #%d" % item_id, "weight": 0.5, "slot": -1, "bonus": {}})
 
 static func weight(item_id: int) -> float:
@@ -254,8 +307,8 @@ static func bonus(item_id: int) -> Dictionary:
 
 ## Nome do aspecto que a Qualidade mede em cada tipo de item.
 static func quality_aspect(item_id: int) -> String:
-	if MATERIALS.has(item_id):
-		match String(MATERIALS[item_id]["category"]):
+	if is_material(item_id):
+		match String(material(item_id)["category"]):
 			"Orgao_Sangue":
 				return "Frescor"
 			"Pele_Fio":
@@ -278,9 +331,12 @@ static func junk_name(item_id: int) -> String:
 
 ## Raridade: a do catálogo para materiais; para equipamentos, estimada pela soma dos bônus.
 static func rarity(item_id: int) -> Array:
-	if MATERIALS.has(item_id):
-		var r: int = int(MATERIALS[item_id]["rarity"])
+	if is_material(item_id):
+		var r: int = int(material(item_id)["rarity"])
 		return [rarity_name(r), rarity_color(r)]
+	if FORGED.has(item_id):
+		var fr: int = int(FORGED[item_id]["rarity"])
+		return [rarity_name(fr), rarity_color(fr)]
 	var total := 0
 	var b: Dictionary = bonus(item_id)
 	for k in b.keys():

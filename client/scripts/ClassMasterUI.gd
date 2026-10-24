@@ -810,6 +810,16 @@ func _render_main_view(m_info: Dictionary) -> void:
 		trade_btn.pressed.connect(_on_open_trade_pressed)
 		options_vbox.add_child(trade_btn)
 
+	if current_npc_id == 100 and world and int(world.get("current_zone_id")) == 17:
+		var forge_open := Button.new()
+		forge_open.custom_minimum_size = Vector2(0, 40)
+		forge_open.text = "🔨 Usar a Forja (Ligas e Blueprints)"
+		forge_open.pressed.connect(func():
+			close_menu()
+			world.open_forge(false)
+		)
+		options_vbox.add_child(forge_open)
+
 	if m_info.get("villager", false):
 		return # aldeões não ensinam vocações
 

@@ -44,6 +44,12 @@ for m in entry.finditer(mat_go):
     mat_rows.append('\t%d: {"name": "%s", "category": "%s", "rarity": %d, "durability": %s, "weight": %s, "resist": "%s", "trait": "%s", "thermal": %s, "electric": %s, "magic": %s},' % (
         mid, m.group(2), cat_names[m.group(3)], rar[m.group(4)], m.group(5), float(m.group(6)), m.group(7), m.group(8), m.group(9), m.group(10), m.group(11)))
     rows.append('\t%d: {"name": "%s", "weight": %s, "slot": -1, "bonus": {}},' % (mid, m.group(2), float(m.group(6))))
+# Blueprints Antigas (forge.go, via tools/world_dump.json)
+import json
+dump = json.loads((ROOT / "tools/world_dump.json").read_text())
+for bp in dump["forge"]["blueprints"]:
+    if bp.get("scroll"):
+        rows.append('\t%d: {"name": "Blueprint Antiga: %s", "weight": 0.2, "slot": -1, "bonus": {}, "blueprint": %d},' % (bp["scroll"], bp["name"], bp["id"]))
 starting = [mat_ids[n] for n in re.search(r"StartingDiscoveredMaterials = \[\]uint16\{([^}]*)\}", mat_go).group(1).replace(" ", "").split(",")]
 
 out = '''extends RefCounted
@@ -62,7 +68,7 @@ const RARITY_NAMES := ["", "Comum", "Incomum", "Raro", "Épico", "Único", "Exó
 const RARITY_COLORS := [Color("#9e9e9e"), Color("#bdbdbd"), Color("#81c784"), Color("#4fc3f7"), Color("#ba68c8"),
 	Color("#ff8a65"), Color("#26c6da"), Color("#ffb300"), Color("#ff1744")]
 const CATEGORY_NAMES := {"Madeira": "Madeira", "Pedra": "Pedra", "Metal": "Metal", "Cristal": "Cristal", "Liga": "Liga",
-	"Pele_Fio": "Pele / Fio", "Orgao_Sangue": "Órgão / Sangue", "Planta_Liquido": "Planta / Líquido"}
+	"Pele_Fio": "Pele / Fio", "Orgao_Sangue": "Órgão / Sangue", "Planta_Liquido": "Planta / Líquido", "Osso": "Osso"}
 const STARTING_DISCOVERED := %s
 
 ## Catálogo de Materiais (MaterialsDB) com propriedades de Forja e Ligas.
@@ -70,10 +76,16 @@ const MATERIALS := {
 %s
 }
 
+## Peças únicas do jogador (ligas sintéticas e equipamentos forjados, IDs 200-254): preenchido
+## pelo pacote 0x54 (FORGE_STATE). Têm prioridade sobre o catálogo fixo.
+static var FORGED := {}
+
 static func is_material(item_id: int) -> bool:
-	return MATERIALS.has(item_id)
+	return MATERIALS.has(item_id) or (FORGED.has(item_id) and int(FORGED[item_id]["kind"]) == 1)
 
 static func material(item_id: int) -> Dictionary:
+	if FORGED.has(item_id) and int(FORGED[item_id]["kind"]) == 1:
+		return FORGED[item_id]["material"]
 	return MATERIALS.get(item_id, {})
 
 static func rarity_name(r: int) -> String:
@@ -83,6 +95,8 @@ static func rarity_color(r: int) -> Color:
 	return RARITY_COLORS[clampi(r, 0, 8)]
 
 static func info(item_id: int) -> Dictionary:
+	if FORGED.has(item_id):
+		return FORGED[item_id]["info"]
 	return ITEMS.get(item_id, {"name": "Item #%%d" %% item_id, "weight": 0.5, "slot": -1, "bonus": {}})
 
 static func weight(item_id: int) -> float:
@@ -96,8 +110,8 @@ static func bonus(item_id: int) -> Dictionary:
 
 ## Nome do aspecto que a Qualidade mede em cada tipo de item.
 static func quality_aspect(item_id: int) -> String:
-	if MATERIALS.has(item_id):
-		match String(MATERIALS[item_id]["category"]):
+	if is_material(item_id):
+		match String(material(item_id)["category"]):
 			"Orgao_Sangue":
 				return "Frescor"
 			"Pele_Fio":
@@ -120,9 +134,12 @@ static func junk_name(item_id: int) -> String:
 
 ## Raridade: a do catálogo para materiais; para equipamentos, estimada pela soma dos bônus.
 static func rarity(item_id: int) -> Array:
-	if MATERIALS.has(item_id):
-		var r: int = int(MATERIALS[item_id]["rarity"])
+	if is_material(item_id):
+		var r: int = int(material(item_id)["rarity"])
 		return [rarity_name(r), rarity_color(r)]
+	if FORGED.has(item_id):
+		var fr: int = int(FORGED[item_id]["rarity"])
+		return [rarity_name(fr), rarity_color(fr)]
 	var total := 0
 	var b: Dictionary = bonus(item_id)
 	for k in b.keys():

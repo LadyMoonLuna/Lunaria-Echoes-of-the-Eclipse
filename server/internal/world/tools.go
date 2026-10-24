@@ -91,6 +91,9 @@ func (p *Player) BestTool(kind ToolKind) uint8 {
 		}
 	}
 	check(p.EquippedSlots[protocol.SlotMainHand])
+	if t := p.customToolTierLocked(kind); t > best {
+		best = t // ferramentas forjadas por blueprint
+	}
 	return best
 }
 

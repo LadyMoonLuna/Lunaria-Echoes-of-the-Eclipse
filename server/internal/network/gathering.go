@@ -108,6 +108,8 @@ func harvestYield(p *world.Player, n world.ResourceNode) (uint8, string) {
 			return base, ""
 		}
 		return 0, "✂️ Use uma arma cortante (espada, adaga, cutelo) ou uma Tesoura de Herborista para colher."
+	case world.NodeBones:
+		return base, "" // ossadas: às mãos
 	case world.NodeMud:
 		if p.BestTool(world.ToolPickaxe) > 0 {
 			return base + 1, "" // com a Picareta sai mais barro

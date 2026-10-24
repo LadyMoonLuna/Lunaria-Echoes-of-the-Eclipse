@@ -16,6 +16,7 @@ const (
 	NodeVine    uint8 = 5 // Vinha/cipó/arbusto/cogumelo — arma cortante (1x) ou Tesoura (2x)
 	NodeWater   uint8 = 6 // Fonte de água/ácido/orvalho — exige Frasco Vazio
 	NodeMud     uint8 = 7 // Barreiro na margem do rio (barro/argila) — com as mãos ou Picareta (mais)
+	NodeBones   uint8 = 8 // Ossada de fera — com as mãos
 )
 
 // HarvestRange: distância máxima (m) para coletar um nó.
@@ -67,6 +68,9 @@ func NodeKindForMaterial(materialID uint16) uint8 {
 	if materialID == MatMud || materialID == MatClay {
 		return NodeMud
 	}
+	if materialID == MatBones {
+		return NodeBones
+	}
 	switch MaterialsDB[materialID].Category {
 	case MatWood:
 		return NodeTree
@@ -88,34 +92,34 @@ type spawnEntry struct {
 
 // zoneResourceTables: o que nasce em cada zona (e com que frequência).
 var zoneResourceTables = map[uint8][]spawnEntry{
-	ZoneVillage: {{MatPineRefuge, 12}, {MatGreyOak, 6}, {MatStormCedar, 1}, {MatRawStone, 8}, {MatLimestone, 5},
+	ZoneVillage: {{MatCharcoal, 3}, {MatZinc, 2}, {MatPineRefuge, 12}, {MatGreyOak, 6}, {MatStormCedar, 1}, {MatRawStone, 8}, {MatLimestone, 5},
 		{MatCopper, 5}, {MatTin, 4}, {MatIron, 5}, {MatQuartz, 3}, {MatThornVine, 5}, {MatPureWater, 3}, {MatHerbs, 5}},
-	ZoneForest: {{MatPineRefuge, 8}, {MatGreyOak, 8}, {MatStormCedar, 4}, {MatWhisperEbony, 2}, {MatBloodWillow, 1},
+	ZoneForest: {{MatBones, 2}, {MatCharcoal, 2}, {MatPineRefuge, 8}, {MatGreyOak, 8}, {MatStormCedar, 4}, {MatWhisperEbony, 2}, {MatBloodWillow, 1},
 		{MatSolarAsh, 1}, {MatThornVine, 6}, {MatSteelLiana, 2}, {MatGlowMushroom, 4}, {MatParasiteMycel, 1}, {MatHerbs, 4},
 		{MatPureWater, 3}, {MatLunarDew, 2}},
-	ZoneRuins: {{MatRawStone, 6}, {MatBasalt, 4}, {MatLimestone, 4}, {MatIron, 6}, {MatSilver, 3}, {MatTitanium, 3},
+	ZoneRuins: {{MatBones, 4}, {MatCharcoal, 2}, {MatGold, 1}, {MatRawStone, 6}, {MatBasalt, 4}, {MatLimestone, 4}, {MatIron, 6}, {MatSilver, 3}, {MatTitanium, 3},
 		{MatLunarMithril, 2}, {MatQuartz, 4}, {MatManaCrystal, 2}, {MatZeroSapphire, 1}, {MatGreyOak, 2}},
-	ZoneSanctuary: {{MatStarRock, 2}, {MatVoidStone, 3}, {MatManaCrystal, 4}, {MatBlackSunShard, 1}, {MatSolarAsh, 2},
+	ZoneSanctuary: {{MatBones, 4}, {MatGold, 1}, {MatStarRock, 2}, {MatVoidStone, 3}, {MatManaCrystal, 4}, {MatBlackSunShard, 1}, {MatSolarAsh, 2},
 		{MatLunarDew, 3}, {MatQuartz, 3}, {MatSilver, 2}},
-	ZoneAshFrontier: {{MatObsidianRock, 4}, {MatBasalt, 5}, {MatCrimsonOrich, 1}, {MatAbyssTungsten, 2}, {MatFireRuby, 2},
+	ZoneAshFrontier: {{MatCharcoal, 4}, {MatBones, 2}, {MatObsidianRock, 4}, {MatBasalt, 5}, {MatCrimsonOrich, 1}, {MatAbyssTungsten, 2}, {MatFireRuby, 2},
 		{MatIronwood, 2}, {MatAcidSap, 3}, {MatIron, 3}, {MatAdamantine, 1}},
-	ZoneSparseWoods: {{MatPineRefuge, 8}, {MatGreyOak, 6}, {MatStormCedar, 2}, {MatThornVine, 5}, {MatHerbs, 6},
+	ZoneSparseWoods: {{MatCharcoal, 2}, {MatPineRefuge, 8}, {MatGreyOak, 6}, {MatStormCedar, 2}, {MatThornVine, 5}, {MatHerbs, 6},
 		{MatGlowMushroom, 3}, {MatRawStone, 4}, {MatCopper, 3}, {MatPureWater, 2}},
-	ZoneGrasslands: {{MatHerbs, 9}, {MatThornVine, 6}, {MatRawStone, 5}, {MatLimestone, 5}, {MatCopper, 3}, {MatTin, 3},
+	ZoneGrasslands: {{MatZinc, 3}, {MatBones, 2}, {MatHerbs, 9}, {MatThornVine, 6}, {MatRawStone, 5}, {MatLimestone, 5}, {MatCopper, 3}, {MatTin, 3},
 		{MatGreyOak, 3}, {MatPureWater, 3}},
-	ZoneSavanna: {{MatIronwood, 3}, {MatRawStone, 5}, {MatLimestone, 4}, {MatCopper, 4}, {MatIron, 3}, {MatThornVine, 5},
+	ZoneSavanna: {{MatBones, 4}, {MatGold, 1}, {MatZinc, 2}, {MatIronwood, 3}, {MatRawStone, 5}, {MatLimestone, 4}, {MatCopper, 4}, {MatIron, 3}, {MatThornVine, 5},
 		{MatHerbs, 4}, {MatQuartz, 2}},
-	ZoneSaltDesert: {{MatRawStone, 4}, {MatLimestone, 6}, {MatQuartz, 5}, {MatFireRuby, 2}, {MatStarRock, 1}, {MatIron, 3},
+	ZoneSaltDesert: {{MatBones, 4}, {MatGold, 2}, {MatRawStone, 4}, {MatLimestone, 6}, {MatQuartz, 5}, {MatFireRuby, 2}, {MatStarRock, 1}, {MatIron, 3},
 		{MatAcidSap, 3}},
-	ZoneWindPlateau: {{MatPineRefuge, 6}, {MatRawStone, 8}, {MatBasalt, 3}, {MatIron, 5}, {MatCopper, 3}, {MatSilver, 2},
+	ZoneWindPlateau: {{MatCharcoal, 3}, {MatZinc, 2}, {MatPineRefuge, 6}, {MatRawStone, 8}, {MatBasalt, 3}, {MatIron, 5}, {MatCopper, 3}, {MatSilver, 2},
 		{MatHerbs, 4}, {MatThornVine, 3}, {MatPureWater, 2}},
-	ZoneFrozenPeaks: {{MatRawStone, 6}, {MatBasalt, 4}, {MatSilver, 4}, {MatTitanium, 3}, {MatLunarMithril, 2},
+	ZoneFrozenPeaks: {{MatBones, 2}, {MatGold, 1}, {MatRawStone, 6}, {MatBasalt, 4}, {MatSilver, 4}, {MatTitanium, 3}, {MatLunarMithril, 2},
 		{MatZeroSapphire, 2}, {MatManaCrystal, 3}, {MatQuartz, 4}},
-	ZoneBasaltHills: {{MatBasalt, 8}, {MatObsidianRock, 3}, {MatRawStone, 5}, {MatIron, 5}, {MatCopper, 3}, {MatFireRuby, 1},
+	ZoneBasaltHills: {{MatCharcoal, 5}, {MatZinc, 2}, {MatGold, 1}, {MatBasalt, 8}, {MatObsidianRock, 3}, {MatRawStone, 5}, {MatIron, 5}, {MatCopper, 3}, {MatFireRuby, 1},
 		{MatThornVine, 3}, {MatIronwood, 2}},
-	ZoneMistMarsh: {{MatBloodWillow, 3}, {MatWhisperEbony, 2}, {MatThornVine, 6}, {MatSteelLiana, 3}, {MatGlowMushroom, 6},
+	ZoneMistMarsh: {{MatBones, 3}, {MatBloodWillow, 3}, {MatWhisperEbony, 2}, {MatThornVine, 6}, {MatSteelLiana, 3}, {MatGlowMushroom, 6},
 		{MatParasiteMycel, 3}, {MatToxicWater, 5}, {MatLunarDew, 3}, {MatHerbs, 5}},
-	ZoneAncientSewers: {{MatToxicWater, 5}, {MatIronEaterFungi, 2}, {MatGlowMushroom, 4}, {MatParasiteMycel, 2},
+	ZoneAncientSewers: {{MatBones, 3}, {MatZinc, 2}, {MatToxicWater, 5}, {MatIronEaterFungi, 2}, {MatGlowMushroom, 4}, {MatParasiteMycel, 2},
 		{MatIron, 3}, {MatTin, 3}, {MatRawStone, 3}},
 }
 

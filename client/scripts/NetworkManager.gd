@@ -1,4 +1,5 @@
 extends Node
+const ItemData = preload("res://scripts/ItemData.gd")
 
 # Sinais de rede dos Marcos 1, 2 e 3
 signal connected_to_server(player_id: int)
@@ -18,6 +19,7 @@ signal equipped_qualities_updated(qualities: Array) # Condição (0-100) de cada
 signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: float, max_weight: float, speed_mult: float)
 signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
 signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
+signal forge_state_received(blueprints: Array)
 signal discovered_materials_received(mode: int, material_ids: Array) # mode 0 = lista completa, 1 = novas descobertas
 signal quest_state_received(quest_id: int, stage: int, have: int, need: int) # stage 255 = concluída
 signal player_respawn_received(player_id: int, respawn_pos: Vector3)
@@ -264,6 +266,13 @@ func _process_tcp() -> void:
 					d_ids.append(tcp_rx_buffer[4 + i * 2] | (tcp_rx_buffer[5 + i * 2] << 8))
 				discovered_materials_received.emit(d_mode, d_ids)
 				tcp_rx_buffer = tcp_rx_buffer.slice(d_size)
+
+			elif opcode == 0x54: # FORGE_STATE: op | nBP | ids | nPeças | peças (id, tipo, slot, raridade, ferramenta, tier, peso f32, atk, def, hp, dur u16, condutividades, textos)
+				var fs := _parse_forge_state()
+				if fs.is_empty():
+					break
+				tcp_rx_buffer = tcp_rx_buffer.slice(int(fs["size"]))
+				forge_state_received.emit(fs["blueprints"])
 
 			elif opcode == 0x50: # PLAYER_SURVIVAL: op | fome | frio | calor | temp. sentida i8 | temp. ambiente i8
 				if tcp_rx_buffer.size() < 6:
@@ -927,3 +936,85 @@ func send_portal_travel(target_zone_id: int, portal_id: int) -> void:
 	if udp:
 		udp.put_packet(buffer.data_array)
 	print("[NetworkManager] 0x23 PORTAL_TRAVEL enviado: Zona Alvo %d, Portal %d" % [target_zone_id, portal_id])
+
+
+## Blueprints conhecidas (espelho do servidor; atualizado pelo pacote 0x54).
+var known_blueprints: Array = []
+
+## Lê o pacote 0x54 do início do buffer; {} se ainda não chegou inteiro. Preenche ItemData.FORGED.
+func _parse_forge_state() -> Dictionary:
+	var buf := tcp_rx_buffer
+	if buf.size() < 3:
+		return {}
+	var i := 1
+	var nbp: int = buf[i]
+	i += 1
+	if buf.size() < i + nbp + 1:
+		return {}
+	var bps: Array = []
+	for k in range(nbp):
+		bps.append(buf[i + k])
+	i += nbp
+	var nc: int = buf[i]
+	i += 1
+	var items := {}
+	for k in range(nc):
+		if buf.size() < i + 21:
+			return {}
+		var sp := StreamPeerBuffer.new()
+		sp.big_endian = false
+		sp.data_array = buf.slice(i, i + 21)
+		var e := {"id": sp.get_u8(), "kind": sp.get_u8(), "slot": sp.get_u8(), "rarity": sp.get_u8(), "tool_kind": sp.get_u8(), "tool_tier": sp.get_u8()}
+		e["weight"] = sp.get_float()
+		e["atk"] = sp.get_u16()
+		e["def"] = sp.get_u16()
+		e["hp"] = sp.get_u16()
+		e["durability"] = sp.get_u16()
+		e["thermal"] = sp.get_u8()
+		e["electric"] = sp.get_u8()
+		e["magic"] = sp.get_u8()
+		i += 21
+		var texts: Array = []
+		for t in range(3):
+			if buf.size() < i + 2:
+				return {}
+			var l: int = buf[i] | (buf[i + 1] << 8)
+			i += 2
+			if buf.size() < i + l:
+				return {}
+			texts.append(buf.slice(i, i + l).get_string_from_utf8())
+			i += l
+		e["name"] = texts[0]
+		e["desc"] = texts[1]
+		var slot: int = -1 if int(e["slot"]) == 255 else int(e["slot"])
+		var bonus := {}
+		if int(e["atk"]) > 0: bonus["atk"] = int(e["atk"])
+		if int(e["def"]) > 0: bonus["def"] = int(e["def"])
+		if int(e["hp"]) > 0: bonus["hp"] = int(e["hp"])
+		e["info"] = {"name": texts[0], "weight": snappedf(float(e["weight"]), 0.1), "slot": slot, "bonus": bonus}
+		if int(e["tool_kind"]) > 0:
+			e["info"]["tool"] = ["", "axe", "pickaxe", "shears"][clampi(int(e["tool_kind"]), 0, 3)]
+			e["info"]["tool_tier"] = int(e["tool_tier"])
+		e["material"] = {"name": texts[0], "category": "Liga", "rarity": int(e["rarity"]), "durability": int(e["durability"]),
+			"weight": snappedf(float(e["weight"]), 0.1), "resist": texts[2], "trait": texts[1],
+			"thermal": int(e["thermal"]), "electric": int(e["electric"]), "magic": int(e["magic"])}
+		items[int(e["id"])] = e
+	ItemData.FORGED = items
+	known_blueprints = bps
+	return {"size": i, "blueprints": bps}
+
+# Forja (0x51 / 0x52 / 0x53)
+func send_forge_alloy(ids: Array) -> void:
+	var data := PackedByteArray([0x51, 0, 0, 0, 0])
+	for k in range(mini(4, ids.size())):
+		data[1 + k] = int(ids[k])
+	tcp.put_data(data)
+
+func send_forge_blueprint(bp_id: int, picks: Array) -> void:
+	var data := PackedByteArray([0x52, bp_id, 0, 0, 0, 0, 0, 0])
+	for k in range(mini(6, picks.size())):
+		data[2 + k] = int(picks[k])
+	tcp.put_data(data)
+
+func send_forge_action(action: int, bp_id: int = 0) -> void:
+	tcp.put_data(PackedByteArray([0x53, action, bp_id]))

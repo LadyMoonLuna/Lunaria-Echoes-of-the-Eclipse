@@ -28,6 +28,7 @@ const (
 	MatHideThread  = "Pele_Fio"
 	MatOrganBlood  = "Orgao_Sangue"
 	MatPlantLiquid = "Planta_Liquido"
+	MatBone        = "Osso"
 )
 
 // MaterialDef descreve um material e suas propriedades para Forja e Ligas.
@@ -112,6 +113,27 @@ const (
 	MatHerbs          uint16 = 155 // Ervas Medicinais
 	MatMud            uint16 = 156 // Barro (margens do rio)
 	MatClay           uint16 = 157 // Argila (margens do rio)
+	MatZinc           uint16 = 158 // Zinco (vira Latão com Cobre)
+	MatGold           uint16 = 159 // Ouro
+	MatBones          uint16 = 86  // Ossos de Fera (ossadas pelo mundo)
+
+	// Ligas da Fornalha (forge.go): IDs 175 a 190
+	MatTemperedSteel   uint16 = 175
+	MatBronze          uint16 = 176
+	MatRunicBronze     uint16 = 177
+	MatBrass           uint16 = 178
+	MatRoseGold        uint16 = 179
+	MatBlessedSilver   uint16 = 180
+	MatDamascusSteel   uint16 = 181
+	MatGlacialTitanium uint16 = 182
+	MatThunderSteel    uint16 = 183
+	MatVenomSteel      uint16 = 184
+	MatLunarSilver     uint16 = 185
+	MatBloodSteel      uint16 = 186
+	MatLivingMithril   uint16 = 187
+	MatHeavyTungsten   uint16 = 188
+	MatFlameOrichalcum uint16 = 189
+	MatDivineAdamant   uint16 = 190
 )
 
 // MaterialsDB é o catálogo oficial de materiais.
@@ -179,7 +201,27 @@ var MaterialsDB = map[uint16]MaterialDef{
 	MatCharcoal:       {MatCharcoal, "Carvão", MatStone, RarityCommon, 10, 1.0, "Fogo +10%", "Combustível da forja; queima mais quente que a madeira.", 90, 30, 5},
 	MatMud:            {MatMud, "Barro", MatStone, RarityCommon, 10, 1.2, "Vedação +10%", "Lama grossa das margens do Rio Prateado; tapa frestas e molda tijolos.", 20, 10, 5},
 	MatClay:           {MatClay, "Argila", MatStone, RarityUncommon, 25, 1.0, "Cerâmica +20%", "Argila fina e plástica que vira cerâmica, moldes de fundição e cadinhos.", 45, 15, 10},
-	MatHerbs:          {MatHerbs, "Ervas Medicinais", MatPlantLiquid, RarityCommon, 0, 0.2, "Cura +15%", "Folhas amargas que fecham feridas; base das poções de Lyra.", 10, 5, 35},
+	MatZinc:           {MatZinc, "Zinco", MatMetal, RarityCommon, 50, 4.2, "Ácido +10%", "Metal azulado e quebradiço; com Cobre vira Latão.", 65, 75, 15},
+	MatGold:           {MatGold, "Ouro", MatMetal, RarityRare, 60, 7.0, "Magia +20%, Sorte +10%", "Macio e pesado; conduz mana melhor que qualquer metal comum.", 75, 95, 80},
+	MatBones:          {MatBones, "Ossos de Fera", MatBone, RarityCommon, 55, 1.5, "Impacto +10%", "Ossos grandes e secos; cabos, guardas e reforços de arco.", 15, 5, 35},
+
+	MatTemperedSteel:   {MatTemperedSteel, "Aço Temperado", MatAlloy, RarityUncommon, 140, 5.0, "Corte +25%, Impacto +15%", "Ferro e carvão temperados na água pura: o aço de todo ferreiro.", 70, 55, 15},
+	MatBronze:          {MatBronze, "Bronze", MatAlloy, RarityCommon, 90, 4.6, "Impacto +15%", "Cobre endurecido com estanho; não enferruja.", 80, 80, 25},
+	MatRunicBronze:     {MatRunicBronze, "Bronze Rúnico", MatAlloy, RarityRare, 110, 4.3, "Raio +35%, Magia +15%", "Bronze com pó de quartzo: conduz eletricidade como nenhum outro.", 75, 92, 55},
+	MatBrass:           {MatBrass, "Latão", MatAlloy, RarityCommon, 80, 4.4, "Ácido +15%", "Dourado e fácil de moldar; bom para guardas e pomos.", 75, 85, 20},
+	MatRoseGold:        {MatRoseGold, "Ouro Rosé", MatAlloy, RarityUncommon, 85, 6.2, "Magia +25%, Sorte +10%", "Ouro com cobre: bonito e ótimo condutor de mana.", 70, 90, 75},
+	MatBlessedSilver:   {MatBlessedSilver, "Prata Consagrada", MatAlloy, RarityRare, 120, 5.0, "Trevas +50%, Mortos-vivos +60%", "Prata fundida com água pura e ervas sob oração.", 85, 85, 75},
+	MatDamascusSteel:   {MatDamascusSteel, "Aço de Damasco", MatAlloy, RarityRare, 170, 5.0, "Corte +45%", "Camadas de aço e obsidiana dobradas cem vezes.", 65, 50, 20},
+	MatGlacialTitanium: {MatGlacialTitanium, "Titânio Glacial", MatAlloy, RarityEpic, 210, 3.6, "Gelo +55%, Corte +25%", "Titânio resfriado com safira: sempre gelado ao toque.", 10, 20, 50},
+	MatThunderSteel:    {MatThunderSteel, "Aço Trovejante", MatAlloy, RarityEpic, 180, 4.8, "Raio +60%", "Aço com cobre e cristal de mana; faísca a cada golpe.", 60, 98, 55},
+	MatVenomSteel:      {MatVenomSteel, "Aço Venenoso", MatAlloy, RarityEpic, 190, 5.0, "Veneno +60%", "Aço temperado em veneno, fungos e água tóxica.", 55, 50, 40},
+	MatLunarSilver:     {MatLunarSilver, "Prata Lunar", MatAlloy, RarityEpic, 200, 4.0, "Magia +55%, Trevas +40%", "Prata banhada em orvalho lunar; brilha à noite.", 70, 80, 95},
+	MatBloodSteel:      {MatBloodSteel, "Aço Sanguíneo", MatAlloy, RarityUnique, 280, 5.2, "Necrose +40%, Vida +30%", "Aço que bebeu sangue e um coração ainda pulsante.", 50, 60, 80},
+	MatLivingMithril:   {MatLivingMithril, "Mithril Vivo", MatAlloy, RarityExotic, 320, 1.0, "Magia +50%, Natureza +40%", "Mithril atravessado por micélio vivo; cresce e se fecha sozinho.", 40, 55, 95},
+	MatHeavyTungsten:   {MatHeavyTungsten, "Tungstênio Reforçado", MatAlloy, RarityExotic, 360, 8.5, "Impacto +70%, Fogo +40%", "Tungstênio com carvão e basalto: quase impossível de entortar.", 45, 30, 25},
+	MatFlameOrichalcum: {MatFlameOrichalcum, "Oricalco Flamejante", MatAlloy, RarityLegendary, 480, 4.0, "Fogo +80%, Corte +40%", "Oricalco fundido com rubi e presas de fera: arde por dentro.", 100, 60, 80},
+	MatDivineAdamant:   {MatDivineAdamant, "Adamantino Divino", MatAlloy, RarityMythic, 9999, 6.0, "Todas +80%", "Adamantino com o Sol Negro e a Raiz da Árvore do Mundo. Não se quebra.", 100, 100, 100},
+	MatHerbs:           {MatHerbs, "Ervas Medicinais", MatPlantLiquid, RarityCommon, 0, 0.2, "Cura +15%", "Folhas amargas que fecham feridas; base das poções de Lyra.", 10, 5, 35},
 }
 
 // StartingDiscoveredMaterials: o que todo jogador já conhece ao começar.

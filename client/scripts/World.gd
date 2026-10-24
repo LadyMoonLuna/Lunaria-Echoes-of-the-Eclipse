@@ -49,6 +49,10 @@ var corpses_container: Node3D = null
 var char_select_ui: CanvasLayer = null
 var attributes_ui: CanvasLayer = null
 var inventory_ui: CanvasLayer = null
+var forge_ui: CanvasLayer = null
+const ForgeUIScript = preload("res://scripts/forge/ForgeUI.gd")
+const ForgeDataRef = preload("res://scripts/forge/ForgeData.gd")
+const FORGE_ANVIL_REACH := 2.4
 var entity_offer_ui: CanvasLayer = null
 var skills_ui: CanvasLayer = null
 var class_master_ui: CanvasLayer = null
@@ -561,7 +565,7 @@ const QUEST_PARTS := {
 }
 var _discovery_queue: Array = []
 const HARVEST_RANGE := 3.5
-const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte", 7: "Barreiro"}
+const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte", 7: "Barreiro", 8: "Ossada"}
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -597,6 +601,9 @@ func _ready() -> void:
 
 	inventory_ui = InventoryUIScript.new()
 	add_child(inventory_ui)
+
+	forge_ui = ForgeUIScript.new()
+	add_child(forge_ui)
 
 	entity_offer_ui = EntityOfferUIScript.new()
 	add_child(entity_offer_ui)
@@ -783,9 +790,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				pass
 			elif _try_harvest_nearest_node():
 				pass
+			elif _try_use_anvil():
+				pass
 			else:
 				if not _try_interact_door():
 					_try_interact_nearest_npc()
+		elif event.keycode == KEY_U:
+			open_forge(true)
 		elif event.keycode == KEY_C or event.keycode == KEY_TAB:
 			if char_select_ui:
 				if char_select_ui.is_open:
@@ -2616,6 +2627,8 @@ func _node_requirement_text(data: Dictionary) -> String:
 			return "[E] Coletar — Frasco Vazio"
 		7:
 			return "[E] Cavar barro/argila — às mãos (Picareta: +1)"
+		8:
+			return "[E] Recolher ossos — às mãos"
 	return "[E] Coletar"
 
 func _on_resource_nodes_received(nodes: Array) -> void:
@@ -2669,7 +2682,8 @@ func _node_color(mat_id: int, kind: int) -> Color:
 				Color(0.35, 0.35, 0.3), Color(1.0, 0.75, 0.25), Color(0.4, 1.0, 0.6)][clampi(r - 1, 0, 7)]
 		3:
 			var metal := {114: Color(0.85, 0.5, 0.3), 115: Color(0.75, 0.75, 0.72), 116: Color(0.45, 0.42, 0.4), 117: Color(0.9, 0.92, 0.95),
-				118: Color(0.6, 0.65, 0.7), 119: Color(0.6, 0.8, 1.0), 120: Color(0.9, 0.25, 0.2), 121: Color(0.3, 0.3, 0.4), 122: Color(0.75, 1.0, 0.95)}
+				118: Color(0.6, 0.65, 0.7), 119: Color(0.6, 0.8, 1.0), 120: Color(0.9, 0.25, 0.2), 121: Color(0.3, 0.3, 0.4), 122: Color(0.75, 1.0, 0.95),
+				158: Color(0.62, 0.68, 0.75), 159: Color(1.0, 0.82, 0.25)}
 			return metal.get(mat_id, Color(0.6, 0.6, 0.6))
 		4:
 			var crys := {123: Color(0.92, 0.92, 1.0), 124: Color(0.4, 0.6, 1.0), 125: Color(1.0, 0.2, 0.15), 126: Color(0.5, 0.85, 1.0), 127: Color(0.35, 0.1, 0.45)}
@@ -2679,6 +2693,8 @@ func _node_color(mat_id: int, kind: int) -> Color:
 			return liq.get(mat_id, Color(0.4, 0.6, 1.0))
 		7:
 			return Color(0.45, 0.32, 0.22) if mat_id == 156 else Color(0.72, 0.5, 0.36)
+		8:
+			return Color(0.88, 0.85, 0.76)
 	return ItemDataScript.rarity_color(r)
 
 func _create_resource_node(nd: Dictionary) -> Node3D:
@@ -2761,6 +2777,22 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 			var sph7 := SphereShape3D.new()
 			sph7.radius = 0.7
 			shape.shape = sph7
+			shape.position = Vector3(0, 0.3, 0)
+		8: # Ossada: costelas e um crânio de fera semienterrados
+			var bone_mat := _mat(col, 0.0, 0.7)
+			for i in range(4):
+				var rib := CylinderMesh.new()
+				rib.top_radius = 0.05
+				rib.bottom_radius = 0.07
+				rib.height = 0.9
+				_add_mesh(model, rib, bone_mat, Vector3(-0.45 + i * 0.3, 0.3, 0), Vector3(0, 0, 35))
+			var skull := SphereMesh.new()
+			skull.radius = 0.28
+			skull.height = 0.45
+			_add_mesh(model, skull, bone_mat, Vector3(0.75, 0.2, 0.2))
+			var sph8 := SphereShape3D.new()
+			sph8.radius = 0.6
+			shape.shape = sph8
 			shape.position = Vector3(0, 0.3, 0)
 		_: # Fonte de água / ácido / orvalho
 			var pool := CylinderMesh.new()
@@ -6703,3 +6735,29 @@ func _build_interior(root: Node3D, zone_id: int) -> void:
 			_create_furniture_piece(root, Vector3(0, 0.45, 1), Vector3(2.4, 0.9, 1.6), wood)
 			_create_furniture_piece(root, Vector3(11.3, 1.2, 2), Vector3(1.2, 2.4, 3.0), Color(0.45, 0.42, 0.4))
 			_add_fire(root, Vector3(10.6, 0.5, 2), 0.5)
+
+
+# =============================================================================
+# FORJA (Etapa 2): bigorna da Forja do Garrick [E] ou tecla [U] para Forjadores de Estrelas
+# =============================================================================
+func _try_use_anvil() -> bool:
+	if current_zone_id != 17 or local_player == null:
+		return false
+	var p := local_player.global_position
+	if Vector2(p.x - ForgeDataRef.ANVIL.x, p.z - ForgeDataRef.ANVIL.z).length() > FORGE_ANVIL_REACH:
+		return false
+	open_forge(false)
+	return true
+
+## Abre a Forja: na sala da Forja do Garrick qualquer um; fora dela só o Forjador de Estrelas (classe 7).
+func open_forge(from_hotkey: bool) -> void:
+	if forge_ui == null:
+		return
+	if forge_ui.is_open:
+		forge_ui.close_menu()
+		return
+	if current_zone_id != 17 and my_class_id != 7:
+		if from_hotkey:
+			show_loot_toast("🔨 A Forja fica na Forja do Garrick (bigorna). Só o Forjador de Estrelas forja em qualquer lugar.")
+		return
+	forge_ui.open_menu()
