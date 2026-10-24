@@ -145,18 +145,18 @@ func appendAnatomy(organs []CorpseOrgan, mobType uint8) []CorpseOrgan {
 			next = o.Index + 1
 		}
 	}
-	have := map[uint8]bool{}
+	have := map[ItemID]bool{}
 	for _, o := range organs {
 		have[o.ItemReward] = true
 	}
 	for _, v := range mobAnatomy[mobType] {
-		if have[uint8(v.material)] {
+		if have[ItemID(v.material)] {
 			continue // o saque tradicional já tem este material
 		}
-		have[uint8(v.material)] = true
+		have[ItemID(v.material)] = true
 		organs = append(organs, CorpseOrgan{
 			Index: next, Name: v.name, OrganType: v.organType,
-			ItemReward: uint8(v.material), Quantity: 1, Difficulty: v.difficulty,
+			ItemReward: ItemID(v.material), Quantity: 1, Difficulty: v.difficulty,
 		})
 		next++
 	}
@@ -175,7 +175,7 @@ type CorpseOrgan struct {
 	Index       uint8
 	Name        string
 	OrganType   uint8
-	ItemReward  uint8
+	ItemReward  ItemID
 	Quantity    uint8
 	Difficulty  uint8 // 1 a 10
 	QualityTier uint8 // 0=Pendente, 1=Perfeito, 2=Comum, 3=Destruído
@@ -263,7 +263,12 @@ func NewCorpse(corpseID, mobID uint32, mobType uint8, mobName string, x, y, z, r
 }
 
 // generateCorpseOrgans gera a lista de órgãos vitais passíveis de corte na autópsia conforme o tipo de criatura.
+// generateCorpseOrgans: saque e anatomia da criatura, já com as partes específicas dela.
 func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
+	return specializeOrgans(mobType, generateBaseCorpseOrgans(mobType, luckBonus))
+}
+
+func generateBaseCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 	var organs []CorpseOrgan
 	if d, ok := FaunaByType(mobType); ok {
 		return faunaOrgans(d) // anatomia da espécie (couro, carne, órgãos pela massa e pelo corpo)

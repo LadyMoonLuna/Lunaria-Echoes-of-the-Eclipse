@@ -267,7 +267,7 @@ func (s *Server) handleNPCDeathBy(npc *world.NPC, killer string, byZombie bool) 
 	for item, qty := range items {
 		for qty > 0 {
 			q := min(qty, 255)
-			s.groundItems.Drop(uint8(item), uint8(q), 75, x, z, zone)
+			s.groundItems.Drop(world.ItemID(item), uint8(q), 75, x, z, zone)
 			qty -= q
 		}
 	}

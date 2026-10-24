@@ -8,7 +8,7 @@ import (
 
 func TestUnitQuality(t *testing.T) {
 	p := NewPlayer(1, nil, 0, 0, 0)
-	heart := uint8(MatPulsingHeart)
+	heart := ItemID(MatPulsingHeart)
 	p.AddItemWithQuality(heart, 1, 90)
 	p.AddItemWithQuality(heart, 2, 50)
 	p.AddItemWithQuality(heart, 1, 70)
@@ -38,7 +38,7 @@ func TestUnitQuality(t *testing.T) {
 	if got := p.UnitQualities(heart); len(got) != 2 || got[0] != 70 {
 		t.Fatalf("restaram %v", got)
 	}
-	if JunkFor(uint8(MatIron)) != protocol.ItemMetalScrap || JunkFor(heart) != protocol.ItemOrganicTrash {
+	if JunkFor(ItemID(MatIron)) != protocol.ItemMetalScrap || JunkFor(heart) != protocol.ItemOrganicTrash {
 		t.Fatal("lixo errado: metal vira sucata, orgânico vira lixo orgânico")
 	}
 }

@@ -34,16 +34,28 @@ func TestHeatSpeedsThirst(t *testing.T) {
 func TestPuddlesDryInHeatAndRefillWithRain(t *testing.T) {
 	m := NewResourceNodeManager()
 	always := func() float32 { return 0 }
-	if !m.UpdateEvaporation(ZoneVillage, 45, false, always) {
-		t.Fatal("no calor extremo alguma poça da vila deveria secar")
+	zone := uint8(255)
+	for z := uint8(0); z < ZoneCount && zone == 255; z++ {
+		for _, n := range m.InZone(z) {
+			if IsEvaporable(n.MaterialID) && !n.Purified {
+				zone = z
+				break
+			}
+		}
 	}
-	for _, n := range m.InZone(ZoneVillage) {
+	if zone == 255 {
+		t.Fatal("nenhuma poça no mapa")
+	}
+	if !m.UpdateEvaporation(zone, 45, false, always) {
+		t.Fatal("no calor extremo alguma poça deveria secar")
+	}
+	for _, n := range m.InZone(zone) {
 		if IsEvaporable(n.MaterialID) && !n.Purified && n.Available() {
 			t.Fatal("poça seca não pode ser coletada")
 		}
 	}
-	m.UpdateEvaporation(ZoneVillage, 35, true, always)
-	for _, n := range m.InZone(ZoneVillage) {
+	m.UpdateEvaporation(zone, 35, true, always)
+	for _, n := range m.InZone(zone) {
 		if n.DriedUp {
 			t.Fatal("a chuva deveria reabastecer as poças")
 		}

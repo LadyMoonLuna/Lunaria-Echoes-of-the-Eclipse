@@ -11,10 +11,10 @@ func TestMaterialsCatalogAndDiscovery(t *testing.T) {
 		t.Fatalf("catálogo de materiais incompleto: %d", len(MaterialsDB))
 	}
 	for id, m := range MaterialsDB {
-		if id > 255 || m.Rarity < RarityCommon || m.Rarity > RarityMythic || m.Name == "" {
+		if id >= uint16(CustomItemFirstID) || m.Rarity < RarityCommon || m.Rarity > RarityTranscendent || m.Name == "" {
 			t.Fatalf("material inválido %d: %+v", id, m)
 		}
-		if _, ok := ItemCatalog[uint8(id)]; !ok {
+		if _, ok := ItemCatalog[ItemID(id)]; !ok {
 			t.Fatalf("material %d não virou item da mochila", id)
 		}
 	}
@@ -24,12 +24,12 @@ func TestMaterialsCatalogAndDiscovery(t *testing.T) {
 			t.Fatalf("material inicial %d deveria ser conhecido", id)
 		}
 	}
-	p.AddItem(uint8(MatStormCedar), 1)
-	p.AddItem(uint8(MatStormCedar), 1)
+	p.AddItem(ItemID(MatStormCedar), 1)
+	p.AddItem(ItemID(MatStormCedar), 1)
 	if got := p.TakeNewDiscoveries(); len(got) != 1 || got[0] != MatStormCedar {
 		t.Fatalf("descoberta nova esperada uma única vez: %v", got)
 	}
-	p.AddItem(uint8(MatIron), 1)
+	p.AddItem(ItemID(MatIron), 1)
 	if got := p.TakeNewDiscoveries(); len(got) != 0 {
 		t.Fatal("Ferro já era conhecido")
 	}

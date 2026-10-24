@@ -41,8 +41,8 @@ type raceTrial struct {
 	hourFrom  int     // intervalo de horas [hourFrom, hourTo] (pode cruzar a meia-noite)
 	hourTo    int
 	moon      int
-	weathers  []uint8 // vazio = qualquer clima
-	item      uint8   // item consumido ao concluir (0 = nenhum)
+	weathers  []uint8      // vazio = qualquer clima
+	item      world.ItemID // item consumido ao concluir (0 = nenhum)
 	minLevel  uint8
 	reqRaces  []uint8 // raças de origem permitidas (vazio = qualquer)
 	done      string  // fala ao concluir

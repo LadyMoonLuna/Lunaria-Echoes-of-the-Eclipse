@@ -130,7 +130,7 @@ func main() {
 		DurScale  float32   `json:"dur_scale"`
 		Basic     bool      `json:"basic"`
 		Price     uint32    `json:"price"`
-		Scroll    uint8     `json:"scroll"`
+		Scroll    uint16    `json:"scroll"`
 		Parts     []partOut `json:"parts"`
 	}
 	var bps []bpOut
@@ -187,6 +187,42 @@ func main() {
 		}
 	}
 	out["ponds"] = ponds
+	// Catálogo completo de materiais (inclui as partes de criatura e as madeiras geradas)
+	type matOut struct {
+		ID       uint16  `json:"id"`
+		Name     string  `json:"name"`
+		Category string  `json:"category"`
+		Rarity   uint8   `json:"rarity"`
+		Dur      int     `json:"durability"`
+		Weight   float32 `json:"weight"`
+		Resist   string  `json:"resist"`
+		Thermal  int     `json:"thermal"`
+		Electric int     `json:"electric"`
+		Magic    int     `json:"magic"`
+		Base     uint16  `json:"base"`
+		Food     bool    `json:"food,omitempty"`
+	}
+	var mats []matOut
+	for id, m := range world.MaterialsDB {
+		_, fruit := world.FruitFood[world.ItemID(id)]
+		mats = append(mats, matOut{id, m.Name, m.Category, m.Rarity, m.Durability, m.Weight, m.Resistances,
+			m.CondThermal, m.CondElectric, m.CondMagic, uint16(world.BaseOf(world.ItemID(id))), fruit})
+	}
+	sort.Slice(mats, func(i, j int) bool { return mats[i].ID < mats[j].ID })
+	out["materials"] = mats
+	type woodOut struct {
+		Trunk  uint16 `json:"trunk"`
+		Name   string `json:"name"`
+		Rarity uint8  `json:"rarity"`
+		Leaf   string `json:"leaf"`
+		Bark   string `json:"bark"`
+	}
+	var woods []woodOut
+	for _, w := range world.WoodCatalog {
+		woods = append(woods, woodOut{uint16(world.WoodProductID(w.Index, world.WoodTrunk)), w.Name, w.Rarity, w.LeafColor, w.BarkColor})
+	}
+	out["woods"] = woods
+	out["yggdrasil"] = map[string]float32{"x": world.YggdrasilPos[0], "z": world.YggdrasilPos[1], "zone": float32(world.ZoneForest)}
 	out["river"] = map[string]float64{
 		"source_gz": world.RiverSourceGZ, "mouth_gz": world.RiverMouthGZ, "mouth_lake_r": world.RiverMouthLakeR,
 		"span": world.ZoneSpan,

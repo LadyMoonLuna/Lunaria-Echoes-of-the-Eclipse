@@ -17,17 +17,17 @@ import (
 const StockOutMessage = "📦 Estoque esgotado! Volte mais tarde (ou traga matéria-prima para o NPC fabricar)."
 
 type marketBuyEntry struct {
-	ID    uint8  `json:"id"`
-	Qty   int    `json:"qty"`
-	Price uint32 `json:"price"`
+	ID    world.ItemID `json:"id"`
+	Qty   int          `json:"qty"`
+	Price uint32       `json:"price"`
 }
 
 type marketSellEntry struct {
-	ID    uint8  `json:"id"`
-	Q     uint8  `json:"q"`
-	Have  int    `json:"have"`
-	Price uint32 `json:"price"`
-	Max   int    `json:"max"`
+	ID    world.ItemID `json:"id"`
+	Q     uint8        `json:"q"`
+	Have  int          `json:"have"`
+	Price uint32       `json:"price"`
+	Max   int          `json:"max"`
 }
 
 type marketOrderEntry struct {
@@ -59,11 +59,11 @@ func (s *Server) sendMarketState(p *world.Player, npc *world.NPC, msg string) {
 		personality, market = n.Personality, world.MarketOf(n.ZoneID)
 		st.NPCGold = n.Gold
 		for item, qty := range n.ShopStock {
-			if qty <= 0 || !world.SellsItem(n.ID, uint8(item)) {
+			if qty <= 0 || !world.SellsItem(n.ID, world.ItemID(item)) {
 				continue
 			}
-			if price := world.NPCSellUnitPrice(personality, market, uint8(item), qty); price > 0 {
-				st.Buy = append(st.Buy, marketBuyEntry{ID: uint8(item), Qty: qty, Price: price})
+			if price := world.NPCSellUnitPrice(personality, market, world.ItemID(item), qty); price > 0 {
+				st.Buy = append(st.Buy, marketBuyEntry{ID: world.ItemID(item), Qty: qty, Price: price})
 			}
 		}
 		for _, o := range n.Life.BuyOrders {
@@ -72,7 +72,7 @@ func (s *Server) sendMarketState(p *world.Player, npc *world.NPC, msg string) {
 	})
 	p.Mu.RLock()
 	st.PlayerGold = p.Gold
-	items := make([]uint8, 0, len(p.Inventory))
+	items := make([]world.ItemID, 0, len(p.Inventory))
 	for id, n := range p.Inventory {
 		if n > 0 {
 			items = append(items, id)
@@ -117,7 +117,7 @@ func (s *Server) sendMarketState(p *world.Player, npc *world.NPC, msg string) {
 }
 
 // shopBuy: o jogador compra do estoque real; cada unidade comprada encarece a próxima.
-func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item, qty uint8) string {
+func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item world.ItemID, qty uint8) string {
 	if !world.SellsItem(npc.ID, item) {
 		return "Isso eu não vendo."
 	}
@@ -169,7 +169,7 @@ func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item, qty uint8) strin
 
 // shopSell: o jogador vende ao NPC. Cada unidade vale um pouco menos que a anterior (o mercado enche);
 // o NPC para quando o preço fica ridículo ou quando o ouro dele acaba.
-func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty uint8) string {
+func (s *Server) shopSell(p *world.Player, npc *world.NPC, item world.ItemID, quality, qty uint8) string {
 	if p.IsSoulbound(item) {
 		return "📘 Blueprint Exclusiva é Soulbound: não pode ser vendida."
 	}
@@ -213,15 +213,16 @@ func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty ui
 		if world.SellsItem(n.ID, item) {
 			n.ShopStock[uint16(item)] += int(sold) // revende
 		} else {
-			n.RawMaterials[uint16(item)] += int(sold)
+			n.RawMaterials[uint16(world.BaseOf(item))] += int(sold)
 		}
-		if o, open := n.Life.BuyOrders[uint16(item)]; open {
+		fam := uint16(world.BaseOf(item))
+		if o, open := n.Life.BuyOrders[fam]; open {
 			o.Wanted -= int(sold)
 			if o.Wanted <= 0 {
-				delete(n.Life.BuyOrders, uint16(item))
-				delete(n.Life.OrderSince, uint16(item))
+				delete(n.Life.BuyOrders, fam)
+				delete(n.Life.OrderSince, fam)
 			} else {
-				n.Life.BuyOrders[uint16(item)] = o
+				n.Life.BuyOrders[fam] = o
 			}
 		}
 		n.Life.LastCraft = time.Time{} // volta a produzir já no próximo tick

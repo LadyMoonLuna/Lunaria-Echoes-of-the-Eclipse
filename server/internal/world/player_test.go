@@ -651,7 +651,7 @@ func Test12EquipmentSlotsAndRingRotation(t *testing.T) {
 	p.AddItem(protocol.ItemAncestralFangRing, 1) // 5º anel para testar rotação FIFO
 
 	// Equipa slots fixos
-	slotsToEquip := []uint8{
+	slotsToEquip := []ItemID{
 		protocol.ItemVigilHelmet,
 		protocol.ItemSteelChestplate,
 		protocol.ItemWolfLeatherPants,
@@ -682,7 +682,7 @@ func Test12EquipmentSlotsAndRingRotation(t *testing.T) {
 	}
 
 	// Equipa 4 Anéis nos slots [8, 9, 10, 11]
-	rings := []uint8{
+	rings := []ItemID{
 		protocol.ItemAncestralFangRing,
 		protocol.ItemBloodRubyRing,
 		protocol.ItemObsidianRing,

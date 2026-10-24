@@ -13,7 +13,7 @@ func TestEveryTradableItemHasPrice(t *testing.T) {
 		}
 	}
 	for id := range MaterialsDB {
-		if BasePrice(uint8(id)) == 0 {
+		if BasePrice(ItemID(id)) == 0 {
 			t.Errorf("material %d sem preço", id)
 		}
 	}
@@ -27,7 +27,7 @@ func TestNoShopSellsClassOrRaceUnlocks(t *testing.T) {
 			}
 		}
 	}
-	for _, it := range []uint8{protocol.ItemEclipseScytheTome, protocol.ItemBrokenSoulChalice, protocol.ItemBeastProgenitorBlood, protocol.ItemPureLunarBlood} {
+	for _, it := range []ItemID{protocol.ItemEclipseScytheTome, protocol.ItemBrokenSoulChalice, protocol.ItemBeastProgenitorBlood, protocol.ItemPureLunarBlood} {
 		if SellsItem(104, it) {
 			t.Errorf("Mercado Negro não pode vender %d", it)
 		}
@@ -36,7 +36,7 @@ func TestNoShopSellsClassOrRaceUnlocks(t *testing.T) {
 
 func TestMarketSaturationLowersPriceAndRefuses(t *testing.T) {
 	Market = NewMarketBook()
-	leather := uint8(MatWolfLeather)
+	leather := ItemID(MatWolfLeather)
 	first := NPCBuyUnitPrice(114, PersonalityHonorable, ZoneVillage, leather, 75, 0)
 	tenth := NPCBuyUnitPrice(114, PersonalityHonorable, ZoneVillage, leather, 75, 10)
 	if first == 0 || tenth >= first {
@@ -56,7 +56,7 @@ func TestMarketSaturationLowersPriceAndRefuses(t *testing.T) {
 func TestRegionalScarcityPaysMore(t *testing.T) {
 	Market = NewMarketBook()
 	// Pinho do Refúgio nasce na Vila: lá vale menos do que num mercado onde ele não existe
-	pine := uint8(MatPineRefuge)
+	pine := ItemID(MatPineRefuge)
 	if RegionalFactor(pine, ZoneVillage) >= RegionalFactor(pine, ZoneSaltDesert) {
 		t.Fatal("madeira da Vila deveria valer mais no deserto")
 	}
@@ -81,7 +81,7 @@ func TestFriendshipTalkLimits(t *testing.T) {
 
 func TestGiftTastes(t *testing.T) {
 	p := NewPlayer(1, nil, 0, 0, 0)
-	if r := p.Gift(107, uint8(MatMoonflower), 75, 0); r.OK {
+	if r := p.Gift(107, ItemID(MatMoonflower), 75, 0); r.OK {
 		t.Fatal("presente antes de 2 corações não pode")
 	}
 	p.AddFriendship(107, 60)
@@ -89,10 +89,10 @@ func TestGiftTastes(t *testing.T) {
 	if !r.OK || r.Delta >= 0 {
 		t.Fatalf("Seraphina detesta veneno: %+v", r)
 	}
-	if r := p.Gift(107, uint8(MatMoonflower), 75, 1); r.OK {
+	if r := p.Gift(107, ItemID(MatMoonflower), 75, 1); r.OK {
 		t.Fatal("só um presente por dia")
 	}
-	if r := p.Gift(107, uint8(MatMoonflower), 75, 25); !r.OK || r.Delta <= 0 {
+	if r := p.Gift(107, ItemID(MatMoonflower), 75, 25); !r.OK || r.Delta <= 0 {
 		t.Fatalf("Seraphina ama Flor-da-Lua: %+v", r)
 	}
 }

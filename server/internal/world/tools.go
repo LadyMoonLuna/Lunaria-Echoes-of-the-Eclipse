@@ -18,25 +18,25 @@ type ToolDef struct {
 }
 
 const (
-	ItemStoneAxe       uint8 = 160
-	ItemIronAxe        uint8 = 161
-	ItemTemperedAxe    uint8 = 162
-	ItemMithrilAxe     uint8 = 163
-	ItemOrichalcumAxe  uint8 = 164
-	ItemAdamantineAxe  uint8 = 165
-	ItemBlackSunAxe    uint8 = 166
-	ItemStonePickaxe   uint8 = 167
-	ItemIronPickaxe    uint8 = 168
-	ItemTemperedPick   uint8 = 169
-	ItemMithrilPickaxe uint8 = 170
-	ItemOrichalcumPick uint8 = 171
-	ItemAdamantinePick uint8 = 172
-	ItemBlackSunPick   uint8 = 173
-	ItemHerbalShears   uint8 = 174
+	ItemStoneAxe       ItemID = 160
+	ItemIronAxe        ItemID = 161
+	ItemTemperedAxe    ItemID = 162
+	ItemMithrilAxe     ItemID = 163
+	ItemOrichalcumAxe  ItemID = 164
+	ItemAdamantineAxe  ItemID = 165
+	ItemBlackSunAxe    ItemID = 166
+	ItemStonePickaxe   ItemID = 167
+	ItemIronPickaxe    ItemID = 168
+	ItemTemperedPick   ItemID = 169
+	ItemMithrilPickaxe ItemID = 170
+	ItemOrichalcumPick ItemID = 171
+	ItemAdamantinePick ItemID = 172
+	ItemBlackSunPick   ItemID = 173
+	ItemHerbalShears   ItemID = 174
 )
 
 // ToolsDB: tipo e tier de cada ferramenta. O tier precisa ser >= ao tier (raridade) do nó.
-var ToolsDB = map[uint8]ToolDef{
+var ToolsDB = map[ItemID]ToolDef{
 	ItemStoneAxe: {ToolAxe, 1}, ItemIronAxe: {ToolAxe, 2}, ItemTemperedAxe: {ToolAxe, 3}, ItemMithrilAxe: {ToolAxe, 4},
 	ItemOrichalcumAxe: {ToolAxe, 5}, ItemAdamantineAxe: {ToolAxe, 7}, ItemBlackSunAxe: {ToolAxe, 8},
 	ItemStonePickaxe: {ToolPickaxe, 1}, ItemIronPickaxe: {ToolPickaxe, 2}, ItemTemperedPick: {ToolPickaxe, 3}, ItemMithrilPickaxe: {ToolPickaxe, 4},
@@ -44,7 +44,7 @@ var ToolsDB = map[uint8]ToolDef{
 	ItemHerbalShears: {ToolShears, 1},
 }
 
-var toolItems = map[uint8]ItemInfo{
+var toolItems = map[ItemID]ItemInfo{
 	ItemStoneAxe:       {Name: "Machado Velho", Weight: 3.0, Slot: NoSlot},
 	ItemIronAxe:        {Name: "Machado de Ferro", Weight: 3.5, Slot: NoSlot},
 	ItemTemperedAxe:    {Name: "Machado de Aço Temperado", Weight: 3.5, Slot: NoSlot},
@@ -63,7 +63,7 @@ var toolItems = map[uint8]ItemInfo{
 }
 
 // Armas cortantes que colhem vinhas e arbustos (1x) quando não há tesoura.
-var cuttingWeapons = map[uint8]bool{
+var cuttingWeapons = map[ItemID]bool{
 	protocol.ItemIronLongsword: true, protocol.ItemSteelDagger: true, protocol.ItemOffhandDagger: true,
 	protocol.ItemGiantCleaver: true, protocol.ItemColossalSword: true, protocol.ItemSteelNeedles: true,
 	protocol.ItemInquisitorShadowScythe: true, protocol.ItemAutopsyDagger: true,
@@ -80,7 +80,7 @@ func (p *Player) BestTool(kind ToolKind) uint8 {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	var best uint8
-	check := func(id uint8) {
+	check := func(id ItemID) {
 		if t, ok := ToolsDB[id]; ok && t.Kind == kind && t.Tier > best {
 			best = t.Tier
 		}
@@ -101,7 +101,7 @@ func (p *Player) BestTool(kind ToolKind) uint8 {
 func (p *Player) HasCuttingWeapon() bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
-	for _, id := range []uint8{p.EquippedSlots[protocol.SlotMainHand], p.EquippedSlots[protocol.SlotOffHand]} {
+	for _, id := range []ItemID{p.EquippedSlots[protocol.SlotMainHand], p.EquippedSlots[protocol.SlotOffHand]} {
 		if cuttingWeapons[id] {
 			return true
 		}
@@ -117,7 +117,7 @@ func (p *Player) HasCuttingWeapon() bool {
 // --- Materiais descobertos ---
 
 // markDiscoveredLocked registra o material como visto; retorna true se é a primeira vez.
-func (p *Player) markDiscoveredLocked(itemID uint8) bool {
+func (p *Player) markDiscoveredLocked(itemID ItemID) bool {
 	if !IsMaterial(itemID) {
 		return false
 	}

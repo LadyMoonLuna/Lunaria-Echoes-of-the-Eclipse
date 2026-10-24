@@ -323,7 +323,7 @@ func produceAndOrder(n *world.NPC, now time.Time, villageNodes, forestNodes []wo
 			price := uint32(float32(prof.BuyPrices[mat])*world.BuyPriceMult(n.Personality) + 0.5)
 			n.Life.BuyOrders[mat] = world.BuyOrder{Material: mat, Wanted: want - have, Price: price}
 			n.Life.OrderSince[mat] = now
-			ev.says = append(ev.says, fmt.Sprintf("📜 Encomenda aberta: compro %d× %s por %d Sollares cada!", want-have, world.ItemName(uint8(mat)), price))
+			ev.says = append(ev.says, fmt.Sprintf("📜 Encomenda aberta: compro %d× %s por %d Sollares cada!", want-have, world.ItemName(world.ItemID(mat)), price))
 			continue
 		}
 		order.Wanted = want - have
@@ -351,7 +351,7 @@ func produceAndOrder(n *world.NPC, now time.Time, villageNodes, forestNodes []wo
 		if node.ZoneID == world.ZoneForest {
 			where = "no Bosque Sussurrante"
 		}
-		ev.says = append(ev.says, fmt.Sprintf("Ninguém me trouxe %s... eu mesmo vou buscar %s.", world.ItemName(uint8(mat)), where))
+		ev.says = append(ev.says, fmt.Sprintf("Ninguém me trouxe %s... eu mesmo vou buscar %s.", world.ItemName(world.ItemID(mat)), where))
 		return
 	}
 }
@@ -539,11 +539,11 @@ func shopStateOf(npc *world.NPC) protocol.ShopState {
 			Temperature: int8(max(min(n.Temperature, 127), -128)), Activity: n.CurrentActivity}
 		market := world.MarketOf(n.ZoneID)
 		for item, qty := range n.ShopStock {
-			price := world.NPCSellUnitPrice(n.Personality, market, uint8(item), qty)
-			if price == 0 || !world.SellsItem(n.ID, uint8(item)) {
+			price := world.NPCSellUnitPrice(n.Personality, market, world.ItemID(item), qty)
+			if price == 0 || !world.SellsItem(n.ID, world.ItemID(item)) {
 				continue
 			}
-			st.Stock = append(st.Stock, protocol.ShopStockEntry{ItemID: uint8(item), Qty: uint8(min(qty, 255)), Price: price})
+			st.Stock = append(st.Stock, protocol.ShopStockEntry{ItemID: world.ItemID(item), Qty: uint8(min(qty, 255)), Price: price})
 		}
 		for _, o := range n.Life.BuyOrders {
 			st.Orders = append(st.Orders, protocol.ShopOrderEntry{Material: o.Material, Wanted: uint8(min(o.Wanted, 255)), Price: o.Price})
@@ -633,7 +633,7 @@ func (s *Server) npcCare(npc *world.NPC, action string) {
 		}
 		var mult float32
 		seller.WithLife(func(a *world.NPC) { mult = world.SellPriceMult(a.Personality) })
-		price = uint32(float32(world.ShopPrice(world.LyraID, uint8(item)))*mult + 0.5)
+		price = uint32(float32(world.ShopPrice(world.LyraID, world.ItemID(item)))*mult + 0.5)
 	default:
 		s.mu.RLock()
 		seller = s.npcs[world.SeraphinaID]
@@ -709,7 +709,7 @@ func (s *Server) genericNPCTalk(p *world.Player, npc *world.NPC) {
 	if len(st.Orders) > 0 {
 		b.WriteString(" Compro:")
 		for _, o := range st.Orders {
-			fmt.Fprintf(&b, " %s (%d Sollares cada);", world.ItemName(uint8(o.Material)), o.Price)
+			fmt.Fprintf(&b, " %s (%d Sollares cada);", world.ItemName(world.ItemID(o.Material)), o.Price)
 		}
 	}
 	s.sendPlayerNPCSay(p, npc.ID, b.String())

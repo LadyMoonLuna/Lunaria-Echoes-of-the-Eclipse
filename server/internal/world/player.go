@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"sort"
 	"sync"
 	"time"
 
@@ -78,25 +79,25 @@ type Player struct {
 	WolfPotionUntil  time.Time // Poção de Sangue Lupino (+20% velocidade e crítico por 20s)
 
 	// Sistema de Inventário e 12 Slots de Equipamento Real
-	Inventory           map[uint8]uint8                // ItemID -> Quantidade
-	EquippedSlots       [protocol.EquipSlotCount]uint8 // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
-	DiscoveredMaterials map[uint16]bool                // Materiais já vistos pelo jogador (Forja)
-	CustomItems         map[uint8]*CustomItem          // Ligas sintéticas e equipamentos forjados (IDs 200-254)
-	KnownBlueprints     map[uint8]bool                 // Blueprints avançadas aprendidas (as básicas todos sabem)
-	ExclusiveBlueprints []ExclusiveBlueprint           // Desenhos patenteados no Criador Quebra-Cabeça (Soulbound)
-	DevForgeAccess      bool                           // Dev: forja e Quebra-Cabeça liberados em qualquer lugar
-	ItemUnits           map[uint8][]uint8              // Qualidade de cada unidade da mochila (melhor -> pior)
-	EquippedQuality     [protocol.EquipSlotCount]uint8 // Condição de cada item equipado
-	EquippedQualitySet  [protocol.EquipSlotCount]bool  // slot com Condição registrada (senão vale a padrão do item)
-	newDiscoveries      []uint16                       // Descobertas ainda não avisadas ao cliente
-	Gold                uint32                         // Sollares de Ouro
-	PKMode              bool                           // Postura Hostil: trava de segurança desligada (pode ferir NPCs)
-	WantedTimer         float32                        // segundos restantes como PROCURADO pela Guarda
-	BountyGold          uint32                         // recompensa pela cabeça do jogador
-	JailUntil           time.Time                      // preso: não age até esta hora
-	MurderCount         int                            // NPCs assassinados (para sempre)
-	KillStreak          int                            // assassinatos seguidos enquanto procurado
-	PermanentWanted     map[uint8]bool                 // cidade -> procurado para sempre
+	Inventory           map[ItemID]uint8                // ItemID -> Quantidade
+	EquippedSlots       [protocol.EquipSlotCount]ItemID // 14 Slots Reais [0..13] (12 = Mão Principal, 13 = Mão Secundária)
+	DiscoveredMaterials map[uint16]bool                 // Materiais já vistos pelo jogador (Forja)
+	CustomItems         map[ItemID]*CustomItem          // Ligas sintéticas e equipamentos forjados (IDs 200-254)
+	KnownBlueprints     map[uint8]bool                  // Blueprints avançadas aprendidas (as básicas todos sabem)
+	ExclusiveBlueprints []ExclusiveBlueprint            // Desenhos patenteados no Criador Quebra-Cabeça (Soulbound)
+	DevForgeAccess      bool                            // Dev: forja e Quebra-Cabeça liberados em qualquer lugar
+	ItemUnits           map[ItemID][]uint8              // Qualidade de cada unidade da mochila (melhor -> pior)
+	EquippedQuality     [protocol.EquipSlotCount]uint8  // Condição de cada item equipado
+	EquippedQualitySet  [protocol.EquipSlotCount]bool   // slot com Condição registrada (senão vale a padrão do item)
+	newDiscoveries      []uint16                        // Descobertas ainda não avisadas ao cliente
+	Gold                uint32                          // Sollares de Ouro
+	PKMode              bool                            // Postura Hostil: trava de segurança desligada (pode ferir NPCs)
+	WantedTimer         float32                         // segundos restantes como PROCURADO pela Guarda
+	BountyGold          uint32                          // recompensa pela cabeça do jogador
+	JailUntil           time.Time                       // preso: não age até esta hora
+	MurderCount         int                             // NPCs assassinados (para sempre)
+	KillStreak          int                             // assassinatos seguidos enquanto procurado
+	PermanentWanted     map[uint8]bool                  // cidade -> procurado para sempre
 
 	// Sobrevivência: fome (100 = saciado) e temperatura corporal
 	Hunger              float32
@@ -106,8 +107,8 @@ type Player struct {
 	survivalInit        bool
 	survivalDmg         float32
 	EclipseCoins        uint32 // Moedas do Eclipse (Mercado Negro)
-	EquippedArmorID     uint8  // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
-	EquippedAccessoryID uint8  // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade
+	EquippedArmorID     ItemID // Alias Peitoral (EquippedSlots[1]) para retrocompatibilidade
+	EquippedAccessoryID ItemID // Alias Acessório/Anel (EquippedSlots[7]) para retrocompatibilidade
 
 	// Mini-game de Autópsia e Proteção contra Mobs
 	InAutopsy           bool      // Flag de autópsia ativa
@@ -119,8 +120,9 @@ type Player struct {
 
 	// Sistema Universal de Amizade com NPCs (0 a 100) e Receitas Secretas
 	NPCFriendship   map[uint32]int        // NPCID -> Pontos de Afiança (0 a 100)
+	YggdrasilAt     float64               // última colheita na Yggdrasil (horas de jogo)
 	Social          map[uint32]*NPCSocial // conversas, presentes e favores com cada NPC
-	UnlockedRecipes map[uint8]bool        // RecipeID -> Desbloqueada
+	UnlockedRecipes map[ItemID]bool       // RecipeID -> Desbloqueada
 
 	// Desafios de Obtenção das Classes Secretas (10 a 15)
 	UntouchedKills         int               // Abates sem sofrer dano (Bailarino das Estrelas - Classe 10)
@@ -1077,12 +1079,12 @@ func NewPlayer(id uint32, tcpConn net.Conn, initX, initY, initZ float32) *Player
 		XP:                  0,
 		NextLevelXP:         100,
 		StatPoints:          0,
-		Inventory:           make(map[uint8]uint8),
+		Inventory:           make(map[ItemID]uint8),
 		Gold:                StartingGold,
 		DiscoveredMaterials: startingDiscoveries(),
 		EclipseCoins:        StartingEclipseCoins,
 		NPCFriendship:       make(map[uint32]int),
-		UnlockedRecipes:     make(map[uint8]bool),
+		UnlockedRecipes:     make(map[ItemID]bool),
 		LastActionTimes:     make(map[uint8]time.Time),
 	}
 	p.ApplyBaseRaceAttributes(initRace)
@@ -1245,7 +1247,7 @@ type PendingIdentityOffer struct {
 	RaceID   uint8
 	ClassID  uint8
 	Mode     uint8
-	CostItem uint8 // item consumido só quando o jogador confirma (0 = nenhum)
+	CostItem ItemID // item consumido só quando o jogador confirma (0 = nenhum)
 	Expires  time.Time
 }
 
@@ -1254,7 +1256,7 @@ const IdentityOfferTTL = 2 * time.Minute
 
 // OfferIdentity registra uma troca de Classe/Raça pendente (substitui qualquer oferta anterior).
 // costItem opcional: item que só é consumido quando o jogador confirma.
-func (p *Player) OfferIdentity(raceID, classID, mode uint8, costItem ...uint8) {
+func (p *Player) OfferIdentity(raceID, classID, mode uint8, costItem ...ItemID) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	offer := &PendingIdentityOffer{RaceID: raceID, ClassID: classID, Mode: mode, Expires: time.Now().Add(IdentityOfferTTL)}
@@ -2025,11 +2027,11 @@ func (p *Player) ToStatsPacket() protocol.PlayerStatsPacket {
 }
 
 // AddItem adiciona itens à mochila do jogador.
-func (p *Player) AddItem(itemID, qty uint8) {
+func (p *Player) AddItem(itemID ItemID, qty uint8) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	if p.Inventory == nil {
-		p.Inventory = make(map[uint8]uint8)
+		p.Inventory = make(map[ItemID]uint8)
 	}
 	p.markDiscoveredLocked(itemID) // primeiro contato com um material
 	if int(p.Inventory[itemID])+int(qty) > 255 {
@@ -2040,7 +2042,7 @@ func (p *Player) AddItem(itemID, qty uint8) {
 }
 
 // RemoveItem remove itens da mochila do jogador se houver quantidade suficiente.
-func (p *Player) RemoveItem(itemID, qty uint8) bool {
+func (p *Player) RemoveItem(itemID ItemID, qty uint8) bool {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	if p.Inventory == nil {
@@ -2059,14 +2061,14 @@ func (p *Player) RemoveItem(itemID, qty uint8) bool {
 }
 
 // HasItem verifica se o jogador possui o item no inventário.
-func (p *Player) HasItem(itemID uint8) bool {
+func (p *Player) HasItem(itemID ItemID) bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	return p.Inventory != nil && p.Inventory[itemID] > 0
 }
 
 // GetItemCount retorna a quantidade do item no inventário.
-func (p *Player) GetItemCount(itemID uint8) uint8 {
+func (p *Player) GetItemCount(itemID ItemID) uint8 {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	if p.Inventory == nil {
@@ -2080,8 +2082,15 @@ func (p *Player) GetInventorySlots() []protocol.InventorySlot {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	slots := make([]protocol.InventorySlot, 0, len(p.Inventory))
-	for id := uint8(1); id <= 255; id++ {
-		if qty, exists := p.Inventory[id]; exists && qty > 0 {
+	ids := make([]ItemID, 0, len(p.Inventory))
+	for id, qty := range p.Inventory {
+		if qty > 0 {
+			ids = append(ids, id)
+		}
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	for _, id := range ids {
+		{
 			// Uma entrada por Qualidade: cada unidade mantém a sua
 			units := p.unitsLocked(id)
 			for i := 0; i < len(units); {
@@ -2093,29 +2102,26 @@ func (p *Player) GetInventorySlots() []protocol.InventorySlot {
 				i = j
 			}
 		}
-		if id == 255 {
-			break
-		}
 	}
 	return slots
 }
 
 // GetEquipment retorna os IDs dos equipamentos equipados de forma thread-safe.
-func (p *Player) GetEquipment() (armorID, accessoryID uint8) {
+func (p *Player) GetEquipment() (armorID, accessoryID ItemID) {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	return p.EquippedSlots[protocol.SlotChest], p.EquippedSlots[protocol.SlotRing1]
 }
 
 // GetEquippedSlots retorna uma cópia dos 14 slots equipados thread-safe.
-func (p *Player) GetEquippedSlots() [protocol.EquipSlotCount]uint8 {
+func (p *Player) GetEquippedSlots() [protocol.EquipSlotCount]ItemID {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	return p.EquippedSlots
 }
 
 // getSlotForItem retorna o slot padrão (0..13) do catálogo e se o item é equipável.
-func getSlotForItem(itemID uint8) (uint8, bool) {
+func getSlotForItem(itemID ItemID) (uint8, bool) {
 	info, ok := ItemCatalog[itemID]
 	if !ok || info.Slot == NoSlot {
 		return 255, false
@@ -2124,20 +2130,20 @@ func getSlotForItem(itemID uint8) (uint8, bool) {
 }
 
 // IsEquippable informa se o item ocupa algum dos 14 slots.
-func IsEquippable(itemID uint8) bool {
+func IsEquippable(itemID ItemID) bool {
 	_, ok := getSlotForItem(itemID)
 	return ok
 }
 
 // EquipItem vincula um item aos 12 slots de equipamento.
 // Anéis preenchem os slots 7..10; se todos estiverem ocupados, rotacionam substituindo o mais antigo.
-func (p *Player) EquipItem(itemID uint8) (bool, string) {
+func (p *Player) EquipItem(itemID ItemID) (bool, string) {
 	return p.EquipItemQuality(itemID, AnyQuality)
 }
 
 // EquipItemQuality equipa a unidade do item com a Qualidade pedida (AnyQuality = a melhor).
 // O item que sai do slot volta para a mochila com a Condição que tinha.
-func (p *Player) EquipItemQuality(itemID, quality uint8) (bool, string) {
+func (p *Player) EquipItemQuality(itemID ItemID, quality uint8) (bool, string) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
@@ -2206,7 +2212,7 @@ func (p *Player) UnequipSlot(slotIdx uint8) bool {
 		return false
 	}
 	if p.Inventory == nil {
-		p.Inventory = make(map[uint8]uint8)
+		p.Inventory = make(map[ItemID]uint8)
 	}
 	old := p.EquippedSlots[slotIdx]
 	p.addUnitsLocked(old, 1, p.slotQualityLocked(slotIdx)) // volta com a Condição que tinha
@@ -2273,7 +2279,7 @@ func (p *Player) DevSetRaceAndKit(raceID, classID uint8) {
 	p.EquippedAccessoryID = protocol.ItemAncestralFangRing
 
 	if p.Inventory == nil {
-		p.Inventory = make(map[uint8]uint8)
+		p.Inventory = make(map[ItemID]uint8)
 	}
 	p.Inventory[protocol.ItemWolfBloodPotion] = 5
 	p.Inventory[protocol.ItemCookedNobleMeat] = 5
@@ -2388,7 +2394,7 @@ func (p *Player) RewindTimeDestiny() (TimeHistorySnapshot, bool) {
 }
 
 // UseConsumable usa um item consumível ou tomo/relíquia de raça/classe secreta.
-func (p *Player) UseConsumable(itemID uint8) (bool, string) {
+func (p *Player) UseConsumable(itemID ItemID) (bool, string) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 
@@ -2396,12 +2402,18 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		return false, "Item não encontrado no inventário."
 	}
 
-	switch itemID {
-	case uint8(MatGameMeat): // Carne de Caça crua: mata a fome e cura um pouco
+	if f, ok := FruitFood[itemID]; ok { // frutos das árvores
 		p.consumeOneItemLocked(itemID)
 		p.feedLocked(itemID)
+		p.HP = min(p.MaxHP, p.HP+f.HP)
+		return true, fmt.Sprintf("Você comeu %s (+%d HP).", MaterialsDB[uint16(itemID)].Name, f.HP)
+	}
+	switch BaseOf(itemID) {
+	case ItemID(MatGameMeat): // carne crua de qualquer caça: mata a fome e cura um pouco
+		p.consumeOneItemLocked(itemID)
+		p.feedLocked(ItemID(MatGameMeat))
 		p.HP = min(p.MaxHP, p.HP+25)
-		return true, "Você comeu Carne de Caça crua (+25 HP, fome saciada)."
+		return true, fmt.Sprintf("Você comeu %s crua (+25 HP, fome saciada).", MaterialsDB[uint16(itemID)].Name)
 	case protocol.ItemRawWolfMeat: // 2: Carne Crua de Lobo (+45 HP / +90 HP Chimeryth)
 		p.consumeOneItemLocked(itemID)
 		p.feedLocked(itemID)
@@ -2509,7 +2521,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 		p.consumeOneItemLocked(itemID)
 		p.unlockRecipeLocked(protocol.ItemRunicWarhammerRecipe)
 		if p.Inventory == nil {
-			p.Inventory = make(map[uint8]uint8)
+			p.Inventory = make(map[ItemID]uint8)
 		}
 		p.Inventory[protocol.ItemRunicWarhammer]++
 		return true, "Você aprendeu a receita secreta e forjou o lendário Malho de Batalha Rúnico (+45 Dano Melee, +8 FOR, +6 CON, +4 MAS)!"
@@ -2571,7 +2583,7 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 	return false, "Este item não é consumível."
 }
 
-func (p *Player) consumeOneItemLocked(itemID uint8) {
+func (p *Player) consumeOneItemLocked(itemID ItemID) {
 	if p.Inventory[itemID] <= 1 {
 		delete(p.Inventory, itemID)
 	} else {
@@ -2676,22 +2688,22 @@ func (p *Player) GetFriendshipLevel(npcID uint32) uint8 {
 	return uint8(pts / 20)
 }
 
-func (p *Player) unlockRecipeLocked(recipeID uint8) {
+func (p *Player) unlockRecipeLocked(recipeID ItemID) {
 	if p.UnlockedRecipes == nil {
-		p.UnlockedRecipes = make(map[uint8]bool)
+		p.UnlockedRecipes = make(map[ItemID]bool)
 	}
 	p.UnlockedRecipes[recipeID] = true
 }
 
 // UnlockRecipe registra a receita como desbloqueada pelo jogador.
-func (p *Player) UnlockRecipe(recipeID uint8) {
+func (p *Player) UnlockRecipe(recipeID ItemID) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	p.unlockRecipeLocked(recipeID)
 }
 
 // HasUnlockedRecipe verifica se o jogador possui a receita desbloqueada.
-func (p *Player) HasUnlockedRecipe(recipeID uint8) bool {
+func (p *Player) HasUnlockedRecipe(recipeID ItemID) bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 

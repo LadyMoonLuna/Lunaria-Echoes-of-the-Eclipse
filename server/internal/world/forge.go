@@ -14,10 +14,10 @@ import (
 // são peças únicas de cada jogador: ocupam os IDs 200 a 254 da mochila (CustomItems).
 
 const (
-	CustomItemFirstID uint8 = 200
-	CustomItemLastID  uint8 = 254
-	MaxCrucibleSlots        = 4
-	ForgeTraitSep           = " • "
+	CustomItemFirstID ItemID = 60000
+	CustomItemLastID  ItemID = 65000
+	MaxCrucibleSlots         = 4
+	ForgeTraitSep            = " • "
 )
 
 // Tipos de peça única
@@ -164,7 +164,7 @@ type BlueprintDef struct {
 	DurScale  float32
 	Basic     bool   // todo jogador já começa sabendo
 	Price     uint32 // > 0: Garrick vende
-	ScrollID  uint8  // item "Blueprint Antiga" que ensina esta blueprint (drops)
+	ScrollID  ItemID // item "Blueprint Antiga" que ensina esta blueprint (drops)
 	Parts     []BlueprintPart
 }
 
@@ -181,13 +181,13 @@ var (
 
 // IDs dos itens "Blueprint Antiga" (drops de ruínas e chefes)
 const (
-	ItemBPScrollLongsword uint8 = 87
-	ItemBPScrollScythe    uint8 = 88
-	ItemBPScrollHammer    uint8 = 89
-	ItemBPScrollBow       uint8 = 90
-	ItemBPScrollGauntlets uint8 = 91
-	ItemBPScrollShield    uint8 = 92
-	ItemBPScrollPlate     uint8 = 93
+	ItemBPScrollLongsword ItemID = 87
+	ItemBPScrollScythe    ItemID = 88
+	ItemBPScrollHammer    ItemID = 89
+	ItemBPScrollBow       ItemID = 90
+	ItemBPScrollGauntlets ItemID = 91
+	ItemBPScrollShield    ItemID = 92
+	ItemBPScrollPlate     ItemID = 93
 )
 
 // Blueprints: as 5 básicas e as 7 avançadas (compradas com o Garrick ou achadas como Blueprint Antiga).
@@ -254,7 +254,7 @@ func GetBlueprint(id uint8) (BlueprintDef, bool) {
 }
 
 // BlueprintByScroll: blueprint ensinada pelo item "Blueprint Antiga".
-func BlueprintByScroll(itemID uint8) (BlueprintDef, bool) {
+func BlueprintByScroll(itemID ItemID) (BlueprintDef, bool) {
 	for _, b := range Blueprints {
 		if b.ScrollID != 0 && b.ScrollID == itemID {
 			return b, true
@@ -428,7 +428,7 @@ func containsStr(list []string, s string) bool {
 
 // CustomItem é uma liga sintética ou um equipamento forjado deste jogador.
 type CustomItem struct {
-	ID        uint8
+	ID        ItemID
 	Kind      uint8
 	Name      string
 	Desc      string
@@ -442,7 +442,7 @@ type CustomItem struct {
 }
 
 // itemInfoLocked: catálogo com as peças únicas do jogador por cima (chamar com p.Mu travado).
-func (p *Player) itemInfoLocked(id uint8) ItemInfo {
+func (p *Player) itemInfoLocked(id ItemID) ItemInfo {
 	if c, ok := p.CustomItems[id]; ok {
 		if c.Kind == CustomAlloy {
 			return ItemInfo{Name: c.Name, Weight: c.Material.Weight, Slot: NoSlot}
@@ -453,7 +453,7 @@ func (p *Player) itemInfoLocked(id uint8) ItemInfo {
 }
 
 // materialLocked: material do catálogo ou liga sintética do jogador.
-func (p *Player) materialLocked(id uint8) (MaterialDef, bool) {
+func (p *Player) materialLocked(id ItemID) (MaterialDef, bool) {
 	if c, ok := p.CustomItems[id]; ok && c.Kind == CustomAlloy {
 		return c.Material, true
 	}
@@ -461,7 +461,7 @@ func (p *Player) materialLocked(id uint8) (MaterialDef, bool) {
 }
 
 // slotForItemLocked: slot de equipamento, considerando as peças forjadas.
-func (p *Player) slotForItemLocked(id uint8) (uint8, bool) {
+func (p *Player) slotForItemLocked(id ItemID) (uint8, bool) {
 	if c, ok := p.CustomItems[id]; ok {
 		if c.Kind == CustomEquip && c.Info.Slot != NoSlot {
 			return c.Info.Slot, true
@@ -472,7 +472,7 @@ func (p *Player) slotForItemLocked(id uint8) (uint8, bool) {
 }
 
 // IsEquippableFor: como IsEquippable, mas conhece as peças forjadas do jogador.
-func (p *Player) IsEquippableFor(id uint8) bool {
+func (p *Player) IsEquippableFor(id ItemID) bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	_, ok := p.slotForItemLocked(id)
@@ -496,9 +496,9 @@ func (p *Player) customToolTierLocked(kind ToolKind) uint8 {
 }
 
 // allocCustomLocked: primeiro ID livre (nem na mochila nem equipado); peças sumidas são reaproveitadas.
-func (p *Player) allocCustomLocked() (uint8, bool) {
+func (p *Player) allocCustomLocked() (ItemID, bool) {
 	if p.CustomItems == nil {
-		p.CustomItems = make(map[uint8]*CustomItem)
+		p.CustomItems = make(map[ItemID]*CustomItem)
 	}
 	for id := CustomItemFirstID; ; id++ {
 		inUse := p.Inventory[id] > 0
@@ -574,7 +574,7 @@ func (p *Player) KnownBlueprintIDs() []uint8 {
 
 // ForgeResult: o que saiu do cadinho ou da bigorna.
 type ForgeResult struct {
-	ItemID  uint8
+	ItemID  ItemID
 	Qty     uint8
 	Quality uint8
 	Name    string
@@ -582,7 +582,7 @@ type ForgeResult struct {
 }
 
 // takeIngredientsLocked retira 1 unidade de cada item (a melhor) e devolve a média das Qualidades.
-func (p *Player) takeIngredientsLocked(ids []uint8) uint8 {
+func (p *Player) takeIngredientsLocked(ids []ItemID) uint8 {
 	total := 0
 	for _, id := range ids {
 		q, _ := p.takeUnitLocked(id, AnyQuality)
@@ -591,8 +591,8 @@ func (p *Player) takeIngredientsLocked(ids []uint8) uint8 {
 	return uint8(total / len(ids))
 }
 
-func (p *Player) hasEachLocked(ids []uint8) bool {
-	need := map[uint8]uint8{}
+func (p *Player) hasEachLocked(ids []ItemID) bool {
+	need := map[ItemID]uint8{}
 	for _, id := range ids {
 		need[id]++
 	}
@@ -606,13 +606,13 @@ func (p *Player) hasEachLocked(ids []uint8) bool {
 
 // SmeltAlloy funde até 4 ingredientes no cadinho: receita fixa ou Liga Sintética Customizada.
 // (Forja antiga, sem mini-games.)
-func (p *Player) SmeltAlloy(ings []uint8) (ForgeResult, error) {
+func (p *Player) SmeltAlloy(ings []ItemID) (ForgeResult, error) {
 	return p.SmeltAlloyScored(ings, CraftScores{})
 }
 
 // SmeltAlloyScored: como SmeltAlloy, com as notas dos mini-games. Ponto de Fusão >= 0,95 dá o
 // Bônus de Harmonia Híbrida e a Nota de Criação define a Qualidade das unidades.
-func (p *Player) SmeltAlloyScored(ings []uint8, cs CraftScores) (ForgeResult, error) {
+func (p *Player) SmeltAlloyScored(ings []ItemID, cs CraftScores) (ForgeResult, error) {
 	cs = cs.Clamp()
 	if len(ings) < 2 || len(ings) > MaxCrucibleSlots {
 		return ForgeResult{}, fmt.Errorf("coloque de 2 a 4 ingredientes no cadinho")
@@ -649,7 +649,7 @@ func (p *Player) SmeltAlloyScored(ings []uint8, cs CraftScores) (ForgeResult, er
 	}
 	if r, ok := MatchAlloyRecipe(ids16); ok && !harmony {
 		q := unitQ(p.takeIngredientsLocked(ings))
-		out := uint8(r.Output)
+		out := ItemID(r.Output)
 		p.markDiscoveredLocked(out)
 		p.addUnitsLocked(out, r.Qty, q)
 		name := MaterialsDB[r.Output].Name
@@ -678,8 +678,8 @@ func (p *Player) SmeltAlloyScored(ings []uint8, cs CraftScores) (ForgeResult, er
 }
 
 // storeCustomAlloyLocked guarda a liga única (reaproveita a mesma mistura) e consome os ingredientes.
-func (p *Player) storeCustomAlloyLocked(syn MaterialDef, sig string, ings []uint8, qty uint8, unitQ func(uint8) uint8, note, verb string) (ForgeResult, error) {
-	id := uint8(0)
+func (p *Player) storeCustomAlloyLocked(syn MaterialDef, sig string, ings []ItemID, qty uint8, unitQ func(uint8) uint8, note, verb string) (ForgeResult, error) {
+	id := ItemID(0)
 	for cid, c := range p.CustomItems {
 		if c.Kind == CustomAlloy && c.Signature == sig && (p.Inventory[cid] > 0) {
 			id = cid
@@ -688,7 +688,7 @@ func (p *Player) storeCustomAlloyLocked(syn MaterialDef, sig string, ings []uint
 	if id == 0 {
 		var ok bool
 		if id, ok = p.allocCustomLocked(); !ok {
-			return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais (máx. 55)")
+			return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais")
 		}
 		syn.ID = uint16(id)
 		p.CustomItems[id] = &CustomItem{ID: id, Kind: CustomAlloy, Name: syn.Name, Desc: syn.Trait, Material: syn, Signature: sig}
@@ -762,13 +762,13 @@ func SyntheticAlloy(mats []MaterialDef) MaterialDef {
 
 // ForgeBlueprint monta o equipamento: picks[i] = item usado na peça i (0 = peça opcional vazia).
 // (Forja antiga, sem mini-games.)
-func (p *Player) ForgeBlueprint(bpID uint8, picks []uint8) (ForgeResult, error) {
+func (p *Player) ForgeBlueprint(bpID uint8, picks []ItemID) (ForgeResult, error) {
 	return p.ForgeBlueprintScored(bpID, picks, CraftScores{})
 }
 
 // ForgeBlueprintScored: montagem final com as notas dos mini-games (peças reforjadas usam a nota
 // da sessão); a Nota de Criação mexe em atributos, durabilidade, peso, raridade e nome.
-func (p *Player) ForgeBlueprintScored(bpID uint8, picks []uint8, cs CraftScores) (ForgeResult, error) {
+func (p *Player) ForgeBlueprintScored(bpID uint8, picks []ItemID, cs CraftScores) (ForgeResult, error) {
 	bp, ok := GetBlueprint(bpID)
 	if !ok {
 		return ForgeResult{}, fmt.Errorf("blueprint desconhecida")
@@ -783,7 +783,7 @@ func (p *Player) ForgeBlueprintScored(bpID uint8, picks []uint8, cs CraftScores)
 	defer p.Mu.Unlock()
 	mats := make([]MaterialDef, len(picks))
 	specials := map[uint16]string{}
-	var used []uint8
+	var used []ItemID
 	for i, id := range picks {
 		part := bp.Parts[i]
 		if id == 0 {
@@ -820,7 +820,7 @@ func (p *Player) ForgeBlueprintScored(bpID uint8, picks []uint8, cs CraftScores)
 	}
 	id, ok := p.allocCustomLocked()
 	if !ok {
-		return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais (máx. 55)")
+		return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais")
 	}
 	q := p.takeIngredientsLocked(used)
 	if cs.FromClient {

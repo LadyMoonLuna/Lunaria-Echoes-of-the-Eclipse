@@ -88,7 +88,7 @@ type PuzzlePlacement struct {
 	Module   uint8
 	X, Y     uint8
 	Rot      uint8
-	Material uint8
+	Material ItemID
 }
 
 // RotatedCells: células ocupadas (rotação de 90° por passo, normalizada para começar em 0,0).
@@ -339,7 +339,7 @@ func (p *Player) ForgePuzzleScored(name string, pl []PuzzlePlacement, owner stri
 		m, _ := GetPuzzleModule(pc.Module)
 		totalCells += len(m.Cells)
 	}
-	var used []uint8
+	var used []ItemID
 	for i, pc := range pl {
 		m, _ := GetPuzzleModule(pc.Module)
 		mat, ok := p.materialLocked(pc.Material)
@@ -380,7 +380,7 @@ func (p *Player) ForgePuzzleScored(name string, pl []PuzzlePlacement, owner stri
 
 	weaponID, ok := p.allocCustomLocked()
 	if !ok {
-		return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais (máx. 55)"), false
+		return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais"), false
 	}
 	q := p.takeIngredientsLocked(used)
 	if cs.FromClient {
@@ -431,7 +431,7 @@ func (p *Player) GetExclusiveBlueprints() []ExclusiveBlueprint {
 }
 
 // IsSoulbound: itens que não podem ir ao chão, ser vendidos nem trocados.
-func (p *Player) IsSoulbound(id uint8) bool {
+func (p *Player) IsSoulbound(id ItemID) bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	c, ok := p.CustomItems[id]

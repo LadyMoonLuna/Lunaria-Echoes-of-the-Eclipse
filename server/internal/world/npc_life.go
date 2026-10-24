@@ -115,7 +115,7 @@ type Ingredient struct {
 
 // Recipe transforma matérias-primas em um item de loja.
 type Recipe struct {
-	Output      uint8
+	Output      ItemID
 	Ingredients []Ingredient
 	Price       uint32  // preço base de venda
 	Difficulty  float64 // 0..1: chance-base de um aprendiz falhar
@@ -126,7 +126,7 @@ type NPCProfile struct {
 	Recipes   []Recipe
 	BuyPrices map[uint16]uint32 // quanto paga por cada matéria-prima
 	Restock   map[uint16]int    // quanto quer ter de cada matéria-prima
-	SellExtra map[uint8]uint32  // preço de itens que vende sem fabricar (ex.: refeições da taverna)
+	SellExtra map[ItemID]uint32 // preço de itens que vende sem fabricar (ex.: refeições da taverna)
 }
 
 var fuel = []uint16{MatCharcoal, MatPineRefuge, MatGreyOak}
@@ -301,7 +301,7 @@ func (npc *NPC) WithLife(fn func(n *NPC)) {
 }
 
 // ShopPrice: preço base de venda de um item no NPC (receita ou extra); 0 = não vende.
-func ShopPrice(profession uint32, item uint8) uint32 {
+func ShopPrice(profession uint32, item ItemID) uint32 {
 	prof, ok := NPCProfiles[profession]
 	if !ok {
 		return 0

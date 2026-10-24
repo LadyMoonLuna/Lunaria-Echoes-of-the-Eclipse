@@ -24,7 +24,7 @@ const (
 
 // DefaultQualityFor: equipamentos e ferramentas sem criação vêm em Condição perfeita (100);
 // materiais, órgãos e consumíveis de drop/presente chegam com Qualidade 75.
-func DefaultQualityFor(itemID uint8) uint8 {
+func DefaultQualityFor(itemID ItemID) uint8 {
 	if IsEquippable(itemID) {
 		return 100
 	}
@@ -36,7 +36,7 @@ func DefaultQualityFor(itemID uint8) uint8 {
 
 // JunkFor devolve o lixo que um item vira quando a Qualidade fica abaixo do limite:
 // Sucata Metálica para metais, ligas, pedras e cristais; Lixo Orgânico para o resto.
-func JunkFor(itemID uint8) uint8 {
+func JunkFor(itemID ItemID) ItemID {
 	if m, ok := GetMaterial(itemID); ok {
 		switch m.Category {
 		case MatMetal, MatAlloy, MatStone, MatCrystal:
@@ -51,9 +51,9 @@ func JunkFor(itemID uint8) uint8 {
 }
 
 // unitsLocked reconcilia e devolve as Qualidades das unidades do item (melhor -> pior).
-func (p *Player) unitsLocked(itemID uint8) []uint8 {
+func (p *Player) unitsLocked(itemID ItemID) []uint8 {
 	if p.ItemUnits == nil {
-		p.ItemUnits = make(map[uint8][]uint8)
+		p.ItemUnits = make(map[ItemID][]uint8)
 	}
 	count := int(p.Inventory[itemID])
 	units := p.ItemUnits[itemID]
@@ -80,7 +80,7 @@ func insertSortedDesc(units []uint8, q uint8) []uint8 {
 }
 
 // addUnitsLocked adiciona qty unidades com a Qualidade q.
-func (p *Player) addUnitsLocked(itemID, qty, q uint8) uint8 {
+func (p *Player) addUnitsLocked(itemID ItemID, qty, q uint8) uint8 {
 	if q > 100 {
 		q = 100
 	}
@@ -98,7 +98,7 @@ func (p *Player) addUnitsLocked(itemID, qty, q uint8) uint8 {
 }
 
 // takeUnitLocked tira UMA unidade: com a Qualidade pedida (ou a melhor, se AnyQuality/não existir).
-func (p *Player) takeUnitLocked(itemID, quality uint8) (uint8, bool) {
+func (p *Player) takeUnitLocked(itemID ItemID, quality uint8) (uint8, bool) {
 	units := p.unitsLocked(itemID)
 	if len(units) == 0 {
 		return 0, false
@@ -125,11 +125,11 @@ func (p *Player) takeUnitLocked(itemID, quality uint8) (uint8, bool) {
 }
 
 // AddItemWithQuality adiciona itens com uma Qualidade específica (minigames, coleta).
-func (p *Player) AddItemWithQuality(itemID, qty, quality uint8) {
+func (p *Player) AddItemWithQuality(itemID ItemID, qty, quality uint8) {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	if p.Inventory == nil {
-		p.Inventory = make(map[uint8]uint8)
+		p.Inventory = make(map[ItemID]uint8)
 	}
 	p.markDiscoveredLocked(itemID)
 	p.addUnitsLocked(itemID, qty, quality)
@@ -137,7 +137,7 @@ func (p *Player) AddItemWithQuality(itemID, qty, quality uint8) {
 
 // TakeItemUnits tira até qty unidades do item com exatamente a Qualidade pedida.
 // Retorna quantas saíram.
-func (p *Player) TakeItemUnits(itemID, quality, qty uint8) uint8 {
+func (p *Player) TakeItemUnits(itemID ItemID, quality, qty uint8) uint8 {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	var taken uint8
@@ -160,7 +160,7 @@ func (p *Player) TakeItemUnits(itemID, quality, qty uint8) uint8 {
 }
 
 // UnitQualities devolve uma cópia das Qualidades das unidades do item (melhor -> pior).
-func (p *Player) UnitQualities(itemID uint8) []uint8 {
+func (p *Player) UnitQualities(itemID ItemID) []uint8 {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	return append([]uint8(nil), p.unitsLocked(itemID)...)
@@ -206,4 +206,27 @@ func (p *Player) setSlotQualityLocked(slot, q uint8) {
 // qualityStatMult: equipamentos rendem de 50% (Qualidade 0) a 100% (Qualidade 100) de ATK, DEF e Vida.
 func qualityStatMult(q uint8) float32 {
 	return 0.5 + float32(q)/200.0
+}
+
+// FamilyUnit: uma unidade da mochila que pertence a uma família (o próprio item ou uma parte específica).
+type FamilyUnit struct {
+	ID      ItemID
+	Quality uint8
+}
+
+// FamilyUnits lista as unidades da mochila cuja família é `base` (pior Qualidade primeiro).
+func (p *Player) FamilyUnits(base ItemID) []FamilyUnit {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	var out []FamilyUnit
+	for id, n := range p.Inventory {
+		if n == 0 || BaseOf(id) != base {
+			continue
+		}
+		for _, q := range p.unitsLocked(id) {
+			out = append(out, FamilyUnit{id, q})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Quality < out[j].Quality })
+	return out
 }

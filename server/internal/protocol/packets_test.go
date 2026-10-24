@@ -541,7 +541,7 @@ func TestProjectileSpawnPacket(t *testing.T) {
 }
 
 func TestInventorySyncPacket(t *testing.T) {
-	var equippedSlots [EquipSlotCount]uint8
+	var equippedSlots [EquipSlotCount]ItemID
 	equippedSlots[SlotHelmet] = ItemVigilHelmet
 	equippedSlots[SlotChest] = ItemSteelChestplate
 	equippedSlots[SlotLegs] = ItemWolfLeatherPants

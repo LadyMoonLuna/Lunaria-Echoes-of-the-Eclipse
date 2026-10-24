@@ -23,8 +23,8 @@ const (
 )
 
 type questPart struct {
-	gift     uint8  // ferramenta entregue ao começar a parte
-	material uint16 // material pedido
+	gift     world.ItemID // ferramenta entregue ao começar a parte
+	material uint16       // material pedido
 	need     uint8
 	reward   uint32 // Sollares ao entregar
 	intro    string
@@ -77,7 +77,7 @@ func (s *Server) sendQuestState(p *world.Player) {
 		writeTCP(p, pkt[:])
 	default:
 		part := blacksmithQuest[stage-1]
-		have := p.GetItemCount(uint8(part.material))
+		have := uint8(min(255, len(p.FamilyUnits(world.ItemID(part.material)))))
 		if have > part.need {
 			have = part.need
 		}
@@ -97,11 +97,14 @@ func (s *Server) handleBlacksmithQuest(p *world.Player, npcID uint32) bool {
 		return true
 	}
 	part := blacksmithQuest[stage-1]
-	if p.GetItemCount(uint8(part.material)) < part.need {
+	units := p.FamilyUnits(world.ItemID(part.material)) // couro de qualquer javali serve
+	if len(units) < int(part.need) {
 		s.BroadcastNPCSay(npcID, part.reminder)
 		return false // deixa o resto da conversa (presentes, classe) acontecer
 	}
-	p.RemoveItem(uint8(part.material), part.need)
+	for _, u := range units[len(units)-int(part.need):] { // entrega as melhores
+		p.TakeItemUnits(u.ID, u.Quality, 1)
+	}
 	p.AddGold(part.reward)
 	s.BroadcastNPCSay(npcID, fmt.Sprintf("%s (+%d Sollares)", part.thanks, part.reward))
 	log.Printf("[MISSÃO] Jogador #%d concluiu a parte %d de O Aprendiz do Ferreiro\n", p.ID, stage)

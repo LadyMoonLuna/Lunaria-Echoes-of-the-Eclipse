@@ -1062,7 +1062,7 @@ func _update_inspector() -> void:
 	inspector_name.add_theme_color_override("font_color", data.get("color", Color(1, 1, 1)))
 	var cat_text: String = data.get("category", "Item")
 	if ItemData.is_material(item_id):
-		cat_text = "Material de Forja — %s" % ItemData.CATEGORY_NAMES.get(ItemData.material(item_id)["category"], "")
+		cat_text = "Material" # sem dicas: o jogador descobre para que serve
 	elif ItemData.FORGED.has(item_id) and int(ItemData.FORGED[item_id]["kind"]) == 3:
 		cat_text = "📘 Blueprint Exclusiva — Soulbound (Inegociável / Introcável)"
 	elif ItemData.FORGED.has(item_id):
@@ -1082,16 +1082,10 @@ func _update_inspector() -> void:
 			lines.append("[color=#73e673]+%d %s[/color]" % [int(b[key]), BONUS_LABELS[key]])
 	if item_id == 15:
 		lines.append("[color=#73e673]+15% Roubo de Vida[/color]")
-	if ItemData.is_material(item_id):
-		var m: Dictionary = ItemData.material(item_id)
-		lines.append("[color=#ffd54f]⚒ Propriedades de Forja / Ligas[/color]")
-		lines.append("Durabilidade: %d" % int(m["durability"]))
-		lines.append("Resistências: [color=#73e673]%s[/color]" % m["resist"])
-		lines.append("Condutividade — Térmica %d%% • Elétrica %d%% • Mágica %d%%" % [int(m["thermal"]), int(m["electric"]), int(m["magic"])])
-		lines.append("[i]%s[/i]" % m["trait"])
 	if not lines.is_empty():
 		lines.append("")
-	var desc: String = data.get("desc", "")
+	# Órgãos e materiais não têm descrição: só o nome ("Coração de Lobo", "Pata de Aranha")
+	var desc: String = "" if ItemData.is_material(item_id) else data.get("desc", "")
 	if ItemData.FORGED.has(item_id):
 		desc = String(ItemData.FORGED[item_id]["desc"])
 	if desc != "":
@@ -1120,7 +1114,7 @@ func _update_inspector() -> void:
 	use_btn.visible = not is_equipped and (data.get("usable", false) or ItemData.slot_of(item_id) >= 0 or ItemData.info(item_id).has("blueprint"))
 	use_btn.text = "⬆️ Equipar" if ItemData.slot_of(item_id) >= 0 else "⬆️ Usar"
 	# Peças forjadas únicas e Blueprints Exclusivas (Soulbound) não vão para o chão
-	drop_btn.get_parent().visible = not is_equipped and item_id < 200
+	drop_btn.get_parent().visible = not is_equipped and item_id < 60000
 	drop_qty.max_value = max(1, qty)
 	drop_qty.value = clampi(int(drop_qty.value), 1, max(1, qty))
 	drop_qty.editable = qty > 1

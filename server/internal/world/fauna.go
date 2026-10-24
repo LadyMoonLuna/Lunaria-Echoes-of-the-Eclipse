@@ -199,7 +199,7 @@ func faunaQty(mass, per float32, maxQ int) uint8 {
 func faunaOrgans(d FaunaDef) []CorpseOrgan {
 	var out []CorpseOrgan
 	add := func(t uint8, mat uint16, name string, qty uint8, diff uint8) {
-		out = append(out, CorpseOrgan{Index: uint8(len(out)), Name: name, OrganType: t, ItemReward: uint8(mat), Quantity: qty, Difficulty: diff})
+		out = append(out, CorpseOrgan{Index: uint8(len(out)), Name: name, OrganType: t, ItemReward: ItemID(mat), Quantity: qty, Difficulty: diff})
 	}
 	big := d.MassKg >= 5
 	hideName := map[uint16]string{MatScales: "Escamas", MatFeathers: "Penas", MatBones: "Carapaça e Ossos", MatSpiderWeb: "Fiandeiras e Teia",

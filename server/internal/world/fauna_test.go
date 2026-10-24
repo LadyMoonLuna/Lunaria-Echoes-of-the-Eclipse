@@ -52,11 +52,11 @@ func TestFaunaCorpseHasRealAnatomy(t *testing.T) {
 		}
 	}
 	b := generateCorpseOrgans(bear.Type, 0)
-	if len(b) < 6 || b[0].ItemReward != uint8(MatThickFur) || b[0].Quantity < 3 {
+	if len(b) < 6 || BaseOf(b[0].ItemReward) != ItemID(MatThickFur) || b[0].Quantity < 3 {
 		t.Fatalf("urso deveria render muita pelagem e órgãos: %+v", b)
 	}
 	tr := generateCorpseOrgans(trout.Type, 0)
-	if tr[0].ItemReward != uint8(MatScales) {
+	if BaseOf(tr[0].ItemReward) != ItemID(MatScales) {
 		t.Fatalf("truta deveria render escamas: %+v", tr)
 	}
 	for _, o := range tr {

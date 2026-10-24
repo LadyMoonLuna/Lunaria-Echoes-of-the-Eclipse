@@ -895,6 +895,15 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				}
 				s.handleConflictPacket(playerID, full)
 
+			case protocol.PacketTypeDevGiveItem:
+				full := make([]byte, protocol.DevGiveItemPacketSize)
+				full[0] = header[0]
+				if _, err := io.ReadFull(conn, full[1:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				s.devGiveItem(playerID, binary.LittleEndian.Uint16(full[1:3]))
+
 			case protocol.PacketTypeFountainUse, protocol.PacketTypeSocialAction, protocol.PacketTypeGuildAction:
 				// Pacotes 0x61 / 0x63 / 0x65: Fonte, amizade com NPCs e Guilda dos Ofícios
 				size := protocol.FountainUsePacketSize
@@ -1064,12 +1073,16 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 		s.toggleEquip(player, itemID, pkt.SlotIndex) // SlotIndex = Qualidade da unidade escolhida
 		return
 	}
-	switch itemID {
+	useAs := world.BaseOf(itemID)
+	if _, fruit := world.FruitFood[itemID]; fruit {
+		useAs = world.ItemID(world.MatGameMeat) // frutos são comida
+	}
+	switch useAs {
 	// Consumíveis e Tomos Secretos (2, 3, 4, 16, 17, 18, 26, 28, 29, 30)
 	case protocol.ItemRawWolfMeat, protocol.ItemCookedNobleMeat, protocol.ItemWolfBloodPotion,
 		protocol.ItemBeastProgenitorBlood, protocol.ItemEclipseScytheTome, protocol.ItemStarforgeCore,
 		protocol.ItemRunicWarhammerRecipe, protocol.ItemOrganicTrash, protocol.ItemRunicHourglass, protocol.ItemSilverSilkCocoon,
-		protocol.ItemHealingPotion, protocol.ItemManaPotion, uint8(world.MatGameMeat):
+		protocol.ItemHealingPotion, protocol.ItemManaPotion, world.ItemID(world.MatGameMeat):
 		ok, msg := player.UseConsumable(itemID)
 		if ok {
 			log.Printf("[ITEM] Jogador #%d usou item ID %d: %s\n", pkt.PlayerID, itemID, msg)
@@ -1256,21 +1269,22 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 			s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] Jogador #%d recebeu o Kit Completo dos 12 Equipamentos!", player.ID))
 		} else {
 			// Adiciona +1 (ou +5 se for consumível/frasco) do item ItemID = val
+			item := world.ItemID(val)
 			qty := uint8(1)
-			if val == protocol.ItemEmptyFlask || val == protocol.ItemRawWolfMeat ||
-				val == protocol.ItemCookedNobleMeat || val == protocol.ItemWolfBloodPotion ||
-				val == protocol.ItemFreshWolfBlood || val == protocol.ItemPureLunarBlood ||
-				val == protocol.ItemDarkPoisonGland || val == protocol.ItemBeastProgenitorBlood ||
-				val == protocol.ItemOrganicTrash {
+			if item == protocol.ItemEmptyFlask || item == protocol.ItemRawWolfMeat ||
+				item == protocol.ItemCookedNobleMeat || item == protocol.ItemWolfBloodPotion ||
+				item == protocol.ItemFreshWolfBlood || item == protocol.ItemPureLunarBlood ||
+				item == protocol.ItemDarkPoisonGland || item == protocol.ItemBeastProgenitorBlood ||
+				item == protocol.ItemOrganicTrash {
 				qty = 5
 			}
 			s.mu.RLock()
 			q := s.devItemQuality[player.ID]
 			s.mu.RUnlock()
 			if q > 0 {
-				player.AddItemWithQuality(val, qty, q)
+				player.AddItemWithQuality(item, qty, q)
 			} else {
-				player.AddItem(val, qty)
+				player.AddItem(item, qty)
 			}
 			s.sendInventorySync(player)
 			log.Printf("[DEV] Adicionado item %d (+%d, qualidade %d) ao inventário do Jogador #%d!\n", val, qty, q, player.ID)
@@ -1304,12 +1318,12 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		if player == nil {
 			return
 		}
-		for _, id := range []uint8{world.ItemIronAxe, world.ItemIronPickaxe, world.ItemHerbalShears} {
+		for _, id := range []world.ItemID{world.ItemIronAxe, world.ItemIronPickaxe, world.ItemHerbalShears} {
 			player.AddItem(id, 1)
 		}
 		for _, mid := range []uint16{world.MatIron, world.MatCopper, world.MatTin, world.MatCharcoal, world.MatPureWater,
 			world.MatPineRefuge, world.MatBoarLeather, world.MatBones, world.MatQuartz} {
-			player.AddItemWithQuality(uint8(mid), 5, 80)
+			player.AddItemWithQuality(world.ItemID(mid), 5, 80)
 		}
 		s.sendInventorySync(player)
 		s.sendDiscoveries(player, false)
@@ -3899,7 +3913,7 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		return
 	}
 
-	var itemToGive uint8
+	var itemToGive world.ItemID
 	var qty uint8 = 1
 	var resultMsg string
 

@@ -73,7 +73,7 @@ type UniqueRequirement struct {
 	Races    []uint8 // raça obrigatória (qualquer uma da lista)
 	RaceName string  // nome mostrado no aviso de "Sangue Incompatível"
 	Classes  []uint8 // classes atuais que cumprem o requisito (vazio = só o item serve)
-	Item     uint8   // item que cumpre o requisito (0 = nenhum)
+	Item     ItemID  // item que cumpre o requisito (0 = nenhum)
 	ItemName string
 }
 
@@ -117,7 +117,7 @@ func (p *Player) CheckUniqueRaceRequirement(classID uint8) (bool, string) {
 
 // CanAwakenUnique valida raça e requisito (classe e/ou item) de uma Classe Única Exclusiva de Raça.
 // usedItem é o item que cumpriu o requisito (para ser consumido), ou 0 se foi a classe.
-func (p *Player) CanAwakenUnique(classID uint8) (ok bool, reason string, usedItem uint8) {
+func (p *Player) CanAwakenUnique(classID uint8) (ok bool, reason string, usedItem ItemID) {
 	if raceOK, why := p.CheckUniqueRaceRequirement(classID); !raceOK {
 		return false, why, 0
 	}

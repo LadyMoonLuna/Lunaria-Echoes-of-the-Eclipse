@@ -5,18 +5,19 @@ package world
 
 // Raridades dos materiais
 const (
-	RarityCommon    uint8 = 1 // Comum
-	RarityUncommon  uint8 = 2 // Incomum
-	RarityRare      uint8 = 3 // Raro
-	RarityEpic      uint8 = 4 // Épico
-	RarityUnique    uint8 = 5 // Único
-	RarityExotic    uint8 = 6 // Exótico
-	RarityLegendary uint8 = 7 // Lendário
-	RarityMythic    uint8 = 8 // Mítico
+	RarityCommon       uint8 = 1 // Comum
+	RarityUncommon     uint8 = 2 // Incomum
+	RarityRare         uint8 = 3 // Raro
+	RarityEpic         uint8 = 4 // Épico
+	RarityUnique       uint8 = 5 // Único
+	RarityExotic       uint8 = 6 // Exótico
+	RarityLegendary    uint8 = 7 // Lendário
+	RarityMythic       uint8 = 8 // Mítico
+	RarityTranscendent uint8 = 9 // Transcendente (só a Yggdrasil)
 )
 
 // RarityNames: nome de cada raridade (índice = Rarity).
-var RarityNames = []string{"", "Comum", "Incomum", "Raro", "Épico", "Único", "Exótico", "Lendário", "Mítico"}
+var RarityNames = []string{"", "Comum", "Incomum", "Raro", "Épico", "Único", "Exótico", "Lendário", "Mítico", "Transcendente"}
 
 // Categorias de material
 const (
@@ -261,13 +262,13 @@ var MaterialsDB = map[uint16]MaterialDef{
 var StartingDiscoveredMaterials = []uint16{MatPineRefuge, MatRawStone, MatCopper, MatIron}
 
 // GetMaterial devolve o material pelo ID de item (ok = false se não for material).
-func GetMaterial(itemID uint8) (MaterialDef, bool) {
+func GetMaterial(itemID ItemID) (MaterialDef, bool) {
 	m, ok := MaterialsDB[uint16(itemID)]
 	return m, ok
 }
 
 // IsMaterial informa se o item é um material do catálogo.
-func IsMaterial(itemID uint8) bool {
+func IsMaterial(itemID ItemID) bool {
 	_, ok := MaterialsDB[uint16(itemID)]
 	return ok
 }
@@ -275,9 +276,6 @@ func IsMaterial(itemID uint8) bool {
 func init() {
 	// Todo material também é um item comum da mochila (peso para a carga)
 	for id, m := range MaterialsDB {
-		if id > 255 {
-			continue
-		}
-		ItemCatalog[uint8(id)] = ItemInfo{Name: m.Name, Weight: m.Weight, Slot: NoSlot}
+		ItemCatalog[ItemID(id)] = ItemInfo{Name: m.Name, Weight: m.Weight, Slot: NoSlot}
 	}
 }

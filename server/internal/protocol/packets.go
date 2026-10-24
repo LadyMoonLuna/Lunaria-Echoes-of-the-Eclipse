@@ -231,111 +231,114 @@ const (
 	ItemActionUnequip uint8 = 1 // Desequipar o slot informado em SlotIndex
 )
 
-// Catálogo de Itens Realistas (ItemID uint8)
+// ItemID identifica itens e materiais (uint16: espaço para dezenas de milhares de itens).
+type ItemID = uint16
+
+// Catálogo de Itens Realistas
 const (
 	// Utilitários & Consumíveis
-	ItemEmptyFlask      uint8 = 1 // Frasco de Vidro Vazio (Necessário para coletar sangues e venenos)
-	ItemRawWolfMeat     uint8 = 2 // Carne Crua de Lobo (Consumível: Recupera +45 HP)
-	ItemCookedNobleMeat uint8 = 3 // Carne Nobre Assada (Consumível: Recupera +90 HP e +40 Stamina)
-	ItemWolfBloodPotion uint8 = 4 // Poção de Sangue Lupino (+20% Velocidade e Crítico por 20s)
+	ItemEmptyFlask      ItemID = 1 // Frasco de Vidro Vazio (Necessário para coletar sangues e venenos)
+	ItemRawWolfMeat     ItemID = 2 // Carne Crua de Lobo (Consumível: Recupera +45 HP)
+	ItemCookedNobleMeat ItemID = 3 // Carne Nobre Assada (Consumível: Recupera +90 HP e +40 Stamina)
+	ItemWolfBloodPotion ItemID = 4 // Poção de Sangue Lupino (+20% Velocidade e Crítico por 20s)
 
 	// Materiais Anatômicos de Criaturas
-	ItemWolfGreyPelt      uint8 = 129 // Unificado: Couro de Lobo (material 129)
-	ItemSharpWolfFang     uint8 = 142 // Unificado: Presas e Garras Afiadas (material 142)
-	ItemBeastClaw         uint8 = 142 // Unificado: Presas e Garras Afiadas (material 142)
-	ItemFreshWolfBlood    uint8 = 136 // Unificado: Sangue de Lobo (material 136)
-	ItemAlphaWolfPelt     uint8 = 9   // Pele Intacta de Lobo Alfa (Armadura: +35 MaxHP, +3 FOR)
-	ItemPureLunarBlood    uint8 = 10  // Sangue Lunar Puro (Coletado de Lobo Alfa com Frasco Vazio)
-	ItemDarkPoisonGland   uint8 = 11  // Glândula de Veneno Sombrio (Coletado com Frasco Vazio)
-	ItemHeavySteelPlate   uint8 = 12  // Placa de Aço Pesada (Armadura: +50 MaxHP, +4 CON)
-	ItemAncestralFangRing uint8 = 13  // Anel de Presa Ancestral (Acessório/Anel 1: +3 DES, +3 AGI)
+	ItemWolfGreyPelt      ItemID = 129 // Unificado: Couro de Lobo (material 129)
+	ItemSharpWolfFang     ItemID = 142 // Unificado: Presas e Garras Afiadas (material 142)
+	ItemBeastClaw         ItemID = 142 // Unificado: Presas e Garras Afiadas (material 142)
+	ItemFreshWolfBlood    ItemID = 136 // Unificado: Sangue de Lobo (material 136)
+	ItemAlphaWolfPelt     ItemID = 9   // Pele Intacta de Lobo Alfa (Armadura: +35 MaxHP, +3 FOR)
+	ItemPureLunarBlood    ItemID = 10  // Sangue Lunar Puro (Coletado de Lobo Alfa com Frasco Vazio)
+	ItemDarkPoisonGland   ItemID = 11  // Glândula de Veneno Sombrio (Coletado com Frasco Vazio)
+	ItemHeavySteelPlate   ItemID = 12  // Placa de Aço Pesada (Armadura: +50 MaxHP, +4 CON)
+	ItemAncestralFangRing ItemID = 13  // Anel de Presa Ancestral (Acessório/Anel 1: +3 DES, +3 AGI)
 
 	// Itens de Eventos & Rituais Secretos
-	ItemBrokenSoulChalice    uint8 = 14 // Cálice da Alma Partida (Morte à noite desperta Raça 7 Cinerion - Drop 0.1%)
-	ItemLycanAlphaHeart      uint8 = 15 // Coração do Licantropo Alfa (Relíquia: +15% Roubo de Vida, +5 em todos status - Drop 0.1%)
-	ItemBeastProgenitorBlood uint8 = 16 // Sangue do Progenitor Bestial (Desperta Sangrael - Drop 0.1%)
-	ItemEclipseScytheTome    uint8 = 17 // Tomo da Foice do Eclipse (Desperta Classe Secreta 7 Ceifador da Lua Negra - Drop 0.1%)
-	ItemStarforgeCore        uint8 = 18 // Núcleo de Forja Estelar (Desperta Classe Secreta 8 Engenheiro Rúnico - Drop 0.1%)
-	ItemTitansHammerTome     uint8 = 18 // Alias: Tomo do Martelo Titânico / Núcleo de Forja Estelar
+	ItemBrokenSoulChalice    ItemID = 14 // Cálice da Alma Partida (Morte à noite desperta Raça 7 Cinerion - Drop 0.1%)
+	ItemLycanAlphaHeart      ItemID = 15 // Coração do Licantropo Alfa (Relíquia: +15% Roubo de Vida, +5 em todos status - Drop 0.1%)
+	ItemBeastProgenitorBlood ItemID = 16 // Sangue do Progenitor Bestial (Desperta Sangrael - Drop 0.1%)
+	ItemEclipseScytheTome    ItemID = 17 // Tomo da Foice do Eclipse (Desperta Classe Secreta 7 Ceifador da Lua Negra - Drop 0.1%)
+	ItemStarforgeCore        ItemID = 18 // Núcleo de Forja Estelar (Desperta Classe Secreta 8 Engenheiro Rúnico - Drop 0.1%)
+	ItemTitansHammerTome     ItemID = 18 // Alias: Tomo do Martelo Titânico / Núcleo de Forja Estelar
 
 	// Itens do Santuário do Eclipse
-	ItemShadowCultistRobe        uint8 = 19 // Túnica do Cultista Sombrio
-	ItemGargoyleStoneHeart       uint8 = 20 // Coração Pétreo da Gárgula
-	ItemInquisitorShadowScythe   uint8 = 21 // Foice de Sombras do Inquisidor
-	ItemTraitorCommanderInsignia uint8 = 22 // Insígnia do Comandante Traidor
-	ItemHeraldEclipseEye         uint8 = 23 // Olho do Arauto do Eclipse
-	ItemSacredTorch              uint8 = 24 // Tocha Sagrada do Santuário
+	ItemShadowCultistRobe        ItemID = 19 // Túnica do Cultista Sombrio
+	ItemGargoyleStoneHeart       ItemID = 20 // Coração Pétreo da Gárgula
+	ItemInquisitorShadowScythe   ItemID = 21 // Foice de Sombras do Inquisidor
+	ItemTraitorCommanderInsignia ItemID = 22 // Insígnia do Comandante Traidor
+	ItemHeraldEclipseEye         ItemID = 23 // Olho do Arauto do Eclipse
+	ItemSacredTorch              ItemID = 24 // Tocha Sagrada do Santuário
 
 	// Minérios, Receitas e Forja
-	ItemIronOre              uint8 = 116 // Unificado: Ferro (material 116) — presente compatível para Garrick
-	ItemRunicWarhammerRecipe uint8 = 26  // Receita: Malho de Batalha Rúnico (Receita secreta do Ferreiro)
-	ItemRunicWarhammer       uint8 = 27  // Malho de Batalha Rúnico (Arma Exclusiva Forjada: +45 Dano, +8 FOR, +6 CON, +4 MAS)
-	ItemOrganicTrash         uint8 = 28  // Lixo Orgânico / Restos Estragados (Falha na autópsia / corte na Zona Vermelha)
+	ItemIronOre              ItemID = 116 // Unificado: Ferro (material 116) — presente compatível para Garrick
+	ItemRunicWarhammerRecipe ItemID = 26  // Receita: Malho de Batalha Rúnico (Receita secreta do Ferreiro)
+	ItemRunicWarhammer       ItemID = 27  // Malho de Batalha Rúnico (Arma Exclusiva Forjada: +45 Dano, +8 FOR, +6 CON, +4 MAS)
+	ItemOrganicTrash         ItemID = 28  // Lixo Orgânico / Restos Estragados (Falha na autópsia / corte na Zona Vermelha)
 
 	// Itens Secretos de Desbloqueio de Raças/Classes (Chance 0.1%)
-	ItemRunicHourglass   uint8 = 29 // Ampulheta Rúnica (Desperta Raça 28 Cronari / Cronari - Drop 0.1%)
-	ItemSilverSilkCocoon uint8 = 30 // Casulo de Seda Prateada (Desperta Raça 21 Aracne - Drop 0.1%)
+	ItemRunicHourglass   ItemID = 29 // Ampulheta Rúnica (Desperta Raça 28 Cronari / Cronari - Drop 0.1%)
+	ItemSilverSilkCocoon ItemID = 30 // Casulo de Seda Prateada (Desperta Raça 21 Aracne - Drop 0.1%)
 
 	// Equipamentos para os 12 Slots Reais
-	ItemVigilHelmet         uint8 = 31 // Elmo de Vigia (Capacete: +25 HP, +2 CON)
-	ItemSteelChestplate     uint8 = 32 // Peitoral de Aço (Peitoral: +60 HP, +5 CON)
-	ItemWolfLeatherPants    uint8 = 33 // Calças de Couro Lupino (Calças: +30 HP, +3 AGI)
-	ItemMistwalkerBoots     uint8 = 34 // Botas Passo-da-Bruma (Botas: +25 HP, +4 AGI, +2 DES)
-	ItemBlacksmithGauntlets uint8 = 35 // Manoplas de Forjador de Estrelas (Luvas: +4 FOR, +3 MAS)
-	ItemAlchemistBelt       uint8 = 36 // Cinto de Transmutador (Cinto: +3 INT, +3 SPI)
-	ItemSilverMoonAmulet    uint8 = 37 // Colar da Lua Prateada (Colar: +4 INT, +4 SPI, +3 LCK)
-	ItemBloodRubyRing       uint8 = 38 // Anel de Rubi Sanguinário (Anel: +4 FOR, +3 CON)
-	ItemObsidianRing        uint8 = 39 // Anel de Obsidiana (Anel: +4 CON, +3 MAS)
-	ItemStarlightRing       uint8 = 40 // Anel Estelar (Anel: +3 INT, +4 LCK)
-	ItemAlphaPeltCloak      uint8 = 41 // Capa de Pele Alfa (Capa: +35 HP, +3 FOR, +3 AGI)
+	ItemVigilHelmet         ItemID = 31 // Elmo de Vigia (Capacete: +25 HP, +2 CON)
+	ItemSteelChestplate     ItemID = 32 // Peitoral de Aço (Peitoral: +60 HP, +5 CON)
+	ItemWolfLeatherPants    ItemID = 33 // Calças de Couro Lupino (Calças: +30 HP, +3 AGI)
+	ItemMistwalkerBoots     ItemID = 34 // Botas Passo-da-Bruma (Botas: +25 HP, +4 AGI, +2 DES)
+	ItemBlacksmithGauntlets ItemID = 35 // Manoplas de Forjador de Estrelas (Luvas: +4 FOR, +3 MAS)
+	ItemAlchemistBelt       ItemID = 36 // Cinto de Transmutador (Cinto: +3 INT, +3 SPI)
+	ItemSilverMoonAmulet    ItemID = 37 // Colar da Lua Prateada (Colar: +4 INT, +4 SPI, +3 LCK)
+	ItemBloodRubyRing       ItemID = 38 // Anel de Rubi Sanguinário (Anel: +4 FOR, +3 CON)
+	ItemObsidianRing        ItemID = 39 // Anel de Obsidiana (Anel: +4 CON, +3 MAS)
+	ItemStarlightRing       ItemID = 40 // Anel Estelar (Anel: +3 INT, +4 LCK)
+	ItemAlphaPeltCloak      ItemID = 41 // Capa de Pele Alfa (Capa: +35 HP, +3 FOR, +3 AGI)
 
 	// Quadrante 4: Drops de Criaturas e Raid Bosses
-	ItemPerfectSilkCocoon      uint8 = 132 // Unificado: Teias de Aranha (material 132)
-	ItemSpiderQueenHeart       uint8 = 43  // Coração da Rainha Aranha (Relíquia: +12 INT, +8 SPI)
-	ItemArachnaEye             uint8 = 44  // Olho Multifacetado de Arachna (0.1% - Desbloqueia Raça 21 Aracne)
-	ItemImperialSilkCloak      uint8 = 45  // Manto de Seda Imperial (Capa: +45 HP, +6 INT, +5 SPI)
-	ItemPureAcid               uint8 = 153 // Unificado: Seiva Ácida (material 153)
-	ItemAbyssalScorpionStinger uint8 = 47  // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Escarion)
-	ItemVorpalPoison           uint8 = 143 // Unificado: Bolsa de Veneno Vorpal (material 143)
-	ItemChimeraFleshPart       uint8 = 49  // Retalho Quimérico Costurado (Mutagênico)
-	ItemAncientIceCore         uint8 = 50  // Núcleo de Gelo Antigo (Gélido)
-	ItemPrimordialDragonScale  uint8 = 51  // Escama Dracônica Primordial (Armadura Superior)
-	ItemEternalFrostHeart      uint8 = 52  // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Borealin / Jotunar)
-	ItemCrimsonGuardInsignia   uint8 = 53  // Insígnia do Guarda Carmesim
-	ItemProgenitorPureBlood    uint8 = 54  // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Sangrael)
-	ItemVesperianCrimsonRing   uint8 = 55  // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
-	ItemRoyalVenomGland        uint8 = 56  // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Algoz Vorpal)
-	ItemVesperianPureBlood     uint8 = 57  // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Conde Escarlate)
-	ItemMechaBlueprint         uint8 = 58  // Diagrama do Mecha Gnarlin (Mercado Negro de Varis - requisito do Barão Engrenagem)
+	ItemPerfectSilkCocoon      ItemID = 132 // Unificado: Teias de Aranha (material 132)
+	ItemSpiderQueenHeart       ItemID = 43  // Coração da Rainha Aranha (Relíquia: +12 INT, +8 SPI)
+	ItemArachnaEye             ItemID = 44  // Olho Multifacetado de Arachna (0.1% - Desbloqueia Raça 21 Aracne)
+	ItemImperialSilkCloak      ItemID = 45  // Manto de Seda Imperial (Capa: +45 HP, +6 INT, +5 SPI)
+	ItemPureAcid               ItemID = 153 // Unificado: Seiva Ácida (material 153)
+	ItemAbyssalScorpionStinger ItemID = 47  // Ferrão de Escorpião Abissal (0.1% - Desbloqueia Raça Escarion)
+	ItemVorpalPoison           ItemID = 143 // Unificado: Bolsa de Veneno Vorpal (material 143)
+	ItemChimeraFleshPart       ItemID = 49  // Retalho Quimérico Costurado (Mutagênico)
+	ItemAncientIceCore         ItemID = 50  // Núcleo de Gelo Antigo (Gélido)
+	ItemPrimordialDragonScale  ItemID = 51  // Escama Dracônica Primordial (Armadura Superior)
+	ItemEternalFrostHeart      ItemID = 52  // Coração de Geada Eterna (0.1% - Desbloqueia Raça 24 Borealin / Jotunar)
+	ItemCrimsonGuardInsignia   ItemID = 53  // Insígnia do Guarda Carmesim
+	ItemProgenitorPureBlood    ItemID = 54  // Sangue Puro do Progenitor (0.1% - Desbloqueia Raça 5 Sangrael)
+	ItemVesperianCrimsonRing   ItemID = 55  // Anel Carmesim de Vesperian (Anel: +6 FOR, +6 CON, +10% Lifesteal)
+	ItemRoyalVenomGland        ItemID = 56  // Glândula Real do Escorpião (2% Escorpião Abissal - requisito do Algoz Vorpal)
+	ItemVesperianPureBlood     ItemID = 57  // Sangue Puro de Vesperian (25% Lorde Vesperian - requisito do Conde Escarlate)
+	ItemMechaBlueprint         ItemID = 58  // Diagrama do Mecha Gnarlin (Mercado Negro de Varis - requisito do Barão Engrenagem)
 
 	// Armas de Mão Principal (Slot 12) e itens de Mão Secundária (Slot 13)
-	ItemIronLongsword   uint8 = 59 // Espada Longa de Ferro (1 mão)
-	ItemOakStaff        uint8 = 60 // Cajado de Carvalho Arcano
-	ItemRecurveBow      uint8 = 61 // Arco Recurvo de Caça
-	ItemSteelDagger     uint8 = 62 // Adaga de Aço
-	ItemIronKnuckles    uint8 = 63 // Manoplas de Ferro
-	ItemForgeHammer     uint8 = 64 // Martelo de Forja
-	ItemGiantCleaver    uint8 = 65 // Cutelo Gigante
-	ItemBeastWhip       uint8 = 66 // Chicote Bestial
-	ItemSteelNeedles    uint8 = 67 // Agulhas de Aço Rúnicas
-	ItemColossalSword   uint8 = 68 // Espada Colossal (2 mãos)
-	ItemTowerShield     uint8 = 69 // Escudo de Torre (Mão Secundária)
-	ItemOffhandDagger   uint8 = 70 // Adaga Secundária
-	ItemArcaneOrb       uint8 = 71 // Orbe Arcano (Mão Secundária)
-	ItemAlchemyCatalyst uint8 = 72 // Catalisador Alquímico (Mão Secundária)
-	ItemIronWok         uint8 = 73 // Wok de Ferro (Mão Secundária)
-	ItemHuntersQuiver   uint8 = 74 // Aljava de Caçador (Mão Secundária)
-	ItemOffhandKnuckle  uint8 = 75 // Manopla Secundária
-	ItemLeadPlate       uint8 = 76 // Placa de Chumbo (25 kg) — item de teste de sobrecarga
-	ItemAutopsyDagger   uint8 = 77 // Adaga de Autópsia (presente de Garrick; arma cortante para dissecar)
-	ItemMetalScrap      uint8 = 78 // Sucata Metálica (resultado de extração/criação metálica de baixa qualidade)
-	ItemHealingPotion   uint8 = 79 // Poção de Cura (Lyra: Ervas + Água) — +90 HP
-	ItemManaPotion      uint8 = 80 // Poção de Mana (Lyra: Cogumelo + Ervas + Água) — +80 Mana
-	ItemBlueprintScroll uint8 = 81 // Pergaminho de Blueprint (forma um aprendiz no ofício do mestre caído)
-	ItemHerbalRemedy    uint8 = 82 // Remédio de Ervas (Lyra) — cura doenças e infecções
-	ItemRubyLongsword   uint8 = 83 // Espada Longa Cravejada de Rubis (Joalheira) — melhor que a do ferreiro
-	ItemGemChestplate   uint8 = 84 // Peitoral Cravejado de Safiras (Joalheira)
-	ItemQuartzCirclet   uint8 = 85 // Diadema de Quartzo (Joalheira, Elmo)
+	ItemIronLongsword   ItemID = 59 // Espada Longa de Ferro (1 mão)
+	ItemOakStaff        ItemID = 60 // Cajado de Carvalho Arcano
+	ItemRecurveBow      ItemID = 61 // Arco Recurvo de Caça
+	ItemSteelDagger     ItemID = 62 // Adaga de Aço
+	ItemIronKnuckles    ItemID = 63 // Manoplas de Ferro
+	ItemForgeHammer     ItemID = 64 // Martelo de Forja
+	ItemGiantCleaver    ItemID = 65 // Cutelo Gigante
+	ItemBeastWhip       ItemID = 66 // Chicote Bestial
+	ItemSteelNeedles    ItemID = 67 // Agulhas de Aço Rúnicas
+	ItemColossalSword   ItemID = 68 // Espada Colossal (2 mãos)
+	ItemTowerShield     ItemID = 69 // Escudo de Torre (Mão Secundária)
+	ItemOffhandDagger   ItemID = 70 // Adaga Secundária
+	ItemArcaneOrb       ItemID = 71 // Orbe Arcano (Mão Secundária)
+	ItemAlchemyCatalyst ItemID = 72 // Catalisador Alquímico (Mão Secundária)
+	ItemIronWok         ItemID = 73 // Wok de Ferro (Mão Secundária)
+	ItemHuntersQuiver   ItemID = 74 // Aljava de Caçador (Mão Secundária)
+	ItemOffhandKnuckle  ItemID = 75 // Manopla Secundária
+	ItemLeadPlate       ItemID = 76 // Placa de Chumbo (25 kg) — item de teste de sobrecarga
+	ItemAutopsyDagger   ItemID = 77 // Adaga de Autópsia (presente de Garrick; arma cortante para dissecar)
+	ItemMetalScrap      ItemID = 78 // Sucata Metálica (resultado de extração/criação metálica de baixa qualidade)
+	ItemHealingPotion   ItemID = 79 // Poção de Cura (Lyra: Ervas + Água) — +90 HP
+	ItemManaPotion      ItemID = 80 // Poção de Mana (Lyra: Cogumelo + Ervas + Água) — +80 Mana
+	ItemBlueprintScroll ItemID = 81 // Pergaminho de Blueprint (forma um aprendiz no ofício do mestre caído)
+	ItemHerbalRemedy    ItemID = 82 // Remédio de Ervas (Lyra) — cura doenças e infecções
+	ItemRubyLongsword   ItemID = 83 // Espada Longa Cravejada de Rubis (Joalheira) — melhor que a do ferreiro
+	ItemGemChestplate   ItemID = 84 // Peitoral Cravejado de Safiras (Joalheira)
+	ItemQuartzCirclet   ItemID = 85 // Diadema de Quartzo (Joalheira, Elmo)
 )
 
 // Identificadores de Classes (Base 1-12 e Secretas 13-21)
@@ -470,13 +473,13 @@ const (
 	PlayerRespawnPacketSize  = 17 // uint8 (1) + uint32 (4) + 3x float32 (12) = 17 bytes
 	AllocateStatPacketSize   = 8  // uint8 (1) + uint32 (4) + uint8 (1) + uint16 Amount (2) = 8 bytes
 
-	InventorySyncHeaderSize  = 50 // op (1) + 15 slots + 15 Condições + Gold u32 + Eclipses u32 + Peso f32 + PesoMáx f32 + Velocidade% u8 + count u16
-	InventorySlotEntrySize   = 3  // item (1) + quantidade (1) + Qualidade 0-100 (1) = 3 bytes
-	UseOrEquipItemPacketSize = 8  // op (1) + playerID u32 (4) + itemID (1) + action (1) + slot (1) = 8 bytes
+	InventorySyncHeaderSize  = 65 // op (1) + 15 slots u16 + 15 Condições + Gold u32 + Eclipses u32 + Peso f32 + PesoMáx f32 + Velocidade% u8 + count u16
+	InventorySlotEntrySize   = 4  // item u16 (2) + quantidade (1) + Qualidade 0-100 (1) = 4 bytes
+	UseOrEquipItemPacketSize = 9  // op (1) + playerID u32 (4) + itemID u16 (2) + action (1) + slot (1) = 9 bytes
 
-	DropItemGroundPacketSize   = 8  // op (1) + playerID u32 (4) + item (1) + Qualidade (1) + quantidade (1)
+	DropItemGroundPacketSize   = 9  // op (1) + playerID u32 (4) + item u16 (2) + Qualidade (1) + quantidade (1)
 	PickupGroundItemPacketSize = 9  // op (1) + playerID u32 (4) + dropID u32 (4)
-	GroundItemEntrySize        = 15 // dropID u32 (4) + itemID (1) + qty (1) + Qualidade (1) + X f32 (4) + Z f32 (4)
+	GroundItemEntrySize        = 16 // dropID u32 (4) + itemID u16 (2) + qty (1) + Qualidade (1) + X f32 (4) + Z f32 (4)
 
 	MobSnapshotHeaderSize  = 2  // uint8 (1) + uint8 (1) = 2 bytes
 	MobSnapshotEntrySize   = 26 // uint32 (4) + 2x uint8 (2) + 4x float32 (16) + 2x uint16 (4) = 26 bytes
@@ -485,7 +488,7 @@ const (
 	// Cadáveres e Autópsia
 	InteractCorpsePacketSize      = 9  // uint8 (1) + uint32 (4) + uint32 (4) = 9 bytes
 	OpenAutopsyUIHeaderSize       = 11 // uint8 (1) + uint32 (4) + uint8 (1) + uint32 (4) + uint8 (1) = 11 bytes
-	AutopsyOrganEntrySize         = 5  // uint8 (1) + uint8 (1) + uint8 (1) + uint8 (1) + uint8 (1) = 5 bytes
+	AutopsyOrganEntrySize         = 6  // índice (1) + tipo (1) + item u16 (2) + dificuldade (1) + tier (1) = 6 bytes
 	SubmitAutopsyResultPacketSize = 12 // op (1) + playerID (4) + corpseID (4) + órgão (1) + tier (1) + Qualidade (1) = 12 bytes
 	CorpseSnapshotHeaderSize      = 2  // uint8 (1) + uint8 (1) = 2 bytes
 	CorpseSnapshotEntrySize       = 28 // uint32 (4) + uint32 (4) + uint8 (1) + 3x float32 (12) + float32 (4) + uint8 (1) + uint16 (2) = 28 bytes
@@ -1465,7 +1468,7 @@ func DeserializeProjectileSpawn(data []byte, pkt *ProjectileSpawnPacket) error {
 
 // InventorySlot representa um slot de item com seu identificador e quantidade.
 type InventorySlot struct {
-	ItemID   uint8
+	ItemID   ItemID
 	Quantity uint8
 	Quality  uint8 // Qualidade média da pilha (0 a 100)
 }
@@ -1482,19 +1485,19 @@ type InventoryStatus struct {
 // InventorySyncPacket representa a mochila (uma entrada por item+Qualidade), os 14 slots com a
 // Condição de cada um, o dinheiro e o peso.
 type InventorySyncPacket struct {
-	EquippedSlots       [EquipSlotCount]uint8
+	EquippedSlots       [EquipSlotCount]ItemID
 	EquippedQualities   [EquipSlotCount]uint8
-	EquippedArmorID     uint8 // Helper alias -> EquippedSlots[SlotChest]
-	EquippedAccessoryID uint8 // Helper alias -> EquippedSlots[SlotRing1]
+	EquippedArmorID     ItemID // Helper alias -> EquippedSlots[SlotChest]
+	EquippedAccessoryID ItemID // Helper alias -> EquippedSlots[SlotRing1]
 	Status              InventoryStatus
 	SlotCount           uint16
 	Slots               []InventorySlot
 }
 
 // SerializeInventorySync empacota o 0x38.
-// Layout: op | 15 slots | 15 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 |
-// count u16 | count × (item, quantidade, Qualidade)
-func SerializeInventorySync(equippedSlots, equippedQualities [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) []byte {
+// Layout: op | 15 slots u16 | 15 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Velocidade% u8 |
+// count u16 | count × (item u16, quantidade, Qualidade)
+func SerializeInventorySync(equippedSlots [EquipSlotCount]ItemID, equippedQualities [EquipSlotCount]uint8, status InventoryStatus, slots []InventorySlot) []byte {
 	count := len(slots)
 	if count > 65535 {
 		count = 65535
@@ -1502,28 +1505,29 @@ func SerializeInventorySync(equippedSlots, equippedQualities [EquipSlotCount]uin
 	buf := make([]byte, InventorySyncHeaderSize+count*InventorySlotEntrySize)
 	buf[0] = PacketTypeInventorySync
 	for i := 0; i < EquipSlotCount; i++ {
-		buf[1+i] = equippedSlots[i]
-		buf[1+EquipSlotCount+i] = equippedQualities[i]
+		binary.LittleEndian.PutUint16(buf[1+2*i:3+2*i], equippedSlots[i])
+		buf[1+2*EquipSlotCount+i] = equippedQualities[i]
 	}
-	binary.LittleEndian.PutUint32(buf[31:35], status.Gold)
-	binary.LittleEndian.PutUint32(buf[35:39], status.EclipseCoins)
-	binary.LittleEndian.PutUint32(buf[39:43], math.Float32bits(status.CurrentWeight))
-	binary.LittleEndian.PutUint32(buf[43:47], math.Float32bits(status.MaxWeight))
-	buf[47] = status.SpeedPercent
-	binary.LittleEndian.PutUint16(buf[48:50], uint16(count))
+	binary.LittleEndian.PutUint32(buf[46:50], status.Gold)
+	binary.LittleEndian.PutUint32(buf[50:54], status.EclipseCoins)
+	binary.LittleEndian.PutUint32(buf[54:58], math.Float32bits(status.CurrentWeight))
+	binary.LittleEndian.PutUint32(buf[58:62], math.Float32bits(status.MaxWeight))
+	buf[62] = status.SpeedPercent
+	binary.LittleEndian.PutUint16(buf[63:65], uint16(count))
 	offset := InventorySyncHeaderSize
 	for i := 0; i < count; i++ {
-		buf[offset] = slots[i].ItemID
-		buf[offset+1] = slots[i].Quantity
-		buf[offset+2] = slots[i].Quality
+		binary.LittleEndian.PutUint16(buf[offset:offset+2], slots[i].ItemID)
+		buf[offset+2] = slots[i].Quantity
+		buf[offset+3] = slots[i].Quality
 		offset += InventorySlotEntrySize
 	}
 	return buf
 }
 
 // SerializeInventorySyncLegacy serializa com apenas peitoral e anel preenchidos (testes/compatibilidade).
-func SerializeInventorySyncLegacy(equippedArmorID, equippedAccessoryID uint8, slots []InventorySlot) []byte {
-	var eq, q [EquipSlotCount]uint8
+func SerializeInventorySyncLegacy(equippedArmorID, equippedAccessoryID ItemID, slots []InventorySlot) []byte {
+	var eq [EquipSlotCount]ItemID
+	var q [EquipSlotCount]uint8
 	eq[SlotChest] = equippedArmorID
 	eq[SlotRing1] = equippedAccessoryID
 	return SerializeInventorySync(eq, q, InventoryStatus{SpeedPercent: 100}, slots)
@@ -1538,24 +1542,24 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 		return ErrInvalidPacketType
 	}
 	for i := 0; i < EquipSlotCount; i++ {
-		out.EquippedSlots[i] = data[1+i]
-		out.EquippedQualities[i] = data[1+EquipSlotCount+i]
+		out.EquippedSlots[i] = binary.LittleEndian.Uint16(data[1+2*i : 3+2*i])
+		out.EquippedQualities[i] = data[1+2*EquipSlotCount+i]
 	}
 	out.EquippedArmorID = out.EquippedSlots[SlotChest]
 	out.EquippedAccessoryID = out.EquippedSlots[SlotRing1]
-	out.Status.Gold = binary.LittleEndian.Uint32(data[31:35])
-	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[35:39])
-	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[39:43]))
-	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[43:47]))
-	out.Status.SpeedPercent = data[47]
-	out.SlotCount = binary.LittleEndian.Uint16(data[48:50])
+	out.Status.Gold = binary.LittleEndian.Uint32(data[46:50])
+	out.Status.EclipseCoins = binary.LittleEndian.Uint32(data[50:54])
+	out.Status.CurrentWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[54:58]))
+	out.Status.MaxWeight = math.Float32frombits(binary.LittleEndian.Uint32(data[58:62]))
+	out.Status.SpeedPercent = data[62]
+	out.SlotCount = binary.LittleEndian.Uint16(data[63:65])
 	if len(data) < InventorySyncHeaderSize+int(out.SlotCount)*InventorySlotEntrySize {
 		return ErrInvalidPacketSize
 	}
 	out.Slots = make([]InventorySlot, out.SlotCount)
 	offset := InventorySyncHeaderSize
 	for i := range out.Slots {
-		out.Slots[i] = InventorySlot{ItemID: data[offset], Quantity: data[offset+1], Quality: data[offset+2]}
+		out.Slots[i] = InventorySlot{ItemID: binary.LittleEndian.Uint16(data[offset : offset+2]), Quantity: data[offset+2], Quality: data[offset+3]}
 		offset += InventorySlotEntrySize
 	}
 	return nil
@@ -1566,41 +1570,38 @@ func DeserializeInventorySync(data []byte, out *InventorySyncPacket) error {
 // UseOrEquipItemPacket representa a solicitação do cliente para usar consumível ou equipar armadura/acessório.
 type UseOrEquipItemPacket struct {
 	PlayerID  uint32
-	ItemID    uint8
+	ItemID    ItemID
 	Action    uint8 // ItemActionUse ou ItemActionUnequip
 	SlotIndex uint8 // Slot (0..13) para ItemActionUnequip
 }
 
 // SerializeUseOrEquipItem cria o payload de 8 bytes do pacote USE_OR_EQUIP_ITEM.
-func SerializeUseOrEquipItem(playerID uint32, itemID uint8, actionAndSlot ...uint8) [UseOrEquipItemPacketSize]byte {
+func SerializeUseOrEquipItem(playerID uint32, itemID ItemID, actionAndSlot ...uint8) [UseOrEquipItemPacketSize]byte {
 	var b [UseOrEquipItemPacketSize]byte
 	b[0] = PacketTypeUseOrEquipItem
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
-	b[5] = itemID
+	binary.LittleEndian.PutUint16(b[5:7], itemID)
 	if len(actionAndSlot) > 0 {
-		b[6] = actionAndSlot[0]
+		b[7] = actionAndSlot[0]
 	}
 	if len(actionAndSlot) > 1 {
-		b[7] = actionAndSlot[1]
+		b[8] = actionAndSlot[1]
 	}
 	return b
 }
 
 // DeserializeUseOrEquipItem decodifica o pacote USE_OR_EQUIP_ITEM (8 bytes; aceita o legado de 6).
 func DeserializeUseOrEquipItem(data []byte, out *UseOrEquipItemPacket) error {
-	if len(data) < 6 {
+	if len(data) < UseOrEquipItemPacketSize {
 		return ErrInvalidPacketSize
 	}
 	if data[0] != PacketTypeUseOrEquipItem {
 		return ErrInvalidPacketType
 	}
 	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
-	out.ItemID = data[5]
-	out.Action, out.SlotIndex = ItemActionUse, 0
-	if len(data) >= UseOrEquipItemPacketSize {
-		out.Action = data[6]
-		out.SlotIndex = data[7]
-	}
+	out.ItemID = binary.LittleEndian.Uint16(data[5:7])
+	out.Action = data[7]
+	out.SlotIndex = data[8]
 	return nil
 }
 
@@ -1609,18 +1610,18 @@ func DeserializeUseOrEquipItem(data []byte, out *UseOrEquipItemPacket) error {
 // DropItemGroundPacket: o cliente descarta Quantity unidades do item com a Qualidade indicada.
 type DropItemGroundPacket struct {
 	PlayerID uint32
-	ItemID   uint8
+	ItemID   ItemID
 	Quality  uint8
 	Quantity uint8
 }
 
-func SerializeDropItemGround(playerID uint32, itemID, quality, quantity uint8) [DropItemGroundPacketSize]byte {
+func SerializeDropItemGround(playerID uint32, itemID ItemID, quality, quantity uint8) [DropItemGroundPacketSize]byte {
 	var b [DropItemGroundPacketSize]byte
 	b[0] = PacketTypeDropItemGround
 	binary.LittleEndian.PutUint32(b[1:5], playerID)
-	b[5] = itemID
-	b[6] = quality
-	b[7] = quantity
+	binary.LittleEndian.PutUint16(b[5:7], itemID)
+	b[7] = quality
+	b[8] = quantity
 	return b
 }
 
@@ -1632,9 +1633,9 @@ func DeserializeDropItemGround(data []byte, out *DropItemGroundPacket) error {
 		return ErrInvalidPacketType
 	}
 	out.PlayerID = binary.LittleEndian.Uint32(data[1:5])
-	out.ItemID = data[5]
-	out.Quality = data[6]
-	out.Quantity = data[7]
+	out.ItemID = binary.LittleEndian.Uint16(data[5:7])
+	out.Quality = data[7]
+	out.Quantity = data[8]
 	return nil
 }
 
@@ -1667,13 +1668,13 @@ func DeserializePickupGroundItem(data []byte, out *PickupGroundItemPacket) error
 // GroundItemEntry é um item visível no chão (0x42).
 type GroundItemEntry struct {
 	DropID   uint32
-	ItemID   uint8
+	ItemID   ItemID
 	Quantity uint8
 	Quality  uint8
 	X, Z     float32
 }
 
-// SerializeGroundItemsSync: op | count u16 | count × (dropID u32, item, qtd, X f32, Z f32)
+// SerializeGroundItemsSync: op | count u16 | count × (dropID u32, item u16, qtd, Qualidade, X f32, Z f32)
 func SerializeGroundItemsSync(items []GroundItemEntry) []byte {
 	count := len(items)
 	if count > 65535 {
@@ -1686,11 +1687,11 @@ func SerializeGroundItemsSync(items []GroundItemEntry) []byte {
 	for i := 0; i < count; i++ {
 		it := items[i]
 		binary.LittleEndian.PutUint32(buf[off:off+4], it.DropID)
-		buf[off+4] = it.ItemID
-		buf[off+5] = it.Quantity
-		buf[off+6] = it.Quality
-		binary.LittleEndian.PutUint32(buf[off+7:off+11], math.Float32bits(it.X))
-		binary.LittleEndian.PutUint32(buf[off+11:off+15], math.Float32bits(it.Z))
+		binary.LittleEndian.PutUint16(buf[off+4:off+6], it.ItemID)
+		buf[off+6] = it.Quantity
+		buf[off+7] = it.Quality
+		binary.LittleEndian.PutUint32(buf[off+8:off+12], math.Float32bits(it.X))
+		binary.LittleEndian.PutUint32(buf[off+12:off+16], math.Float32bits(it.Z))
 		off += GroundItemEntrySize
 	}
 	return buf
@@ -1712,11 +1713,11 @@ func DeserializeGroundItemsSync(data []byte) ([]GroundItemEntry, error) {
 	off := 3
 	for i := range items {
 		items[i].DropID = binary.LittleEndian.Uint32(data[off : off+4])
-		items[i].ItemID = data[off+4]
-		items[i].Quantity = data[off+5]
-		items[i].Quality = data[off+6]
-		items[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+7 : off+11]))
-		items[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+11 : off+15]))
+		items[i].ItemID = binary.LittleEndian.Uint16(data[off+4 : off+6])
+		items[i].Quantity = data[off+6]
+		items[i].Quality = data[off+7]
+		items[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+8 : off+12]))
+		items[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+12 : off+16]))
 		off += GroundItemEntrySize
 	}
 	return items, nil
@@ -1860,7 +1861,7 @@ func DeserializeInteractCorpse(data []byte, out *InteractCorpsePacket) error {
 type AutopsyOrganEntry struct {
 	OrganIndex  uint8
 	OrganType   uint8
-	ItemReward  uint8
+	ItemReward  ItemID
 	Difficulty  uint8
 	QualityTier uint8
 }
@@ -1892,9 +1893,9 @@ func SerializeOpenAutopsyUI(corpseID uint32, mobType uint8, difficultySeed uint3
 	for i := 0; i < count; i++ {
 		buf[offset] = organs[i].OrganIndex
 		buf[offset+1] = organs[i].OrganType
-		buf[offset+2] = organs[i].ItemReward
-		buf[offset+3] = organs[i].Difficulty
-		buf[offset+4] = organs[i].QualityTier
+		binary.LittleEndian.PutUint16(buf[offset+2:offset+4], organs[i].ItemReward)
+		buf[offset+4] = organs[i].Difficulty
+		buf[offset+5] = organs[i].QualityTier
 		offset += AutopsyOrganEntrySize
 	}
 	return buf
@@ -1924,9 +1925,9 @@ func DeserializeOpenAutopsyUI(data []byte, out *OpenAutopsyUIPacket) error {
 		out.Organs[i] = AutopsyOrganEntry{
 			OrganIndex:  data[offset],
 			OrganType:   data[offset+1],
-			ItemReward:  data[offset+2],
-			Difficulty:  data[offset+3],
-			QualityTier: data[offset+4],
+			ItemReward:  binary.LittleEndian.Uint16(data[offset+2 : offset+4]),
+			Difficulty:  data[offset+4],
+			QualityTier: data[offset+5],
 		}
 		offset += AutopsyOrganEntrySize
 	}
@@ -2127,7 +2128,7 @@ func IsTranscendentClass(classID uint8) bool {
 
 const (
 	HarvestNodePacketSize = 9  // op (1) + playerID u32 (4) + nodeID u32 (4)
-	ResourceNodeEntrySize = 16 // nodeID u32 + kind u8 + material u8 + tier u8 + available u8 + X f32 + Z f32
+	ResourceNodeEntrySize = 17 // nodeID u32 + kind u8 + material u16 + tier u8 + available u8 + X f32 + Z f32
 )
 
 // HarvestNodePacket: o cliente pede para coletar o nó NodeID.
@@ -2160,13 +2161,13 @@ func DeserializeHarvestNode(data []byte, out *HarvestNodePacket) error {
 type ResourceNodeEntry struct {
 	NodeID    uint32
 	Kind      uint8
-	Material  uint8
+	Material  ItemID
 	Tier      uint8
 	Available bool
 	X, Z      float32
 }
 
-// SerializeResourceNodesSync: op | count u16 | count × entrada (16 bytes)
+// SerializeResourceNodesSync: op | count u16 | count × entrada (17 bytes)
 func SerializeResourceNodesSync(nodes []ResourceNodeEntry) []byte {
 	count := len(nodes)
 	if count > 65535 {
@@ -2180,13 +2181,13 @@ func SerializeResourceNodesSync(nodes []ResourceNodeEntry) []byte {
 		n := nodes[i]
 		binary.LittleEndian.PutUint32(buf[off:off+4], n.NodeID)
 		buf[off+4] = n.Kind
-		buf[off+5] = n.Material
-		buf[off+6] = n.Tier
+		binary.LittleEndian.PutUint16(buf[off+5:off+7], n.Material)
+		buf[off+7] = n.Tier
 		if n.Available {
-			buf[off+7] = 1
+			buf[off+8] = 1
 		}
-		binary.LittleEndian.PutUint32(buf[off+8:off+12], math.Float32bits(n.X))
-		binary.LittleEndian.PutUint32(buf[off+12:off+16], math.Float32bits(n.Z))
+		binary.LittleEndian.PutUint32(buf[off+9:off+13], math.Float32bits(n.X))
+		binary.LittleEndian.PutUint32(buf[off+13:off+17], math.Float32bits(n.Z))
 		off += ResourceNodeEntrySize
 	}
 	return buf
@@ -2205,11 +2206,11 @@ func DeserializeResourceNodesSync(data []byte) ([]ResourceNodeEntry, error) {
 	for i := range out {
 		out[i].NodeID = binary.LittleEndian.Uint32(data[off : off+4])
 		out[i].Kind = data[off+4]
-		out[i].Material = data[off+5]
-		out[i].Tier = data[off+6]
-		out[i].Available = data[off+7] == 1
-		out[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+8 : off+12]))
-		out[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+12 : off+16]))
+		out[i].Material = binary.LittleEndian.Uint16(data[off+5 : off+7])
+		out[i].Tier = data[off+7]
+		out[i].Available = data[off+8] == 1
+		out[i].X = math.Float32frombits(binary.LittleEndian.Uint32(data[off+9 : off+13]))
+		out[i].Z = math.Float32frombits(binary.LittleEndian.Uint32(data[off+13 : off+17]))
 		off += ResourceNodeEntrySize
 	}
 	return out, nil
@@ -2262,7 +2263,7 @@ func SerializeQuestState(questID, stage, have, need uint8) [QuestStatePacketSize
 
 const (
 	ShopRequestPacketSize       = 9  // op | playerID u32 | npcID u32
-	ShopTradePacketSize         = 13 // op | playerID u32 | npcID u32 | ação | item | qualidade | qtd
+	ShopTradePacketSize         = 14 // op | playerID u32 | npcID u32 | ação | item u16 | qualidade | qtd
 	ShopActionBuy         uint8 = 0
 	ShopActionSell        uint8 = 1
 )
@@ -2276,7 +2277,7 @@ type ShopTradePacket struct {
 	PlayerID uint32
 	NPCID    uint32
 	Action   uint8
-	ItemID   uint8
+	ItemID   ItemID
 	Quality  uint8
 	Qty      uint8
 }
@@ -2296,12 +2297,12 @@ func DeserializeShopTrade(data []byte, pkt *ShopTradePacket) error {
 	}
 	pkt.PlayerID = binary.LittleEndian.Uint32(data[1:5])
 	pkt.NPCID = binary.LittleEndian.Uint32(data[5:9])
-	pkt.Action, pkt.ItemID, pkt.Quality, pkt.Qty = data[9], data[10], data[11], data[12]
+	pkt.Action, pkt.ItemID, pkt.Quality, pkt.Qty = data[9], binary.LittleEndian.Uint16(data[10:12]), data[12], data[13]
 	return nil
 }
 
 type ShopStockEntry struct {
-	ItemID uint8
+	ItemID ItemID
 	Qty    uint8
 	Price  uint32
 }
@@ -2325,7 +2326,7 @@ type ShopState struct {
 }
 
 // SerializeShopState: op | tamanho u16 | npc u32 | ouro u32 | hp u16 | maxhp u16 | fome | sede | frio | calor | temp °C i8 |
-// lenAtividade u8 + texto | nEstoque u8 + (item u8, qtd u8, preço u32)* | nEncomendas u8 + (mat u16, qtd u8, preço u32)*
+// lenAtividade u8 + texto | nEstoque u8 + (item u16, qtd u8, preço u32)* | nEncomendas u8 + (mat u16, qtd u8, preço u32)*
 func SerializeShopState(st ShopState) []byte {
 	act := []byte(st.Activity)
 	if len(act) > 255 {
@@ -2347,7 +2348,8 @@ func SerializeShopState(st ShopState) []byte {
 	b = append(b, act...)
 	b = append(b, uint8(len(st.Stock)))
 	for _, e := range st.Stock {
-		b = append(b, e.ItemID, e.Qty)
+		b = binary.LittleEndian.AppendUint16(b, e.ItemID)
+		b = append(b, e.Qty)
 		b = binary.LittleEndian.AppendUint32(b, e.Price)
 	}
 	b = append(b, uint8(len(st.Orders)))

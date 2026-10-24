@@ -216,6 +216,11 @@ func NewResourceNodeManager() *ResourceNodeManager {
 	for _, n := range uniqueNodes {
 		add(n)
 	}
+	// A Yggdrasil: gigantesca, nunca é cortada; dá galhos, folhas, frutos e seiva Míticos
+	add(ResourceNode{ZoneID: ZoneForest, MaterialID: uint16(WoodProductID(YggdrasilWood.Index, WoodLeaves)), X: YggdrasilPos[0], Z: YggdrasilPos[1]})
+	m.nodes[nextID-1].Kind = NodeYggdrasil
+	m.nodes[nextID-1].Tier = RarityTranscendent
+	m.nodes[nextID-1].RespawnIn = 0
 	// Fonte de Água Purificada no centro da praça da Vila: nunca seca e enche os frascos na hora
 	add(ResourceNode{ZoneID: ZoneVillage, MaterialID: MatPureWater, X: PurifiedFountainPos[0], Z: PurifiedFountainPos[1] + PurifiedFountainRadius})
 	m.nodes[nextID-1].RespawnIn = 2 * time.Second

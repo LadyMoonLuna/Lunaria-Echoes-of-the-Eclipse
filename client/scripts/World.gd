@@ -570,7 +570,7 @@ const QUEST_PARTS := {
 }
 var _discovery_queue: Array = []
 const HARVEST_RANGE := 3.5
-const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte", 7: "Barreiro", 8: "Ossada"}
+const NODE_KIND_NAMES := {1: "Árvore", 2: "Rocha", 3: "Veio de Metal", 4: "Cristal", 5: "Vinha / Arbusto", 6: "Fonte", 7: "Barreiro", 8: "Ossada", 9: "Yggdrasil"}
 var my_level: int = 1
 var my_buff_active: int = 0
 var my_hp: int = 100
@@ -971,7 +971,6 @@ func _dev_items_list() -> Array:
 		if ItemDataScript.is_material(iid):
 			var m: Dictionary = ItemDataScript.material(iid)
 			cat = "%s %s" % [ItemDataScript.CATEGORY_NAMES.get(m["category"], ""), ItemDataScript.rarity_name(int(m["rarity"]))]
-			desc += " • " + m["trait"]
 		elif info.has("tool"):
 			cat = "Ferramenta Tier %d" % int(info["tool_tier"])
 		elif int(info["slot"]) >= 0:
@@ -1887,6 +1886,11 @@ func _build_dev_tab_items(tabs: TabContainer) -> void:
 			forge_ui.tabs.current_tab = 2
 	))
 
+	# Busca: com ~2000 itens a lista mostra só o que bate com o filtro (até 120 cartões)
+	var search := LineEdit.new()
+	search.placeholder_text = "🔎 Buscar item ou material (ex.: Coração, Aranha, Yggdrasil, Tronco)..."
+	tab.add_child(search)
+
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1897,7 +1901,21 @@ func _build_dev_tab_items(tabs: TabContainer) -> void:
 	vb.add_theme_constant_override("separation", 6)
 	scroll.add_child(vb)
 
+	_dev_fill_items(vb, "")
+	search.text_changed.connect(func(txt: String): _dev_fill_items(vb, txt))
+
+## Monta os cartões do Dev para os itens que batem com o filtro.
+func _dev_fill_items(vb: VBoxContainer, filter: String) -> void:
+	for c in vb.get_children():
+		c.queue_free()
+	var shown := 0
+	var f := filter.strip_edges().to_lower()
 	for item in _dev_items_list():
+		if f != "" and not String(item["name"]).to_lower().contains(f) and str(item["id"]) != f:
+			continue
+		shown += 1
+		if shown > 120:
+			break
 		var is_secret: bool = item["rate"].contains("SECRETO")
 		var col := Color(0.85, 0.35, 0.9) if is_secret else Color(0.3, 0.6, 0.8)
 		var card := PanelContainer.new()
@@ -2735,8 +2753,8 @@ func _show_next_discovery() -> void:
 	var mid: int = _discovery_queue.pop_front()
 	var mat: Dictionary = ItemDataScript.material(mid)
 	var mat_name: String = mat.get("name", "Material #%d" % mid)
-	discovery_banner.text = "✨ Novo Material Descoberto para Forja: %s! ✨\n%s • %s" % [
-		mat_name, ItemDataScript.rarity_name(int(mat.get("rarity", 1))), mat.get("trait", "")]
+	discovery_banner.text = "✨ Novo material descoberto: %s! ✨\n%s" % [
+		mat_name, ItemDataScript.rarity_name(int(mat.get("rarity", 1)))]
 	discovery_banner.add_theme_color_override("font_color", Color(1.0, 0.84, 0.3))
 	discovery_banner.visible = true
 	discovery_banner.modulate.a = 1.0
@@ -2817,6 +2835,8 @@ func _add_mesh(parent: Node3D, mesh: Mesh, m: Material, pos: Vector3, rot: Vecto
 # Cor de cada material no mundo (madeira, metal, cristal, líquido...)
 func _node_color(mat_id: int, kind: int) -> Color:
 	var r: int = int(ItemDataScript.material(mat_id).get("rarity", 1))
+	if kind == 1 and ItemDataScript.WOODS.has(mat_id):
+		return ItemDataScript.WOODS[mat_id]["leaf"] # cada espécie com a cor da sua copa
 	match kind:
 		1:
 			return [Color(0.25, 0.45, 0.2), Color(0.3, 0.42, 0.22), Color(0.35, 0.5, 0.65), Color(0.18, 0.12, 0.25), Color(0.6, 0.12, 0.12),
@@ -2845,6 +2865,56 @@ const FLORA_COLORS := {
 	197: Color(0.25, 0.55, 0.2), 198: Color(1.0, 0.82, 0.2),
 }
 
+const YGGDRASIL_TRUNK_RADIUS := 7.0
+
+## A Yggdrasil: gigantesca e impossível de cortar. Visível de longe (não some com a distância).
+func _build_yggdrasil(model: Node3D) -> void:
+	var bark := _mat(Color(0.42, 0.32, 0.22), 0.0, 0.95, "bark")
+	var leaf := _mat(Color(0.5, 0.88, 0.62), 0.35, 0.8, "leaf")
+	var glow := _mat(Color(0.85, 1.0, 0.75), 1.2, 0.5)
+	var trunk := CylinderMesh.new()
+	trunk.top_radius = YGGDRASIL_TRUNK_RADIUS * 0.6
+	trunk.bottom_radius = YGGDRASIL_TRUNK_RADIUS
+	trunk.height = 60.0
+	trunk.radial_segments = 24
+	_add_mesh(model, trunk, bark, Vector3(0, 30, 0)).visibility_range_end = 0.0
+	for i in range(10): # raízes que se espalham pelo chão
+		var a: float = TAU * i / 10.0
+		var root_mesh := CylinderMesh.new()
+		root_mesh.top_radius = 0.6
+		root_mesh.bottom_radius = 1.8
+		root_mesh.height = 16.0
+		_add_mesh(model, root_mesh, bark, Vector3(cos(a) * 9.0, 1.0, sin(a) * 9.0), Vector3(sin(a) * 70.0, 0, -cos(a) * 70.0)).visibility_range_end = 0.0
+	for i in range(8): # galhos principais
+		var a2: float = TAU * i / 8.0 + 0.3
+		var branch := CylinderMesh.new()
+		branch.top_radius = 0.5
+		branch.bottom_radius = 1.6
+		branch.height = 24.0
+		_add_mesh(model, branch, bark, Vector3(cos(a2) * 9.0, 52.0 + (i % 3) * 4.0, sin(a2) * 9.0), Vector3(sin(a2) * 55.0, 0, -cos(a2) * 55.0)).visibility_range_end = 0.0
+	var crown := SphereMesh.new()
+	crown.radius = 30.0
+	crown.height = 34.0
+	_add_mesh(model, crown, leaf, Vector3(0, 70, 0)).visibility_range_end = 0.0
+	for i in range(6):
+		var a3: float = TAU * i / 6.0
+		var sub := SphereMesh.new()
+		sub.radius = 16.0
+		sub.height = 18.0
+		_add_mesh(model, sub, leaf, Vector3(cos(a3) * 24.0, 60.0 + (i % 2) * 8.0, sin(a3) * 24.0)).visibility_range_end = 0.0
+	for i in range(14): # frutos luminosos pendurados
+		var a4: float = TAU * i / 14.0
+		var fruit := SphereMesh.new()
+		fruit.radius = 0.9
+		fruit.height = 1.8
+		_add_mesh(model, fruit, glow, Vector3(cos(a4) * 26.0, 54.0 + (i % 4) * 3.0, sin(a4) * 26.0)).visibility_range_end = 0.0
+	var light := OmniLight3D.new()
+	light.light_color = Color(0.7, 1.0, 0.8)
+	light.light_energy = 1.4
+	light.omni_range = 40.0
+	light.position = Vector3(0, 12, 0)
+	model.add_child(light)
+
 func _create_resource_node(nd: Dictionary) -> Node3D:
 	var kind: int = int(nd["kind"])
 	var mat_id: int = int(nd["material"])
@@ -2854,7 +2924,7 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 	var root := StaticBody3D.new()
 	root.name = "ResourceNode_%d" % int(nd["node_id"])
 	# Só árvores e veios grandes bloqueiam o passo; pedrinhas, arbustos, flores e poças dá para pisar por cima
-	root.collision_layer = 1 if kind in [1, 3, 4] else 16
+	root.collision_layer = 1 if kind in [1, 3, 4, 9] else 16
 	root.collision_mask = 0
 	add_child(root)
 	root.global_position = Vector3(float(nd["x"]), ground_y(float(nd["x"]), float(nd["z"])), float(nd["z"]))
@@ -2932,6 +3002,13 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 			sph2.radius = 0.6
 			shape.shape = sph2
 			shape.position = Vector3(0, 0.5, 0)
+		9: # Yggdrasil: a Árvore do Mundo — tronco colossal, raízes e copa que somem nas nuvens
+			_build_yggdrasil(model)
+			var trunk_shape := CylinderShape3D.new()
+			trunk_shape.radius = YGGDRASIL_TRUNK_RADIUS
+			trunk_shape.height = 60.0
+			shape.shape = trunk_shape
+			shape.position = Vector3(0, 30, 0)
 		7: # Barreiro: montes de barro/argila molhada na margem do rio
 			var mud_mat := _mat(col, 0.0, 0.35)
 			for i in range(3):
@@ -2985,6 +3062,9 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 	lbl.outline_size = 10
 	lbl.visibility_range_end = 22.0
 	lbl.position = Vector3(0, 5.6 if kind == 1 else 2.0, 0)
+	if kind == 9:
+		lbl.position = Vector3(0, 4.0, YGGDRASIL_TRUNK_RADIUS + 1.5)
+		lbl.visibility_range_end = 45.0
 	root.add_child(lbl)
 	root.set_meta("label", lbl)
 	_apply_node_state(root, nd)
@@ -3033,6 +3113,8 @@ func _try_harvest_nearest_node() -> bool:
 		var p1: Vector3 = local_player.global_position
 		var p2: Vector3 = n.global_position
 		var d: float = Vector2(p1.x - p2.x, p1.z - p2.z).length()
+		if resource_nodes_data.has(nid) and int(resource_nodes_data[nid]["kind"]) == 9:
+			d -= YGGDRASIL_TRUNK_RADIUS + 2.0 # colhe-se em volta do tronco gigante
 		if d <= best_dist:
 			best_dist = d
 			best_id = nid

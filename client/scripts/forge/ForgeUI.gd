@@ -372,7 +372,8 @@ func _material_card(m: Dictionary, qty: int, mid: int) -> String:
 	lines.append("Resistências: [color=#73e673]%s[/color]" % m["resist"])
 	if ForgeData.SPECIALS.has(mid):
 		lines.append("Característica: [color=#ffb74d]%s[/color]" % ForgeData.SPECIALS[mid])
-	lines.append("[i]%s[/i]" % m["trait"])
+	if String(m.get("trait", "")) != "":
+		lines.append("[i]%s[/i]" % m["trait"])
 	return "\n".join(lines)
 
 func _on_smelt() -> void:

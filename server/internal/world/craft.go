@@ -188,7 +188,7 @@ func ApplyHarmony(m MaterialDef) MaterialDef {
 
 // PartScores: notas dos mini-games 1, 3, 4, 5 e 6 de uma peça já trabalhada.
 type PartScores struct {
-	Material uint8
+	Material ItemID
 	Module   uint8 // Quebra-Cabeça: módulo da peça (0 nas blueprints)
 	Scores   CraftScores
 	Reforges int
@@ -228,7 +228,7 @@ func IsReforgeable(m MaterialDef) bool {
 
 // WorkPart registra as notas de uma peça de blueprint. Na primeira vez é o trabalho normal; depois é
 // Reforja: só Metal/Liga, custa 15 de Stamina, oxida o metal e substitui a nota antiga.
-func (p *Player) WorkPart(bpID uint8, partIdx int, matID uint8, sc CraftScores) (WorkResult, error) {
+func (p *Player) WorkPart(bpID uint8, partIdx int, matID ItemID, sc CraftScores) (WorkResult, error) {
 	bp, ok := GetBlueprint(bpID)
 	if !ok || partIdx < 0 || partIdx >= len(bp.Parts) {
 		return WorkResult{}, fmt.Errorf("peça inválida")
@@ -240,7 +240,7 @@ func (p *Player) WorkPart(bpID uint8, partIdx int, matID uint8, sc CraftScores) 
 }
 
 // WorkPuzzlePart: o mesmo para uma peça do Quebra-Cabeça (índice da peça na grade + módulo).
-func (p *Player) WorkPuzzlePart(partIdx int, moduleID, matID uint8, sc CraftScores) (WorkResult, error) {
+func (p *Player) WorkPuzzlePart(partIdx int, moduleID uint8, matID ItemID, sc CraftScores) (WorkResult, error) {
 	if !p.CanUsePuzzleForge() {
 		return WorkResult{}, fmt.Errorf("só Ferreiros Avançados, Únicos ou Lendários usam o Criador Quebra-Cabeça")
 	}
@@ -252,7 +252,7 @@ func (p *Player) WorkPuzzlePart(partIdx int, moduleID, matID uint8, sc CraftScor
 	return p.workPart(0, true, moduleID, partIdx, part, matID, sc)
 }
 
-func (p *Player) workPart(bpID uint8, puzzle bool, moduleID uint8, partIdx int, part BlueprintPart, matID uint8, sc CraftScores) (WorkResult, error) {
+func (p *Player) workPart(bpID uint8, puzzle bool, moduleID uint8, partIdx int, part BlueprintPart, matID ItemID, sc CraftScores) (WorkResult, error) {
 	p.Mu.RLock()
 	m, okMat := p.materialLocked(matID)
 	known := p.DiscoveredMaterials[uint16(matID)]
@@ -329,7 +329,7 @@ func (p *Player) PuzzleSessionScores(pl []PuzzlePlacement, global CraftScores) C
 
 // SessionScores: as notas finais da forja juntando as peças trabalhadas (média ponderada pelo
 // tamanho de cada peça) com as notas globais do pacote final (fallback e Montagem).
-func (p *Player) SessionScores(bp BlueprintDef, picks []uint8, global CraftScores) CraftScores {
+func (p *Player) SessionScores(bp BlueprintDef, picks []ItemID, global CraftScores) CraftScores {
 	forgeSessions.Lock()
 	s := forgeSessions.byPlayer[p.ID]
 	forgeSessions.Unlock()
@@ -368,7 +368,7 @@ func (p *Player) EndForgeSession() {
 }
 
 // MaterialFor: material do catálogo ou liga sintética do jogador.
-func (p *Player) MaterialFor(id uint8) (MaterialDef, bool) {
+func (p *Player) MaterialFor(id ItemID) (MaterialDef, bool) {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
 	return p.materialLocked(id)

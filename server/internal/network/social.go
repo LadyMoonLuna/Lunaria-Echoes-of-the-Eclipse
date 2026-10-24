@@ -39,9 +39,9 @@ type socialState struct {
 }
 
 type giftItem struct {
-	ID uint8 `json:"id"`
-	Q  uint8 `json:"q"`
-	N  int   `json:"n"`
+	ID world.ItemID `json:"id"`
+	Q  uint8        `json:"q"`
+	N  int          `json:"n"`
 }
 
 func rewardText(def world.QuestDef) string {
@@ -86,7 +86,7 @@ func (s *Server) sendSocialState(p *world.Player, npcID uint32, msg string, tast
 	}
 	if st.CanGift {
 		p.Mu.RLock()
-		ids := make([]uint8, 0, len(p.Inventory))
+		ids := make([]world.ItemID, 0, len(p.Inventory))
 		for id, n := range p.Inventory {
 			if n > 0 && id < world.CustomItemFirstID {
 				ids = append(ids, id)
@@ -116,7 +116,7 @@ func (s *Server) handleSocialAction(playerID uint32, data []byte) {
 		return
 	}
 	npcID := binary.LittleEndian.Uint32(data[1:5])
-	action, item, quality := data[5], data[6], data[7]
+	action, item, quality := data[5], binary.LittleEndian.Uint16(data[6:8]), data[8]
 	s.mu.RLock()
 	p := s.players[playerID]
 	npc := s.npcs[npcID]
@@ -176,7 +176,7 @@ var tasteLines = map[int]string{
 	-2: "😠 Sério? Eu detesto isso!",
 }
 
-func (s *Server) giveGift(p *world.Player, npcID uint32, item, quality uint8, now float64) (string, int) {
+func (s *Server) giveGift(p *world.Player, npcID uint32, item world.ItemID, quality uint8, now float64) (string, int) {
 	if world.Hearts(p.GetFriendship(npcID)) < 2 {
 		return "Ainda não temos intimidade para presentes (2 corações).", 0
 	}
@@ -241,18 +241,17 @@ func (s *Server) turnInQuest(p *world.Player, npcID uint32, now float64) string 
 			return fmt.Sprintf("Ainda falta: %s.", st.Text(aq.Progress))
 		}
 		// Entrega: usa primeiro as unidades de menor Qualidade que ainda servem
-		quals := p.UnitQualities(st.Item)
-		var ok []uint8
-		for i := len(quals) - 1; i >= 0 && len(ok) < st.Qty; i-- {
-			if quals[i] >= st.MinQuality {
-				ok = append(ok, quals[i])
+		var ok []world.FamilyUnit
+		for _, u := range p.FamilyUnits(st.Item) { // pior Qualidade que ainda serve primeiro
+			if u.Quality >= st.MinQuality && len(ok) < st.Qty {
+				ok = append(ok, u)
 			}
 		}
 		if len(ok) < st.Qty {
 			return fmt.Sprintf("Ainda falta: %s (você tem %d que servem).", st.Text(0), len(ok))
 		}
-		for _, q := range ok {
-			p.TakeItemUnits(st.Item, q, 1)
+		for _, u := range ok {
+			p.TakeItemUnits(u.ID, u.Quality, 1)
 		}
 		aq.Step++
 		aq.Progress = 0

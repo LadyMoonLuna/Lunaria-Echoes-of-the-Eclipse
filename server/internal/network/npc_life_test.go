@@ -103,13 +103,13 @@ func TestShopBuyAndSellMoveGold(t *testing.T) {
 	if msg := s.shopBuy(p, l, protocol.ItemHealingPotion, 1); !strings.Contains(msg, "Estoque esgotado") {
 		t.Fatalf("sem estoque deveria avisar: %q", msg)
 	}
-	p.AddItemWithQuality(uint8(world.MatHerbs), 3, 75)
+	p.AddItemWithQuality(world.ItemID(world.MatHerbs), 3, 75)
 	npcGold := l.Gold
 	var expect uint32
 	for i := 0; i < 3; i++ {
-		expect += world.NPCBuyUnitPrice(103, l.Personality, world.ZoneVillage, uint8(world.MatHerbs), 75, i)
+		expect += world.NPCBuyUnitPrice(103, l.Personality, world.ZoneVillage, world.ItemID(world.MatHerbs), 75, i)
 	}
-	s.shopSell(p, l, uint8(world.MatHerbs), 75, 3)
+	s.shopSell(p, l, world.ItemID(world.MatHerbs), 75, 3)
 	if l.RawMaterials[world.MatHerbs] != 7 || l.Gold != npcGold-expect || expect == 0 {
 		t.Fatalf("venda errada: ervas %d ouro %d (esperado -%d)", l.RawMaterials[world.MatHerbs], l.Gold, expect)
 	}

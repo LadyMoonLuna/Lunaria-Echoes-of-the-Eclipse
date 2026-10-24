@@ -26,7 +26,7 @@ const (
 
 // NonTradable: itens que NUNCA aparecem à venda nas lojas (mudança de raça/classe, tomos, receitas,
 // troféus de chefes, blueprints). Alguns podem ser vendidos ao Mercado Negro (ver BlackMarketBuys).
-var NonTradable = map[uint8]bool{
+var NonTradable = map[ItemID]bool{
 	protocol.ItemPureLunarBlood: true, protocol.ItemBrokenSoulChalice: true, protocol.ItemLycanAlphaHeart: true,
 	protocol.ItemBeastProgenitorBlood: true, protocol.ItemEclipseScytheTome: true, protocol.ItemStarforgeCore: true,
 	protocol.ItemRunicWarhammerRecipe: true, protocol.ItemRunicWarhammer: true,
@@ -37,7 +37,7 @@ var NonTradable = map[uint8]bool{
 }
 
 // Troféus de chefes: só o Mercado Negro compra (e paga bem), ninguém vende.
-var bossTrophies = map[uint8]bool{
+var bossTrophies = map[ItemID]bool{
 	protocol.ItemShadowCultistRobe: true, protocol.ItemGargoyleStoneHeart: true, protocol.ItemInquisitorShadowScythe: true,
 	protocol.ItemTraitorCommanderInsignia: true, protocol.ItemHeraldEclipseEye: true, protocol.ItemSacredTorch: true,
 	protocol.ItemSpiderQueenHeart: true, protocol.ItemArachnaEye: true, protocol.ItemImperialSilkCloak: true,
@@ -47,7 +47,7 @@ var bossTrophies = map[uint8]bool{
 }
 
 // Preços justos explícitos (Sollares). O resto sai da raridade/categoria (materiais) ou dos bônus (equipamentos).
-var basePriceOverride = map[uint8]uint32{
+var basePriceOverride = map[ItemID]uint32{
 	protocol.ItemEmptyFlask: 6, protocol.ItemRawWolfMeat: 8, protocol.ItemCookedNobleMeat: 22, protocol.ItemWolfBloodPotion: 70,
 	protocol.ItemHealingPotion: 40, protocol.ItemManaPotion: 55, protocol.ItemHerbalRemedy: 50, protocol.ItemDarkPoisonGland: 65,
 	protocol.ItemOrganicTrash: 1, protocol.ItemMetalScrap: 4, protocol.ItemAutopsyDagger: 35, protocol.ItemLeadPlate: 30,
@@ -66,13 +66,13 @@ var basePriceOverride = map[uint8]uint32{
 }
 
 var rarityBase = map[uint8]float32{RarityCommon: 6, RarityUncommon: 16, RarityRare: 42, RarityEpic: 110, RarityUnique: 220,
-	RarityExotic: 380, RarityLegendary: 650, RarityMythic: 1200}
+	RarityExotic: 380, RarityLegendary: 650, RarityMythic: 1200, RarityTranscendent: 3000}
 
 var categoryFactor = map[string]float32{MatWood: 0.8, MatStone: 0.6, MatMetal: 1.4, MatCrystal: 1.7, MatAlloy: 2.1,
 	MatHideThread: 1.15, MatOrganBlood: 1.2, MatPlantLiquid: 0.9, MatBone: 0.7}
 
 // BasePrice: preço justo do item (0 = sem valor de mercado).
-func BasePrice(item uint8) uint32 {
+func BasePrice(item ItemID) uint32 {
 	if item >= CustomItemFirstID {
 		return 0
 	}
@@ -116,8 +116,27 @@ var (
 func buildNativeMats() {
 	nativeMats = map[uint8]map[uint16]bool{}
 	anywhere = map[uint16]bool{}
+	// Subprodutos das árvores (seiva, galhos, folhas, frutos) são nativos onde a árvore nasce
+	for i := range WoodCatalog {
+		w := &WoodCatalog[i]
+		for _, z := range w.Zones {
+			if nativeMats[z] == nil {
+				nativeMats[z] = map[uint16]bool{}
+			}
+			for p := WoodTrunk; p <= WoodFruit; p++ {
+				if w.HasProduct(p) {
+					id := uint16(WoodProductID(w.Index, p))
+					nativeMats[z][id] = true
+					anywhere[id] = true
+				}
+			}
+		}
+	}
 	for zone, table := range zoneResourceTables {
-		set := map[uint16]bool{}
+		set := nativeMats[zone]
+		if set == nil {
+			set = map[uint16]bool{}
+		}
 		for _, e := range table {
 			set[e.material] = true
 			anywhere[e.material] = true
@@ -130,7 +149,7 @@ func buildNativeMats() {
 			set = map[uint16]bool{}
 			nativeMats[d.Zone] = set
 		}
-		for _, o := range faunaOrgans(d) {
+		for _, o := range specializeOrgans(d.Type, faunaOrgans(d)) {
 			set[uint16(o.ItemReward)] = true
 			anywhere[uint16(o.ItemReward)] = true
 		}
@@ -138,7 +157,7 @@ func buildNativeMats() {
 }
 
 // RegionalFactor: o quanto o item vale neste mercado (abundante aqui < 1 < raro aqui).
-func RegionalFactor(item uint8, market uint8) float32 {
+func RegionalFactor(item ItemID, market uint8) float32 {
 	nativeOnce.Do(buildNativeMats)
 	if _, isMat := MaterialsDB[uint16(item)]; !isMat {
 		return 1
@@ -152,17 +171,22 @@ func RegionalFactor(item uint8, market uint8) float32 {
 	return 1.35 // vem de outra região
 }
 
+type marketKey struct {
+	Market uint8
+	Item   ItemID
+}
+
 // MarketBook guarda a oferta e a procura recentes de cada mercado.
 type MarketBook struct {
 	mu       sync.Mutex
-	sold     map[[2]uint8]float32 // unidades vendidas aos NPCs (excesso)
-	bought   map[[2]uint8]float32 // unidades compradas dos NPCs (procura)
+	sold     map[marketKey]float32 // unidades vendidas aos NPCs (excesso)
+	bought   map[marketKey]float32 // unidades compradas dos NPCs (procura)
 	lastTick float64
 }
 
 // NewMarketBook cria um livro de ofertas vazio.
 func NewMarketBook() *MarketBook {
-	return &MarketBook{sold: map[[2]uint8]float32{}, bought: map[[2]uint8]float32{}}
+	return &MarketBook{sold: map[marketKey]float32{}, bought: map[marketKey]float32{}}
 }
 
 // Market é o livro de ofertas de Lunaria.
@@ -196,27 +220,27 @@ func (b *MarketBook) Decay(nowGH float64) {
 	}
 }
 
-func (b *MarketBook) Sold(market, item uint8) float32 {
+func (b *MarketBook) Sold(market uint8, item ItemID) float32 {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	return b.sold[[2]uint8{market, item}]
+	return b.sold[marketKey{market, item}]
 }
 
-func (b *MarketBook) Bought(market, item uint8) float32 {
+func (b *MarketBook) Bought(market uint8, item ItemID) float32 {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	return b.bought[[2]uint8{market, item}]
+	return b.bought[marketKey{market, item}]
 }
 
-func (b *MarketBook) AddSold(market, item uint8, n float32) {
+func (b *MarketBook) AddSold(market uint8, item ItemID, n float32) {
 	b.mu.Lock()
-	b.sold[[2]uint8{market, item}] += n
+	b.sold[marketKey{market, item}] += n
 	b.mu.Unlock()
 }
 
-func (b *MarketBook) AddBought(market, item uint8, n float32) {
+func (b *MarketBook) AddBought(market uint8, item ItemID, n float32) {
 	b.mu.Lock()
-	b.bought[[2]uint8{market, item}] += n
+	b.bought[marketKey{market, item}] += n
 	b.mu.Unlock()
 }
 
@@ -227,7 +251,7 @@ func qualityFactor(q uint8) float32 {
 
 // NPCBuyUnitPrice: quanto o NPC paga pela PRÓXIMA unidade, já com `extra` unidades vendidas nesta
 // negociação. 0 = não compra mais (mercado cheio ou o item não lhe interessa).
-func NPCBuyUnitPrice(npcID uint32, personality string, market, item, quality uint8, extra int) uint32 {
+func NPCBuyUnitPrice(npcID uint32, personality string, market uint8, item ItemID, quality uint8, extra int) uint32 {
 	mult, ok := NPCBuyInterest(npcID, item)
 	if !ok {
 		return 0
@@ -246,7 +270,7 @@ func NPCBuyUnitPrice(npcID uint32, personality string, market, item, quality uin
 }
 
 // NPCSellUnitPrice: quanto o NPC cobra do jogador pela próxima unidade (estoque baixo encarece).
-func NPCSellUnitPrice(personality string, market, item uint8, stock int) uint32 {
+func NPCSellUnitPrice(personality string, market uint8, item ItemID, stock int) uint32 {
 	base := float32(BasePrice(item))
 	if base == 0 {
 		return 0
@@ -263,22 +287,22 @@ func NPCSellUnitPrice(personality string, market, item uint8, stock int) uint32 
 // --- O que cada NPC vende e o que ele compra ---
 
 // MerchantCatalog: itens que o NPC tem à venda (além do que ele fabrica) e quantos gosta de manter.
-var MerchantCatalog = map[uint32]map[uint8]int{
-	100: {ItemStoneAxe: 3, ItemStonePickaxe: 3, protocol.ItemForgeHammer: 1, protocol.ItemVigilHelmet: 2, protocol.ItemIronKnuckles: 2, uint8(MatCharcoal): 10},
-	103: {protocol.ItemEmptyFlask: 12, ItemHerbalShears: 2, protocol.ItemAlchemyCatalyst: 1, uint8(MatPureWater): 8},
+var MerchantCatalog = map[uint32]map[ItemID]int{
+	100: {ItemStoneAxe: 3, ItemStonePickaxe: 3, protocol.ItemForgeHammer: 1, protocol.ItemVigilHelmet: 2, protocol.ItemIronKnuckles: 2, ItemID(MatCharcoal): 10},
+	103: {protocol.ItemEmptyFlask: 12, ItemHerbalShears: 2, protocol.ItemAlchemyCatalyst: 1, ItemID(MatPureWater): 8},
 	104: {protocol.ItemDarkPoisonGland: 3, protocol.ItemSteelDagger: 2, protocol.ItemOffhandDagger: 2, protocol.ItemObsidianRing: 1,
-		uint8(MatVorpalSac): 2, uint8(MatAcidSap): 4, uint8(MatVampireBlood): 2, uint8(MatParasiteMycel): 3},
+		ItemID(MatVorpalSac): 2, ItemID(MatAcidSap): 4, ItemID(MatVampireBlood): 2, ItemID(MatParasiteMycel): 3},
 	105: {protocol.ItemCookedNobleMeat: 6, protocol.ItemHealingPotion: 4, protocol.ItemVigilHelmet: 2, protocol.ItemTowerShield: 1, protocol.ItemIronLongsword: 1},
 	106: {protocol.ItemRecurveBow: 2, protocol.ItemHuntersQuiver: 2, protocol.ItemMistwalkerBoots: 1, protocol.ItemWolfLeatherPants: 1},
-	107: {protocol.ItemHealingPotion: 5, protocol.ItemHerbalRemedy: 4, protocol.ItemSilverMoonAmulet: 1, uint8(MatLunarDew): 4},
-	108: {protocol.ItemManaPotion: 5, protocol.ItemOakStaff: 1, protocol.ItemArcaneOrb: 1, uint8(MatQuartz): 4},
+	107: {protocol.ItemHealingPotion: 5, protocol.ItemHerbalRemedy: 4, protocol.ItemSilverMoonAmulet: 1, ItemID(MatLunarDew): 4},
+	108: {protocol.ItemManaPotion: 5, protocol.ItemOakStaff: 1, protocol.ItemArcaneOrb: 1, ItemID(MatQuartz): 4},
 	109: {protocol.ItemRecurveBow: 1, protocol.ItemHuntersQuiver: 2, protocol.ItemAutopsyDagger: 3, ItemHerbalShears: 1, protocol.ItemRawWolfMeat: 6},
-	111: {protocol.ItemSteelDagger: 2, protocol.ItemOffhandDagger: 2, uint8(MatVorpalSac): 2},
+	111: {protocol.ItemSteelDagger: 2, protocol.ItemOffhandDagger: 2, ItemID(MatVorpalSac): 2},
 	112: {protocol.ItemIronKnuckles: 2, protocol.ItemOffhandKnuckle: 2, protocol.ItemHerbalRemedy: 3},
-	113: {uint8(MatLimestone): 10, uint8(MatBasalt): 6, uint8(MatClay): 8},
-	114: {protocol.ItemSteelNeedles: 2, protocol.ItemWolfLeatherPants: 2, protocol.ItemMistwalkerBoots: 1, protocol.ItemAlchemistBelt: 1, uint8(MatRoughThread): 10},
+	113: {ItemID(MatLimestone): 10, ItemID(MatBasalt): 6, ItemID(MatClay): 8},
+	114: {protocol.ItemSteelNeedles: 2, protocol.ItemWolfLeatherPants: 2, protocol.ItemMistwalkerBoots: 1, protocol.ItemAlchemistBelt: 1, ItemID(MatRoughThread): 10},
 	115: {protocol.ItemIronWok: 1, protocol.ItemGiantCleaver: 1},
-	116: {protocol.ItemBeastWhip: 1, uint8(MatHerbs): 6, protocol.ItemRawWolfMeat: 4},
+	116: {protocol.ItemBeastWhip: 1, ItemID(MatHerbs): 6, protocol.ItemRawWolfMeat: 4},
 }
 
 // Categorias de material que cada NPC compra (multiplicador de interesse: >1 paga melhor).
@@ -301,7 +325,7 @@ var npcBuyCategories = map[uint32]map[string]float32{
 }
 
 // Itens (não materiais) que o NPC também compra.
-var npcBuyItems = map[uint32]map[uint8]float32{
+var npcBuyItems = map[uint32]map[ItemID]float32{
 	100: {protocol.ItemMetalScrap: 1, protocol.ItemIronOre: 1, protocol.ItemIronLongsword: 0.8, protocol.ItemSteelChestplate: 0.8,
 		protocol.ItemHeavySteelPlate: 0.8, ItemIronAxe: 0.8, ItemIronPickaxe: 0.8, protocol.ItemTowerShield: 0.8},
 	103:       {protocol.ItemFreshWolfBlood: 1.2, protocol.ItemEmptyFlask: 0.6, protocol.ItemDarkPoisonGland: 0.9},
@@ -319,7 +343,8 @@ var npcBuyItems = map[uint32]map[uint8]float32{
 var foodMaterials = map[uint16]bool{MatGameMeat: true, MatHerbs: true, MatGlowMushroom: true, MatGoldenClover: true}
 
 // NPCBuyInterest: o NPC compra este item? (e com que interesse)
-func NPCBuyInterest(npcID uint32, item uint8) (float32, bool) {
+func NPCBuyInterest(npcID uint32, item ItemID) (float32, bool) {
+	item = BaseOf(item) // partes específicas de criatura contam pela família
 	if item >= CustomItemFirstID || NonTradable[item] {
 		return 0, false
 	}
@@ -353,7 +378,7 @@ func NPCBuyInterest(npcID uint32, item uint8) (float32, bool) {
 }
 
 // SellsItem: o NPC tem este item no catálogo (fabricado ou revendido)?
-func SellsItem(npcID uint32, item uint8) bool {
+func SellsItem(npcID uint32, item ItemID) bool {
 	if NonTradable[item] || bossTrophies[item] {
 		return false
 	}

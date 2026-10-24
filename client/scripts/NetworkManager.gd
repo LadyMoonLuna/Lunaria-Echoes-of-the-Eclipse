@@ -205,11 +205,11 @@ func _process_tcp() -> void:
 				player_attributes_received.emit(pid, xp, next_xp, stat_pts, str_stat, dex_stat, con_stat, agi_stat, int_stat, spi_stat, mas_stat, lck_stat)
 				tcp_rx_buffer = tcp_rx_buffer.slice(expected_len)
 
-			elif opcode == 0x38: # INVENTORY_SYNC: op | 15 slots | 15 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count u16 | count × (item, qtd, Qualidade)
-				if tcp_rx_buffer.size() < 50:
+			elif opcode == 0x38: # INVENTORY_SYNC: op | 15 slots u16 | 15 Condições | Gold u32 | Eclipses u32 | Peso f32 | PesoMáx f32 | Vel% u8 | count u16 | count × (item u16, qtd, Qualidade)
+				if tcp_rx_buffer.size() < 65:
 					break
-				var slot_count: int = tcp_rx_buffer[48] | (tcp_rx_buffer[49] << 8)
-				var total_size: int = 50 + slot_count * 3
+				var slot_count: int = tcp_rx_buffer[63] | (tcp_rx_buffer[64] << 8)
+				var total_size: int = 65 + slot_count * 4
 				if tcp_rx_buffer.size() < total_size:
 					break
 				var inv_buf := StreamPeerBuffer.new()
@@ -218,19 +218,19 @@ func _process_tcp() -> void:
 				var equipped_slots: Array = []
 				var equipped_qualities: Array = []
 				for i in range(15):
-					equipped_slots.append(tcp_rx_buffer[1 + i])
-					equipped_qualities.append(tcp_rx_buffer[16 + i])
-				inv_buf.seek(31)
+					equipped_slots.append(tcp_rx_buffer[1 + 2 * i] | (tcp_rx_buffer[2 + 2 * i] << 8))
+					equipped_qualities.append(tcp_rx_buffer[31 + i])
+				inv_buf.seek(46)
 				var gold: int = inv_buf.get_u32()
 				var eclipse_coins: int = inv_buf.get_u32()
 				var cur_weight: float = inv_buf.get_float()
 				var max_weight: float = inv_buf.get_float()
-				var speed_mult: float = float(tcp_rx_buffer[47]) / 100.0
+				var speed_mult: float = float(tcp_rx_buffer[62]) / 100.0
 				var items_array: Array = []
-				var offset: int = 50
+				var offset: int = 65
 				for i in range(slot_count):
-					items_array.append({"id": tcp_rx_buffer[offset], "quantity": tcp_rx_buffer[offset + 1], "quality": tcp_rx_buffer[offset + 2]})
-					offset += 3
+					items_array.append({"id": tcp_rx_buffer[offset] | (tcp_rx_buffer[offset + 1] << 8), "quantity": tcp_rx_buffer[offset + 2], "quality": tcp_rx_buffer[offset + 3]})
+					offset += 4
 				equipped_qualities_updated.emit(equipped_qualities)
 				inventory_updated.emit(equipped_slots, items_array)
 				wallet_weight_updated.emit(gold, eclipse_coins, cur_weight, max_weight, speed_mult)
@@ -240,7 +240,7 @@ func _process_tcp() -> void:
 				if tcp_rx_buffer.size() < 3:
 					break
 				var n_count: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
-				var n_size: int = 3 + n_count * 16
+				var n_size: int = 3 + n_count * 17
 				if tcp_rx_buffer.size() < n_size:
 					break
 				var n_buf := StreamPeerBuffer.new()
@@ -251,7 +251,7 @@ func _process_tcp() -> void:
 				for i in range(n_count):
 					var node_id: int = n_buf.get_u32()
 					var kind: int = n_buf.get_u8()
-					var mat_id: int = n_buf.get_u8()
+					var mat_id: int = n_buf.get_u16()
 					var tier: int = n_buf.get_u8()
 					var node_avail: bool = n_buf.get_u8() == 1
 					var nx: float = n_buf.get_float()
@@ -376,7 +376,7 @@ func _process_tcp() -> void:
 				if tcp_rx_buffer.size() < 3:
 					break
 				var g_count: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
-				var g_size: int = 3 + g_count * 15
+				var g_size: int = 3 + g_count * 16
 				if tcp_rx_buffer.size() < g_size:
 					break
 				var g_buf := StreamPeerBuffer.new()
@@ -386,7 +386,7 @@ func _process_tcp() -> void:
 				var ground: Array = []
 				for i in range(g_count):
 					var drop_id: int = g_buf.get_u32()
-					var g_item: int = g_buf.get_u8()
+					var g_item: int = g_buf.get_u16()
 					var g_qty: int = g_buf.get_u8()
 					var g_quality: int = g_buf.get_u8()
 					var gx: float = g_buf.get_float()
@@ -455,7 +455,7 @@ func _process_tcp() -> void:
 				var mob_type: int = b.get_u8()
 				var seed: int = b.get_u32()
 				var organ_count: int = b.get_u8()
-				var total_size: int = 11 + organ_count * 5
+				var total_size: int = 11 + organ_count * 6
 				if tcp_rx_buffer.size() < total_size:
 					break
 				var organs: Array = []
@@ -463,9 +463,9 @@ func _process_tcp() -> void:
 				for i in range(organ_count):
 					var idx: int = tcp_rx_buffer[offset]
 					var otype: int = tcp_rx_buffer[offset + 1]
-					var item_reward: int = tcp_rx_buffer[offset + 2]
-					var diff: int = tcp_rx_buffer[offset + 3]
-					var qtier: int = tcp_rx_buffer[offset + 4]
+					var item_reward: int = tcp_rx_buffer[offset + 2] | (tcp_rx_buffer[offset + 3] << 8)
+					var diff: int = tcp_rx_buffer[offset + 4]
+					var qtier: int = tcp_rx_buffer[offset + 5]
 					organs.append({
 						"index": idx,
 						"type": otype,
@@ -473,7 +473,7 @@ func _process_tcp() -> void:
 						"difficulty": diff,
 						"quality_tier": qtier
 					})
-					offset += 5
+					offset += 6
 				print("[NetworkManager] 0x3C OPEN_AUTOPSY_UI recebido: Corpse #%d, MobType %d, %d órgãos" % [corpse_id, mob_type, organ_count])
 				open_autopsy_ui_received.emit(corpse_id, mob_type, seed, organs)
 				tcp_rx_buffer = tcp_rx_buffer.slice(total_size)
@@ -832,7 +832,11 @@ func send_set_weather(weather: int) -> void:
 	send_world_control(6, weather)
 
 func send_give_item(item_id: int) -> void:
-	send_world_control(7, item_id)
+	if item_id <= 254:
+		send_world_control(7, item_id)
+		return
+	# IDs acima de 254 (partes de criatura, madeiras...): 0x67 DEV_GIVE_ITEM com o ID em u16
+	tcp.put_data(PackedByteArray([0x67, item_id & 0xFF, (item_id >> 8) & 0xFF]))
 
 func send_dev_level_control(val: int) -> void:
 	send_world_control(8, val)
@@ -900,9 +904,9 @@ func _send_item_action(item_id: int, action: int, slot_index: int) -> void:
 
 	var buffer := StreamPeerBuffer.new()
 	buffer.big_endian = false
-	buffer.put_u8(0x39) # USE_OR_EQUIP_ITEM (8 bytes): item, ação, slot
+	buffer.put_u8(0x39) # USE_OR_EQUIP_ITEM (9 bytes): item u16, ação, slot
 	buffer.put_u32(my_player_id)
-	buffer.put_u8(item_id)
+	buffer.put_u16(item_id)
 	buffer.put_u8(action)
 	buffer.put_u8(slot_index)
 
@@ -916,7 +920,7 @@ func send_drop_item_ground(item_id: int, quality: int, quantity: int) -> void:
 	buffer.big_endian = false
 	buffer.put_u8(0x41)
 	buffer.put_u32(my_player_id)
-	buffer.put_u8(item_id)
+	buffer.put_u16(item_id)
 	buffer.put_u8(clampi(quality, 0, 100))
 	buffer.put_u8(clampi(quantity, 1, 255))
 	tcp.put_data(buffer.data_array)
@@ -1043,12 +1047,12 @@ func _parse_forge_state() -> Dictionary:
 	i += 1
 	var items := {}
 	for k in range(nc):
-		if buf.size() < i + 21:
+		if buf.size() < i + 22:
 			return {}
 		var sp := StreamPeerBuffer.new()
 		sp.big_endian = false
-		sp.data_array = buf.slice(i, i + 21)
-		var e := {"id": sp.get_u8(), "kind": sp.get_u8(), "slot": sp.get_u8(), "rarity": sp.get_u8(), "tool_kind": sp.get_u8(), "tool_tier": sp.get_u8()}
+		sp.data_array = buf.slice(i, i + 22)
+		var e := {"id": sp.get_u16(), "kind": sp.get_u8(), "slot": sp.get_u8(), "rarity": sp.get_u8(), "tool_kind": sp.get_u8(), "tool_tier": sp.get_u8()}
 		e["weight"] = sp.get_float()
 		e["atk"] = sp.get_u16()
 		e["def"] = sp.get_u16()
@@ -1057,7 +1061,7 @@ func _parse_forge_state() -> Dictionary:
 		e["thermal"] = sp.get_u8()
 		e["electric"] = sp.get_u8()
 		e["magic"] = sp.get_u8()
-		i += 21
+		i += 22
 		var texts: Array = []
 		for t in range(3):
 			if buf.size() < i + 2:
@@ -1088,16 +1092,23 @@ func _parse_forge_state() -> Dictionary:
 	return {"size": i, "blueprints": bps}
 
 # Forja (0x51 / 0x52 / 0x53)
+## IDs de item viajam como u16 (little endian).
+func _ids_u16(ids: Array, count: int) -> PackedByteArray:
+	var out := PackedByteArray()
+	for k in range(count):
+		var v: int = int(ids[k]) if k < ids.size() else 0
+		out.append(v & 0xFF)
+		out.append((v >> 8) & 0xFF)
+	return out
+
 func send_forge_alloy(ids: Array) -> void:
-	var data := PackedByteArray([0x51, 0, 0, 0, 0])
-	for k in range(mini(4, ids.size())):
-		data[1 + k] = int(ids[k])
+	var data := PackedByteArray([0x51])
+	data.append_array(_ids_u16(ids, 4))
 	tcp.put_data(data)
 
 func send_forge_blueprint(bp_id: int, picks: Array) -> void:
-	var data := PackedByteArray([0x52, bp_id, 0, 0, 0, 0, 0, 0])
-	for k in range(mini(6, picks.size())):
-		data[2 + k] = int(picks[k])
+	var data := PackedByteArray([0x52, bp_id])
+	data.append_array(_ids_u16(picks, 6))
 	tcp.put_data(data)
 
 func send_forge_action(action: int, bp_id: int = 0) -> void:
@@ -1123,12 +1134,12 @@ func _parse_puzzle_state() -> Dictionary:
 			return {}
 		var n: int = buf[i]
 		i += 1
-		if buf.size() < i + n * 5:
+		if buf.size() < i + n * 6:
 			return {}
 		var pieces: Array = []
 		for pc in range(n):
-			pieces.append([buf[i], buf[i + 1], buf[i + 2], buf[i + 3], buf[i + 4]])
-			i += 5
+			pieces.append([buf[i], buf[i + 1], buf[i + 2], buf[i + 3], buf[i + 4] | (buf[i + 5] << 8)])
+			i += 6
 		list.append({"name": nm, "pieces": pieces})
 	return {"size": i, "unlocked": buf[1] == 1, "list": list}
 
@@ -1142,8 +1153,10 @@ func send_register_custom_weapon(weapon_name: String, pieces: Array) -> void:
 	body.append_array(name_bytes)
 	body.append(pieces.size())
 	for pc in pieces:
-		for v in pc:
-			body.append(int(v))
+		for k in range(4):
+			body.append(int(pc[k]))
+		body.append(int(pc[4]) & 0xFF)
+		body.append((int(pc[4]) >> 8) & 0xFF)
 	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
 	data.append_array(body)
 	tcp.put_data(data)
@@ -1158,16 +1171,14 @@ func _score_bytes(scores: Array) -> PackedByteArray:
 	return out
 
 func send_forge_alloy_scored(ids: Array, scores: Array) -> void:
-	var data := PackedByteArray([0x58, 0, 0, 0, 0])
-	for k in range(mini(4, ids.size())):
-		data[1 + k] = int(ids[k])
+	var data := PackedByteArray([0x58])
+	data.append_array(_ids_u16(ids, 4))
 	data.append_array(_score_bytes(scores))
 	tcp.put_data(data)
 
 func send_forge_blueprint_scored(bp_id: int, picks: Array, scores: Array) -> void:
-	var data := PackedByteArray([0x59, bp_id, 0, 0, 0, 0, 0, 0])
-	for k in range(mini(6, picks.size())):
-		data[2 + k] = int(picks[k])
+	var data := PackedByteArray([0x59, bp_id])
+	data.append_array(_ids_u16(picks, 6))
 	data.append_array(_score_bytes(scores))
 	tcp.put_data(data)
 
@@ -1180,8 +1191,10 @@ func send_register_custom_weapon_scored(weapon_name: String, pieces: Array, scor
 	body.append_array(name_bytes)
 	body.append(pieces.size())
 	for pc in pieces:
-		for v in pc:
-			body.append(int(v))
+		for k in range(4):
+			body.append(int(pc[k]))
+		body.append(int(pc[4]) & 0xFF)
+		body.append((int(pc[4]) >> 8) & 0xFF)
 	body.append_array(_score_bytes(scores))
 	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
 	data.append_array(body)
@@ -1208,7 +1221,7 @@ func send_shop_trade(npc_id: int, action: int, item_id: int, quality: int, qty: 
 	buf.put_u32(my_player_id)
 	buf.put_u32(npc_id)
 	buf.put_u8(action)
-	buf.put_u8(item_id)
+	buf.put_u16(item_id)
 	buf.put_u8(quality)
 	buf.put_u8(clampi(qty, 1, 255))
 	tcp.put_data(buf.data_array)
@@ -1226,7 +1239,7 @@ func send_social_action(npc_id: int, action: int, item_id: int = 0, quality: int
 	buf.put_u8(0x63)
 	buf.put_u32(npc_id)
 	buf.put_u8(action)
-	buf.put_u8(item_id)
+	buf.put_u16(item_id)
 	buf.put_u8(quality)
 	tcp.put_data(buf.data_array)
 
@@ -1237,7 +1250,7 @@ func send_guild_action(action: int, npc_id: int = 0, item_id: int = 0, qty: int 
 	buf.put_u8(0x65)
 	buf.put_u8(action)
 	buf.put_u32(npc_id)
-	buf.put_u8(item_id)
+	buf.put_u16(item_id)
 	buf.put_u8(clampi(qty, 0, 255))
 	tcp.put_data(buf.data_array)
 
@@ -1254,12 +1267,12 @@ func send_corpse_drag(corpse_id: int, action: int) -> void:
 
 ## 0x5A: notas de uma peça (primeira vez) ou Reforja (de novo, mesmo material de Metal/Liga).
 func send_reforge_part(bp_id: int, part_idx: int, mat_id: int, scores: Array) -> void:
-	var data := PackedByteArray([0x5A, bp_id, part_idx, mat_id])
+	var data := PackedByteArray([0x5A, bp_id, part_idx, mat_id & 0xFF, (mat_id >> 8) & 0xFF])
 	data.append_array(_score_bytes(scores))
 	tcp.put_data(data)
 
 ## 0x5D: notas de uma peça do Quebra-Cabeça (índice na grade + módulo); de novo = Reforja.
 func send_puzzle_part(part_idx: int, module_id: int, mat_id: int, scores: Array) -> void:
-	var data := PackedByteArray([0x5D, part_idx, module_id, mat_id])
+	var data := PackedByteArray([0x5D, part_idx, module_id, mat_id & 0xFF, (mat_id >> 8) & 0xFF])
 	data.append_array(_score_bytes(scores))
 	tcp.put_data(data)

@@ -114,45 +114,45 @@ func (p *Player) GiftWait(npcID uint32, now float64) float64 {
 
 // GiftTaste: 2 = ama, 1 = gosta, 0 = neutro, -1 = não gosta, -2 = detesta.
 type giftPrefs struct {
-	items map[uint8]int
+	items map[ItemID]int
 	cats  map[string]int
 }
 
 var npcGiftPrefs = map[uint32]giftPrefs{
-	100: {map[uint8]int{uint8(MatIron): 2, uint8(MatTemperedSteel): 2, uint8(MatCharcoal): 1, protocol.ItemCookedNobleMeat: 1,
-		uint8(MatMoonflower): -1, protocol.ItemOrganicTrash: -2, uint8(MatToxicWater): -2}, map[string]int{MatMetal: 1, MatAlloy: 2, MatPlantLiquid: -1}},
-	103: {map[uint8]int{protocol.ItemPureLunarBlood: 2, uint8(MatMoonflower): 2, uint8(MatLunarDew): 2, protocol.ItemFreshWolfBlood: 1, uint8(MatGlowMushroom): 1,
-		protocol.ItemRawWolfMeat: -1, protocol.ItemOrganicTrash: -2, uint8(MatMud): -2}, map[string]int{MatPlantLiquid: 1, MatStone: -1}},
-	104: {map[uint8]int{protocol.ItemDarkPoisonGland: 2, uint8(MatVorpalSac): 2, uint8(MatGold): 2, uint8(MatVampireBlood): 1,
-		protocol.ItemHealingPotion: -1, uint8(MatMoonflower): -2, protocol.ItemSilverMoonAmulet: -2}, map[string]int{MatCrystal: 1, MatOrganBlood: 1}},
-	105: {map[uint8]int{protocol.ItemCookedNobleMeat: 2, protocol.ItemIronLongsword: 2, protocol.ItemHealingPotion: 1,
-		protocol.ItemDarkPoisonGland: -2, uint8(MatVorpalSac): -2, uint8(MatParasiteMycel): -1}, map[string]int{MatMetal: 1}},
-	106: {map[uint8]int{protocol.ItemCookedNobleMeat: 2, uint8(MatFeathers): 1, protocol.ItemRecurveBow: 2,
-		protocol.ItemOrganicTrash: -2, uint8(MatToxicWater): -1}, map[string]int{MatWood: 1}},
-	107: {map[uint8]int{uint8(MatMoonflower): 2, uint8(MatRiverLily): 2, protocol.ItemSilverMoonAmulet: 2, uint8(MatLunarDew): 1, protocol.ItemHerbalRemedy: 1,
-		protocol.ItemDarkPoisonGland: -2, uint8(MatVampireBlood): -2, uint8(MatParasiteMycel): -2}, map[string]int{MatOrganBlood: -1}},
-	108: {map[uint8]int{protocol.ItemStarlightRing: 2, uint8(MatStarRock): 2, uint8(MatManaCrystal): 2, uint8(MatLunarDew): 1, protocol.ItemManaPotion: 1,
-		protocol.ItemRawWolfMeat: -1, uint8(MatMud): -2}, map[string]int{MatCrystal: 1, MatHideThread: -1}},
-	109: {map[uint8]int{protocol.ItemAlphaWolfPelt: 2, protocol.ItemSharpWolfFang: 2, uint8(MatGameMeat): 1, protocol.ItemRawWolfMeat: 1,
+	100: {map[ItemID]int{ItemID(MatIron): 2, ItemID(MatTemperedSteel): 2, ItemID(MatCharcoal): 1, protocol.ItemCookedNobleMeat: 1,
+		ItemID(MatMoonflower): -1, protocol.ItemOrganicTrash: -2, ItemID(MatToxicWater): -2}, map[string]int{MatMetal: 1, MatAlloy: 2, MatPlantLiquid: -1}},
+	103: {map[ItemID]int{protocol.ItemPureLunarBlood: 2, ItemID(MatMoonflower): 2, ItemID(MatLunarDew): 2, protocol.ItemFreshWolfBlood: 1, ItemID(MatGlowMushroom): 1,
+		protocol.ItemRawWolfMeat: -1, protocol.ItemOrganicTrash: -2, ItemID(MatMud): -2}, map[string]int{MatPlantLiquid: 1, MatStone: -1}},
+	104: {map[ItemID]int{protocol.ItemDarkPoisonGland: 2, ItemID(MatVorpalSac): 2, ItemID(MatGold): 2, ItemID(MatVampireBlood): 1,
+		protocol.ItemHealingPotion: -1, ItemID(MatMoonflower): -2, protocol.ItemSilverMoonAmulet: -2}, map[string]int{MatCrystal: 1, MatOrganBlood: 1}},
+	105: {map[ItemID]int{protocol.ItemCookedNobleMeat: 2, protocol.ItemIronLongsword: 2, protocol.ItemHealingPotion: 1,
+		protocol.ItemDarkPoisonGland: -2, ItemID(MatVorpalSac): -2, ItemID(MatParasiteMycel): -1}, map[string]int{MatMetal: 1}},
+	106: {map[ItemID]int{protocol.ItemCookedNobleMeat: 2, ItemID(MatFeathers): 1, protocol.ItemRecurveBow: 2,
+		protocol.ItemOrganicTrash: -2, ItemID(MatToxicWater): -1}, map[string]int{MatWood: 1}},
+	107: {map[ItemID]int{ItemID(MatMoonflower): 2, ItemID(MatRiverLily): 2, protocol.ItemSilverMoonAmulet: 2, ItemID(MatLunarDew): 1, protocol.ItemHerbalRemedy: 1,
+		protocol.ItemDarkPoisonGland: -2, ItemID(MatVampireBlood): -2, ItemID(MatParasiteMycel): -2}, map[string]int{MatOrganBlood: -1}},
+	108: {map[ItemID]int{protocol.ItemStarlightRing: 2, ItemID(MatStarRock): 2, ItemID(MatManaCrystal): 2, ItemID(MatLunarDew): 1, protocol.ItemManaPotion: 1,
+		protocol.ItemRawWolfMeat: -1, ItemID(MatMud): -2}, map[string]int{MatCrystal: 1, MatHideThread: -1}},
+	109: {map[ItemID]int{protocol.ItemAlphaWolfPelt: 2, protocol.ItemSharpWolfFang: 2, ItemID(MatGameMeat): 1, protocol.ItemRawWolfMeat: 1,
 		protocol.ItemOrganicTrash: -1, protocol.ItemManaPotion: -1}, map[string]int{MatHideThread: 1, MatBone: 1, MatCrystal: -1}},
-	111: {map[uint8]int{protocol.ItemDarkPoisonGland: 2, uint8(MatVorpalSac): 2, protocol.ItemSteelDagger: 1,
-		uint8(MatMoonflower): -1, protocol.ItemCookedNobleMeat: -1}, map[string]int{MatOrganBlood: 1}},
-	112: {map[uint8]int{uint8(MatHerbs): 2, protocol.ItemHerbalRemedy: 2, protocol.ItemAlphaWolfPelt: 1,
-		uint8(MatVampireBlood): -2, protocol.ItemDarkPoisonGland: -1}, map[string]int{MatPlantLiquid: 1, MatAlloy: -1}},
-	113: {map[uint8]int{uint8(MatStarRock): 2, protocol.ItemStarlightRing: 2, uint8(MatLimestone): 1, uint8(MatQuartz): 1,
-		protocol.ItemRawWolfMeat: -1, uint8(MatGameMeat): -1}, map[string]int{MatStone: 1, MatCrystal: 1, MatOrganBlood: -2}},
-	114: {map[uint8]int{uint8(MatArachnaSilk): 2, protocol.ItemSilverMoonAmulet: 2, uint8(MatSpiderWeb): 1, uint8(MatThickFur): 1,
-		uint8(MatMud): -2, protocol.ItemOrganicTrash: -2}, map[string]int{MatHideThread: 1, MatStone: -1}},
-	115: {map[uint8]int{uint8(MatGameMeat): 2, protocol.ItemFreshWolfBlood: 2, protocol.ItemRawWolfMeat: 1, uint8(MatHerbs): 1, uint8(MatGoldenClover): 1,
-		uint8(MatToxicWater): -2, uint8(MatParasiteMycel): -2}, map[string]int{MatPlantLiquid: 1, MatMetal: -1}},
-	116: {map[uint8]int{protocol.ItemSharpWolfFang: 2, protocol.ItemAlphaWolfPelt: 2, uint8(MatHerbs): 1,
+	111: {map[ItemID]int{protocol.ItemDarkPoisonGland: 2, ItemID(MatVorpalSac): 2, protocol.ItemSteelDagger: 1,
+		ItemID(MatMoonflower): -1, protocol.ItemCookedNobleMeat: -1}, map[string]int{MatOrganBlood: 1}},
+	112: {map[ItemID]int{ItemID(MatHerbs): 2, protocol.ItemHerbalRemedy: 2, protocol.ItemAlphaWolfPelt: 1,
+		ItemID(MatVampireBlood): -2, protocol.ItemDarkPoisonGland: -1}, map[string]int{MatPlantLiquid: 1, MatAlloy: -1}},
+	113: {map[ItemID]int{ItemID(MatStarRock): 2, protocol.ItemStarlightRing: 2, ItemID(MatLimestone): 1, ItemID(MatQuartz): 1,
+		protocol.ItemRawWolfMeat: -1, ItemID(MatGameMeat): -1}, map[string]int{MatStone: 1, MatCrystal: 1, MatOrganBlood: -2}},
+	114: {map[ItemID]int{ItemID(MatArachnaSilk): 2, protocol.ItemSilverMoonAmulet: 2, ItemID(MatSpiderWeb): 1, ItemID(MatThickFur): 1,
+		ItemID(MatMud): -2, protocol.ItemOrganicTrash: -2}, map[string]int{MatHideThread: 1, MatStone: -1}},
+	115: {map[ItemID]int{ItemID(MatGameMeat): 2, protocol.ItemFreshWolfBlood: 2, protocol.ItemRawWolfMeat: 1, ItemID(MatHerbs): 1, ItemID(MatGoldenClover): 1,
+		ItemID(MatToxicWater): -2, ItemID(MatParasiteMycel): -2}, map[string]int{MatPlantLiquid: 1, MatMetal: -1}},
+	116: {map[ItemID]int{protocol.ItemSharpWolfFang: 2, protocol.ItemAlphaWolfPelt: 2, ItemID(MatHerbs): 1,
 		protocol.ItemWolfGreyPelt: -2, protocol.ItemCookedNobleMeat: -1}, map[string]int{MatBone: 1, MatAlloy: -1, MatMetal: -1}},
-	JewelerID: {map[uint8]int{uint8(MatFireRuby): 2, uint8(MatZeroSapphire): 2, uint8(MatGold): 2, uint8(MatSilver): 1, uint8(MatQuartz): 1,
-		uint8(MatMud): -2, protocol.ItemRawWolfMeat: -2}, map[string]int{MatCrystal: 1, MatOrganBlood: -1}},
+	JewelerID: {map[ItemID]int{ItemID(MatFireRuby): 2, ItemID(MatZeroSapphire): 2, ItemID(MatGold): 2, ItemID(MatSilver): 1, ItemID(MatQuartz): 1,
+		ItemID(MatMud): -2, protocol.ItemRawWolfMeat: -2}, map[string]int{MatCrystal: 1, MatOrganBlood: -1}},
 }
 
 // GiftTaste: o quanto o NPC gosta do item (2 ama .. -2 detesta).
-func GiftTaste(npcID uint32, item uint8) int {
+func GiftTaste(npcID uint32, item ItemID) int {
 	prefs, ok := npcGiftPrefs[npcID]
 	if !ok {
 		if item == protocol.ItemOrganicTrash {
@@ -161,6 +161,9 @@ func GiftTaste(npcID uint32, item uint8) int {
 		return 0
 	}
 	if v, ok := prefs.items[item]; ok {
+		return v
+	}
+	if v, ok := prefs.items[BaseOf(item)]; ok {
 		return v
 	}
 	if m, ok := MaterialsDB[uint16(item)]; ok {
@@ -182,7 +185,7 @@ type GiftResult struct {
 }
 
 // Gift entrega um presente (o item já foi validado/retirado pelo chamador).
-func (p *Player) Gift(npcID uint32, item, quality uint8, now float64) GiftResult {
+func (p *Player) Gift(npcID uint32, item ItemID, quality uint8, now float64) GiftResult {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
 	pts := p.NPCFriendship[npcID]
@@ -212,7 +215,7 @@ func (p *Player) Gift(npcID uint32, item, quality uint8, now float64) GiftResult
 // QuestStep: um passo do favor.
 type QuestStep struct {
 	Kind       string // "deliver" (entregar itens) ou "hunt" (abater criaturas)
-	Item       uint8
+	Item       ItemID
 	Qty        int
 	MinQuality uint8
 	Mobs       []uint8
@@ -230,12 +233,12 @@ type QuestDef struct {
 	MinHearts  int
 	Gold       uint32
 	Friendship int
-	RewardItem uint8
+	RewardItem ItemID
 	RewardQty  uint8
 	Thanks     string
 }
 
-func deliver(item uint8, qty int, minQ uint8) QuestStep {
+func deliver(item ItemID, qty int, minQ uint8) QuestStep {
 	return QuestStep{Kind: "deliver", Item: item, Qty: qty, MinQuality: minQ}
 }
 
@@ -246,21 +249,21 @@ func hunt(label string, count int, mobs ...uint8) QuestStep {
 // QuestDefs: favores de cada NPC (os de 2 corações são simples; os de 3+ são complexos, em etapas).
 var QuestDefs = []QuestDef{
 	{1, 100, "Lenha para a Forja", "A fornalha come lenha como um dragão. Me traz 6 toras de Pinho do Refúgio?",
-		[]QuestStep{deliver(uint8(MatPineRefuge), 6, 0)}, 2, 60, 6, 0, 0, "Isso mantém o fogo aceso por dias. Obrigado!"},
+		[]QuestStep{deliver(ItemID(MatPineRefuge), 6, 0)}, 2, 60, 6, 0, 0, "Isso mantém o fogo aceso por dias. Obrigado!"},
 	{2, 100, "Ferro de Primeira", "Estou com uma encomenda grande e o ferro acabou. Preciso de 5 Ferros com Qualidade 60 ou mais.",
-		[]QuestStep{deliver(uint8(MatIron), 5, 60)}, 2, 140, 8, uint8(MatCharcoal), 4, "Ferro bom faz espada boa. Leva esse carvão pra você."},
+		[]QuestStep{deliver(ItemID(MatIron), 5, 60)}, 2, 140, 8, ItemID(MatCharcoal), 4, "Ferro bom faz espada boa. Leva esse carvão pra você."},
 	{3, 100, "A Ameaça dos Saqueadores", "Saqueadores roubaram minhas ferramentas a caminho das Ruínas. Derrube 4 deles e me traga 3 Sucatas Metálicas que eles carregam.",
 		[]QuestStep{hunt("Saqueadores Deserdados", 4, protocol.MobTypeOutcastRaider), deliver(protocol.ItemMetalScrap, 3, 0)}, 3, 320, 12, ItemIronPickaxe, 1, "Você é dos meus. Essa picareta é por minha conta."},
 	{10, 103, "Ervas Frescas", "Meu estoque de ervas medicinais está no fim. Pode colher 6 para mim?",
-		[]QuestStep{deliver(uint8(MatHerbs), 6, 0)}, 2, 55, 6, protocol.ItemHealingPotion, 1, "Perfeitas! Uma poção pelo seu trabalho."},
+		[]QuestStep{deliver(ItemID(MatHerbs), 6, 0)}, 2, 55, 6, protocol.ItemHealingPotion, 1, "Perfeitas! Uma poção pelo seu trabalho."},
 	{11, 103, "Pétalas da Lua", "Uma cliente pediu um elixir raro. Preciso de 3 Flores-da-Lua com Qualidade 70+.",
-		[]QuestStep{deliver(uint8(MatMoonflower), 3, 70)}, 2, 120, 8, protocol.ItemManaPotion, 2, "Que perfume! Vou destilar agora mesmo."},
+		[]QuestStep{deliver(ItemID(MatMoonflower), 3, 70)}, 2, 120, 8, protocol.ItemManaPotion, 2, "Que perfume! Vou destilar agora mesmo."},
 	{12, 103, "Sangue para a Pesquisa", "Estudo o sangue das feras do Bosque. Abata 3 Lobos da Bruma e me traga 2 frascos de Sangue de Lobo.",
-		[]QuestStep{hunt("Lobos da Bruma", 3, protocol.MobTypeMistWolf), deliver(uint8(MatWolfBlood), 2, 0)}, 3, 260, 12, protocol.ItemWolfBloodPotion, 1, "Isso vai render um tratado inteiro. Obrigada!"},
+		[]QuestStep{hunt("Lobos da Bruma", 3, protocol.MobTypeMistWolf), deliver(ItemID(MatWolfBlood), 2, 0)}, 3, 260, 12, protocol.ItemWolfBloodPotion, 1, "Isso vai render um tratado inteiro. Obrigada!"},
 	{20, 104, "Entrega Discreta", "Pssiu... preciso de 2 Glândulas de Veneno Sombrio. Não pergunte para quê.",
 		[]QuestStep{deliver(protocol.ItemDarkPoisonGland, 2, 0)}, 2, 150, 7, 0, 0, "Ninguém viu nada. Aqui está o combinado."},
 	{21, 104, "Limpeza no Beco", "Uns cultistas andam xeretando meus negócios. Some com 3 deles no Santuário e me traga uma Bolsa de Veneno Vorpal como prova.",
-		[]QuestStep{hunt("Cultistas Sombrios", 3, protocol.MobTypeDarkCultist), deliver(uint8(MatVorpalSac), 1, 0)}, 3, 380, 12, protocol.ItemObsidianRing, 1, "Você tem talento para as sombras. Fique com isto."},
+		[]QuestStep{hunt("Cultistas Sombrios", 3, protocol.MobTypeDarkCultist), deliver(ItemID(MatVorpalSac), 1, 0)}, 3, 380, 12, protocol.ItemObsidianRing, 1, "Você tem talento para as sombras. Fique com isto."},
 	{30, 105, "Patrulha do Bosque", "Lobos atacaram uma carroça na estrada sul. Abata 4 Lobos da Bruma.",
 		[]QuestStep{hunt("Lobos da Bruma", 4, protocol.MobTypeMistWolf)}, 2, 110, 7, protocol.ItemHealingPotion, 2, "A estrada está segura de novo. Bom trabalho, recruta."},
 	{31, 105, "Rações para a Guarda", "Meus homens estão famintos. Traga 4 Carnes Nobres Assadas.",
@@ -268,41 +271,41 @@ var QuestDefs = []QuestDef{
 	{32, 105, "A Fortaleza Perdida", "Precisamos enfraquecer as Ruínas: derrube 3 Besteiros da Vigília e depois 1 Executor de Ferro.",
 		[]QuestStep{hunt("Besteiros da Vigília", 3, protocol.MobTypeVigilCrossbowman), hunt("Executor de Ferro", 1, protocol.MobTypeIronEnforcer)}, 3, 480, 14, protocol.ItemVigilHelmet, 1, "Você honra a Guarda. Este elmo é seu."},
 	{40, 106, "Penas para Flechas", "Fico sem flechas toda semana. Me traga 8 Penas?",
-		[]QuestStep{deliver(uint8(MatFeathers), 8, 0)}, 2, 70, 6, 0, 0, "Agora sim, aljava cheia!"},
+		[]QuestStep{deliver(ItemID(MatFeathers), 8, 0)}, 2, 70, 6, 0, 0, "Agora sim, aljava cheia!"},
 	{41, 106, "Ursos na Trilha", "Um Urso-Pardo bloqueia a trilha do Bosque. Afaste-o de vez.",
 		[]QuestStep{hunt("Urso-Pardo do Bosque", 1, 110)}, 3, 260, 12, protocol.ItemHuntersQuiver, 1, "Corajoso! Fique com minha aljava reserva."},
 	{50, 107, "Lírios para o Altar", "O altar precisa de flores puras. Traga 4 Lírios-do-Rio.",
-		[]QuestStep{deliver(uint8(MatRiverLily), 4, 0)}, 2, 60, 7, protocol.ItemHerbalRemedy, 1, "Que a Luz o acompanhe."},
+		[]QuestStep{deliver(ItemID(MatRiverLily), 4, 0)}, 2, 60, 7, protocol.ItemHerbalRemedy, 1, "Que a Luz o acompanhe."},
 	{51, 107, "Descanso aos Mortos", "Os mortos-vivos perturbam o cemitério. Dê descanso a 3 Zumbis.",
 		[]QuestStep{hunt("Zumbis", 3, protocol.MobTypeZombie)}, 3, 240, 12, protocol.ItemHealingPotion, 3, "As almas agradecem. E eu também."},
 	{60, 108, "Cristais de Quartzo", "Preciso de 3 Quartzos para calibrar meu telescópio.",
-		[]QuestStep{deliver(uint8(MatQuartz), 3, 0)}, 2, 110, 7, protocol.ItemManaPotion, 1, "As estrelas estarão mais nítidas esta noite."},
+		[]QuestStep{deliver(ItemID(MatQuartz), 3, 0)}, 2, 110, 7, protocol.ItemManaPotion, 1, "As estrelas estarão mais nítidas esta noite."},
 	{61, 108, "Fragmentos Estelares", "Uma chuva de meteoros caiu no Santuário. Traga 2 Rochas Estelares com Qualidade 65+.",
-		[]QuestStep{deliver(uint8(MatStarRock), 2, 65)}, 3, 320, 12, protocol.ItemArcaneOrb, 1, "Extraordinário! Este orbe ressoa com elas."},
+		[]QuestStep{deliver(ItemID(MatStarRock), 2, 65)}, 3, 320, 12, protocol.ItemArcaneOrb, 1, "Extraordinário! Este orbe ressoa com elas."},
 	{70, 109, "Carne para o Posto", "O posto está sem carne. Traga 5 Carnes de Caça.",
-		[]QuestStep{deliver(uint8(MatGameMeat), 5, 0)}, 2, 80, 6, 0, 0, "Isso alimenta a matilha de caçadores por uma semana."},
+		[]QuestStep{deliver(ItemID(MatGameMeat), 5, 0)}, 2, 80, 6, 0, 0, "Isso alimenta a matilha de caçadores por uma semana."},
 	{71, 109, "A Grande Caçada", "Prove seu valor: abata 3 Cervos-Galheiros e 2 Javalis Selvagens, e me traga 3 Couros de Javali bem tirados (Qualidade 60+).",
-		[]QuestStep{hunt("Cervos-Galheiros", 3, 102), hunt("Javalis Selvagens", 2, protocol.MobTypeWildBoar, 120), deliver(uint8(MatBoarLeather), 3, 60)}, 3, 420, 14, protocol.ItemAutopsyDagger, 1, "Esse é um caçador! Leve minha melhor adaga de autópsia."},
+		[]QuestStep{hunt("Cervos-Galheiros", 3, 102), hunt("Javalis Selvagens", 2, protocol.MobTypeWildBoar, 120), deliver(ItemID(MatBoarLeather), 3, 60)}, 3, 420, 14, protocol.ItemAutopsyDagger, 1, "Esse é um caçador! Leve minha melhor adaga de autópsia."},
 	{80, 114, "Linha e Agulha", "Acabaram minhas linhas grossas. Traga 6, querida(o).",
-		[]QuestStep{deliver(uint8(MatRoughThread), 6, 0)}, 2, 70, 6, 0, 0, "Divino! Já posso terminar o vestido."},
+		[]QuestStep{deliver(ItemID(MatRoughThread), 6, 0)}, 2, 70, 6, 0, 0, "Divino! Já posso terminar o vestido."},
 	{81, 114, "Couro de Lobo Impecável", "Um nobre encomendou um casaco. Preciso de 4 Couros de Lobo com Qualidade 70+.",
-		[]QuestStep{deliver(uint8(MatWolfLeather), 4, 70)}, 3, 300, 12, protocol.ItemWolfLeatherPants, 1, "Perfeitos, sem um furo! Leve estas calças."},
+		[]QuestStep{deliver(ItemID(MatWolfLeather), 4, 70)}, 3, 300, 12, protocol.ItemWolfLeatherPants, 1, "Perfeitos, sem um furo! Leve estas calças."},
 	{90, 115, "Ingredientes do Dia", "Hoje tem ensopado! Traga 4 Carnes de Caça e 3 Ervas Medicinais.",
-		[]QuestStep{deliver(uint8(MatGameMeat), 4, 0), deliver(uint8(MatHerbs), 3, 0)}, 2, 90, 7, protocol.ItemCookedNobleMeat, 2, "Vai sair o melhor ensopado da Vila!"},
+		[]QuestStep{deliver(ItemID(MatGameMeat), 4, 0), deliver(ItemID(MatHerbs), 3, 0)}, 2, 90, 7, protocol.ItemCookedNobleMeat, 2, "Vai sair o melhor ensopado da Vila!"},
 	{91, 115, "O Trevo da Sorte", "Dizem que o Trevo-Dourado dá sabor de festa. Me traz 2?",
-		[]QuestStep{deliver(uint8(MatGoldenClover), 2, 0)}, 3, 200, 12, protocol.ItemCookedNobleMeat, 3, "Sabor de festa! A casa agradece."},
+		[]QuestStep{deliver(ItemID(MatGoldenClover), 2, 0)}, 3, 200, 12, protocol.ItemCookedNobleMeat, 3, "Sabor de festa! A casa agradece."},
 	{100, 112, "Ervas da Montanha", "Meu chá precisa de ervas. Traga 5 Ervas Medicinais.",
-		[]QuestStep{deliver(uint8(MatHerbs), 5, 0)}, 2, 60, 7, protocol.ItemHerbalRemedy, 1, "Um bom chá acalma até o mais feroz dos espíritos."},
+		[]QuestStep{deliver(ItemID(MatHerbs), 5, 0)}, 2, 60, 7, protocol.ItemHerbalRemedy, 1, "Um bom chá acalma até o mais feroz dos espíritos."},
 	{110, 113, "Pedra para a Estátua", "Preciso de 6 blocos de Calcário para uma nova estátua.",
-		[]QuestStep{deliver(uint8(MatLimestone), 6, 0)}, 2, 70, 7, 0, 0, "A pedra já sussurra o que quer ser."},
+		[]QuestStep{deliver(ItemID(MatLimestone), 6, 0)}, 2, 70, 7, 0, 0, "A pedra já sussurra o que quer ser."},
 	{120, 111, "Silêncio na Mata", "Víboras do Musgo andam mordendo meus informantes. Elimine 3.",
 		[]QuestStep{hunt("Víboras-do-Musgo", 3, 116)}, 2, 120, 7, 0, 0, "Silêncio... é assim que eu gosto."},
 	{130, 116, "Respeito à Matilha", "Caçadores mataram demais por aqui. Devolva à terra 3 Presas de Lobo.",
 		[]QuestStep{deliver(protocol.ItemSharpWolfFang, 3, 0)}, 2, 40, 9, 0, 0, "A matilha sentirá sua gratidão."},
 	{140, JewelerID, "Prata para Joias", "Preciso de 4 Pratas para uma encomenda real.",
-		[]QuestStep{deliver(uint8(MatSilver), 4, 0)}, 2, 160, 7, 0, 0, "Brilha como a lua cheia!"},
+		[]QuestStep{deliver(ItemID(MatSilver), 4, 0)}, 2, 160, 7, 0, 0, "Brilha como a lua cheia!"},
 	{141, JewelerID, "O Rubi Perfeito", "Um colecionador quer um Rubi de Fogo com Qualidade 80+.",
-		[]QuestStep{deliver(uint8(MatFireRuby), 1, 80)}, 3, 380, 14, protocol.ItemBloodRubyRing, 1, "Que lapidação natural! Este anel é seu."},
+		[]QuestStep{deliver(ItemID(MatFireRuby), 1, 80)}, 3, 380, 14, protocol.ItemBloodRubyRing, 1, "Que lapidação natural! Este anel é seu."},
 }
 
 // QuestByID devolve a definição do favor.

@@ -61,7 +61,7 @@ func (s *Server) sendGuildState(p *world.Player, msg string) {
 		})
 	}
 	for i := range st.Orders {
-		st.Orders[i].Have = int(p.GetItemCount(uint8(st.Orders[i].ID)))
+		st.Orders[i].Have = len(p.FamilyUnits(world.ItemID(st.Orders[i].ID)))
 	}
 	sort.Slice(st.Orders, func(i, j int) bool {
 		if st.Orders[i].Food != st.Orders[j].Food {
@@ -95,7 +95,7 @@ func (s *Server) handleGuildAction(playerID uint32, data []byte) {
 	}
 	action := data[1]
 	npcID := binary.LittleEndian.Uint32(data[2:6])
-	item, qty := data[6], data[7]
+	item, qty := binary.LittleEndian.Uint16(data[6:8]), data[8]
 	msg := ""
 	if action == protocol.GuildActionDeliver && qty > 0 {
 		msg = s.guildDeliver(p, npcID, item, qty)
@@ -104,7 +104,7 @@ func (s *Server) handleGuildAction(playerID uint32, data []byte) {
 }
 
 // guildDeliver entrega itens de uma encomenda pelo preço combinado (a Guilda leva o pacote ao NPC).
-func (s *Server) guildDeliver(p *world.Player, npcID uint32, item, qty uint8) string {
+func (s *Server) guildDeliver(p *world.Player, npcID uint32, item world.ItemID, qty uint8) string {
 	s.mu.RLock()
 	npc := s.npcs[npcID]
 	s.mu.RUnlock()
@@ -129,11 +129,11 @@ func (s *Server) guildDeliver(p *world.Player, npcID uint32, item, qty uint8) st
 		return fmt.Sprintf("%s está sem ouro para pagar agora.", npc.Name)
 	}
 	taken := 0
-	for _, q := range p.UnitQualities(item) {
+	for _, u := range p.FamilyUnits(item) {
 		if taken >= n {
 			break
 		}
-		taken += int(p.TakeItemUnits(item, q, 1))
+		taken += int(p.TakeItemUnits(u.ID, u.Quality, 1))
 	}
 	if taken == 0 {
 		return "Você não tem esse item."
@@ -195,7 +195,7 @@ func (s *Server) handleFountainUse(playerID uint32, action uint8) {
 			return
 		}
 		p.RemoveItem(protocol.ItemEmptyFlask, n)
-		p.AddItemWithQuality(uint8(world.MatPureWater), n, 95)
+		p.AddItemWithQuality(world.ItemID(world.MatPureWater), n, 95)
 		s.sendInventorySync(p)
 		s.sendPlayerNPCSay(p, 0, fmt.Sprintf("🧪 Você encheu %d frasco(s) com Água Pura da Fonte (Qualidade 95).", n))
 	case 3: // lavar-se
@@ -206,4 +206,23 @@ func (s *Server) handleFountainUse(playerID uint32, action uint8) {
 			s.sendPlayerNPCSay(p, 0, "🫧 Você lava o rosto e os braços. O calor some e você se sente renovado.")
 		}
 	}
+}
+
+// devGiveItem (0x67): o Dev pega qualquer item pelo ID u16 (partes de criatura, madeiras...).
+func (s *Server) devGiveItem(playerID uint32, item world.ItemID) {
+	s.mu.RLock()
+	p := s.players[playerID]
+	q := s.devItemQuality[playerID]
+	s.mu.RUnlock()
+	if p == nil {
+		return
+	}
+	if _, ok := world.ItemCatalog[item]; !ok {
+		return
+	}
+	if q == 0 {
+		q = world.DefaultQualityFor(item)
+	}
+	p.AddItemWithQuality(item, 1, q)
+	s.sendInventorySync(p)
 }

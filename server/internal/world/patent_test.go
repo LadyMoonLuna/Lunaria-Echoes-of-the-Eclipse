@@ -10,10 +10,10 @@ import (
 // Espada simples: Ponta Reta em cima, Guarda Cruzada, Cabo Curto e Bainha ao lado.
 func sampleSword() []PuzzlePlacement {
 	return []PuzzlePlacement{
-		{Module: 1, X: 3, Y: 0, Material: uint8(MatTemperedSteel)},
-		{Module: 10, X: 2, Y: 2, Material: uint8(MatCopper)}, // células (3,2),(2,3),(3,3),(4,3)
-		{Module: 15, X: 3, Y: 4, Material: uint8(MatStormCedar)},
-		{Module: 19, X: 4, Y: 4, Material: uint8(MatBoarLeather)},
+		{Module: 1, X: 3, Y: 0, Material: ItemID(MatTemperedSteel)},
+		{Module: 10, X: 2, Y: 2, Material: ItemID(MatCopper)}, // células (3,2),(2,3),(3,3),(4,3)
+		{Module: 15, X: 3, Y: 4, Material: ItemID(MatStormCedar)},
+		{Module: 19, X: 4, Y: 4, Material: ItemID(MatBoarLeather)},
 	}
 }
 
@@ -42,11 +42,11 @@ func TestPuzzleValidation(t *testing.T) {
 	if err := ValidatePuzzle(noSheath); err == nil || !strings.Contains(err.Error(), "Bainha") {
 		t.Fatalf("sem bainha deveria falhar: %v", err)
 	}
-	loose := append(sampleSword(), PuzzlePlacement{Module: 11, X: 0, Y: 6, Material: uint8(MatCopper)})
+	loose := append(sampleSword(), PuzzlePlacement{Module: 11, X: 0, Y: 6, Material: ItemID(MatCopper)})
 	if err := ValidatePuzzle(loose); err == nil {
 		t.Fatal("peça solta deveria falhar")
 	}
-	out := append(sampleSword()[:3:3], PuzzlePlacement{Module: 16, X: 6, Y: 5, Material: uint8(MatPineRefuge)})
+	out := append(sampleSword()[:3:3], PuzzlePlacement{Module: 16, X: 6, Y: 5, Material: ItemID(MatPineRefuge)})
 	if err := ValidatePuzzle(out); err == nil {
 		t.Fatal("peça fora da grade deveria falhar")
 	}
@@ -75,7 +75,7 @@ func TestPatentBlocksOtherPlayerButNotCreator(t *testing.T) {
 	if _, err, denied := b.ForgePuzzle("Cópia", sampleSword(), "Jogador #2"); !denied || err == nil || err.Error() != PatentDeniedMessage {
 		t.Fatalf("outro jogador deveria ser barrado: %v", err)
 	}
-	if b.Inventory[uint8(MatCopper)] != 3 {
+	if b.Inventory[ItemID(MatCopper)] != 3 {
 		t.Fatal("o bloqueio não pode consumir materiais")
 	}
 	if _, err, _ := a.ForgePuzzle("Eclipse Cortante II", sampleSword(), "Jogador #1"); err != nil {
@@ -85,8 +85,8 @@ func TestPatentBlocksOtherPlayerButNotCreator(t *testing.T) {
 		t.Fatal("não deveria duplicar a blueprint exclusiva")
 	}
 	other := sampleSword()
-	other[2].Material = uint8(MatPineRefuge)
-	b.AddItemWithQuality(uint8(MatPineRefuge), 1, 80)
+	other[2].Material = ItemID(MatPineRefuge)
+	b.AddItemWithQuality(ItemID(MatPineRefuge), 1, 80)
 	if _, err, denied := b.ForgePuzzle("Minha", other, "Jogador #2"); err != nil || denied {
 		t.Fatalf("material diferente é outra patente: %v", err)
 	}

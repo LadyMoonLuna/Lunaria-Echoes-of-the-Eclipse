@@ -1,6 +1,7 @@
 package network
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"math/rand"
@@ -57,41 +58,31 @@ func (s *Server) handleForgePacket(playerID uint32, data []byte) {
 	var err error
 	switch data[0] {
 	case protocol.PacketTypeForgeAlloy:
-		var ings []uint8
-		for _, id := range data[1:protocol.ForgeAlloyPacketSize] {
-			if id != 0 {
-				ings = append(ings, id)
-			}
-		}
+		ings := protocol.ReadItemIDs(data[1:], 4, true)
 		res, err = player.SmeltAlloy(ings)
 	case protocol.PacketTypeForgeBlueprint:
 		bp, ok := world.GetBlueprint(data[1])
 		if !ok {
 			return
 		}
-		picks := append([]uint8(nil), data[2:2+len(bp.Parts)]...)
+		picks := protocol.ReadItemIDs(data[2:], len(bp.Parts), false)
 		res, err = player.ForgeBlueprint(bp.ID, picks)
 	case protocol.PacketTypeForgeAlloyScored:
-		var ings []uint8
-		for _, id := range data[1:5] {
-			if id != 0 {
-				ings = append(ings, id)
-			}
-		}
-		res, err = player.SmeltAlloyScored(ings, world.ScoresFromBytes(data[5:]))
+		ings := protocol.ReadItemIDs(data[1:9], 4, true)
+		res, err = player.SmeltAlloyScored(ings, world.ScoresFromBytes(data[9:]))
 	case protocol.PacketTypeForgeBlueprintScored:
 		bp, ok := world.GetBlueprint(data[1])
 		if !ok {
 			return
 		}
-		picks := append([]uint8(nil), data[2:2+len(bp.Parts)]...)
-		res, err = player.ForgeBlueprintScored(bp.ID, picks, world.ScoresFromBytes(data[2+protocol.ForgeMaxParts:]))
+		picks := protocol.ReadItemIDs(data[2:], len(bp.Parts), false)
+		res, err = player.ForgeBlueprintScored(bp.ID, picks, world.ScoresFromBytes(data[2+2*protocol.ForgeMaxParts:]))
 	case protocol.PacketTypeReforgePart:
-		wr, werr := player.WorkPart(data[1], int(data[2]), data[3], world.ScoresFromBytes(data[4:]))
+		wr, werr := player.WorkPart(data[1], int(data[2]), binary.LittleEndian.Uint16(data[3:5]), world.ScoresFromBytes(data[5:]))
 		s.sendPartResult(player, data[1], data[2], wr, werr)
 		return
 	case protocol.PacketTypePuzzlePart:
-		wr, werr := player.WorkPuzzlePart(int(data[1]), data[2], data[3], world.ScoresFromBytes(data[4:]))
+		wr, werr := player.WorkPuzzlePart(int(data[1]), data[2], binary.LittleEndian.Uint16(data[3:5]), world.ScoresFromBytes(data[5:]))
 		s.sendPartResult(player, 0, data[1], wr, werr)
 		return
 	default:
@@ -135,7 +126,7 @@ func (s *Server) buyBlueprint(p *world.Player, id uint8) {
 }
 
 // useBlueprintScroll: ler uma Blueprint Antiga ensina a blueprint e consome o pergaminho.
-func (s *Server) useBlueprintScroll(p *world.Player, itemID uint8, bp world.BlueprintDef) {
+func (s *Server) useBlueprintScroll(p *world.Player, itemID world.ItemID, bp world.BlueprintDef) {
 	if !p.LearnBlueprint(bp.ID) {
 		s.sendPlayerNPCSay(p, 0, fmt.Sprintf("Você já conhece a blueprint %s.", bp.Name))
 		return
@@ -256,12 +247,9 @@ func (s *Server) sendPuzzleState(p *world.Player) {
 }
 
 // sendFusionInfo (0x5C): dificuldade do Mini-game 2 para os ingredientes do cadinho.
-func (s *Server) sendFusionInfo(p *world.Player, ids []uint8) {
+func (s *Server) sendFusionInfo(p *world.Player, raw []byte) {
 	var mats []world.MaterialDef
-	for _, id := range ids {
-		if id == 0 {
-			continue
-		}
+	for _, id := range protocol.ReadItemIDs(raw, 4, true) {
 		if m, ok := p.MaterialFor(id); ok {
 			mats = append(mats, m)
 		}

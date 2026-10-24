@@ -32,7 +32,7 @@ const NoSlot uint8 = 255
 // joias/relíquias leves 0.1–0.3 | poções, frascos, órgãos e comidas 0.4–0.8 |
 // adagas, agulhas, cajados, tecido e botas leves 1.2–2.5 | espadas de 1 mão, arcos, chicotes,
 // couro e minérios 3.5–6.0 | armas colossais, martelos, cutelos, escudos e placas 12–22.
-var ItemCatalog = map[uint8]ItemInfo{
+var ItemCatalog = map[ItemID]ItemInfo{
 	protocol.ItemEmptyFlask:      {Name: "Frasco de Vidro Vazio", Weight: 0.4, Slot: NoSlot},
 	protocol.ItemRawWolfMeat:     {Name: "Carne Crua de Lobo", Weight: 0.8, Slot: NoSlot},
 	protocol.ItemCookedNobleMeat: {Name: "Carne Nobre Assada", Weight: 0.7, Slot: NoSlot},
@@ -132,7 +132,7 @@ func init() {
 }
 
 // GetItemInfo devolve os dados do item (itens desconhecidos pesam 0.5 kg e não equipam).
-func GetItemInfo(itemID uint8) ItemInfo {
+func GetItemInfo(itemID ItemID) ItemInfo {
 	if info, ok := ItemCatalog[itemID]; ok {
 		return info
 	}
@@ -184,7 +184,7 @@ func WeightSpeedMultiplier(current, max float32) float32 {
 }
 
 // ItemName devolve o nome legível de um item ou material.
-func ItemName(itemID uint8) string {
+func ItemName(itemID ItemID) string {
 	if n := GetItemInfo(itemID).Name; n != "" {
 		return n
 	}

@@ -782,12 +782,10 @@ func _item_name(item_id: int) -> String:
 
 # Propriedades de Forja/Ligas do material extraído
 func _forge_props(item_id: int) -> String:
+	# Sem descrições nem propriedades: o jogador descobre para que serve cada parte
 	if not ItemData.is_material(item_id):
 		return ""
-	var m: Dictionary = ItemData.material(item_id)
-	return "\n⚒ %s • %s | Durab. %d | %s | Térm. %d%% Elét. %d%% Mág. %d%%\n%s" % [
-		ItemData.CATEGORY_NAMES.get(m["category"], m["category"]), ItemData.rarity_name(int(m["rarity"])),
-		int(m["durability"]), m["resist"], int(m["thermal"]), int(m["electric"]), int(m["magic"]), m["trait"]]
+	return "\n%s" % ItemData.rarity_name(int(ItemData.material(item_id)["rarity"]))
 
 func _get_organ_type_name(otype: int) -> String:
 	match otype:
@@ -802,6 +800,15 @@ func _get_organ_type_name(otype: int) -> String:
 		9: return "Pulmões"
 		10: return "Olhos"
 		11: return "Bolsa de Veneno"
+		12: return "Patas"
+		13: return "Cabeça"
+		14: return "Cauda"
+		15: return "Asas"
+		16: return "Bico"
+		17: return "Barbatanas"
+		18: return "Pinças"
+		19: return "Antenas"
+		20: return "Ossos"
 		_: return "Ponto Vital"
 
 # Desenho visual em tempo real da Barra Colorida e do Pêndulo

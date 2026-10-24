@@ -8,13 +8,13 @@ import (
 
 // Forja — Etapa 2 (Fornalha de Ligas e Forja por Blueprints)
 const (
-	PacketTypeForgeAlloy     uint8 = 0x51 // [Client -> Server] Fundir até 4 ingredientes (5 bytes)
-	PacketTypeForgeBlueprint uint8 = 0x52 // [Client -> Server] Forjar blueprint escolhendo o material de cada peça (8 bytes)
+	PacketTypeForgeAlloy     uint8 = 0x51 // [Client -> Server] Fundir até 4 ingredientes (9 bytes)
+	PacketTypeForgeBlueprint uint8 = 0x52 // [Client -> Server] Forjar blueprint escolhendo o material de cada peça (14 bytes)
 	PacketTypeForgeAction    uint8 = 0x53 // [Client -> Server] Pedir estado da forja / comprar blueprint (3 bytes)
 	PacketTypeForgeState     uint8 = 0x54 // [Server -> Client] Blueprints conhecidas e peças únicas (tamanho variável)
 
-	ForgeAlloyPacketSize     = 5
-	ForgeBlueprintPacketSize = 8
+	ForgeAlloyPacketSize     = 1 + 2*4             // op | 4 ingredientes u16
+	ForgeBlueprintPacketSize = 2 + 2*ForgeMaxParts // op | blueprint | 6 materiais u16
 	ForgeActionPacketSize    = 3
 	ForgeMaxParts            = 6
 
@@ -24,11 +24,12 @@ const (
 
 // ForgeCustomEntry: peça única (liga sintética ou equipamento forjado) enviada ao cliente.
 type ForgeCustomEntry struct {
-	ID, Kind, Slot, Rarity, ToolKind, ToolTier uint8
-	Weight                                     float32
-	ATK, DEF, HP, Durability                   uint16
-	Thermal, Electric, Magic                   uint8
-	Name, Desc, Resist                         string
+	ID                                     ItemID
+	Kind, Slot, Rarity, ToolKind, ToolTier uint8
+	Weight                                 float32
+	ATK, DEF, HP, Durability               uint16
+	Thermal, Electric, Magic               uint8
+	Name, Desc, Resist                     string
 }
 
 func putString(buf []byte, s string) []byte {
@@ -45,7 +46,8 @@ func SerializeForgeState(blueprints []uint8, custom []ForgeCustomEntry) []byte {
 	buf = append(buf, blueprints...)
 	buf = append(buf, uint8(len(custom)))
 	for _, c := range custom {
-		buf = append(buf, c.ID, c.Kind, c.Slot, c.Rarity, c.ToolKind, c.ToolTier)
+		buf = binary.LittleEndian.AppendUint16(buf, c.ID)
+		buf = append(buf, c.Kind, c.Slot, c.Rarity, c.ToolKind, c.ToolTier)
 		buf = binary.LittleEndian.AppendUint32(buf, math.Float32bits(c.Weight))
 		buf = binary.LittleEndian.AppendUint16(buf, c.ATK)
 		buf = binary.LittleEndian.AppendUint16(buf, c.DEF)
@@ -89,11 +91,13 @@ func DeserializeForgeState(data []byte) ([]uint8, []ForgeCustomEntry, error) {
 	}
 	var out []ForgeCustomEntry
 	for k := 0; k < cn; k++ {
-		if len(data) < i+21 {
+		if len(data) < i+22 {
 			return nil, nil, errors.New("entrada curta")
 		}
 		var c ForgeCustomEntry
-		c.ID, c.Kind, c.Slot, c.Rarity, c.ToolKind, c.ToolTier = data[i], data[i+1], data[i+2], data[i+3], data[i+4], data[i+5]
+		c.ID = binary.LittleEndian.Uint16(data[i:])
+		i++
+		c.Kind, c.Slot, c.Rarity, c.ToolKind, c.ToolTier = data[i+1], data[i+2], data[i+3], data[i+4], data[i+5]
 		c.Weight = math.Float32frombits(binary.LittleEndian.Uint32(data[i+6:]))
 		c.ATK = binary.LittleEndian.Uint16(data[i+10:])
 		c.DEF = binary.LittleEndian.Uint16(data[i+12:])
@@ -129,7 +133,10 @@ const (
 )
 
 // PuzzlePiece: módulo, âncora x/y, rotação e material (5 bytes no fio).
-type PuzzlePiece struct{ Module, X, Y, Rot, Material uint8 }
+type PuzzlePiece struct {
+	Module, X, Y, Rot uint8
+	Material          ItemID
+}
 
 // RegisterCustomWeapon: nome digitado e peças montadas na grade.
 type RegisterCustomWeapon struct {
@@ -142,7 +149,8 @@ type RegisterCustomWeapon struct {
 func appendPieces(buf []byte, pieces []PuzzlePiece) []byte {
 	buf = append(buf, uint8(len(pieces)))
 	for _, p := range pieces {
-		buf = append(buf, p.Module, p.X, p.Y, p.Rot, p.Material)
+		buf = append(buf, p.Module, p.X, p.Y, p.Rot)
+		buf = binary.LittleEndian.AppendUint16(buf, p.Material)
 	}
 	return buf
 }
@@ -153,15 +161,15 @@ func readPieces(data []byte, i int) ([]PuzzlePiece, int, error) {
 	}
 	n := int(data[i])
 	i++
-	if len(data) < i+n*5 {
+	if len(data) < i+n*6 {
 		return nil, i, errors.New("peças curtas")
 	}
 	out := make([]PuzzlePiece, n)
 	for k := 0; k < n; k++ {
-		b := data[i+k*5:]
-		out[k] = PuzzlePiece{b[0], b[1], b[2], b[3], b[4]}
+		b := data[i+k*6:]
+		out[k] = PuzzlePiece{Module: b[0], X: b[1], Y: b[2], Rot: b[3], Material: binary.LittleEndian.Uint16(b[4:6])}
 	}
-	return out, i + n*5, nil
+	return out, i + n*6, nil
 }
 
 // SerializeRegisterCustomWeapon (cliente -> servidor; usado nos testes).
@@ -252,10 +260,10 @@ const (
 	PacketTypeFusionInfo           uint8 = 0x5C // [S->C] op | dificuldade u16 (×1000) | diferença u16 (×10) (5 bytes)
 
 	MiniGameCount                  = 7
-	ForgeAlloyScoredPacketSize     = 1 + 4 + MiniGameCount
-	ForgeBlueprintScoredPacketSize = 1 + 1 + ForgeMaxParts + MiniGameCount
-	ReforgePartPacketSize          = 1 + 3 + MiniGameCount
-	FusionQueryPacketSize          = 5
+	ForgeAlloyScoredPacketSize     = 1 + 2*4 + MiniGameCount
+	ForgeBlueprintScoredPacketSize = 1 + 1 + 2*ForgeMaxParts + MiniGameCount
+	ReforgePartPacketSize          = 1 + 2 + 2 + MiniGameCount // op | blueprint | peça | material u16 | notas
+	FusionQueryPacketSize          = 1 + 2*4
 	FusionInfoPacketSize           = 5
 	ScoreWireScale                 = 200
 )
@@ -284,7 +292,7 @@ const (
 	PacketTypePuzzlePart uint8 = 0x5D // [C->S] op | peça | módulo | material | 7 notas (11 bytes)
 	PacketTypePartResult uint8 = 0x5E // [S->C] op | blueprint | peça | status | reforjas | máx | 7 notas | len u16 | mensagem
 
-	PuzzlePartPacketSize = 1 + 3 + MiniGameCount
+	PuzzlePartPacketSize = 1 + 2 + 2 + MiniGameCount // op | peça | módulo | material u16 | notas
 
 	PartResultSaved    uint8 = 0 // primeira vez: nota guardada
 	PartResultReforged uint8 = 1 // Reforja aceita: nota nova (já com a oxidação) substitui a anterior
@@ -352,4 +360,17 @@ func SerializeCorpseDragState(st CorpseDragState) []byte {
 	buf[22] = st.SpeedPct
 	binary.LittleEndian.PutUint16(buf[23:], st.MassKg)
 	return buf
+}
+
+// ReadItemIDs lê n IDs u16 seguidos (0 = vazio fica de fora se skipZero).
+func ReadItemIDs(data []byte, n int, skipZero bool) []ItemID {
+	var out []ItemID
+	for k := 0; k < n && 2*k+1 < len(data); k++ {
+		id := binary.LittleEndian.Uint16(data[2*k:])
+		if id == 0 && skipZero {
+			continue
+		}
+		out = append(out, id)
+	}
+	return out
 }

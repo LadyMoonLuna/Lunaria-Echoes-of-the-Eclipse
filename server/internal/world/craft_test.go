@@ -81,11 +81,11 @@ func TestConductivityDiffAndDifficulty(t *testing.T) {
 func TestHarmonyBonusOnAlloys(t *testing.T) {
 	p := forgePlayer(t)
 	for _, id := range []uint16{MatIron, MatCharcoal, MatPureWater} {
-		p.AddItemWithQuality(uint8(id), 2, 80)
+		p.AddItemWithQuality(ItemID(id), 2, 80)
 	}
-	ings := []uint8{uint8(MatIron), uint8(MatCharcoal), uint8(MatPureWater)}
+	ings := []ItemID{ItemID(MatIron), ItemID(MatCharcoal), ItemID(MatPureWater)}
 	plain, err := p.SmeltAlloyScored(ings, allScores(0.80))
-	if err != nil || plain.ItemID != uint8(MatTemperedSteel) {
+	if err != nil || plain.ItemID != ItemID(MatTemperedSteel) {
 		t.Fatalf("sem harmonia deveria sair o Aço Temperado comum: %+v %v", plain, err)
 	}
 	h, err := p.SmeltAlloyScored(ings, allScores(1.0))
@@ -104,39 +104,39 @@ func TestHarmonyBonusOnAlloys(t *testing.T) {
 
 func TestSelectiveReforge(t *testing.T) {
 	p := forgePlayer(t)
-	picks := []uint8{uint8(MatIron), uint8(MatCopper), uint8(MatPineRefuge), uint8(MatBoarLeather), 0, 0}
+	picks := []ItemID{ItemID(MatIron), ItemID(MatCopper), ItemID(MatPineRefuge), ItemID(MatBoarLeather), 0, 0}
 	for _, id := range picks[:4] {
 		p.AddItemWithQuality(id, 1, 80)
 	}
 	p.Stamina = 100
-	if wr, err := p.WorkPart(1, 0, uint8(MatIron), allScores(0.3)); err != nil || wr.Reforged {
+	if wr, err := p.WorkPart(1, 0, ItemID(MatIron), allScores(0.3)); err != nil || wr.Reforged {
 		t.Fatalf("primeiro trabalho da lâmina: %v", err)
 	}
-	wr, err := p.WorkPart(1, 0, uint8(MatIron), allScores(1.0))
+	wr, err := p.WorkPart(1, 0, ItemID(MatIron), allScores(1.0))
 	if err != nil || !wr.Reforged || p.Stamina != 85 {
 		t.Fatalf("reforja da lâmina de ferro deveria custar 15 de Stamina: %v (stamina %.0f)", err, p.Stamina)
 	}
 	if wr.Scores.Melt < 0.969 || wr.Scores.Melt > 0.971 {
 		t.Fatalf("1ª Reforja deveria oxidar 3%%: %.3f", wr.Scores.Melt)
 	}
-	p.WorkPart(1, 0, uint8(MatIron), allScores(1.0))
-	p.WorkPart(1, 0, uint8(MatIron), allScores(1.0))
-	if wr, err := p.WorkPart(1, 0, uint8(MatIron), allScores(1.0)); err == nil || wr.Reforges != MaxReforgesPerPart {
+	p.WorkPart(1, 0, ItemID(MatIron), allScores(1.0))
+	p.WorkPart(1, 0, ItemID(MatIron), allScores(1.0))
+	if wr, err := p.WorkPart(1, 0, ItemID(MatIron), allScores(1.0)); err == nil || wr.Reforges != MaxReforgesPerPart {
 		t.Fatalf("a 4ª Reforja deveria falhar por fadiga do metal: %v", err)
 	}
 	p.Stamina = 5
-	if _, err := p.WorkPart(1, 1, uint8(MatCopper), allScores(0.6)); err != nil {
+	if _, err := p.WorkPart(1, 1, ItemID(MatCopper), allScores(0.6)); err != nil {
 		t.Fatal(err)
 	}
-	if wr, err := p.WorkPart(1, 1, uint8(MatCopper), allScores(1.2)); err == nil || wr.Scores.Melt != 0.6 {
+	if wr, err := p.WorkPart(1, 1, ItemID(MatCopper), allScores(1.2)); err == nil || wr.Scores.Melt != 0.6 {
 		t.Fatalf("sem Stamina a Reforja é recusada e a nota antiga fica: %v %+v", err, wr.Scores)
 	}
 	p.Stamina = 100
-	if p.Inventory[uint8(MatIron)] != 1 {
+	if p.Inventory[ItemID(MatIron)] != 1 {
 		t.Fatal("a reforja não pode destruir o metal")
 	}
-	p.WorkPart(1, 2, uint8(MatPineRefuge), allScores(0.5))
-	if wr, err := p.WorkPart(1, 2, uint8(MatPineRefuge), allScores(1.0)); err == nil || err.Error() != ReforgeDeniedMsg || wr.Scores.Melt != 0.5 {
+	p.WorkPart(1, 2, ItemID(MatPineRefuge), allScores(0.5))
+	if wr, err := p.WorkPart(1, 2, ItemID(MatPineRefuge), allScores(1.0)); err == nil || err.Error() != ReforgeDeniedMsg || wr.Scores.Melt != 0.5 {
 		t.Fatalf("madeira não pode ser reforjada: %v", err)
 	}
 	res, err := p.ForgeBlueprintScored(1, picks, allScores(1.0))
@@ -155,7 +155,7 @@ func TestLegacyForgeUnchanged(t *testing.T) {
 	bp, _ := GetBlueprint(1)
 	mats := []MaterialDef{MaterialsDB[MatIron], MaterialsDB[MatCopper], MaterialsDB[MatPineRefuge], MaterialsDB[MatBoarLeather], {}, {}}
 	p := forgePlayer(t)
-	picks := []uint8{uint8(MatIron), uint8(MatCopper), uint8(MatPineRefuge), uint8(MatBoarLeather), 0, 0}
+	picks := []ItemID{ItemID(MatIron), ItemID(MatCopper), ItemID(MatPineRefuge), ItemID(MatBoarLeather), 0, 0}
 	for _, id := range picks[:4] {
 		p.AddItemWithQuality(id, 1, 80)
 	}

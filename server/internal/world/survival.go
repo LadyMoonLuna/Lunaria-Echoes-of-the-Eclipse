@@ -38,10 +38,10 @@ var raceHeatTolerance = map[uint8]float32{
 }
 
 // Valor de cada comida para a fome.
-var FoodValue = map[uint8]float32{
+var FoodValue = map[ItemID]float32{
 	protocol.ItemRawWolfMeat:     20,
 	protocol.ItemCookedNobleMeat: 50,
-	uint8(MatGameMeat):           30,
+	ItemID(MatGameMeat):          30,
 }
 
 // SurvivalState é o que o HUD mostra (0x50).
@@ -127,8 +127,12 @@ func (p *Player) staminaRegenMultLocked() float32 {
 }
 
 // feedLocked sacia a fome com a comida consumida.
-func (p *Player) feedLocked(itemID uint8) {
-	if v, ok := FoodValue[itemID]; ok {
+func (p *Player) feedLocked(itemID ItemID) {
+	v, ok := FoodValue[BaseOf(itemID)]
+	if f, fruit := FruitFood[itemID]; fruit {
+		v, ok = f.Hunger, true
+	}
+	if ok {
 		if !p.survivalInit {
 			p.Hunger, p.survivalInit = 100, true
 		}

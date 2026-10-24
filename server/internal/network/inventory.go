@@ -11,7 +11,7 @@ import (
 
 // toggleEquip equipa a unidade com a Qualidade pedida (255 = a melhor). Sem a unidade na mochila
 // e com o item equipado, desequipa (comportamento antigo do 0x39).
-func (s *Server) toggleEquip(player *world.Player, itemID, quality uint8) {
+func (s *Server) toggleEquip(player *world.Player, itemID world.ItemID, quality uint8) {
 	if player.GetItemCount(itemID) == 0 {
 		for slotIdx, eqID := range player.GetEquippedSlots() {
 			if eqID == itemID && player.UnequipSlot(uint8(slotIdx)) {
