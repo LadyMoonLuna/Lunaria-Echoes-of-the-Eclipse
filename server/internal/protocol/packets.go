@@ -895,6 +895,7 @@ const (
 	DevCmdForgeKit        uint8 = 16 // Kit de ferramentas + 5 materiais básicos
 	DevCmdRevealMaterials uint8 = 17 // Revela todos os materiais no personagem (teste)
 	DevCmdForgeAccess     uint8 = 18 // Libera a Forja e o Quebra-Cabeça em qualquer lugar (teste)
+	DevCmdReviveNPCs      uint8 = 19 // Revive todos os NPCs mortos e os põe de volta no posto
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).

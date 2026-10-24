@@ -1829,6 +1829,10 @@ func _build_dev_tab_world(tabs: TabContainer) -> void:
 			if dev_status_label: dev_status_label.text = "Evento disparado: %s" % ev_name
 			show_loot_toast(ev_name)
 		))
+	ev_grid.add_child(_dev_create_btn("🕊️ Reviver todos os NPCs", Color(0.4, 0.9, 0.6), func():
+		NetworkManager.send_world_control(19, 0)
+		if dev_status_label: dev_status_label.text = "Todos os NPCs mortos voltaram aos seus postos."
+	))
 
 func _build_dev_tab_items(tabs: TabContainer) -> void:
 	var tab := VBoxContainer.new()

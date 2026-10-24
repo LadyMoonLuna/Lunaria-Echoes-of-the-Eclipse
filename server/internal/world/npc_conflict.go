@@ -189,6 +189,29 @@ func (npc *NPC) markDeadLocked() {
 	npc.CurrentActivity = ActivityDead
 }
 
+// Revive traz o NPC de volta à vida no posto dele (cheio, alimentado e trabalhando).
+func (npc *NPC) Revive() bool {
+	npc.mu.Lock()
+	defer npc.mu.Unlock()
+	if !npc.IsDead {
+		return false
+	}
+	npc.IsDead = false
+	npc.HP = npc.MaxHP
+	npc.Hunger, npc.Thirst, npc.Cold, npc.Heat = 100, 100, 0, 0
+	npc.IsActive = true
+	npc.ShopOpen = true
+	if npc.MoveSpeed == 0 {
+		npc.MoveSpeed = npc.BaseMoveSpeed
+	}
+	npc.Life.Plan = nil
+	npc.Life.Aggressor = 0
+	npc.ZoneID = npc.Life.HomeZone
+	npc.PosX, npc.PosZ = npc.Life.Home[0], npc.Life.Home[1]
+	npc.CurrentActivity = ActivityWorking
+	return true
+}
+
 // TakeEstate esvazia estoque, matérias-primas e ouro do NPC morto (o espólio vai ao chão).
 func (npc *NPC) TakeEstate() (items map[uint16]int, gold uint32) {
 	npc.mu.Lock()

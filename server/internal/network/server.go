@@ -1338,6 +1338,10 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		s.sendForgeState(player)
 		s.sendPlayerNPCSay(player, 0, "[DEV] Todos os materiais foram revelados neste personagem (apenas teste).")
 
+	case protocol.DevCmdReviveNPCs:
+		n := s.reviveAllNPCs()
+		s.BroadcastNPCSay(0, fmt.Sprintf("[DEV] %d NPC(s) voltaram à vida e estão de volta aos seus postos.", n))
+
 	case protocol.DevCmdForgeAccess:
 		if player == nil {
 			return
@@ -3966,9 +3970,9 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 		resultMsg += fmt.Sprintf(" [%s • %s | Durab. %d | Resist.: %s]", m.Name, world.RarityNames[m.Rarity], m.Durability, m.Resistances)
 	}
 
-	// Verifica se a mochila está cheia (limite de 24 slots)
-	slots := player.GetInventorySlots()
-	inventoryFull := len(slots) >= 24 && !player.HasItem(itemToGive)
+	// A mochila é limitada pelo peso (carga), não por número de tipos de item: com as partes próprias de
+	// cada criatura o antigo limite de 24 tipos enchia na segunda autópsia e o órgão sumia.
+	inventoryFull := false
 
 	if inventoryFull {
 		log.Printf("[AUTOPSIA] Mochila do jogador #%d cheia! Item %d (%s) deixado no chão junto ao cadáver #%d.\n",

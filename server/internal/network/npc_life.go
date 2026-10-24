@@ -258,11 +258,12 @@ func planNeeds(n *world.NPC, ctx needsCtx, villageNodes []world.ResourceNode, ev
 			n.Life.OrderSince[world.MatGameMeat] = time.Now()
 			ev.says = append(ev.says, "📜 Pendurei um pedido de comida no quadro da Guilda dos Ofícios. Quem me trouxer Carne de Caça será bem pago!")
 		}
-		// Sem comida e sem ouro: vai coletar algo comestível
-		if node, ok := nearestNode(n, villageNodes, world.MatHerbs, world.MatGlowMushroom); ok {
-			n.Life.Plan = world.RouteTo(n.ZoneID, node.ZoneID, node.X, node.Z, "forage")
-			n.Life.Plan[len(n.Life.Plan)-1].NodeID = node.ID
-			ev.says = append(ev.says, "Sem comida e sem moedas... vou catar o que a terra der.")
+		// Sem taverna e sem comida no estoque: come em casa, da própria despensa (ninguém morre de fome na Vila)
+		if plan := world.RouteTo(n.ZoneID, n.Life.HomeZone, n.Life.Home[0], n.Life.Home[1], "eat_home"); plan != nil {
+			n.Life.Plan = plan
+			ev.says = append(ev.says, "A Taverna está sem comida... vou comer o que tenho em casa.")
+		} else {
+			campProvisions(n)
 		}
 	case n.Cold > world.ColdThreshold:
 		n.Life.Plan = world.RouteTo(n.ZoneID, world.ZoneVillage, world.PlaceFurnace[0], world.PlaceFurnace[1]+3, "warm")
@@ -408,6 +409,9 @@ func (s *Server) advanceErrand(n *world.NPC, ev *lifeEvents) {
 		n.RawMaterials[world.MatPureWater]++ // enche o cantil com Água Pura
 	case "eat":
 		ev.buyMeal = true
+	case "eat_home":
+		n.Hunger = 100
+		n.Gold -= min(n.Gold, 6) // repõe a despensa
 	case "warm":
 		n.Cold = 0
 	case "cool":
@@ -732,4 +736,21 @@ func campProvisions(n *world.NPC) {
 	if float64(n.HP) < float64(n.MaxHP)*world.HurtThreshold {
 		n.HP = min(n.MaxHP, n.HP+int(float64(n.MaxHP)*world.NPCPotionHealFrac))
 	}
+}
+
+// reviveAllNPCs: devolve à vida todos os NPCs mortos (Dev e reinício do servidor).
+func (s *Server) reviveAllNPCs() int {
+	s.mu.RLock()
+	npcs := make([]*world.NPC, 0, len(s.npcs))
+	for _, n := range s.npcs {
+		npcs = append(npcs, n)
+	}
+	s.mu.RUnlock()
+	count := 0
+	for _, n := range npcs {
+		if n.Revive() {
+			count++
+		}
+	}
+	return count
 }

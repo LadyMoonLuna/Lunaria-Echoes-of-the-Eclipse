@@ -452,7 +452,7 @@ func ActivityFor(action string) string {
 	switch action {
 	case "drink":
 		return ActivityDrinking
-	case "eat":
+	case "eat", "eat_home":
 		return ActivityEating
 	case "warm":
 		return ActivityWarming
