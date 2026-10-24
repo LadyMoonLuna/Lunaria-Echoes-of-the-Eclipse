@@ -1124,3 +1124,9 @@ func send_register_custom_weapon_scored(weapon_name: String, pieces: Array, scor
 	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
 	data.append_array(body)
 	tcp.put_data(data)
+
+## 0x5A: notas de uma peça (primeira vez) ou Reforja (de novo, mesmo material de Metal/Liga).
+func send_reforge_part(bp_id: int, part_idx: int, mat_id: int, scores: Array) -> void:
+	var data := PackedByteArray([0x5A, bp_id, part_idx, mat_id])
+	data.append_array(_score_bytes(scores))
+	tcp.put_data(data)

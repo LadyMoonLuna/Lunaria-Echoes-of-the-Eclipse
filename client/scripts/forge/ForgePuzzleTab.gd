@@ -384,7 +384,12 @@ func _on_register() -> void:
 	var picks: Array = []
 	for p in placements:
 		picks.append(int(p["material"]))
-	forge.start_forge_minigames(["melt", "mold", "prep"], forge._mats_of(picks), func(sc: Dictionary):
+	var parts: Array = []
+	for i in range(placements.size()):
+		parts.append({"index": i, "name": String(_module(int(placements[i]["module"]))["name"]), "mat": int(placements[i]["material"])})
+	var base: Dictionary = forge._compute(_bp_dict(), picks)
+	# Quebra-Cabeça: sem blueprint no servidor, as notas das peças vão juntas no 0x55
+	forge.start_equipment_forge(parts, 0, int(base["rarity"]), func(sc: Dictionary):
 		NetworkManager.send_register_custom_weapon_scored(weapon_name, pieces, forge._score_list(sc))
 	)
 
