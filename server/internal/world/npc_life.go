@@ -44,8 +44,10 @@ var (
 
 // Ritmos (por minuto real)
 const (
-	HungerPerMinute       float32 = 0.5
-	ThirstPerMinute       float32 = 0.8
+	// Fome e sede correm no relógio do jogo (1 h de jogo = 400 s de dia, 200 s à noite): parado, um NPC
+	// come a cada ~6 h de jogo e bebe a cada ~4 h. Lutar, forjar e coletar gastam mais; dormir, bem menos.
+	HungerPerGameHour     float32 = 11
+	ThirstPerGameHour     float32 = 15
 	ColdRisePerMinute     float32 = 1.6
 	ColdFallPerMinute     float32 = 4.0
 	NeedThreshold         float32 = 35  // abaixo disso a necessidade vira prioridade
@@ -336,6 +338,42 @@ func (npc *NPC) FeltTemp(ambient float32) float32 {
 	return ambient
 }
 
+// GameHoursFor converte segundos reais em horas de jogo na hora atual (o dia anda mais devagar que a noite).
+func GameHoursFor(dtSec float32, hour int) float32 {
+	if hour >= 6 && hour < 18 {
+		return dtSec / 400
+	}
+	return dtSec / 200
+}
+
+func (npc *NPC) clockHour() int {
+	if npc.clock == nil {
+		return 12
+	}
+	return npc.clock.GetCurrentHour()
+}
+
+// effortMultLocked: o quanto a atividade atual gasta o corpo (fome e sede).
+func (npc *NPC) effortMultLocked() float32 {
+	switch npc.CurrentActivity {
+	case ActivityFighting, ActivityHunting, ActivityFleeing:
+		return 2.5
+	case ActivityGathering, ActivityBurying:
+		return 1.4
+	case ActivitySleeping:
+		return 0.35
+	case ActivityWorking:
+		if forgeProfessions[npc.Profession] {
+			return 1.6 // martelo, fole e fornalha
+		}
+		return 1.0
+	}
+	return 1.0
+}
+
+// Ofícios de esforço pesado (forja e fundição).
+var forgeProfessions = map[uint32]bool{100: true, JewelerID: true}
+
 // TickNeeds avança fome, sede, frio e calor por dt segundos com a temperatura ambiente (°C) e aplica dano.
 // Retorna true se o NPC morreu agora. Chamar com o NPC travado (dentro de WithLife).
 func (npc *NPC) TickNeeds(dt float32, ambient float32) bool {
@@ -352,8 +390,9 @@ func (npc *NPC) TickNeeds(dt float32, ambient float32) bool {
 			npc.sickAccum -= float32(int(npc.sickAccum))
 		}
 	}
-	npc.Hunger = clampNeed(npc.Hunger - HungerPerMinute*sickMult*m)
-	npc.Thirst = clampNeed(npc.Thirst - ThirstPerMinute*ThirstMultiplier(t)*sickMult*m)
+	gh := GameHoursFor(dt, npc.clockHour()) * npc.effortMultLocked() * sickMult
+	npc.Hunger = clampNeed(npc.Hunger - HungerPerGameHour*gh)
+	npc.Thirst = clampNeed(npc.Thirst - ThirstPerGameHour*min(ThirstMultiplier(t), 2)*gh)
 	switch {
 	case t < ComfortMinTemp: // esfria proporcional ao quanto está abaixo do conforto
 		npc.Cold = clampNeed(npc.Cold + ColdRisePerMinute*(ComfortMinTemp-t)/5*m)

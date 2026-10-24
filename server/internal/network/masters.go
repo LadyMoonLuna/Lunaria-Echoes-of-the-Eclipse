@@ -146,65 +146,30 @@ func (s *Server) handleClassMasterInteract(player *world.Player, npcID uint32) b
 	pid := player.ID
 	switch npcID {
 	case NPCNyx:
-		if player.HasItem(protocol.ItemDarkPoisonGland) {
-			player.RemoveItem(protocol.ItemDarkPoisonGland, 1)
-			pts := player.AddFriendship(npcID, 20)
-			s.sendFriendshipSync(player, npcID)
-			s.sendInventorySync(player)
-			s.BroadcastNPCSay(npcID, fmt.Sprintf("Veneno de aranha do esgoto... você sabe agradar uma dama, #%d. [Afiança: %d/100]", pid, pts))
-		}
 		if player.ClassID == protocol.ClassNone {
 			s.offerIdentityChange(player, player.RaceID, protocol.ClassAssassin, protocol.IdentityModeInitialChange)
 			s.BroadcastNPCSay(npcID, fmt.Sprintf("Você me encontrou nas sombras, #%d. Poucos conseguem. Se aceitar, eu lhe ensino a ser uma Lâmina Silente — confirme quando estiver pronto.", pid))
 			return true
 		}
 	case NPCTao:
-		if player.HasItem(protocol.ItemAlphaWolfPelt) {
-			player.RemoveItem(protocol.ItemAlphaWolfPelt, 1)
-			pts := player.AddFriendship(npcID, 25)
-			s.sendFriendshipSync(player, npcID)
-			s.sendInventorySync(player)
-			s.BroadcastNPCSay(npcID, fmt.Sprintf("Derrubou o Alfa? Seu espírito é forte, #%d! Vou usar esta pele no meu tatame. [Afiança: %d/100]", pid, pts))
-		}
 		if player.ClassID == protocol.ClassNone {
 			s.offerIdentityChange(player, player.RaceID, protocol.ClassFighter, protocol.IdentityModeInitialChange)
 			s.BroadcastNPCSay(npcID, fmt.Sprintf("Respire fundo, #%d. O punho é só o fim do caminho; a força nasce dos pés. Confirme e eu lhe ensinarei o caminho do Punho Celeste.", pid))
 			return true
 		}
 	case NPCIolanthe:
-		if player.HasItem(protocol.ItemStarlightRing) {
-			player.RemoveItem(protocol.ItemStarlightRing, 1)
-			pts := player.AddFriendship(npcID, 20)
-			s.sendFriendshipSync(player, npcID)
-			s.sendInventorySync(player)
-			s.BroadcastNPCSay(npcID, fmt.Sprintf("A luz das estrelas presa num anel... Vou incrustá-lo nos olhos da minha próxima estátua. Obrigada, #%d. [Afiança: %d/100]", pid, pts))
-		}
 		if player.ClassID == protocol.ClassNone {
 			s.offerIdentityChange(player, player.RaceID, protocol.ClassSculptor, protocol.IdentityModeInitialChange)
 			s.BroadcastNPCSay(npcID, fmt.Sprintf("Toda pedra guarda uma alma esperando o cinzel certo, #%d. Confirme e eu lhe mostrarei como despertá-las — o ofício do Escultor de Almas.", pid))
 			return true
 		}
 	case NPCFiorella:
-		if player.HasItem(protocol.ItemSilverMoonAmulet) {
-			player.RemoveItem(protocol.ItemSilverMoonAmulet, 1)
-			pts := player.AddFriendship(npcID, 20)
-			s.sendFriendshipSync(player, npcID)
-			s.sendInventorySync(player)
-			s.BroadcastNPCSay(npcID, fmt.Sprintf("Prata lunar! Darling, isto vai virar o fio mais bonito da minha coleção. [Afiança: %d/100]", pts))
-		}
 		if player.ClassID == protocol.ClassNone {
 			s.offerIdentityChange(player, player.RaceID, protocol.ClassWarTailor, protocol.IdentityModeInitialChange)
 			s.BroadcastNPCSay(npcID, fmt.Sprintf("Que postura, #%d! Com uma agulha e um carretel de aço eu faço de você uma obra de arte letal. Confirme e entre para o Ateliê como Tecelão Carmesim.", pid))
 			return true
 		}
 	case NPCBartolomeu:
-		if player.HasItem(protocol.ItemFreshWolfBlood) {
-			player.RemoveItem(protocol.ItemFreshWolfBlood, 1)
-			pts := player.AddFriendship(npcID, 15)
-			s.sendFriendshipSync(player, npcID)
-			s.sendInventorySync(player)
-			s.BroadcastNPCSay(npcID, fmt.Sprintf("Sangue de lobo fresquinho! Hoje tem chouriço da casa, #%d! [Afiança: %d/100]", pid, pts))
-		}
 		if player.ClassID == protocol.ClassNone {
 			s.offerIdentityChange(player, player.RaceID, protocol.ClassHuntingChef, protocol.IdentityModeInitialChange)
 			s.BroadcastNPCSay(npcID, fmt.Sprintf("Fome de aventura, é? Na minha cozinha, quem caça é quem come! Confirme e vista o avental de Mestre do Banquete, #%d.", pid))
@@ -236,7 +201,6 @@ func (s *Server) handleThorneQuest(player *world.Player) bool {
 	if player.HasItem(protocol.ItemAlphaWolfPelt) {
 		player.RemoveItem(protocol.ItemAlphaWolfPelt, 1)
 		pts := addThorneTrust(player, 25)
-		player.AddFriendship(npcID, 25)
 		s.sendFriendshipSync(player, npcID)
 		s.sendInventorySync(player)
 		s.BroadcastNPCSay(npcID, fmt.Sprintf("A pele do Alfa... Você o enfrentou de frente. Os lobos respeitam isso, e eu também. [Confiança: %d/%d]", pts, thorneFriendshipNeeded))
@@ -245,7 +209,6 @@ func (s *Server) handleThorneQuest(player *world.Player) bool {
 	if player.HasItem(protocol.ItemSharpWolfFang) {
 		player.RemoveItem(protocol.ItemSharpWolfFang, 1)
 		pts := addThorneTrust(player, 15)
-		player.AddFriendship(npcID, 15)
 		s.sendFriendshipSync(player, npcID)
 		s.sendInventorySync(player)
 		s.BroadcastNPCSay(npcID, fmt.Sprintf("Uma presa... Vou devolvê-la à terra onde a matilha descansa. [Confiança: %d/%d]", pts, thorneFriendshipNeeded))

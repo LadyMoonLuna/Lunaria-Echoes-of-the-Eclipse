@@ -16,6 +16,8 @@ const InventoryUIScript = preload("res://scripts/InventoryUI.gd")
 const EntityOfferUIScript = preload("res://scripts/EntityOfferUI.gd")
 const SkillsUIScript = preload("res://scripts/SkillsUI.gd")
 const ClassMasterUIScript = preload("res://scripts/ClassMasterUI.gd")
+const ShopUIScript = preload("res://scripts/ui/ShopUI.gd")
+const GuildUIScript = preload("res://scripts/ui/GuildUI.gd")
 const DevDropRatesUIScript = preload("res://scripts/DevDropRatesUI.gd")
 const AutopsyUIScript = preload("res://scripts/AutopsyUI.gd")
 const CorpseEntityScript = preload("res://scripts/CorpseEntity.gd")
@@ -56,6 +58,9 @@ const FORGE_ANVIL_REACH := 2.4
 var entity_offer_ui: CanvasLayer = null
 var skills_ui: CanvasLayer = null
 var class_master_ui: CanvasLayer = null
+var shop_ui: CanvasLayer = null
+var guild_ui: CanvasLayer = null
+var fountain_menu: CanvasLayer = null
 var dev_drop_rates_ui: CanvasLayer = null
 var dev_manager_ui: Control = null
 var dev_manager_node = null
@@ -614,6 +619,12 @@ func _ready() -> void:
 	class_master_ui = ClassMasterUIScript.new()
 	add_child(class_master_ui)
 
+	shop_ui = ShopUIScript.new()
+	add_child(shop_ui)
+
+	guild_ui = GuildUIScript.new()
+	add_child(guild_ui)
+
 	dev_drop_rates_ui = DevDropRatesUIScript.new()
 	add_child(dev_drop_rates_ui)
 
@@ -791,6 +802,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_toggle_corpse_drag()
 		elif event.keycode == KEY_E:
 			if _try_interact_corpse():
+				pass
+			elif _try_use_fountain():
+				pass
+			elif _try_use_guild_board():
 				pass
 			elif _try_harvest_nearest_node():
 				pass
@@ -2838,7 +2853,8 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 	var glow: float = 0.0 if rarity < 3 else 0.25 + 0.15 * rarity
 	var root := StaticBody3D.new()
 	root.name = "ResourceNode_%d" % int(nd["node_id"])
-	root.collision_layer = 1
+	# Só árvores e veios grandes bloqueiam o passo; pedrinhas, arbustos, flores e poças dá para pisar por cima
+	root.collision_layer = 1 if kind in [1, 3, 4] else 16
 	root.collision_mask = 0
 	add_child(root)
 	root.global_position = Vector3(float(nd["x"]), ground_y(float(nd["x"]), float(nd["z"])), float(nd["z"]))
@@ -3371,6 +3387,13 @@ func _on_world_state_received(players_dict: Dictionary) -> void:
 			remote_players[pid].update_network_transform(pdata.position, pdata.rotation_y)
 		else:
 			_spawn_remote_player(pid, pdata.position, pdata.rotation_y)
+	# O snapshot traz todos os jogadores da zona: quem sumiu dele foi para outra zona (ou saiu)
+	if players_dict.has(NetworkManager.my_player_id):
+		for rpid in remote_players.keys():
+			if not players_dict.has(rpid):
+				if is_instance_valid(remote_players[rpid]):
+					remote_players[rpid].queue_free()
+				remote_players.erase(rpid)
 
 func _spawn_remote_player(pid: int, initial_pos: Vector3, initial_rot_y: float) -> void:
 	var rp = remote_player_scene.instantiate()
@@ -3397,6 +3420,13 @@ func _on_npc_state_received(npcs_dict: Dictionary) -> void:
 				n.update_network_transform(on_ground(data.position), data.rotation_y, data.state)
 		else:
 			_spawn_npc(nid, on_ground(data.position), data.rotation_y, data.state)
+	# Snapshot completo da zona: NPC que não veio nele não está aqui (pacote atrasado da zona anterior,
+	# NPC que foi para casa/outra zona). Sem isso ficavam cópias dos NPCs da Vila em todos os mapas.
+	for old_id in npcs.keys():
+		if not npcs_dict.has(old_id):
+			if is_instance_valid(npcs[old_id]):
+				npcs[old_id].queue_free()
+			npcs.erase(old_id)
 
 func _spawn_npc(nid: int, initial_pos: Vector3, initial_rot_y: float, state: int) -> void:
 	var npc_inst = npc_scene.instantiate()
@@ -5078,6 +5108,7 @@ func _build_zone_0_village(root: Node3D) -> void:
 
 	_create_rebirth_crystal(root)
 	_build_purified_fountain(root)
+	_build_guild_hall(root)
 	_build_cemetery_and_river(root)
 
 	for cpos in [Vector3(-7.2, 0, -7.2), Vector3(7.2, 0, -7.2), Vector3(-7.2, 0, 7.2), Vector3(7.2, 0, 7.2)]:
@@ -6889,6 +6920,147 @@ func _build_interior(root: Node3D, zone_id: int) -> void:
 # =============================================================================
 # FORJA (Etapa 2): bigorna da Forja do Garrick [E] ou tecla [U] para Forjadores de Estrelas
 # =============================================================================
+## Loja viva do NPC (comprar / vender com o mercado dinâmico).
+func open_shop(npc_id: int, title: String) -> void:
+	if shop_ui:
+		shop_ui.open_shop(npc_id, title)
+
+# --- Fonte de Água Purificada (centro da praça) ---
+const FOUNTAIN_REACH := 5.0
+
+func _try_use_fountain() -> bool:
+	if current_zone_id != 0 or local_player == null:
+		return false
+	var p := local_player.global_position
+	if Vector2(p.x, p.z).length() > FOUNTAIN_REACH:
+		return false
+	_open_fountain_menu()
+	return true
+
+func _open_fountain_menu() -> void:
+	if fountain_menu and is_instance_valid(fountain_menu):
+		fountain_menu.queue_free()
+	fountain_menu = CanvasLayer.new()
+	fountain_menu.layer = 24
+	add_child(fountain_menu)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fountain_menu.add_child(center)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", LunariaUI.frame_style())
+	center.add_child(panel)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 8)
+	panel.add_child(vb)
+	var title := Label.new()
+	title.text = "💧 Fonte de Água Purificada"
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(0.7, 0.92, 1.0))
+	vb.add_child(title)
+	var options := [[1, "🥤 Beber da fonte (refresca e recupera o fôlego)"], [2, "🧪 Encher frascos vazios com Água Pura"], [3, "🫧 Lavar-se (tira o calor do corpo)"]]
+	for opt in options:
+		var action: int = opt[0]
+		var b := Button.new()
+		b.text = opt[1]
+		b.custom_minimum_size = Vector2(380, 38)
+		b.pressed.connect(func():
+			NetworkManager.send_fountain_use(action)
+			_close_fountain_menu()
+		)
+		vb.add_child(b)
+	var close_b := Button.new()
+	close_b.text = "Sair"
+	close_b.pressed.connect(_close_fountain_menu)
+	vb.add_child(close_b)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if local_player and is_instance_valid(local_player):
+		local_player.set("is_menu_open", true)
+
+func _close_fountain_menu() -> void:
+	if fountain_menu and is_instance_valid(fountain_menu):
+		fountain_menu.queue_free()
+	fountain_menu = null
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if local_player and is_instance_valid(local_player):
+		local_player.set("is_menu_open", false)
+
+# --- Guilda dos Ofícios (pavilhão a sudoeste da praça) ---
+const GUILD_HALL_POS := Vector3(-24.0, 0.0, -52.0)
+const GUILD_BOARD_POS := Vector3(-24.0, 0.0, -46.0)
+const GUILD_BOARD_REACH := 4.5
+
+func _try_use_guild_board() -> bool:
+	if current_zone_id != 0 or local_player == null or guild_ui == null:
+		return false
+	var p := local_player.global_position
+	if Vector2(p.x - GUILD_BOARD_POS.x, p.z - GUILD_BOARD_POS.z).length() > GUILD_BOARD_REACH:
+		return false
+	guild_ui.open_board()
+	return true
+
+## Pavilhão aberto da Guilda: piso de pedra, colunas de madeira, telhado, estandarte e o quadro de encomendas.
+func _build_guild_hall(parent: Node3D) -> void:
+	var root := Node3D.new()
+	root.name = "GuildHall"
+	root.position = Vector3(GUILD_HALL_POS.x, ground_y(GUILD_HALL_POS.x, GUILD_HALL_POS.z), GUILD_HALL_POS.z)
+	parent.add_child(root)
+	var stone := _mat(Color(0.62, 0.6, 0.56), 0.0, 0.9, "stone")
+	var wood := _mat(Color(0.42, 0.28, 0.16), 0.0, 0.85, "planks")
+	var roof := _mat(Color(0.45, 0.16, 0.12), 0.0, 0.8, "roof_tiles")
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.size = Vector3(11.0, 0.3, 9.0)
+	_add_mesh(root, floor_mesh, stone, Vector3(0, 0.15, 0)).visibility_range_end = 0.0
+	var body := StaticBody3D.new()
+	body.collision_layer = 1
+	body.collision_mask = 0
+	root.add_child(body)
+	for cx in [-5.0, 5.0]:
+		for cz in [-4.0, 4.0]:
+			var col := CylinderMesh.new()
+			col.top_radius = 0.22
+			col.bottom_radius = 0.26
+			col.height = 4.2
+			_add_mesh(root, col, wood, Vector3(cx, 2.1, cz)).visibility_range_end = 0.0
+			var cs := CollisionShape3D.new()
+			var cyl := CylinderShape3D.new()
+			cyl.radius = 0.28
+			cyl.height = 4.2
+			cs.shape = cyl
+			cs.position = Vector3(cx, 2.1, cz)
+			body.add_child(cs)
+	var roof_mesh := PrismMesh.new()
+	roof_mesh.size = Vector3(12.4, 2.2, 10.0)
+	_add_mesh(root, roof_mesh, roof, Vector3(0, 5.3, 0)).visibility_range_end = 0.0
+	# Balcão e quadro de encomendas (de frente para a praça, ao norte)
+	var counter := BoxMesh.new()
+	counter.size = Vector3(5.0, 1.0, 0.8)
+	_add_mesh(root, counter, wood, Vector3(0, 0.8, 1.5)).visibility_range_end = 0.0
+	var board := BoxMesh.new()
+	board.size = Vector3(3.2, 2.0, 0.15)
+	_add_mesh(root, board, _mat(Color(0.55, 0.4, 0.24), 0.0, 0.9, "planks"), Vector3(0, 2.2, 5.6)).visibility_range_end = 0.0
+	for i in range(6):
+		var note := BoxMesh.new()
+		note.size = Vector3(0.5, 0.6, 0.02)
+		_add_mesh(root, note, _mat(Color(0.93, 0.89, 0.76), 0.0, 1.0), Vector3(-1.1 + (i % 3) * 1.1, 2.6 - (i / 3) * 0.8, 5.69)).visibility_range_end = 0.0
+	var post := CylinderMesh.new()
+	post.top_radius = 0.08
+	post.bottom_radius = 0.1
+	post.height = 2.2
+	for px in [-1.5, 1.5]:
+		_add_mesh(root, post, wood, Vector3(px, 1.1, 5.6)).visibility_range_end = 0.0
+	var banner := BoxMesh.new()
+	banner.size = Vector3(1.4, 2.4, 0.05)
+	_add_mesh(root, banner, _mat(Color(0.2, 0.32, 0.6), 0.0, 0.9, "cloth"), Vector3(4.2, 3.2, 4.3)).visibility_range_end = 0.0
+	var sign := Label3D.new()
+	sign.text = "⚜️ Guilda dos Ofícios\n[E] Quadro de Encomendas"
+	sign.font_size = 34
+	sign.outline_size = 8
+	sign.modulate = Color(1.0, 0.88, 0.5)
+	sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sign.position = Vector3(0, 3.8, 6.0)
+	sign.visibility_range_end = 40.0
+	root.add_child(sign)
+
 func _try_use_anvil() -> bool:
 	if current_zone_id != 17 or local_player == null:
 		return false

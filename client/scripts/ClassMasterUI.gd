@@ -1,5 +1,6 @@
 extends CanvasLayer
 const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
+const ItemDataScript = preload("res://scripts/ItemData.gd")
 
 var is_open: bool = false
 var current_npc_id: int = 0
@@ -23,17 +24,17 @@ static func get_hearts_string(points: int) -> String:
 
 static func get_hearts_level_text(points: int) -> String:
 	if points >= 100:
-		return "❤️❤️❤️❤️❤️ (Nível Máximo: Alma Irmã — 20% Desconto + Receitas Secretas)"
+		return "❤️❤️❤️❤️❤️ (Alma Irmã)"
 	elif points >= 80:
-		return "❤️❤️❤️❤️♡ (Nível 5: Leal — 15% Desconto)"
+		return "❤️❤️❤️❤️♡ (Leal)"
 	elif points >= 60:
-		return "❤️❤️❤️♡♡ (Nível 4: Confidente — 10% Desconto + Segredos)"
+		return "❤️❤️❤️♡♡ (Confidente)"
 	elif points >= 40:
-		return "❤️❤️♡♡♡ (Nível 3: Amigo — 5% Desconto)"
+		return "❤️❤️♡♡♡ (Amigo — Presentes e Favores liberados)"
 	elif points >= 20:
-		return "❤️♡♡♡♡ (Nível 2: Conhecido)"
+		return "❤️♡♡♡♡ (Conhecido)"
 	else:
-		return "♡♡♡♡♡ (Nível 1: Desconhecido)"
+		return "♡♡♡♡♡ (Desconhecido)"
 
 # Metadados de Treinamento, Diálogos e Comércio por Mestre NPC
 const MASTER_DATA := {
@@ -50,12 +51,6 @@ const MASTER_DATA := {
 			"Dizem que no topo das Ruínas da Vigília há ligas antigas de aço celeste que ninguém conseguiu recuperar.",
 			"Se trouxer um bom pedaço de Minério de Ferro para a forja, saberei recompensar sua lealdade com receitas raras."
 		],
-		"services": [
-			{"icon": "🔨", "title": "Reparar Todos os Equipamentos", "desc": "Restaura a durabilidade de todas as armas e armaduras desgastadas.", "action": "repair"},
-			{"icon": "🛡️", "title": "Forja de Armadura Pesada", "desc": "Encomende Placas de Aço Pesada para reforçar sua defesa contra monstros.", "action": "plate"},
-			{"icon": "⚒️", "title": "Forjar Malho Rúnico de Batalha", "desc": "Disponível para aliados com Receita Secreta e Afiança Nível 3+.", "action": "warhammer"},
-			{"icon": "📦", "title": "Comprar Lingotes de Ferro Temperado", "desc": "Matéria-prima essencial para aprimoramento na bigorna.", "action": "iron"}
-		]
 	},
 	103: { # Lyra, a Alquimista
 		"title": "Lyra, a Mestra Alquimista",
@@ -70,12 +65,6 @@ const MASTER_DATA := {
 			"Às 03:00 da madrugada os vapores dos velhos esgotos sobem pela aldeia... Há sussurros do passado enterrados lá.",
 			"Nunca confie em quem busca o poder proibido sem dominar primeiro a paciência das destilações puras."
 		],
-		"services": [
-			{"icon": "🧪", "title": "Transmutar Poção de Sangue Lupino", "desc": "Combina Sangue Lupino Fresco e Frasco Vazio (+20% Velocidade e Crítico).", "action": "wolf_potion"},
-			{"icon": "🏺", "title": "Adquirir Frascos de Vidro Vazios", "desc": "Recipientes essenciais para coleta de sangue e veneno de monstros abatidos.", "action": "empty_flask"},
-			{"icon": "🌿", "title": "Elixir de Regeneração Acelerada", "desc": "Poção restauradora que cura ferimentos graves em segundos.", "action": "regen_potion"},
-			{"icon": "🔮", "title": "Destilar Sangue Lunar Puro", "desc": "Transmuta a essência do Lobo Alfa em elixires de poder sublime.", "action": "pure_lunar"}
-		]
 	},
 	104: { # Varis, o Mercador Sombrio
 		"title": "Varis, o Mercador do Beco Sombrio",
@@ -90,12 +79,6 @@ const MASTER_DATA := {
 			"Se um dia você encontrar um cálice antigo com a alma partida... não o jogue fora. O destino cobra seu preço.",
 			"Os guardas da aldeia fingem que protegem a todos, mas tremem ao menor uivo na escuridão da mata."
 		],
-		"services": [
-			{"icon": "💀", "title": "Troca Obscura: Cálice da Alma Partida", "desc": "Entregue uma Glândula de Veneno Sombrio para obter o Cálice Proibido.", "action": "chalice"},
-			{"icon": "📖", "title": "Adquirir Tomo do Ceifador da Lua Negra", "desc": "Grimório proibido que permite despertar a classe Ceifador da Lua Negra.", "action": "scythe_tome"},
-			{"icon": "🌑", "title": "Anel de Obsidiana das Sombras", "desc": "Relíquia que potencializa o dano crítico e furtividade nas trevas.", "action": "obsidian_ring"},
-			{"icon": "🗡️", "title": "Adagas Envenenadas de Contrabando", "desc": "Armas leves imbuidas com secreção de aranhas do esgoto.", "action": "poison_dagger"}
-		]
 	},
 	105: { # Capitão Randel
 		"title": "Capitão Randel, Comandante da Guarda",
@@ -110,12 +93,6 @@ const MASTER_DATA := {
 			"A espada é uma extensão da sua honra. Não a desembanhe em vão, mas nunca hesite em um golpe justo.",
 			"A disciplina da guarda mantém os aldeões vivos. Sem ordem, o eclipse devoraria Lunaria em uma única noite."
 		],
-		"services": [
-			{"icon": "🛡️", "title": "Inspecionar & Afiar Lâminas de Serviço", "desc": "Ajuste militar de combate para armas de corte e escudos.", "action": "guard_sharpen"},
-			{"icon": "🥖", "title": "Rações Militares de Vanguarda", "desc": "Restaura vida e vigor rapidamente durante patrulhas prolongadas.", "action": "guard_rations"},
-			{"icon": "⚔️", "title": "Espada Longa de Treinamento", "desc": "Lâmina equilibrada de aço forjado para novos recrutas da guarda.", "action": "training_sword"},
-			{"icon": "📜", "title": "Relatório de Alerta: Ruínas da Vigília", "desc": "Informações táticas sobre a distribuição de saqueadores e besteiros.", "action": "vigil_report"}
-		]
 	},
 	106: { # Guarda Valen
 		"title": "Guarda Valen, Patrulheiro da Vila",
@@ -130,12 +107,6 @@ const MASTER_DATA := {
 			"Flechas com pontas de aço pesado são as únicas que perfuram a couraça espessa de um executor.",
 			"Um bom caçador conhece o terreno como a palma da mão. Nunca lute encurralado contra matilhas de lobos."
 		],
-		"services": [
-			{"icon": "🏹", "title": "Aljava de Flechas de Patrulha", "desc": "Flechas de penas de falcão e pontas de ferro temperado.", "action": "scout_arrows"},
-			{"icon": "🧥", "title": "Capa Camuflada dos Bosques", "desc": "Reduz o alcance de detecção dos monstros enquanto espreita na vegetação.", "action": "camo_cloak"},
-			{"icon": "🔥", "title": "Kit de Fogueira & Sinalizadores", "desc": "Iluminação tática para acampamentos em noites de bruma densa.", "action": "campfire_kit"},
-			{"icon": "🗺️", "title": "Mapa de Trilhas do Bosque", "desc": "Rotas seguras e atalhos contornando o covil dos lobos.", "action": "woods_map"}
-		]
 	},
 	107: { # Irmã Seraphina
 		"title": "Irmã Seraphina, Mestra Guardiã",
@@ -150,12 +121,6 @@ const MASTER_DATA := {
 			"A oração e o cântico dos protetores já salvaram mais vidas na vanguarda do que uma dúzia de espadas afiadas.",
 			"A doação de amuletos sagrados e anéis estelares ajuda a manter as chamas do altar sempre acesas."
 		],
-		"services": [
-			{"icon": "☀️", "title": "Receber Bênção da Luz Sagrada", "desc": "Purifica maldições e concede regeneração acelerada de vida (+Buff).", "action": "solar_blessing"},
-			{"icon": "💧", "title": "Consagrar Água Benta da Igreja", "desc": "Frasco de água benta que causa dano severo a criaturas das sombras.", "action": "holy_water"},
-			{"icon": "📿", "title": "Adquirir Amuleto da Lua Prateada", "desc": "Relíquia sagrada que amplia o poder de cura e resistência mágica.", "action": "silver_amulet"},
-			{"icon": "🕯️", "title": "Vela Votiva do Altar Solar", "desc": "Afasta aparições espectrais menores e traz serenidade ao viajante.", "action": "votive_candle"}
-		]
 	},
 	108: { # Mestre Aurelius
 		"title": "Mestre Aurelius, Arquimago das Luas",
@@ -170,13 +135,6 @@ const MASTER_DATA := {
 			"Os segredos da magia iniciada exigem mente serena e foco inabalável. Não se deixe seduzir pelos atalhos obscuros.",
 			"Anéis estelares e fragmentos de meteoros ressoam com a cúpula mágica. São presentes de imenso valor científico."
 		],
-		"services": [
-			{"icon": "🌌", "title": "Consulta Astronômica: As 10 Fases Lunares", "desc": "Aprenda sobre o impacto de cada lua nos elementos e monstros de Lunaria.", "action": "moon_lore"},
-			{"icon": "🔮", "title": "Orbe de Ressonância Estelar", "desc": "Canalizador mágico que aumenta a amplificação de dano elemental.", "action": "star_orb"},
-			{"icon": "📜", "title": "Tomo de Meditação Arcana", "desc": "Grimório que ensina técnicas aceleradas de foco místico.", "action": "arcane_tome"},
-			{"icon": "✨", "title": "Pergaminho de Éter Puro", "desc": "Restaura instantaneamente a energia arcana e purifica anomalias.", "action": "ether_scroll"},
-			{"icon": "📜", "title": "Rumores das Linhagens Secretas", "desc": "Aurelius conta uma pista sobre como despertar uma raça secreta.", "action": "lineage_rumor"}
-		]
 	},
 	109: { # Kaelen, o Mestre Caçador
 		"title": "Kaelen, Mestre Caçador de Feras",
@@ -191,12 +149,6 @@ const MASTER_DATA := {
 			"E se o céu ficar rubro sob a Lua de Sangue... fuja ou prepare-se para encarar o terrível Licantropo Alfa em (88, -72).",
 			"Presas de lobo bem afiadas podem ser trocadas por pontas especiais de flechas perfurantes aqui no posto."
 		],
-		"services": [
-			{"icon": "🏹", "title": "Flechas Perfurantes de Presa Lupina", "desc": "Projéteis de alta penetração que aplicam sangramento nas feras.", "action": "fang_arrows"},
-			{"icon": "🐺", "title": "Dicas de Rastreamento do Covil do Alfa", "desc": "Pontos de emboscada e coordenadas exatas para caçar os grandes lobos.", "action": "alpha_tips"},
-			{"icon": "🥩", "title": "Carne Seca de Fera Temperada", "desc": "Alimento concentrado de longa duração que restaura estamina.", "action": "dried_meat"},
-			{"icon": "🪤", "title": "Armadilha Pesada de Espinhos", "desc": "Imobiliza grandes predadores por tempo suficiente para disparar flechas.", "action": "beast_trap"}
-		]
 	},
 	110: { # O Alquimista Esquecido
 		"title": "O Alquimista Esquecido",
@@ -211,12 +163,6 @@ const MASTER_DATA := {
 			"Nas horas mortas entre a meia-noite e as quatro da manhã, o véu da realidade se rompe nestes esgotos...",
 			"Traga-me glândulas de veneno e sangue puro... Meu espírito ainda sabe como destilar o poder proibido."
 		],
-		"services": [
-			{"icon": "⚗️", "title": "História Oculta: O Mistério das 03:00", "desc": "Os registros esquecidos sobre o eclipse primordial e a traição de Lyra.", "action": "ghost_story"},
-			{"icon": "☠️", "title": "Transmutação Proibida do Sangue Lunar", "desc": "Converte Sangue Lunar em essência ectoplásmica de imenso poder.", "action": "ghost_transmute"},
-			{"icon": "🧪", "title": "Elixir Ectoplásmico das Sombras", "desc": "Torna o viajante translúcido, reduzindo a agressividade de monstros.", "action": "ghost_elixir"},
-			{"icon": "📜", "title": "Fragmento do Pergaminho Proibido", "desc": "Notas alquímicas antigas contendo fórmulas nunca ensinadas na superfície.", "action": "ghost_scroll"}
-		]
 	},
 	111: { # Nyx Sombraveloz
 		"title": "Nyx Sombraveloz, Mestra das Lâminas Silentes",
@@ -231,12 +177,6 @@ const MASTER_DATA := {
 			"Chá de jasmim acalma as mãos. Mãos calmas não erram o golpe.",
 			"Traga-me Glândulas de Veneno Sombrio dos esgotos e eu passo a confiar em você."
 		],
-		"services": [
-			{"icon": "💨", "title": "Bomba de Fumaça", "desc": "Some por alguns instantes da vista dos monstros.", "action": "smoke_bomb"},
-			{"icon": "🗡️", "title": "Lâminas Envenenadas", "desc": "Adagas leves banhadas em veneno de aranha.", "action": "poison_blades"},
-			{"icon": "🎭", "title": "Máscara Sem Rosto", "desc": "Ninguém lembra de um rosto que nunca viu.", "action": "faceless_mask"},
-			{"icon": "📜", "title": "Rumores da Irmandade", "desc": "Onde os assassinos do Sol Negro andam se escondendo.", "action": "nyx_rumors"}
-		]
 	},
 	112: { # Mestre Tao Ferroventre
 		"title": "Mestre Tao Ferroventre, Grão-Mestre do Punho Celeste",
@@ -251,12 +191,6 @@ const MASTER_DATA := {
 			"Três socos seguidos e o corpo endurece como pedra. Continue batendo!",
 			"Se derrubar o Lobo Alfa, traga a pele. Meu tatame está gasto. Ha-ha!"
 		],
-		"services": [
-			{"icon": "🍵", "title": "Chá das Nove Luas", "desc": "Restaura o fôlego e acalma o espírito.", "action": "nine_moon_tea"},
-			{"icon": "🥊", "title": "Faixas de Treino", "desc": "Faixas de linho que protegem os nós dos dedos.", "action": "hand_wraps"},
-			{"icon": "🧘", "title": "Meditação na Cachoeira", "desc": "Uma lição sobre respiração e foco.", "action": "waterfall_meditation"},
-			{"icon": "🍚", "title": "Bolinho de Arroz do Monge", "desc": "Simples, quente e cheio de energia.", "action": "rice_ball"}
-		]
 	},
 	113: { # Iolanthe Mármore-Lunar
 		"title": "Iolanthe Mármore-Lunar, Escultora de Almas",
@@ -271,12 +205,6 @@ const MASTER_DATA := {
 			"Na Lua Cheia, as pedras cantam. É a coisa mais bonita que já ouvi.",
 			"Um Anel de Luz Estelar daria olhos lindos para minha próxima estátua."
 		],
-		"services": [
-			{"icon": "🪨", "title": "Cinzel de Pedra-Lua", "desc": "Ferramenta que desperta pequenas centelhas na pedra.", "action": "moonstone_chisel"},
-			{"icon": "✨", "title": "Pó Lunar", "desc": "Brilha no escuro e fortalece guardiões de pedra.", "action": "lunar_dust"},
-			{"icon": "🗿", "title": "Estatueta de Proteção", "desc": "Um pequeno vigia para a sua mochila.", "action": "ward_statuette"},
-			{"icon": "📖", "title": "História da Vigília", "desc": "Como a fortaleza caiu e quem ainda a protege.", "action": "vigil_story"}
-		]
 	},
 	114: { # Madame Fiorella Agulhadouro
 		"title": "Madame Fiorella Agulhadouro, Tecelã Carmesim",
@@ -291,12 +219,6 @@ const MASTER_DATA := {
 			"Coleciono botões raros. Se achar algum, traga para mim!",
 			"Prata da lua deixa o fio firme como promessa. Um Amuleto de Prata da Lua me faria muito feliz."
 		],
-		"services": [
-			{"icon": "🧵", "title": "Carretel de Fio de Aço", "desc": "Fio encantado para costurar inimigos à distância.", "action": "steel_thread"},
-			{"icon": "🪡", "title": "Agulhas Rúnicas", "desc": "Agulhas finas que guardam pequenos feitiços.", "action": "runic_needles"},
-			{"icon": "🧥", "title": "Manto Sob Medida", "desc": "Um manto elegante para aventuras elegantes.", "action": "tailored_cloak"},
-			{"icon": "🔘", "title": "Fofocas do Ateliê", "desc": "Tudo o que a vila não quer que você saiba.", "action": "atelier_gossip"}
-		]
 	},
 	115: { # Chef Bartolomeu Brasa-Alta
 		"title": "Chef Bartolomeu Brasa-Alta, Mestre do Banquete",
@@ -311,12 +233,6 @@ const MASTER_DATA := {
 			"Não estou chorando, é o vapor da cebola.",
 			"Sangue Lupino Fresco é o segredo do meu chouriço. Traga um frasco para a cozinha!"
 		],
-		"services": [
-			{"icon": "🍲", "title": "Ensopado de Javali", "desc": "Restaura a vida de qualquer aventureiro faminto.", "action": "boar_stew"},
-			{"icon": "🔪", "title": "Afiar Cutelo", "desc": "Corte limpo na autópsia, corte limpo na batalha.", "action": "sharpen_cleaver"},
-			{"icon": "🍄", "title": "Sopa de Cogumelos do Bosque", "desc": "Aquece o corpo e clareia a mente.", "action": "mushroom_soup"},
-			{"icon": "📒", "title": "Histórias do Naufrágio", "desc": "Três anos numa ilha de monstros, contados com molho.", "action": "shipwreck_tales"}
-		]
 	},
 	116: { # Thorne, o Eremita das Feras (Mestre secreto)
 		"title": "Thorne, o Eremita das Feras",
@@ -331,12 +247,6 @@ const MASTER_DATA := {
 			"Há vinte anos não piso na vila. Lá só ensinam a matar.",
 			"Traga o que restou dos lobos que abateu. Presas. Peles. Devolvo tudo à terra."
 		],
-		"services": [
-			{"icon": "🐺", "title": "Ouvir a Matilha", "desc": "Thorne conta o que os lobos sussurram.", "action": "thorne_pack"},
-			{"icon": "🌕", "title": "Sobre a Lua Cheia", "desc": "Por que a matilha canta quando a lua está inteira.", "action": "thorne_moon"},
-			{"icon": "🦴", "title": "Entregar Troféus de Lobo", "desc": "Presas e peles de Alfa aumentam a confiança de Thorne.", "action": "thorne_offer"},
-			{"icon": "🌿", "title": "Ervas do Bosque", "desc": "Plantas que acalmam feras assustadas.", "action": "forest_herbs"}
-		]
 	}
 }
 
@@ -353,9 +263,6 @@ const VILLAGER_DATA := {
 			"Escutei que o cobre perto do rio é mais macio. Dá pra trabalhar sem rachar.",
 			"Uma vez deixei uma espada cair no barril de têmpera e ela saiu azul. Ninguém sabe por quê."
 		],
-		"services": [
-			{"icon": "🔥", "title": "Ajudar no Fole", "desc": "Bran conta segredos da forja enquanto vocês trabalham.", "action": "chat"}
-		]
 	},
 	118: {
 		"title": "Pip, Aprendiz de Alquimia",
@@ -368,9 +275,6 @@ const VILLAGER_DATA := {
 			"Cogumelos brilhantes só crescem perto da água. Nunca coma um sem saber o nome!",
 			"Se eu errar a receita sai uma poção ruim... a Lyra finge que não vê."
 		],
-		"services": [
-			{"icon": "🧪", "title": "Dicas de Alquimia", "desc": "Pip ensina o básico das misturas.", "action": "chat"}
-		]
 	},
 	119: {
 		"title": "Tilda, Ajudante de Cozinha",
@@ -383,9 +287,6 @@ const VILLAGER_DATA := {
 			"Os guardas pedem sempre dose dupla depois da patrulha noturna.",
 			"Quem come bem aguenta o frio da montanha. Leve comida antes de viajar!"
 		],
-		"services": [
-			{"icon": "🍞", "title": "Pedir um Lanche", "desc": "Pão quente e conversa.", "action": "chat"}
-		]
 	},
 	120: {
 		"title": "Mortimer, o Coveiro",
@@ -398,9 +299,6 @@ const VILLAGER_DATA := {
 			"A Igreja vigia o cemitério. Necromante que aparecer por aqui não sai inteiro.",
 			"Cada lápide tem um nome. Eu lembro de todos."
 		],
-		"services": [
-			{"icon": "⚰️", "title": "Perguntar sobre os Túmulos", "desc": "Quem descansa no cemitério da Vila.", "action": "chat"}
-		]
 	},
 	123: {
 		"title": "Mestra Joalheira Selene Lapidária",
@@ -413,10 +311,6 @@ const VILLAGER_DATA := {
 			"Quartzo é humilde, mas uma boa lapidação o faz brilhar como diamante.",
 			"Traga-me Prata e eu cravejo qualquer gema que você encontrar."
 		],
-		"services": [
-			{"icon": "💍", "title": "Ver Joias", "desc": "Anéis, colares e diademas cravejados.", "action": "chat"},
-			{"icon": "💎", "title": "Avaliar Gema", "desc": "Selene diz quanto vale sua pedra.", "action": "chat"}
-		]
 	},
 	400: {
 		"title": "Paladino da Luz",
@@ -429,7 +323,6 @@ const VILLAGER_DATA := {
 			"Zumbis temem fogo e Luz. Água benta também ajuda.",
 			"Rezo pelos que caíram sem túmulo."
 		],
-		"services": []
 	},
 	420: {
 		"title": "Clériga da Luz",
@@ -442,7 +335,6 @@ const VILLAGER_DATA := {
 			"A Irmã Seraphina cura até a Peste Cinzenta, por uma oferta à Igreja.",
 			"Os mortos merecem descanso. Leve os corpos ao Coveiro."
 		],
-		"services": []
 	},
 }
 
@@ -459,7 +351,7 @@ func info_for(npc_id: int) -> Dictionary:
 		"title": "Morador de Lunaria", "sub": "Habitante da Vila",
 		"greeting": "Olá, viajante. Belo dia, não?", "color": Color("#cfd8dc"),
 		"talk_quotes": ["Dizem que a Fonte da praça nunca seca.", "Cuidado com as feras depois do pôr do sol."],
-		"services": []}).duplicate()
+		}).duplicate()
 	d["villager"] = true
 	d["class_id"] = 0
 	d["class_name"] = ""
@@ -507,12 +399,14 @@ var master_friendship_label: Label = null
 var master_greeting_label: Label = null
 var content_vbox: VBoxContainer = null
 var options_vbox: VBoxContainer = null
+var social: Dictionary = {} # corações, cooldowns e favor vindos do servidor (0x64)
 
 func _ready() -> void:
 	layer = 22
 	visible = false
 	_build_ui()
 	LunariaUI.watch(self) # mesmo estilo do inventário
+	NetworkManager.social_state_received.connect(_on_social_state)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if is_open and event is InputEventKey and event.pressed and not event.echo:
@@ -525,6 +419,8 @@ func open_master_menu(npc_id: int) -> void:
 	var m_info: Dictionary = info_for(npc_id)
 	current_npc_name = m_info["title"]
 	view_mode = "main"
+	social = {}
+	NetworkManager.send_social_action(npc_id, 0)
 
 	_update_display()
 	open_menu()
@@ -697,8 +593,10 @@ func _update_display() -> void:
 	for ch in options_vbox.get_children():
 		ch.queue_free()
 
-	if view_mode == "trade":
-		_render_trade_view(m_info)
+	if view_mode == "gift":
+		_render_gift_view()
+	elif view_mode == "quest":
+		_render_quest_view()
 	elif view_mode == "talk":
 		_render_talk_view(m_info)
 	else:
@@ -752,6 +650,28 @@ func _render_main_view(m_info: Dictionary) -> void:
 		_update_display()
 	)
 	options_vbox.add_child(talk_btn)
+
+	# Presente e Missões: só a partir de 2 corações
+	var hearts: int = int(social.get("hearts", 0))
+	if hearts >= 2:
+		var gift_btn := Button.new()
+		gift_btn.custom_minimum_size = Vector2(0, 40)
+		var gw: float = float(social.get("gift_wait", 0.0))
+		gift_btn.text = "🎁 Presente" if gw <= 0.0 else "🎁 Presente (de novo em %s)" % _hours_text(gw)
+		gift_btn.pressed.connect(func():
+			view_mode = "gift"
+			_update_display()
+		)
+		options_vbox.add_child(gift_btn)
+		if bool(social.get("has_quests", false)):
+			var quest_btn := Button.new()
+			quest_btn.custom_minimum_size = Vector2(0, 40)
+			quest_btn.text = "📜 Missões" + (" (favor em andamento)" if social.get("quest") != null else "")
+			quest_btn.pressed.connect(func():
+				view_mode = "quest"
+				_update_display()
+			)
+			options_vbox.add_child(quest_btn)
 
 	# -------------------------------------------------------------
 	# 2. BOTÃO ABRIR COMÉRCIO (COMPRAR / VENDER / REPARAR):
@@ -976,80 +896,6 @@ func _render_main_view(m_info: Dictionary) -> void:
 # -------------------------------------------------------------
 # VISÃO DE COMÉRCIO & SERVIÇOS (COMPRAR / VENDER / REPARAR)
 # -------------------------------------------------------------
-func _render_trade_view(m_info: Dictionary) -> void:
-	var trade_header := Label.new()
-	trade_header.text = "🛒 Balcão de Comércio & Serviços de %s" % m_info["title"]
-	trade_header.add_theme_font_size_override("font_size", 14)
-	trade_header.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
-	options_vbox.add_child(trade_header)
-
-	var services: Array = m_info.get("services", [])
-	for s_data in services:
-		var item_card := PanelContainer.new()
-		var card_style := StyleBoxFlat.new()
-		card_style.bg_color = Color(0.09, 0.12, 0.17, 0.95)
-		card_style.border_color = Color(0.35, 0.45, 0.6, 0.7)
-		card_style.set_border_width_all(1)
-		card_style.set_corner_radius_all(6)
-		card_style.content_margin_left = 12
-		card_style.content_margin_right = 12
-		card_style.content_margin_top = 8
-		card_style.content_margin_bottom = 8
-		item_card.add_theme_stylebox_override("panel", card_style)
-		options_vbox.add_child(item_card)
-
-		var card_hbox := HBoxContainer.new()
-		card_hbox.add_theme_constant_override("separation", 12)
-		item_card.add_child(card_hbox)
-
-		var icon_lbl := Label.new()
-		icon_lbl.text = s_data.get("icon", "📦")
-		icon_lbl.add_theme_font_size_override("font_size", 18)
-		card_hbox.add_child(icon_lbl)
-
-		var text_vbox := VBoxContainer.new()
-		text_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card_hbox.add_child(text_vbox)
-
-		var t_title := Label.new()
-		t_title.text = s_data.get("title", "Serviço")
-		t_title.add_theme_font_size_override("font_size", 12)
-		t_title.add_theme_color_override("font_color", Color(1.0, 0.92, 0.6))
-		text_vbox.add_child(t_title)
-
-		var t_desc := Label.new()
-		t_desc.text = s_data.get("desc", "")
-		t_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		t_desc.add_theme_font_size_override("font_size", 10)
-		t_desc.add_theme_color_override("font_color", Color(0.75, 0.8, 0.88))
-		text_vbox.add_child(t_desc)
-
-		var act_btn := Button.new()
-		act_btn.text = "Solicitar / Negociar"
-		act_btn.add_theme_font_size_override("font_size", 11)
-		act_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		var ab_style := StyleBoxFlat.new()
-		ab_style.bg_color = Color(0.18, 0.32, 0.22, 0.95)
-		ab_style.border_color = Color(0.4, 0.85, 0.5, 0.9)
-		ab_style.set_border_width_all(1)
-		ab_style.set_corner_radius_all(4)
-		act_btn.add_theme_stylebox_override("normal", ab_style)
-		var act_name: String = s_data.get("action", "")
-		var act_title: String = s_data.get("title", "")
-		act_btn.pressed.connect(func(): _on_service_requested(act_name, act_title))
-		card_hbox.add_child(act_btn)
-
-	var back_btn := Button.new()
-	back_btn.custom_minimum_size = Vector2(0, 38)
-	back_btn.text = "⬅️ Voltar ao Diálogo Principal"
-	back_btn.add_theme_font_size_override("font_size", 11)
-	back_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	back_btn.pressed.connect(func():
-		view_mode = "main"
-		_update_display()
-	)
-	options_vbox.add_child(back_btn)
-
 # -------------------------------------------------------------
 # VISÃO DE CONVERSA: ASSUNTOS
 # -------------------------------------------------------------
@@ -1058,7 +904,7 @@ const TALK_TOPICS := [
 	["🧑", "Fale um pouco sobre você.", "about"],
 	["📜", "Alguma novidade por aí?", "rumor"],
 	["🗺️", "O que há para fazer na região?", "hint"],
-	["💕", "Conversar com calma (+Afiança)", "bond"],
+	["💕", "Conversar com calma (1x a cada 8 h de jogo · leva até 2 corações)", "bond"],
 ]
 
 func _render_talk_view(m_info: Dictionary) -> void:
@@ -1128,30 +974,14 @@ func _answer_topic(kind: String, m_info: Dictionary) -> void:
 # AÇÕES E EVENTOS
 # -------------------------------------------------------------
 func _on_talk_pressed() -> void:
-	print("[ClassMasterUI] Conversando com NPC #%d!" % current_npc_id)
-	var nm_node := get_node_or_null("/root/NetworkManager")
-	if nm_node:
-		nm_node.send_player_interact(current_npc_id)
-
-	var world := get_parent()
-	var cur_pts: int = 0
-	if world and world.has_method("get_npc_friendship"):
-		cur_pts = world.get_npc_friendship(current_npc_id)
-	cur_pts = mini(100, cur_pts + 5)
-	if world and world.has_method("set_npc_friendship"):
-		world.set_npc_friendship(current_npc_id, cur_pts)
-
+	# A Afiança da conversa é decidida pelo servidor (+3, uma vez a cada 8 h de jogo, até 2 corações)
+	NetworkManager.send_social_action(current_npc_id, 1)
+	NetworkManager.send_player_interact(current_npc_id)
 	var m_info: Dictionary = info_for(current_npc_id)
 	var quotes: Array = m_info.get("talk_quotes", [])
 	var quote: String = quotes[randi() % quotes.size()] if quotes.size() > 0 else m_info["greeting"]
-
 	if master_greeting_label:
-		master_greeting_label.text = "💬 \"%s\"\n\n✨ [Você fortaleceu sua afiança com %s! (+5 Pontos no Servidor)]" % [quote, m_info["title"]]
-
-	update_friendship_display()
-
-	if world and world.has_method("show_loot_toast"):
-		world.show_loot_toast("✨ Afiança Aumentada: +5 pontos com %s!" % m_info["title"])
+		master_greeting_label.text = "💬 \"%s\"" % quote
 
 func _on_open_trade_pressed() -> void:
 	var world := get_parent()
@@ -1172,47 +1002,9 @@ func _on_open_trade_pressed() -> void:
 			world.show_loot_toast("🔒 Expediente encerrado (Aberto das 06:00 às 18:00). O NPC está em horário de descanso!")
 		return
 
-	view_mode = "trade"
-	_update_display()
-
-func _on_service_requested(action_key: String, service_title: String) -> void:
-	print("[ClassMasterUI] Serviço solicitado: %s (%s) ao NPC #%d" % [service_title, action_key, current_npc_id])
-	# Notifica o servidor via interação de pacote para registrar transações / ofertas
-	var nm_node := get_node_or_null("/root/NetworkManager")
-	if nm_node:
-		nm_node.send_player_interact(current_npc_id)
-
-	var world := get_parent()
-	var m_info: Dictionary = info_for(current_npc_id)
-
-	match action_key:
-		"repair", "guard_sharpen":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("🔨 %s: \"Seus equipamentos foram forjados, afiados e estão prontos para combate!\"" % m_info["title"])
-		"solar_blessing":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("☀️ Bênção Sagrada Concedida! A Luz Celestial purifica suas feridas.")
-		"moon_lore":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("🌌 Mestre Aurelius: \"A Lua Cheia amplia a mana; a Lua de Sangue liberta as feras!\"")
-		"alpha_tips":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("🐺 Kaelen: \"O Lobo Alfa espreita no Bosque Sussurrante (75, -60) na Lua Cheia!\"")
-		"lineage_rumor":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("📜 Aurelius: \"%s\"" % LINEAGE_RUMORS[randi() % LINEAGE_RUMORS.size()])
-		"thorne_pack":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("🐺 Thorne: \"Os lobos confiam em quem devolve à terra o que tirou deles. Presas, peles...\"")
-		"thorne_moon":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("🌕 Thorne: \"Na Lua Cheia, ou quando os vaga-lumes dançam no Bosque, a matilha ouve um novo chamado.\"")
-		"ghost_story":
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("⚗️ Sussurros dos Esgotos: \"Às 03:00 a traição de Lyra foi consumada...\"")
-		_:
-			if world and world.has_method("show_loot_toast"):
-				world.show_loot_toast("🛒 Negociação realizada: %s com %s!" % [service_title, m_info["title"]])
+	if world and world.has_method("open_shop"):
+		close_menu()
+		world.open_shop(current_npc_id, info_for(current_npc_id)["title"])
 
 func _on_secret_knowledge_pressed() -> void:
 	print("[ClassMasterUI] Absorvendo conhecimento secreto com NPC #%d!" % current_npc_id)
@@ -1267,3 +1059,114 @@ func _on_dev_level_up() -> void:
 	tw.tween_interval(0.2)
 	tw.tween_callback(_update_display)
 
+
+# -------------------------------------------------------------
+# AMIZADE: PRESENTES E FAVORES (estado vem do servidor)
+# -------------------------------------------------------------
+func _hours_text(h: float) -> String:
+	if h >= 1.0:
+		return "%d h de jogo" % int(ceil(h))
+	return "%d min de jogo" % int(ceil(h * 60.0))
+
+func _on_social_state(st: Dictionary) -> void:
+	if int(st.get("npc", 0)) != current_npc_id:
+		return
+	social = st
+	var world := get_parent()
+	if world and world.has_method("set_npc_friendship"):
+		world.set_npc_friendship(current_npc_id, int(st.get("points", 0)))
+	var m: String = str(st.get("msg", ""))
+	if m != "" and master_greeting_label:
+		master_greeting_label.text = "💬 " + m
+	if is_open:
+		_update_display()
+
+func _render_gift_view() -> void:
+	var info_lbl := Label.new()
+	info_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	info_lbl.text = "Escolha um presente. Cada morador tem seus gostos: o que ele ama rende muita Afiança, mas o que ele detesta faz você PERDER Afiança. Um presente por dia."
+	options_vbox.add_child(info_lbl)
+	var gw: float = float(social.get("gift_wait", 0.0))
+	if gw > 0.0:
+		var wait_lbl := Label.new()
+		wait_lbl.text = "⏳ Já recebeu um presente seu hoje. Próximo em %s." % _hours_text(gw)
+		options_vbox.add_child(wait_lbl)
+	else:
+		var gifts: Array = social.get("gifts", [])
+		if gifts.is_empty():
+			var none_lbl := Label.new()
+			none_lbl.text = "Sua mochila está vazia."
+			options_vbox.add_child(none_lbl)
+		for g in gifts:
+			var item_id: int = int(g["id"])
+			var q: int = int(g["q"])
+			var b := Button.new()
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			b.custom_minimum_size = Vector2(0, 32)
+			b.text = "🎁 %s  [Qualidade %d]  ×%d" % [str(ItemDataScript.info(item_id).get("name", "Item")), q, int(g["n"])]
+			b.pressed.connect(func():
+				NetworkManager.send_social_action(current_npc_id, 2, item_id, q)
+			)
+			options_vbox.add_child(b)
+	_add_back_button()
+
+func _render_quest_view() -> void:
+	var q = social.get("quest")
+	if q is Dictionary:
+		var title := Label.new()
+		title.text = "📜 %s" % str(q.get("title", "Favor"))
+		title.add_theme_font_size_override("font_size", 15)
+		title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+		options_vbox.add_child(title)
+		var intro := Label.new()
+		intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		intro.text = "\"%s\"" % str(q.get("intro", ""))
+		options_vbox.add_child(intro)
+		var steps: Array = q.get("steps", [])
+		var cur: int = int(q.get("step", 0))
+		for i in range(steps.size()):
+			var sl := Label.new()
+			var mark := "✅" if i < cur else ("▶️" if i == cur else "▫️")
+			sl.text = "%s %s" % [mark, str(steps[i])]
+			options_vbox.add_child(sl)
+		var rw := Label.new()
+		rw.text = "Recompensa: %s" % str(q.get("reward", ""))
+		rw.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
+		options_vbox.add_child(rw)
+		var turn := Button.new()
+		turn.custom_minimum_size = Vector2(0, 40)
+		turn.text = "🏆 Receber a recompensa" if bool(q.get("ready", false)) else "📦 Entregar / Ver o que falta"
+		turn.pressed.connect(func():
+			NetworkManager.send_social_action(current_npc_id, 4)
+		)
+		options_vbox.add_child(turn)
+		var give_up := Button.new()
+		give_up.text = "Desistir deste favor"
+		give_up.pressed.connect(func():
+			NetworkManager.send_social_action(current_npc_id, 5)
+		)
+		options_vbox.add_child(give_up)
+	else:
+		var qw: float = float(social.get("quest_wait", 0.0))
+		var ask := Button.new()
+		ask.custom_minimum_size = Vector2(0, 40)
+		if qw > 0.0:
+			ask.text = "Sem favores agora (volte em %s)" % _hours_text(qw)
+			ask.disabled = true
+		else:
+			ask.text = "🙋 Posso ajudar em alguma coisa?"
+		ask.pressed.connect(func():
+			NetworkManager.send_social_action(current_npc_id, 3)
+		)
+		options_vbox.add_child(ask)
+	_add_back_button()
+
+func _add_back_button() -> void:
+	var back_btn := Button.new()
+	back_btn.custom_minimum_size = Vector2(0, 34)
+	back_btn.text = "⬅️ Voltar"
+	back_btn.pressed.connect(func():
+		view_mode = "main"
+		_update_display()
+	)
+	options_vbox.add_child(back_btn)

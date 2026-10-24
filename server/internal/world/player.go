@@ -118,8 +118,9 @@ type Player struct {
 	LastRecordTime time.Time
 
 	// Sistema Universal de Amizade com NPCs (0 a 100) e Receitas Secretas
-	NPCFriendship   map[uint32]int // NPCID -> Pontos de Afiança (0 a 100)
-	UnlockedRecipes map[uint8]bool // RecipeID -> Desbloqueada
+	NPCFriendship   map[uint32]int        // NPCID -> Pontos de Afiança (0 a 100)
+	Social          map[uint32]*NPCSocial // conversas, presentes e favores com cada NPC
+	UnlockedRecipes map[uint8]bool        // RecipeID -> Desbloqueada
 
 	// Desafios de Obtenção das Classes Secretas (10 a 15)
 	UntouchedKills         int               // Abates sem sofrer dano (Bailarino das Estrelas - Classe 10)

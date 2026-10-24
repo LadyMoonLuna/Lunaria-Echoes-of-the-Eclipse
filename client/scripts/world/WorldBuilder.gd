@@ -498,7 +498,37 @@ static func _build_vegetation(zone: int, root: Node3D) -> void:
 			rz += 5.0
 	for kind in placements:
 		_add_multimesh(root, _species_mesh(kind, grass_col), placements[kind], "Veg_%s" % kind)
+	_build_vegetation_colliders(root, placements)
 	_build_grass(zone, root, rng, portals)
+
+## Raio do tronco (m, antes da escala) das espécies sólidas; arbustos, juncos, cogumelos e pedrinhas
+## ficam sem colisão para o jogador passar por cima ou por dentro.
+const SOLID_TRUNKS := {
+	"oak": 0.42, "pine": 0.32, "snowpine": 0.32, "birch": 0.22, "acacia": 0.3, "dead": 0.3,
+	"willow": 0.45, "cactus": 0.4, "termite": 0.8, "basalt": 0.9, "crystal": 0.4,
+}
+
+## Um único corpo estático com um cilindro por tronco (barato para a física e cobre a zona inteira).
+static func _build_vegetation_colliders(root: Node3D, placements: Dictionary) -> void:
+	var body := StaticBody3D.new()
+	body.name = "VegColliders"
+	body.collision_layer = 1
+	body.collision_mask = 0
+	root.add_child(body)
+	for kind in placements:
+		if not SOLID_TRUNKS.has(kind):
+			continue
+		var r: float = SOLID_TRUNKS[kind]
+		for xf in placements[kind]:
+			var t: Transform3D = xf
+			var sc: Vector3 = t.basis.get_scale()
+			var cyl := CylinderShape3D.new()
+			cyl.radius = r * sc.x
+			cyl.height = 3.0 * sc.y
+			var cs := CollisionShape3D.new()
+			cs.shape = cyl
+			cs.position = t.origin + Vector3(0, cyl.height * 0.5, 0)
+			body.add_child(cs)
 
 static func _free_spot(zone: int, x: float, z: float, portals: Array, road_gap: float) -> bool:
 	if Vector2(x, z).length() < 30.0:
@@ -520,20 +550,38 @@ static func _pick(table: Array, total_w: int, rng: RandomNumberGenerator) -> Str
 			return e[0]
 	return table[0][0]
 
+## Divide a vegetação em blocos de 80 m, cada um com o nó no centro do bloco. A distância de
+## visibilidade é medida por bloco: um único MultiMesh da zona inteira (nó na origem) sumia por
+## completo quando a câmera passava de 260 m do centro do mapa — as árvores "paravam de carregar".
+const VEG_CHUNK := 80.0
+
 static func _add_multimesh(root: Node3D, mesh: Mesh, xfs: Array, node_name: String) -> void:
 	if xfs.is_empty():
 		return
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = mesh
-	mm.instance_count = xfs.size()
-	for k in range(xfs.size()):
-		mm.set_instance_transform(k, xfs[k])
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = node_name
-	mmi.multimesh = mm
-	mmi.visibility_range_end = 260.0
-	root.add_child(mmi)
+	var buckets := {}
+	for xf in xfs:
+		var t: Transform3D = xf
+		var key := Vector2i(floori(t.origin.x / VEG_CHUNK), floori(t.origin.z / VEG_CHUNK))
+		if not buckets.has(key):
+			buckets[key] = []
+		buckets[key].append(t)
+	for key in buckets:
+		var list: Array = buckets[key]
+		var center := Vector3((key.x + 0.5) * VEG_CHUNK, 0.0, (key.y + 0.5) * VEG_CHUNK)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = mesh
+		mm.instance_count = list.size()
+		for k in range(list.size()):
+			var t2: Transform3D = list[k]
+			t2.origin -= center
+			mm.set_instance_transform(k, t2)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "%s_%d_%d" % [node_name, key.x, key.y]
+		mmi.multimesh = mm
+		mmi.position = center
+		mmi.visibility_range_end = 260.0
+		root.add_child(mmi)
 
 static func _build_grass(zone: int, root: Node3D, rng: RandomNumberGenerator, portals: Array) -> void:
 	var b := Terrain.biome(zone)

@@ -21,6 +21,7 @@ const (
 	shopTradeRange  float32 = 6.0
 	shopUnitQuality uint8   = 80
 	npcSpeechGap            = 20 * time.Second
+	guildFoodPrice  uint32  = 14 // pago por Carne de Caça encomendada na Guilda
 )
 
 // initNPCLife dá a cada NPC vivo seus valores do Mundo Vivo (o posto de trabalho é a posição inicial).
@@ -244,12 +245,18 @@ func planNeeds(n *world.NPC, ctx needsCtx, villageNodes []world.ResourceNode, ev
 			ev.says = append(ev.says, "Meu estômago ronca... hora de uma refeição na Taverna.")
 			return
 		}
-		for _, food := range []uint16{meal, uint16(protocol.ItemRawWolfMeat), world.MatGlowMushroom} {
+		for _, food := range []uint16{meal, world.MatGameMeat, uint16(protocol.ItemRawWolfMeat), world.MatGlowMushroom} {
 			if n.RawMaterials[food] > 0 {
 				n.RawMaterials[food]--
 				n.Hunger = 100
 				return
 			}
+		}
+		// Sem comida em casa: pendura um pedido de Carne de Caça no quadro da Guilda (se tiver ouro)
+		if _, open := n.Life.BuyOrders[world.MatGameMeat]; !open && n.Gold >= 3*guildFoodPrice {
+			n.Life.BuyOrders[world.MatGameMeat] = world.BuyOrder{Material: world.MatGameMeat, Wanted: 3, Price: guildFoodPrice}
+			n.Life.OrderSince[world.MatGameMeat] = time.Now()
+			ev.says = append(ev.says, "📜 Pendurei um pedido de comida no quadro da Guilda dos Ofícios. Quem me trouxer Carne de Caça será bem pago!")
 		}
 		// Sem comida e sem ouro: vai coletar algo comestível
 		if node, ok := nearestNode(n, villageNodes, world.MatHerbs, world.MatGlowMushroom); ok {
@@ -517,6 +524,7 @@ func (s *Server) handleShopRequest(pkt protocol.ShopRequestPacket) {
 		return
 	}
 	s.sendShopState(player, npc)
+	s.sendMarketState(player, npc, "")
 }
 
 func (s *Server) sendShopState(p *world.Player, npc *world.NPC) {
@@ -529,14 +537,13 @@ func shopStateOf(npc *world.NPC) protocol.ShopState {
 		st = protocol.ShopState{NPCID: n.ID, Gold: n.Gold, HP: uint16(max(n.HP, 0)), MaxHP: uint16(n.MaxHP),
 			Hunger: uint8(n.Hunger), Thirst: uint8(n.Thirst), Cold: uint8(n.Cold), Heat: uint8(n.Heat),
 			Temperature: int8(max(min(n.Temperature, 127), -128)), Activity: n.CurrentActivity}
-		mult := world.SellPriceMult(n.Personality)
+		market := world.MarketOf(n.ZoneID)
 		for item, qty := range n.ShopStock {
-			price := world.ShopPrice(n.Profession, uint8(item))
-			if price == 0 {
+			price := world.NPCSellUnitPrice(n.Personality, market, uint8(item), qty)
+			if price == 0 || !world.SellsItem(n.ID, uint8(item)) {
 				continue
 			}
-			st.Stock = append(st.Stock, protocol.ShopStockEntry{ItemID: uint8(item), Qty: uint8(min(qty, 255)),
-				Price: uint32(float32(price)*mult + 0.5)})
+			st.Stock = append(st.Stock, protocol.ShopStockEntry{ItemID: uint8(item), Qty: uint8(min(qty, 255)), Price: price})
 		}
 		for _, o := range n.Life.BuyOrders {
 			st.Orders = append(st.Orders, protocol.ShopOrderEntry{Material: o.Material, Wanted: uint8(min(o.Wanted, 255)), Price: o.Price})
@@ -564,116 +571,7 @@ func (s *Server) handleShopTrade(pkt protocol.ShopTradePacket) {
 	}
 	s.sendInventorySync(player)
 	s.sendShopState(player, npc)
-}
-
-// StockOutMessage: aviso de estoque esgotado.
-const StockOutMessage = "📦 Estoque esgotado! Traga matérias-primas para o NPC fabricar novas unidades."
-
-// shopBuy: o jogador compra do estoque real; o ouro vai para o NPC.
-func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item, qty uint8) string {
-	base := world.ShopPrice(npc.Profession, item)
-	if base == 0 {
-		return "Isso eu não vendo."
-	}
-	bought := uint8(0)
-	var unit uint32
-	outOfStock := false
-	npc.WithLife(func(n *world.NPC) {
-		if n.IsDead {
-			return
-		}
-		unit = uint32(float32(base)*world.SellPriceMult(n.Personality) + 0.5)
-		for bought < qty {
-			if n.ShopStock[uint16(item)] <= 0 {
-				outOfStock = true
-				break
-			}
-			p.Mu.Lock()
-			paid := p.Gold >= unit
-			if paid {
-				p.Gold -= unit
-			}
-			p.Mu.Unlock()
-			if !paid {
-				break
-			}
-			n.ShopStock[uint16(item)]--
-			n.Gold += unit
-			bought++
-		}
-	})
-	if bought > 0 {
-		p.AddItemWithQuality(item, bought, shopUnitQuality)
-	}
-	switch {
-	case bought == 0 && outOfStock:
-		return StockOutMessage
-	case bought == 0:
-		return fmt.Sprintf("Você não tem Sollares suficientes (%d cada).", unit)
-	case outOfStock:
-		return fmt.Sprintf("Vendi %d× %s por %d Sollares. %s", bought, world.ItemName(item), unit*uint32(bought), StockOutMessage)
-	}
-	return fmt.Sprintf("Vendi %d× %s por %d Sollares. Bom proveito!", bought, world.ItemName(item), unit*uint32(bought))
-}
-
-// shopSell: o jogador vende matérias-primas; o NPC paga com o próprio ouro e volta a produzir.
-func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty uint8) string {
-	if p.IsSoulbound(item) {
-		return "📘 Blueprint Exclusiva é Soulbound: não pode ser vendida."
-	}
-	if item >= world.CustomItemFirstID {
-		return "Não compro peças forjadas únicas."
-	}
-	prof, ok := world.NPCProfiles[npc.Profession]
-	if !ok {
-		return "Não preciso disso."
-	}
-	base, wanted := prof.BuyPrices[uint16(item)]
-	if !wanted {
-		return "Não preciso disso."
-	}
-	qf := float32(quality) / 75
-	if qf < 0.5 {
-		qf = 0.5
-	} else if qf > 1.5 {
-		qf = 1.5
-	}
-	var unit uint32
-	affordable := uint8(0)
-	npc.WithLife(func(n *world.NPC) {
-		if n.IsDead {
-			return
-		}
-		unit = uint32(float32(base)*world.BuyPriceMult(n.Personality)*qf + 0.5)
-		if unit == 0 {
-			unit = 1
-		}
-		affordable = uint8(min(uint32(qty), n.Gold/unit))
-	})
-	if affordable == 0 {
-		return "Não tenho ouro para pagar por isso agora..."
-	}
-	sold := p.TakeItemUnits(item, quality, affordable)
-	if sold == 0 {
-		return "Você não tem esse material nessa qualidade."
-	}
-	total := unit * uint32(sold)
-	npc.WithLife(func(n *world.NPC) {
-		n.Gold -= min(total, n.Gold)
-		n.RawMaterials[uint16(item)] += int(sold)
-		if o, open := n.Life.BuyOrders[uint16(item)]; open {
-			o.Wanted -= int(sold)
-			if o.Wanted <= 0 {
-				delete(n.Life.BuyOrders, uint16(item))
-				delete(n.Life.OrderSince, uint16(item))
-			} else {
-				n.Life.BuyOrders[uint16(item)] = o
-			}
-		}
-		n.Life.LastCraft = time.Time{} // volta a produzir já no próximo tick
-	})
-	p.AddGold(total)
-	return fmt.Sprintf("Negócio fechado: %d× %s por %d Sollares. Já vou trabalhar nisso!", sold, world.ItemName(item), total)
+	s.sendMarketState(player, npc, msg)
 }
 
 // evaporationZones: zonas abertas onde as águas rasas podem secar.

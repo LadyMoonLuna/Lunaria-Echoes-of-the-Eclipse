@@ -1,6 +1,10 @@
 package world
 
-import "lunaria/server/internal/protocol"
+import (
+	"time"
+
+	"lunaria/server/internal/protocol"
+)
 
 // Sobrevivência dos jogadores: fome e temperatura corporal, no mesmo modelo dos NPCs do Mundo Vivo.
 
@@ -11,7 +15,19 @@ const (
 	PlayerColdPenalty       float32 = 70  // Frio/Calor acima disso: estamina regenera pela metade
 	PlayerExposureHPPerMin  float32 = 15  // hipotermia ou insolação (100)
 	CloakColdProtection     float32 = 6   // uma capa equipada protege 6 °C do frio
+	PlayerCombatHungerMult  float32 = 2.5 // em combate a fome corre 2,5x mais rápido
+	ForgeHungerCost         float32 = 2   // cada peça forjada/fundida custa fome
 )
+
+// Exert gasta fome num esforço pontual (forjar uma peça, carregar peso...).
+func (p *Player) Exert(hunger float32) {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	if !p.survivalInit {
+		p.Hunger, p.survivalInit = 100, true
+	}
+	p.Hunger = clampNeed(p.Hunger - hunger)
+}
 
 // Raças adaptadas ao frio ou ao calor (°C de tolerância a mais).
 var raceColdTolerance = map[uint8]float32{
@@ -43,7 +59,11 @@ func (p *Player) TickSurvival(dt float32, ambient float32, nearFire bool) uint16
 	if !p.survivalInit {
 		p.Hunger, p.survivalInit = 100, true
 	}
-	p.Hunger = clampNeed(p.Hunger - PlayerHungerPerMinute*m)
+	effort := float32(1)
+	if time.Since(p.LastCombatAt) < 5*time.Second {
+		effort = PlayerCombatHungerMult // lutar gasta bem mais
+	}
+	p.Hunger = clampNeed(p.Hunger - PlayerHungerPerMinute*effort*m)
 
 	felt := ambient
 	if nearFire {
@@ -126,4 +146,28 @@ func (p *Player) DevSetSurvival(hunger, cold float32) {
 	defer p.Mu.Unlock()
 	p.survivalInit = true
 	p.Hunger, p.Cold, p.Heat = hunger, cold, 0
+}
+
+// DrinkFountain: beber da Fonte Purificada refresca (tira calor), recupera fôlego e um pouco de vida.
+func (p *Player) DrinkFountain() {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	p.Heat = clampNeed(p.Heat - 35)
+	p.Stamina = min(float32(p.MaxStamina), p.Stamina+float32(p.MaxStamina)*0.25)
+	if p.HP > 0 {
+		p.HP = min(p.MaxHP, p.HP+max(1, p.MaxHP/30))
+	}
+}
+
+// WashAtFountain: lavar-se tira todo o calor; com tempo frio (< 14 °C) a água gelada esfria o corpo.
+// Devolve true se fez frio.
+func (p *Player) WashAtFountain(ambient float32) bool {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
+	p.Heat = 0
+	if ambient < 14 {
+		p.Cold = clampNeed(p.Cold + 15)
+		return true
+	}
+	return false
 }

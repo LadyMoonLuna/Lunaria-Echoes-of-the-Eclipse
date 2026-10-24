@@ -33,6 +33,9 @@ signal projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_pos
 signal evolution_offer_received(offer_type: int, option_a: int, option_b: int)
 signal dev_drop_rates_received(report_text: String)
 signal corpse_snapshot_received(corpses_dict: Dictionary)
+signal market_state_received(state: Dictionary)
+signal social_state_received(state: Dictionary)
+signal guild_state_received(state: Dictionary)
 signal corpse_drag_state_received(corpse_id: int, pos: Vector3, rot_y: float, integrity: int, dragger_id: int, speed_pct: int, mass_kg: int)
 signal open_autopsy_ui_received(corpse_id: int, mob_type: int, difficulty_seed: int, organs: Array)
 signal zone_change_received(target_zone_id: int, portal_id: int)
@@ -288,6 +291,31 @@ func _process_tcp() -> void:
 				var al_msg: String = tcp_rx_buffer.slice(4, 4 + al_len).get_string_from_utf8()
 				tcp_rx_buffer = tcp_rx_buffer.slice(4 + al_len)
 				forge_alert_received.emit(al_kind, al_msg)
+
+			elif opcode == 0x4A: # SHOP_STATE antigo (tamanho total u16): a loja usa o 0x62; só pula os bytes
+				if tcp_rx_buffer.size() < 3:
+					break
+				var ss_len: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
+				if ss_len < 3 or tcp_rx_buffer.size() < ss_len:
+					break
+				tcp_rx_buffer = tcp_rx_buffer.slice(ss_len)
+
+			elif opcode == 0x62 or opcode == 0x64 or opcode == 0x66: # MARKET / SOCIAL / GUILD: op | tamanho u16 | JSON
+				if tcp_rx_buffer.size() < 3:
+					break
+				var js_len: int = tcp_rx_buffer[1] | (tcp_rx_buffer[2] << 8)
+				if tcp_rx_buffer.size() < 3 + js_len:
+					break
+				var js_text: String = tcp_rx_buffer.slice(3, 3 + js_len).get_string_from_utf8()
+				tcp_rx_buffer = tcp_rx_buffer.slice(3 + js_len)
+				var js_data = JSON.parse_string(js_text)
+				if js_data is Dictionary:
+					if opcode == 0x62:
+						market_state_received.emit(js_data)
+					elif opcode == 0x64:
+						social_state_received.emit(js_data)
+					else:
+						guild_state_received.emit(js_data)
 
 			elif opcode == 0x60: # CORPSE_DRAG_STATE: op | corpo u32 | X f32 | Z f32 | rotY f32 | integridade% | arrastador u32 | velocidade% | massa u16
 				if tcp_rx_buffer.size() < 25:
@@ -1158,6 +1186,60 @@ func send_register_custom_weapon_scored(weapon_name: String, pieces: Array, scor
 	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
 	data.append_array(body)
 	tcp.put_data(data)
+
+## 0x48: abre a loja viva do NPC (o servidor responde com 0x62).
+func send_shop_request(npc_id: int) -> void:
+	if my_player_id == 0:
+		return
+	var buf := StreamPeerBuffer.new()
+	buf.big_endian = false
+	buf.put_u8(0x48)
+	buf.put_u32(my_player_id)
+	buf.put_u32(npc_id)
+	tcp.put_data(buf.data_array)
+
+## 0x49: comprar (action 0) ou vender (action 1) qty unidades do item com a Qualidade dada.
+func send_shop_trade(npc_id: int, action: int, item_id: int, quality: int, qty: int) -> void:
+	if my_player_id == 0:
+		return
+	var buf := StreamPeerBuffer.new()
+	buf.big_endian = false
+	buf.put_u8(0x49)
+	buf.put_u32(my_player_id)
+	buf.put_u32(npc_id)
+	buf.put_u8(action)
+	buf.put_u8(item_id)
+	buf.put_u8(quality)
+	buf.put_u8(clampi(qty, 1, 255))
+	tcp.put_data(buf.data_array)
+
+## 0x61: Fonte Purificada (1 beber, 2 encher frascos, 3 lavar-se).
+func send_fountain_use(action: int) -> void:
+	tcp.put_data(PackedByteArray([0x61, action]))
+
+## 0x63: amizade (0 estado, 1 conversar, 2 presente, 3 pedir favor, 4 entregar, 5 desistir).
+func send_social_action(npc_id: int, action: int, item_id: int = 0, quality: int = 0) -> void:
+	if my_player_id == 0:
+		return
+	var buf := StreamPeerBuffer.new()
+	buf.big_endian = false
+	buf.put_u8(0x63)
+	buf.put_u32(npc_id)
+	buf.put_u8(action)
+	buf.put_u8(item_id)
+	buf.put_u8(quality)
+	tcp.put_data(buf.data_array)
+
+## 0x65: Guilda dos Ofícios (0 abrir quadro, 1 entregar encomenda).
+func send_guild_action(action: int, npc_id: int = 0, item_id: int = 0, qty: int = 0) -> void:
+	var buf := StreamPeerBuffer.new()
+	buf.big_endian = false
+	buf.put_u8(0x65)
+	buf.put_u8(action)
+	buf.put_u32(npc_id)
+	buf.put_u8(item_id)
+	buf.put_u8(clampi(qty, 0, 255))
+	tcp.put_data(buf.data_array)
 
 ## 0x5F: agarrar (action 1) ou soltar (action 0) um corpo para arrastá-lo.
 func send_corpse_drag(corpse_id: int, action: int) -> void:

@@ -24,7 +24,7 @@ const (
 	TCPPort                    = ":7000"
 	UDPPort                    = ":7001"
 	MaxPlayers                 = 5
-	MaxNPCs                    = 16
+	MaxNPCs                    = 64
 	GameTickRate               = 30
 	WorldSnapshotMaxBufferSize = protocol.WorldSnapshotHeaderSize + (MaxPlayers * protocol.PlayerSnapshotEntrySize) // 106 bytes
 	NPCSnapshotMaxBufferSize   = protocol.NPCSnapshotHeaderSize + (MaxNPCs * protocol.NPCSnapshotEntrySize)         // 338 bytes
@@ -32,6 +32,7 @@ const (
 
 // Server coordena conexões de rede, relógio do mundo, NPCs, Bonecos de Treino, Mobs, combate e Game Loop.
 type Server struct {
+	lastRestockGH float64 // última reposição dos mercadores (horas de jogo)
 	mu            sync.RWMutex
 	players       map[uint32]*world.Player
 	npcs          map[uint32]*world.NPC
@@ -366,6 +367,7 @@ func (s *Server) Start() error {
 	s.dummies[dummy2.ID] = dummy2
 	s.mu.Unlock()
 	s.initNPCLife(allLivingNPCs)
+	s.initMerchantStock()
 
 	log.Println("[WORLD] NPCs (Garrick 100, Lyra 103, Varis 104, Guardas 105-106, Seraphina 107, Aurelius 108, Kaelen 109, Fantasma 110) e Bonecos de Treino (101, 102) carregados com sucesso!")
 
@@ -893,6 +895,29 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				}
 				s.handleConflictPacket(playerID, full)
 
+			case protocol.PacketTypeFountainUse, protocol.PacketTypeSocialAction, protocol.PacketTypeGuildAction:
+				// Pacotes 0x61 / 0x63 / 0x65: Fonte, amizade com NPCs e Guilda dos Ofícios
+				size := protocol.FountainUsePacketSize
+				if header[0] == protocol.PacketTypeSocialAction {
+					size = protocol.SocialActionPacketSize
+				} else if header[0] == protocol.PacketTypeGuildAction {
+					size = protocol.GuildActionPacketSize
+				}
+				full := make([]byte, size)
+				full[0] = header[0]
+				if _, err := io.ReadFull(conn, full[1:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				switch header[0] {
+				case protocol.PacketTypeFountainUse:
+					s.handleFountainUse(playerID, full[1])
+				case protocol.PacketTypeSocialAction:
+					s.handleSocialAction(playerID, full)
+				default:
+					s.handleGuildAction(playerID, full)
+				}
+
 			case protocol.PacketTypeCorpseDrag:
 				// Pacote 0x5F: agarrar / soltar um corpo para arrastar
 				full := make([]byte, protocol.CorpseDragPacketSize)
@@ -948,6 +973,14 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				if _, err := io.ReadFull(conn, full[1:]); err != nil {
 					s.removePlayerAndNotify(playerID)
 					return
+				}
+				if header[0] == protocol.PacketTypeReforgePart || header[0] == protocol.PacketTypePuzzlePart || header[0] == protocol.PacketTypeForgeAlloyScored {
+					s.mu.RLock()
+					fp := s.players[playerID]
+					s.mu.RUnlock()
+					if fp != nil {
+						fp.Exert(world.ForgeHungerCost) // martelar o metal cansa
+					}
 				}
 				s.handleForgePacket(playerID, full)
 
@@ -1477,8 +1510,9 @@ func (s *Server) movePlayerToZone(player *world.Player, portal world.PortalDef) 
 		_, _ = s.udpConn.WriteToUDP(portalPkt[:], addr)
 	}
 
-	// Sincroniza nova posição com os demais jogadores conectados
-	s.BroadcastPlayerRespawn(player.ID, targetX, targetY, targetZ)
+	// Quem ficou na zona antiga para de receber este jogador no snapshot e o remove sozinho;
+	// o reposicionamento só interessa a quem está na zona nova.
+	s.broadcastPlayerRespawnInZone(player.ID, newZone, targetX, targetY, targetZ)
 
 	// Envia status atualizados e snapshots de corpos da nova zona
 	s.sendPlayerStats(player)
@@ -1512,99 +1546,11 @@ func (s *Server) handlePlayerInteract(pkt protocol.PlayerInteractPacket) {
 	if npc.CanInteract(px, py, pz) {
 		log.Printf("[INTERACAO] Jogador %d (Raça: %d, Classe: %d, MAS: %d) interagindo com NPC '%s' (ID %d)\n", pkt.PlayerID, pRace, pClass, pMAS, npc.Name, npc.ID)
 
-		// 0. Ganho Universal de Afiança por Interação / Conversa Diária (+5 pontos):
-		player.AddFriendship(pkt.TargetNPCID, 5)
-		s.sendFriendshipSync(player, pkt.TargetNPCID)
-
+		// Afiança agora vem só de conversas limitadas, presentes e favores (0x63 / social.go)
 		// NPCs sem script Lua (Joalheira, aprendizes, Coveiro): conversa e vitrine geradas pelo Mundo Vivo
 		if npc.LuaState == nil {
 			s.genericNPCTalk(player, npc)
 			return
-		}
-
-		// Entrega de Presentes Compatíveis:
-		// Garrick (ID 100 ou 1): Aceita Ferro (+20 Afiança)
-		if (pkt.TargetNPCID == 100 || pkt.TargetNPCID == 1) && player.HasItem(protocol.ItemIronOre) {
-			player.RemoveItem(protocol.ItemIronOre, 1)
-			newPts := player.AddFriendship(pkt.TargetNPCID, 20)
-			s.sendFriendshipSync(player, pkt.TargetNPCID)
-			s.sendInventorySync(player)
-			s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos deuses da bigorna! Um excelente lingote de Ferro! Muito obrigado pelo presente, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-			log.Printf("[PRESENTE] Jogador #%d entregou Ferro para Garrick (+20 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-		}
-
-		// Lyra (ID 103 ou 102): Aceita Frascos de Sangue compatíveis (+15 a +25 Afiança)
-		if pkt.TargetNPCID == 103 || pkt.TargetNPCID == 102 {
-			if player.HasItem(protocol.ItemPureLunarBlood) {
-				player.RemoveItem(protocol.ItemPureLunarBlood, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 25)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Fascinante! Sangue Lunar Puro em um frasco! Que essência sublime para alquimia! Muito obrigada, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d entregou Sangue Lunar Puro para Lyra (+25 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			} else if player.HasItem(protocol.ItemFreshWolfBlood) && !player.HasItem(protocol.ItemEmptyFlask) {
-				player.RemoveItem(protocol.ItemFreshWolfBlood, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 15)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Um frasco com Sangue Lupino fresco! Excelente para minhas infusões! Muito obrigada, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d entregou Sangue Lupino para Lyra (+15 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			}
-		}
-
-		// Irmã Seraphina (ID 107): Aceita Amuletos de Prata ou Anéis Estelares (+20 Afiança)
-		if pkt.TargetNPCID == 107 {
-			if player.HasItem(protocol.ItemSilverMoonAmulet) {
-				player.RemoveItem(protocol.ItemSilverMoonAmulet, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 20)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Que a Luz Sagrada abençoe sua generosidade com o santuário, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d doou Amuleto para Seraphina (+20 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			}
-		}
-
-		// Mestre Aurelius (ID 108): Aceita Anéis Estelares (+20 Afiança)
-		if pkt.TargetNPCID == 108 {
-			if player.HasItem(protocol.ItemStarlightRing) {
-				player.RemoveItem(protocol.ItemStarlightRing, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 20)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Extraordinário! A ressonância deste anel estelar é inestimável para minhas pesquisas astronômicas, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d entregou Anel Estelar para Aurelius (+20 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			}
-		}
-
-		// Kaelen (ID 109): Aceita Presas Lupinas ou Peles de Lobo Alfa (+15 a +25 Afiança)
-		if pkt.TargetNPCID == 109 {
-			if player.HasItem(protocol.ItemAlphaWolfPelt) {
-				player.RemoveItem(protocol.ItemAlphaWolfPelt, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 25)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Pelos rastros da mata! Uma pele intacta de Lobo Alfa! Você é um caçador de verdade, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d entregou Pele de Lobo Alfa para Kaelen (+25 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			} else if player.HasItem(protocol.ItemSharpWolfFang) {
-				player.RemoveItem(protocol.ItemSharpWolfFang, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 15)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Uma bela presa afiada de lobo. Vou usá-la em pontas de flechas perfurantes. Valeu, #%d! [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d entregou Presa Lupina para Kaelen (+15 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			}
-		}
-
-		// Alquimista Esquecido (ID 110): Aceita Glândulas de Veneno (+25 Afiança)
-		if pkt.TargetNPCID == 110 {
-			if player.HasItem(protocol.ItemDarkPoisonGland) {
-				player.RemoveItem(protocol.ItemDarkPoisonGland, 1)
-				newPts := player.AddFriendship(pkt.TargetNPCID, 25)
-				s.sendFriendshipSync(player, pkt.TargetNPCID)
-				s.sendInventorySync(player)
-				s.BroadcastNPCSay(pkt.TargetNPCID, fmt.Sprintf("Sssss... Um veneno primordial tão concentrado... Minha essência se alimenta deste néctar proibido, mortal #%d... [Afiança: %d/100 - Nível %d]", pkt.PlayerID, newPts, player.GetFriendshipLevel(pkt.TargetNPCID)))
-				log.Printf("[PRESENTE] Jogador #%d entregou Veneno ao Alquimista Esquecido (+25 Afiança, Total: %d)\n", pkt.PlayerID, newPts)
-			}
 		}
 
 		// Missão "O Aprendiz do Ferreiro" com Garrick
@@ -3082,6 +3028,24 @@ func (s *Server) RespawnPlayer(player *world.Player) {
 }
 
 // BroadcastPlayerRespawn transmite o pacote 0x36 (PLAYER_RESPAWN: 17 bytes) para todos os clientes via TCP e UDP.
+// broadcastPlayerRespawnInZone avisa só os jogadores da zona (portas e portais).
+func (s *Server) broadcastPlayerRespawnInZone(playerID uint32, zone uint8, posX, posY, posZ float32) {
+	pkt := protocol.SerializePlayerRespawn(playerID, posX, posY, posZ)
+	s.mu.RLock()
+	var conns []net.Conn
+	for _, p := range s.players {
+		if p.GetZone() == zone && p.TCPConn != nil {
+			conns = append(conns, p.TCPConn)
+		}
+	}
+	s.mu.RUnlock()
+	for _, conn := range conns {
+		_ = conn.SetWriteDeadline(time.Now().Add(100 * time.Millisecond))
+		_, _ = conn.Write(pkt[:])
+		_ = conn.SetWriteDeadline(time.Time{})
+	}
+}
+
 func (s *Server) BroadcastPlayerRespawn(playerID uint32, posX, posY, posZ float32) {
 	pkt := protocol.SerializePlayerRespawn(playerID, posX, posY, posZ)
 
@@ -3218,6 +3182,7 @@ func (s *Server) handleMobDeath(mob *world.Mob, killerPlayerID uint32) {
 	s.mu.RUnlock()
 	if trialKiller != nil {
 		s.checkRaceTrialsOnKill(trialKiller, mobType)
+		s.creditQuestKill(trialKiller, mobType)
 	}
 
 	s.mu.RLock()
@@ -4653,8 +4618,9 @@ func (s *Server) runGameLoop() {
 				}
 
 				// 2. NPCs e Dummies da mesma zona (0x12: NPC_SNAPSHOT)
+				// Sempre envia (mesmo vazio): o cliente remove os NPCs que não estão na zona
 				nSnaps := zoneNPCSnaps[z]
-				if len(nSnaps) > 0 {
+				{
 					writtenNPC := protocol.SerializeNPCSnapshotInto(npcSnapshotBuf[:], nSnaps)
 					if writtenNPC > 0 {
 						npcPayload := npcSnapshotBuf[:writtenNPC]
@@ -4825,6 +4791,7 @@ func (s *Server) runGameLoop() {
 				h, _, moon, weather := s.clock.GetTime()
 				s.updateNPCRoutines(int(h))
 				s.updateNPCLife(1.0)
+				s.restockMerchants()
 				s.updateNPCConflict(1.0)
 				s.updateAfterlife()
 				s.updatePlayerSurvival(1.0)

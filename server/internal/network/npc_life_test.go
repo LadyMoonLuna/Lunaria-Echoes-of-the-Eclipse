@@ -88,25 +88,30 @@ func TestProductionConsumesRawMaterials(t *testing.T) {
 }
 
 func TestShopBuyAndSellMoveGold(t *testing.T) {
+	world.Market = world.NewMarketBook()
 	s := lifeTestServer()
 	l := addLifeNPC(s, 103, 0, 0)
 	p := world.NewPlayer(1, nil, 0, 0, 0)
 	p.AddGold(1000)
 	before := p.Gold
 	l.WithLife(func(n *world.NPC) { n.ShopStock[uint16(protocol.ItemHealingPotion)] = 1 })
+	price := world.NPCSellUnitPrice(l.Personality, world.ZoneVillage, protocol.ItemHealingPotion, 1)
 	s.shopBuy(p, l, protocol.ItemHealingPotion, 1)
-	price := uint32(54) // 45 × 1,2: Lyra é Ambiciosa
-	if p.Gold != before-price || l.Gold != 1200+price || p.GetItemCount(protocol.ItemHealingPotion) != 1 {
-		t.Fatalf("compra errada: jogador %d npc %d", p.Gold, l.Gold)
+	if price == 0 || p.Gold != before-price || l.Gold != 1200+price || p.GetItemCount(protocol.ItemHealingPotion) != 1 {
+		t.Fatalf("compra errada: preço %d jogador %d npc %d", price, p.Gold, l.Gold)
 	}
 	if msg := s.shopBuy(p, l, protocol.ItemHealingPotion, 1); !strings.Contains(msg, "Estoque esgotado") {
 		t.Fatalf("sem estoque deveria avisar: %q", msg)
 	}
 	p.AddItemWithQuality(uint8(world.MatHerbs), 3, 75)
 	npcGold := l.Gold
+	var expect uint32
+	for i := 0; i < 3; i++ {
+		expect += world.NPCBuyUnitPrice(103, l.Personality, world.ZoneVillage, uint8(world.MatHerbs), 75, i)
+	}
 	s.shopSell(p, l, uint8(world.MatHerbs), 75, 3)
-	if l.RawMaterials[world.MatHerbs] != 7 || l.Gold != npcGold-3*9 {
-		t.Fatalf("venda errada: ervas %d ouro %d", l.RawMaterials[world.MatHerbs], l.Gold)
+	if l.RawMaterials[world.MatHerbs] != 7 || l.Gold != npcGold-expect || expect == 0 {
+		t.Fatalf("venda errada: ervas %d ouro %d (esperado -%d)", l.RawMaterials[world.MatHerbs], l.Gold, expect)
 	}
 }
 

@@ -1,6 +1,7 @@
 package world
 
 import (
+	"math"
 	"math/rand"
 	"sync"
 )
@@ -165,6 +166,7 @@ type WorldClock struct {
 	zoneWeather    [zoneCount]uint8
 	weatherLocked  bool // true quando o dev fixou o clima manualmente (desliga sorteio)
 	lastLoggedHour int
+	elapsedHours   float64 // horas de jogo desde que o servidor ligou (cooldowns, mercado)
 }
 
 // NewWorldClock cria o relógio oficial iniciando em 16:00 (final da tarde),
@@ -198,6 +200,7 @@ func (c *WorldClock) Advance(dtSec float64) {
 	}
 
 	c.currentHour += hourDelta
+	c.elapsedHours += hourDelta
 	if c.currentHour >= 24.0 {
 		c.currentHour -= 24.0
 	}
@@ -259,6 +262,13 @@ func (c *WorldClock) GetTime() (uint8, uint8, uint8, uint8) {
 }
 
 // GetCurrentHour retorna a hora inteira atual do jogo (0 a 23).
+// ElapsedHours: horas de jogo corridas desde o início do servidor (nunca volta a zero).
+func (c *WorldClock) ElapsedHours() float64 {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.elapsedHours
+}
+
 func (c *WorldClock) GetCurrentHour() int {
 	h, _, _, _ := c.GetTime()
 	return int(h)
@@ -331,6 +341,8 @@ func (c *WorldClock) CheckHourChanged() (bool, int) {
 func (c *WorldClock) SetHour(hour uint8) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	// Pular o relógio adiante (Dev) também conta para cooldowns e para o mercado
+	c.elapsedHours += math.Mod(float64(hour%24)-c.currentHour+24, 24)
 	c.currentHour = float64(hour % 24)
 }
 
