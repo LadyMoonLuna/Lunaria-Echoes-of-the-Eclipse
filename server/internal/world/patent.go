@@ -371,7 +371,9 @@ func (p *Player) ForgePuzzleScored(name string, pl []PuzzlePlacement, owner stri
 	st.Specials = append(st.Specials, fmt.Sprintf("Obra-Prima Autoral de %s (+20%% atributos)", owner))
 	var craftQ float32
 	if cs.FromClient {
-		craftQ = craftQualityFor(cs.Clamp(), p.MAS, p.STR, p.DEX)
+		final := p.PuzzleSessionScores(pl, cs.Clamp()) // peças trabalhadas (e reforjadas) uma a uma
+		craftQ = craftQualityFor(final, p.MAS, p.STR, p.DEX)
+		defer p.EndForgeSession()
 		st = ApplyCraftQuality(st, craftQ)
 		st.Specials = append(st.Specials, fmt.Sprintf("Forja %s (nota %.2f)", CraftTier(craftQ), craftQ))
 	}

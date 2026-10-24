@@ -21,6 +21,7 @@ signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantit
 signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
 signal forge_state_received(blueprints: Array)
 signal forge_alert_received(kind: int, message: String)
+signal part_result_received(bp_id: int, part_idx: int, status: int, reforges: int, max_reforges: int, scores: Array, message: String)
 signal puzzle_state_received(unlocked: bool, exclusives: Array)
 signal discovered_materials_received(mode: int, material_ids: Array) # mode 0 = lista completa, 1 = novas descobertas
 signal quest_state_received(quest_id: int, stage: int, have: int, need: int) # stage 255 = concluída
@@ -286,6 +287,20 @@ func _process_tcp() -> void:
 				var al_msg: String = tcp_rx_buffer.slice(4, 4 + al_len).get_string_from_utf8()
 				tcp_rx_buffer = tcp_rx_buffer.slice(4 + al_len)
 				forge_alert_received.emit(al_kind, al_msg)
+
+			elif opcode == 0x5E: # PART_RESULT: op | blueprint | peça | status | reforjas | máx | 7 notas | len u16 | mensagem
+				if tcp_rx_buffer.size() < 15:
+					break
+				var pr_len: int = tcp_rx_buffer[13] | (tcp_rx_buffer[14] << 8)
+				if tcp_rx_buffer.size() < 15 + pr_len:
+					break
+				var pr_scores: Array = []
+				for k in range(7):
+					pr_scores.append(float(tcp_rx_buffer[6 + k]) / 200.0)
+				var pr_msg: String = tcp_rx_buffer.slice(15, 15 + pr_len).get_string_from_utf8()
+				var pr := tcp_rx_buffer.slice(0, 6)
+				tcp_rx_buffer = tcp_rx_buffer.slice(15 + pr_len)
+				part_result_received.emit(pr[1], pr[2], pr[3], pr[4], pr[5], pr_scores, pr_msg)
 
 			elif opcode == 0x57: # PUZZLE_STATE: op | liberado | n | n × (len + nome, peças)
 				var ps := _parse_puzzle_state()
@@ -1128,5 +1143,11 @@ func send_register_custom_weapon_scored(weapon_name: String, pieces: Array, scor
 ## 0x5A: notas de uma peça (primeira vez) ou Reforja (de novo, mesmo material de Metal/Liga).
 func send_reforge_part(bp_id: int, part_idx: int, mat_id: int, scores: Array) -> void:
 	var data := PackedByteArray([0x5A, bp_id, part_idx, mat_id])
+	data.append_array(_score_bytes(scores))
+	tcp.put_data(data)
+
+## 0x5D: notas de uma peça do Quebra-Cabeça (índice na grade + módulo); de novo = Reforja.
+func send_puzzle_part(part_idx: int, module_id: int, mat_id: int, scores: Array) -> void:
+	var data := PackedByteArray([0x5D, part_idx, module_id, mat_id])
 	data.append_array(_score_bytes(scores))
 	tcp.put_data(data)

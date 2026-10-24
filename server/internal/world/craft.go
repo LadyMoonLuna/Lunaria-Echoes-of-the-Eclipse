@@ -77,8 +77,16 @@ func (p *Player) CraftQuality(c CraftScores) float32 {
 }
 
 func craftQualityFor(c CraftScores, mas, str, dex uint8) float32 {
-	return c.Melt*0.14 + c.Mold*0.12 + c.PrepMetal*0.14 + c.ShapePart*0.18 + c.Temper*0.18 + c.Assembly*0.24 +
-		float32(mas)*0.005 + float32(int(str)+int(dex))*0.002
+	base := c.Melt*0.14 + c.Mold*0.12 + c.PrepMetal*0.14 + c.ShapePart*0.18 + c.Temper*0.18 + c.Assembly*0.24
+	raw := float32(mas)*0.005 + float32(int(str)+int(dex))*0.002
+	return craftQualityWithStats(base, raw)
+}
+
+// craftQualityWithStats: a experiência (Maestria, Força, Destreza) compensa erros, mas não passa da
+// perfeição: ela preenche parte do que falta até 1,20 (retorno decrescente) e a nota nunca passa de 1,20.
+func craftQualityWithStats(base, raw float32) float32 {
+	gap := max(0, MaxMiniGameScore-base)
+	return min(MaxMiniGameScore, base+raw*gap/MaxMiniGameScore)
 }
 
 // CraftTier devolve a faixa da Nota de Criação.
@@ -181,13 +189,15 @@ func ApplyHarmony(m MaterialDef) MaterialDef {
 // PartScores: notas dos mini-games 1, 3, 4, 5 e 6 de uma peça já trabalhada.
 type PartScores struct {
 	Material uint8
+	Module   uint8 // Quebra-Cabeça: módulo da peça (0 nas blueprints)
 	Scores   CraftScores
 	Reforges int
 }
 
-// ForgeSession: peças trabalhadas de uma blueprint antes da montagem final.
+// ForgeSession: peças trabalhadas de uma blueprint (ou do Quebra-Cabeça) antes da montagem final.
 type ForgeSession struct {
 	BlueprintID uint8
+	Puzzle      bool
 	Parts       map[int]PartScores
 }
 
@@ -196,52 +206,125 @@ var forgeSessions = struct {
 	byPlayer map[uint32]*ForgeSession
 }{byPlayer: map[uint32]*ForgeSession{}}
 
+// Realismo da Reforja: cada volta ao fogo descarboniza e oxida um pouco o metal (o teto da nota
+// cai 3% por Reforja) e, depois de 3 Reforjas, a peça entra em fadiga e não aguenta outra fusão.
+const (
+	MaxReforgesPerPart                 = 3
+	ReforgeOxidationPerReforge float32 = 0.03
+)
+
+// WorkResult: o que o servidor guardou para a peça (o cliente mostra exatamente isto).
+type WorkResult struct {
+	Reforged  bool
+	Reforges  int
+	Scores    CraftScores
+	Oxidation float32 // fração perdida pela oxidação nesta Reforja
+}
+
 // IsReforgeable: só peças de Metal ou Liga voltam ao fogo.
 func IsReforgeable(m MaterialDef) bool {
 	return m.Category == MatMetal || m.Category == MatAlloy
 }
 
-// WorkPart registra as notas de uma peça. Na primeira vez é o trabalho normal; depois é Reforja:
-// só Metal/Liga, custa 15 de Stamina e substitui a nota antiga (o metal não se perde).
-func (p *Player) WorkPart(bpID uint8, partIdx int, matID uint8, sc CraftScores) (reforged bool, err error) {
+// WorkPart registra as notas de uma peça de blueprint. Na primeira vez é o trabalho normal; depois é
+// Reforja: só Metal/Liga, custa 15 de Stamina, oxida o metal e substitui a nota antiga.
+func (p *Player) WorkPart(bpID uint8, partIdx int, matID uint8, sc CraftScores) (WorkResult, error) {
 	bp, ok := GetBlueprint(bpID)
 	if !ok || partIdx < 0 || partIdx >= len(bp.Parts) {
-		return false, fmt.Errorf("peça inválida")
+		return WorkResult{}, fmt.Errorf("peça inválida")
 	}
 	if !p.KnowsBlueprint(bpID) {
-		return false, fmt.Errorf("você ainda não aprendeu a blueprint %s", bp.Name)
+		return WorkResult{}, fmt.Errorf("você ainda não aprendeu a blueprint %s", bp.Name)
 	}
+	return p.workPart(bpID, false, 0, partIdx, bp.Parts[partIdx], matID, sc)
+}
+
+// WorkPuzzlePart: o mesmo para uma peça do Quebra-Cabeça (índice da peça na grade + módulo).
+func (p *Player) WorkPuzzlePart(partIdx int, moduleID, matID uint8, sc CraftScores) (WorkResult, error) {
+	if !p.CanUsePuzzleForge() {
+		return WorkResult{}, fmt.Errorf("só Ferreiros Avançados, Únicos ou Lendários usam o Criador Quebra-Cabeça")
+	}
+	m, ok := GetPuzzleModule(moduleID)
+	if !ok || partIdx < 0 || partIdx >= PuzzleMaxPieces {
+		return WorkResult{}, fmt.Errorf("peça inválida")
+	}
+	part := BlueprintPart{Name: m.Name, Tags: m.Tags, Role: m.Role}
+	return p.workPart(0, true, moduleID, partIdx, part, matID, sc)
+}
+
+func (p *Player) workPart(bpID uint8, puzzle bool, moduleID uint8, partIdx int, part BlueprintPart, matID uint8, sc CraftScores) (WorkResult, error) {
 	p.Mu.RLock()
 	m, okMat := p.materialLocked(matID)
 	known := p.DiscoveredMaterials[uint16(matID)]
 	p.Mu.RUnlock()
-	if !okMat || !known || !PartAccepts(bp.Parts[partIdx], m) {
-		return false, fmt.Errorf("esse material não serve para a peça %s", bp.Parts[partIdx].Name)
+	if !okMat || !known || !PartAccepts(part, m) {
+		return WorkResult{}, fmt.Errorf("esse material não serve para a peça %s", part.Name)
 	}
+	sc = sc.Clamp()
 	forgeSessions.Lock()
 	defer forgeSessions.Unlock()
 	s := forgeSessions.byPlayer[p.ID]
-	if s == nil || s.BlueprintID != bpID {
-		s = &ForgeSession{BlueprintID: bpID, Parts: map[int]PartScores{}}
+	if s == nil || s.BlueprintID != bpID || s.Puzzle != puzzle {
+		s = &ForgeSession{BlueprintID: bpID, Puzzle: puzzle, Parts: map[int]PartScores{}}
 		forgeSessions.byPlayer[p.ID] = s
 	}
 	prev, again := s.Parts[partIdx]
-	if again && prev.Material == matID {
-		if !IsReforgeable(m) {
-			return false, fmt.Errorf("%s", ReforgeDeniedMsg)
-		}
-		p.Mu.Lock()
-		if p.Stamina < ReforgeStaminaCost {
-			p.Mu.Unlock()
-			return false, fmt.Errorf("sem fôlego para a Reforja (precisa de %.0f de Stamina)", ReforgeStaminaCost)
-		}
-		p.Stamina -= ReforgeStaminaCost
-		p.Mu.Unlock()
-		s.Parts[partIdx] = PartScores{Material: matID, Scores: sc.Clamp(), Reforges: prev.Reforges + 1}
-		return true, nil
+	if !again || prev.Material != matID || prev.Module != moduleID {
+		s.Parts[partIdx] = PartScores{Material: matID, Module: moduleID, Scores: sc}
+		return WorkResult{Scores: sc}, nil
 	}
-	s.Parts[partIdx] = PartScores{Material: matID, Scores: sc.Clamp()}
-	return false, nil
+	if !IsReforgeable(m) {
+		return WorkResult{Scores: prev.Scores, Reforges: prev.Reforges}, fmt.Errorf("%s", ReforgeDeniedMsg)
+	}
+	if prev.Reforges >= MaxReforgesPerPart {
+		return WorkResult{Scores: prev.Scores, Reforges: prev.Reforges},
+			fmt.Errorf("🧱 Fadiga do metal: esta peça já foi refundida %d vezes e racharia numa nova fusão", prev.Reforges)
+	}
+	p.Mu.Lock()
+	if p.Stamina < ReforgeStaminaCost {
+		p.Mu.Unlock()
+		return WorkResult{Scores: prev.Scores, Reforges: prev.Reforges},
+			fmt.Errorf("😮‍💨 Sem fôlego para a Reforja (precisa de %.0f de Stamina)", ReforgeStaminaCost)
+	}
+	p.Stamina -= ReforgeStaminaCost
+	p.Mu.Unlock()
+	reforges := prev.Reforges + 1
+	ox := ReforgeOxidationPerReforge * float32(reforges)
+	keep := 1 - ox
+	sc.Melt, sc.Mold, sc.PrepMetal, sc.ShapePart, sc.Temper = sc.Melt*keep, sc.Mold*keep, sc.PrepMetal*keep, sc.ShapePart*keep, sc.Temper*keep
+	s.Parts[partIdx] = PartScores{Material: matID, Module: moduleID, Scores: sc, Reforges: reforges}
+	return WorkResult{Reforged: true, Reforges: reforges, Scores: sc, Oxidation: ox}, nil
+}
+
+// PuzzleSessionScores: notas finais do Quebra-Cabeça, ponderadas pelo tamanho (células) de cada peça.
+func (p *Player) PuzzleSessionScores(pl []PuzzlePlacement, global CraftScores) CraftScores {
+	forgeSessions.Lock()
+	s := forgeSessions.byPlayer[p.ID]
+	forgeSessions.Unlock()
+	if s == nil || !s.Puzzle {
+		return global
+	}
+	var w, melt, mold, prep, shape, temper float32
+	for i, pc := range pl {
+		m, _ := GetPuzzleModule(pc.Module)
+		cells := float32(len(m.Cells))
+		sc := global
+		if ps, ok := s.Parts[i]; ok && ps.Material == pc.Material && ps.Module == pc.Module {
+			sc = ps.Scores
+		}
+		w += cells
+		melt += sc.Melt * cells
+		mold += sc.Mold * cells
+		prep += sc.PrepMetal * cells
+		shape += sc.ShapePart * cells
+		temper += sc.Temper * cells
+	}
+	if w <= 0 {
+		return global
+	}
+	out := global
+	out.Melt, out.Mold, out.PrepMetal, out.ShapePart, out.Temper = melt/w, mold/w, prep/w, shape/w, temper/w
+	return out.Clamp()
 }
 
 // SessionScores: as notas finais da forja juntando as peças trabalhadas (média ponderada pelo
@@ -250,7 +333,7 @@ func (p *Player) SessionScores(bp BlueprintDef, picks []uint8, global CraftScore
 	forgeSessions.Lock()
 	s := forgeSessions.byPlayer[p.ID]
 	forgeSessions.Unlock()
-	if s == nil || s.BlueprintID != bp.ID {
+	if s == nil || s.Puzzle || s.BlueprintID != bp.ID {
 		return global
 	}
 	var w, melt, mold, prep, shape, temper float32

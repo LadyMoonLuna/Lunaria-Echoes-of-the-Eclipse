@@ -913,7 +913,7 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				s.handleRegisterCustomWeapon(playerID, body)
 
 			case protocol.PacketTypeForgeAlloy, protocol.PacketTypeForgeBlueprint, protocol.PacketTypeForgeAction,
-				protocol.PacketTypeForgeAlloyScored, protocol.PacketTypeForgeBlueprintScored, protocol.PacketTypeReforgePart, protocol.PacketTypeFusionQuery:
+				protocol.PacketTypeForgeAlloyScored, protocol.PacketTypeForgeBlueprintScored, protocol.PacketTypeReforgePart, protocol.PacketTypeFusionQuery, protocol.PacketTypePuzzlePart:
 				// Pacotes 0x51 / 0x52 / 0x53: Fornalha de Ligas e Forja por Blueprints
 				// Pacotes 0x58 / 0x59 / 0x5A / 0x5B: as mesmas ações com as notas dos Mini-Games
 				size := protocol.ForgeAlloyPacketSize
@@ -924,6 +924,8 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 					size = protocol.ForgeBlueprintScoredPacketSize
 				case protocol.PacketTypeReforgePart:
 					size = protocol.ReforgePartPacketSize
+				case protocol.PacketTypePuzzlePart:
+					size = protocol.PuzzlePartPacketSize
 				case protocol.PacketTypeFusionQuery:
 					size = protocol.FusionQueryPacketSize
 				case protocol.PacketTypeForgeBlueprint:

@@ -278,3 +278,45 @@ func SerializeFusionInfo(difficulty, condDiff float32) []byte {
 	buf = binary.LittleEndian.AppendUint16(buf, uint16(difficulty*1000+0.5))
 	return binary.LittleEndian.AppendUint16(buf, uint16(condDiff*10+0.5))
 }
+
+// Reforja realista (confirmação do servidor e peças do Quebra-Cabeça)
+const (
+	PacketTypePuzzlePart uint8 = 0x5D // [C->S] op | peça | módulo | material | 7 notas (11 bytes)
+	PacketTypePartResult uint8 = 0x5E // [S->C] op | blueprint | peça | status | reforjas | máx | 7 notas | len u16 | mensagem
+
+	PuzzlePartPacketSize = 1 + 3 + MiniGameCount
+
+	PartResultSaved    uint8 = 0 // primeira vez: nota guardada
+	PartResultReforged uint8 = 1 // Reforja aceita: nota nova (já com a oxidação) substitui a anterior
+	PartResultDenied   uint8 = 2 // recusada: a nota guardada continua a anterior
+)
+
+// PartResult: o que o servidor guardou para uma peça.
+type PartResult struct {
+	BlueprintID, Part, Status, Reforges, MaxReforges uint8
+	Scores                                           [MiniGameCount]uint8
+	Message                                          string
+}
+
+func SerializePartResult(r PartResult) []byte {
+	buf := []byte{PacketTypePartResult, r.BlueprintID, r.Part, r.Status, r.Reforges, r.MaxReforges}
+	buf = append(buf, r.Scores[:]...)
+	return putString(buf, r.Message)
+}
+
+// DeserializePartResult lê o 0x5E (testes).
+func DeserializePartResult(data []byte) (PartResult, error) {
+	var r PartResult
+	if len(data) < 6+MiniGameCount+2 || data[0] != PacketTypePartResult {
+		return r, errors.New("pacote inválido")
+	}
+	r.BlueprintID, r.Part, r.Status, r.Reforges, r.MaxReforges = data[1], data[2], data[3], data[4], data[5]
+	copy(r.Scores[:], data[6:6+MiniGameCount])
+	i := 6 + MiniGameCount
+	l := int(binary.LittleEndian.Uint16(data[i:]))
+	if len(data) < i+2+l {
+		return r, errors.New("mensagem curta")
+	}
+	r.Message = string(data[i+2 : i+2+l])
+	return r, nil
+}

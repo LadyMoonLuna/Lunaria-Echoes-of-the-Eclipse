@@ -87,17 +87,12 @@ func (s *Server) handleForgePacket(playerID uint32, data []byte) {
 		picks := append([]uint8(nil), data[2:2+len(bp.Parts)]...)
 		res, err = player.ForgeBlueprintScored(bp.ID, picks, world.ScoresFromBytes(data[2+protocol.ForgeMaxParts:]))
 	case protocol.PacketTypeReforgePart:
-		reforged, rerr := player.WorkPart(data[1], int(data[2]), data[3], world.ScoresFromBytes(data[4:]))
-		if rerr != nil {
-			s.sendPlayerNPCSay(player, 0, "⚠️ "+rerr.Error())
-			return
-		}
-		msg := "🔨 Peça trabalhada: a nota foi guardada para a montagem final."
-		if reforged {
-			msg = "🔁 Reforja concluída: o metal voltou ao fogo (-15 de Stamina) e a nova nota substituiu a anterior."
-			s.sendPlayerStats(player)
-		}
-		s.sendPlayerNPCSay(player, 0, msg)
+		wr, werr := player.WorkPart(data[1], int(data[2]), data[3], world.ScoresFromBytes(data[4:]))
+		s.sendPartResult(player, data[1], data[2], wr, werr)
+		return
+	case protocol.PacketTypePuzzlePart:
+		wr, werr := player.WorkPuzzlePart(int(data[1]), data[2], data[3], world.ScoresFromBytes(data[4:]))
+		s.sendPartResult(player, 0, data[1], wr, werr)
 		return
 	default:
 		return
@@ -280,4 +275,25 @@ func scoresOf(pkt protocol.RegisterCustomWeapon) world.CraftScores {
 		return world.CraftScores{}
 	}
 	return world.ScoresFromBytes(pkt.Scores[:])
+}
+
+// sendPartResult (0x5E): confirma (ou recusa) a nota que o servidor guardou para a peça.
+func (s *Server) sendPartResult(p *world.Player, bpID, partIdx uint8, wr world.WorkResult, err error) {
+	status := protocol.PartResultSaved
+	msg := "🔨 Peça trabalhada: a nota foi guardada para a montagem final."
+	switch {
+	case err != nil:
+		status = protocol.PartResultDenied
+		msg = err.Error()
+	case wr.Reforged:
+		status = protocol.PartResultReforged
+		msg = fmt.Sprintf("🔁 Reforja %d/%d concluída (-15 de Stamina). A nova fusão oxidou %.0f%% do metal.",
+			wr.Reforges, world.MaxReforgesPerPart, wr.Oxidation*100)
+		s.sendPlayerStats(p)
+	}
+	sc := wr.Scores
+	scores := [protocol.MiniGameCount]uint8{protocol.ScoreToWire(sc.Melt), protocol.ScoreToWire(sc.FusionPt), protocol.ScoreToWire(sc.Mold),
+		protocol.ScoreToWire(sc.PrepMetal), protocol.ScoreToWire(sc.ShapePart), protocol.ScoreToWire(sc.Temper), protocol.ScoreToWire(sc.Assembly)}
+	writeTCP(p, protocol.SerializePartResult(protocol.PartResult{BlueprintID: bpID, Part: partIdx, Status: status,
+		Reforges: uint8(wr.Reforges), MaxReforges: world.MaxReforgesPerPart, Scores: scores, Message: msg}))
 }

@@ -10,9 +10,17 @@ func allScores(v float32) CraftScores {
 }
 
 func TestCraftQualityFormulaAndClamp(t *testing.T) {
+	// Atributos preenchem parte do que falta até 1,20 (retorno decrescente)
 	q := craftQualityFor(allScores(1.0), 10, 5, 5)
-	if want := float32(1.0 + 0.05 + 0.02); q < want-0.001 || q > want+0.001 {
-		t.Fatalf("nota %.3f, esperado %.3f", q, want)
+	if want := float32(1.0 + 0.07*0.2/1.2); q < want-0.001 || q > want+0.001 {
+		t.Fatalf("nota %.4f, esperado %.4f", q, want)
+	}
+	if q := craftQualityFor(allScores(1.2), 255, 255, 255); q != MaxMiniGameScore {
+		t.Fatalf("a nota nunca passa de 1,20: %.3f", q)
+	}
+	weak, strong := craftQualityFor(allScores(0.5), 0, 0, 0), craftQualityFor(allScores(0.5), 80, 60, 60)
+	if strong <= weak || strong > MaxMiniGameScore {
+		t.Fatalf("experiência deveria compensar erros sem passar do teto: %.3f vs %.3f", weak, strong)
 	}
 	if c := allScores(9).Clamp(); c.Melt != MaxMiniGameScore {
 		t.Fatal("notas acima de 1.20 precisam ser cortadas")
@@ -101,17 +109,34 @@ func TestSelectiveReforge(t *testing.T) {
 		p.AddItemWithQuality(id, 1, 80)
 	}
 	p.Stamina = 100
-	if again, err := p.WorkPart(1, 0, uint8(MatIron), allScores(0.3)); err != nil || again {
+	if wr, err := p.WorkPart(1, 0, uint8(MatIron), allScores(0.3)); err != nil || wr.Reforged {
 		t.Fatalf("primeiro trabalho da lâmina: %v", err)
 	}
-	if again, err := p.WorkPart(1, 0, uint8(MatIron), allScores(1.1)); err != nil || !again || p.Stamina != 85 {
+	wr, err := p.WorkPart(1, 0, uint8(MatIron), allScores(1.0))
+	if err != nil || !wr.Reforged || p.Stamina != 85 {
 		t.Fatalf("reforja da lâmina de ferro deveria custar 15 de Stamina: %v (stamina %.0f)", err, p.Stamina)
 	}
+	if wr.Scores.Melt < 0.969 || wr.Scores.Melt > 0.971 {
+		t.Fatalf("1ª Reforja deveria oxidar 3%%: %.3f", wr.Scores.Melt)
+	}
+	p.WorkPart(1, 0, uint8(MatIron), allScores(1.0))
+	p.WorkPart(1, 0, uint8(MatIron), allScores(1.0))
+	if wr, err := p.WorkPart(1, 0, uint8(MatIron), allScores(1.0)); err == nil || wr.Reforges != MaxReforgesPerPart {
+		t.Fatalf("a 4ª Reforja deveria falhar por fadiga do metal: %v", err)
+	}
+	p.Stamina = 5
+	if _, err := p.WorkPart(1, 1, uint8(MatCopper), allScores(0.6)); err != nil {
+		t.Fatal(err)
+	}
+	if wr, err := p.WorkPart(1, 1, uint8(MatCopper), allScores(1.2)); err == nil || wr.Scores.Melt != 0.6 {
+		t.Fatalf("sem Stamina a Reforja é recusada e a nota antiga fica: %v %+v", err, wr.Scores)
+	}
+	p.Stamina = 100
 	if p.Inventory[uint8(MatIron)] != 1 {
 		t.Fatal("a reforja não pode destruir o metal")
 	}
 	p.WorkPart(1, 2, uint8(MatPineRefuge), allScores(0.5))
-	if _, err := p.WorkPart(1, 2, uint8(MatPineRefuge), allScores(1.0)); err == nil || err.Error() != ReforgeDeniedMsg {
+	if wr, err := p.WorkPart(1, 2, uint8(MatPineRefuge), allScores(1.0)); err == nil || err.Error() != ReforgeDeniedMsg || wr.Scores.Melt != 0.5 {
 		t.Fatalf("madeira não pode ser reforjada: %v", err)
 	}
 	res, err := p.ForgeBlueprintScored(1, picks, allScores(1.0))
@@ -137,5 +162,33 @@ func TestLegacyForgeUnchanged(t *testing.T) {
 	res, err := p.ForgeBlueprint(1, picks)
 	if err != nil || p.CustomItems[res.ItemID].Stats.ATK != ComputeForged(bp, mats, AlloySpecial).ATK {
 		t.Fatalf("forja sem mini-games não pode mudar: %v", err)
+	}
+}
+
+func TestPuzzlePartReforgeAndSession(t *testing.T) {
+	resetPatents(t)
+	p := puzzleSmith(9)
+	p.Stamina = 100
+	pl := sampleSword()
+	for i, pc := range pl {
+		if _, err := p.WorkPuzzlePart(i, pc.Module, pc.Material, allScores(0.4)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if wr, err := p.WorkPuzzlePart(0, pl[0].Module, pl[0].Material, allScores(1.2)); err != nil || !wr.Reforged || p.Stamina != 85 {
+		t.Fatalf("Reforja da lâmina do Quebra-Cabeça deveria custar Stamina: %v", err)
+	}
+	if _, err := p.WorkPuzzlePart(2, pl[2].Module, pl[2].Material, allScores(1.2)); err == nil {
+		t.Fatal("cabo de madeira não pode ser reforjado")
+	}
+	final := p.PuzzleSessionScores(pl, allScores(0.85))
+	if final.Melt <= 0.4 || final.Melt >= 0.85 {
+		t.Fatalf("a nota final deveria vir das peças trabalhadas: %.3f", final.Melt)
+	}
+	if _, err, _ := p.ForgePuzzleScored("Lâmina Reforjada", pl, "Jogador #9", allScores(0.85)); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := forgeSessions.byPlayer[p.ID]; ok {
+		t.Fatal("a sessão do Quebra-Cabeça deveria terminar depois da forja")
 	}
 }

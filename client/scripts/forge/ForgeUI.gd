@@ -38,6 +38,7 @@ func _ready() -> void:
 	_build_ui()
 	LunariaUI.watch(self) # mesmo estilo do inventário
 	NetworkManager.forge_alert_received.connect(show_alert)
+	NetworkManager.part_result_received.connect(_on_part_result)
 	NetworkManager.forge_state_received.connect(func(_bps: Array): _check_forge_result())
 	NetworkManager.forge_state_received.connect(func(_bps: Array): _refresh.call_deferred())
 	NetworkManager.inventory_updated.connect(func(_slots: Array, _items: Array): _refresh.call_deferred())
@@ -1376,6 +1377,8 @@ var eq_final_scores := {}
 var eq_review_box: VBoxContainer
 var eq_awaiting_result := false
 var eq_known_before: Array = []
+var eq_pending := {}        # peça esperando a confirmação do servidor (0x5E)
+var eq_notice := ""         # aviso do servidor mostrado na inspeção
 
 func _is_metal(mid: int) -> bool:
 	return ["Metal", "Liga"].has(String(ItemData.material(mid).get("category", "")))
@@ -1406,15 +1409,65 @@ func _eq_work_part(idx: int, reforge: bool) -> void:
 	var pt: Dictionary = eq_parts[idx]
 	mg_part_name = "%s de %s%s" % [pt["name"], ItemData.material(int(pt["mat"]))["name"], "  (🔥 Reforja)" if reforge else ""]
 	start_forge_minigames(_part_games(int(pt["mat"])), [ItemData.material(int(pt["mat"]))], func(sc: Dictionary):
-		pt["scores"] = sc
+		# A nota só vale quando o servidor confirma (ele pode recusar: Stamina, fadiga do metal...)
+		eq_pending = {"idx": idx, "reforge": reforge, "local": sc}
 		if eq_bp_id > 0:
 			NetworkManager.send_reforge_part(eq_bp_id, int(pt["index"]), int(pt["mat"]), _part_score_list(sc))
-		if reforge:
-			_show_inspection()
 		else:
-			eq_index += 1
-			_eq_next_part()
+			NetworkManager.send_puzzle_part(int(pt["index"]), int(pt.get("module", 0)), int(pt["mat"]), _part_score_list(sc))
+		_show_waiting(pt)
 	)
+
+func _show_waiting(pt: Dictionary) -> void:
+	mg_layer.visible = true
+	mg_canvas.visible = false
+	mg_action.visible = false
+	mg_next_btn.visible = false
+	mg_title.text = "⏳ O mestre ferreiro avalia a peça..."
+	mg_hint.text = "%s de %s" % [pt["name"], ItemData.material(int(pt["mat"]))["name"]]
+	mg_info.text = ""
+	var token := Time.get_ticks_msec()
+	eq_pending["token"] = token
+	get_tree().create_timer(6.0).timeout.connect(func():
+		if not eq_pending.is_empty() and int(eq_pending.get("token", 0)) == token:
+			# Sem resposta (conexão caiu?): não inventa nota; volta para a inspeção com aviso
+			eq_notice = "⚠️ O servidor não respondeu: a nota desta peça não foi confirmada."
+			var was_reforge: bool = eq_pending["reforge"]
+			eq_pending = {}
+			mg_canvas.visible = true
+			if was_reforge:
+				_show_inspection()
+			else:
+				eq_index += 1
+				_eq_next_part()
+	)
+
+## Resposta 0x5E: guarda exatamente a nota que o servidor confirmou (com a oxidação da Reforja).
+func _on_part_result(_bp_id: int, part_idx: int, status: int, reforges: int, max_reforges: int, scores: Array, message: String) -> void:
+	if eq_pending.is_empty():
+		return
+	var pt: Dictionary = eq_parts[int(eq_pending["idx"])]
+	if int(pt["index"]) != part_idx:
+		return
+	var was_reforge: bool = eq_pending["reforge"]
+	eq_pending = {}
+	mg_canvas.visible = true
+	pt["max_reforges"] = max_reforges
+	if status == 2:
+		eq_notice = "⛔ " + message
+	else:
+		pt["reforges"] = reforges
+		var keys := ["melt", "fusion", "mold", "prep", "shape", "temper", "assembly"]
+		var stored := {}
+		for k in _part_games(int(pt["mat"])):
+			stored[k] = float(scores[keys.find(k)])
+		pt["scores"] = stored
+		eq_notice = message
+	if was_reforge:
+		_show_inspection()
+	else:
+		eq_index += 1
+		_eq_next_part()
 
 ## Peças não metálicas só passam pela Modelagem: ela vale para as outras etapas daquela peça.
 func _part_score_list(sc: Dictionary) -> Array:
@@ -1459,8 +1512,15 @@ func _show_inspection() -> void:
 		lbl.custom_minimum_size = Vector2(380, 0)
 		row.add_child(lbl)
 		var b := Button.new()
-		if _is_metal(int(pt["mat"])):
-			b.text = "🔥 Derreter & Reforjar Peça"
+		var refs: int = int(pt.get("reforges", 0))
+		var max_refs: int = int(pt.get("max_reforges", 3))
+		if refs > 0:
+			lbl.text += "  •  Reforjas %d/%d (última fusão oxidou %d%%)" % [refs, max_refs, refs * 3]
+		if _is_metal(int(pt["mat"])) and refs >= max_refs:
+			b.text = "🧱 Fadiga do metal (não aguenta outra fusão)"
+			b.disabled = true
+		elif _is_metal(int(pt["mat"])):
+			b.text = "🔥 Derreter & Reforjar Peça (15 Stamina)"
 			b.add_theme_color_override("font_color", Color(1.0, 0.75, 0.3))
 			var part_idx := i
 			b.pressed.connect(func(): _eq_reforge(part_idx))
@@ -1468,7 +1528,8 @@ func _show_inspection() -> void:
 			b.text = "🔒 Material Não-Metálico (Não pode ser derretido)"
 			b.disabled = true
 		row.add_child(b)
-	mg_info.text = "Quando estiver satisfeito com as notas, prossiga para a montagem."
+	mg_info.text = (eq_notice + "\n" if eq_notice != "" else "") + "Quando estiver satisfeito com as notas, prossiga para a montagem."
+	eq_notice = ""
 	mg_next_btn.visible = true
 	mg_next_btn.text = "🔩 Prosseguir para Montagem Final"
 	for conn in mg_next_btn.pressed.get_connections():
@@ -1521,9 +1582,11 @@ func _client_craft_quality(sc: Dictionary) -> float:
 	var world := get_parent()
 	if world and world.get("inventory_ui"):
 		stats = world.inventory_ui.stat_totals
-	return float(sc.get("melt", 0.0)) * 0.14 + float(sc.get("mold", 0.0)) * 0.12 + float(sc.get("prep", 0.0)) * 0.14 + \
-		float(sc.get("shape", 0.0)) * 0.18 + float(sc.get("temper", 0.0)) * 0.18 + float(sc.get("assembly", 0.0)) * 0.24 + \
-		int(stats.get("mas", 0)) * 0.005 + (int(stats.get("str", 0)) + int(stats.get("dex", 0))) * 0.002
+	var base: float = float(sc.get("melt", 0.0)) * 0.14 + float(sc.get("mold", 0.0)) * 0.12 + float(sc.get("prep", 0.0)) * 0.14 + \
+		float(sc.get("shape", 0.0)) * 0.18 + float(sc.get("temper", 0.0)) * 0.18 + float(sc.get("assembly", 0.0)) * 0.24
+	var raw: float = int(stats.get("mas", 0)) * 0.005 + (int(stats.get("str", 0)) + int(stats.get("dex", 0))) * 0.002
+	# A experiência compensa erros, mas não passa da perfeição (mesma regra do servidor)
+	return minf(1.2, base + raw * maxf(0.0, 1.2 - base) / 1.2)
 
 ## Quando o servidor devolve a peça nova (0x54), mostra a celebração.
 func _check_forge_result() -> void:
@@ -1554,7 +1617,7 @@ func _show_result(item: Dictionary) -> void:
 		rar_txt += "  ⬇ caiu de %s" % ItemData.rarity_name(eq_base_rarity)
 	var lines := ["%s" % item["name"],
 		"Raridade final: %s" % rar_txt,
-		"Qualidade Final Ponderada: %d%%  (%s)" % [int(round(minf(q, 1.2) * 100.0)), tier], "",
+		"Qualidade Final Ponderada: %d%%  (%s)" % [int(round(q * 100.0)), tier], "",
 		"Derretimento %.2f • Vazamento %.2f • Pureza %.2f • Modelagem %.2f • Têmpera %.2f • Montagem %.2f" % [
 			float(eq_final_scores["melt"]), float(eq_final_scores["mold"]), float(eq_final_scores["prep"]),
 			float(eq_final_scores["shape"]), float(eq_final_scores["temper"]), float(eq_final_scores["assembly"])], ""]

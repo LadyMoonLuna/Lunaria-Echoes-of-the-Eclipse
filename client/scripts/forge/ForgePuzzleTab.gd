@@ -386,9 +386,9 @@ func _on_register() -> void:
 		picks.append(int(p["material"]))
 	var parts: Array = []
 	for i in range(placements.size()):
-		parts.append({"index": i, "name": String(_module(int(placements[i]["module"]))["name"]), "mat": int(placements[i]["material"])})
+		parts.append({"index": i, "module": int(placements[i]["module"]), "name": String(_module(int(placements[i]["module"]))["name"]), "mat": int(placements[i]["material"])})
 	var base: Dictionary = forge._compute(_bp_dict(), picks)
-	# Quebra-Cabeça: sem blueprint no servidor, as notas das peças vão juntas no 0x55
+	# Quebra-Cabeça: cada peça é confirmada no servidor (0x5D) e a obra-prima sai no 0x55
 	forge.start_equipment_forge(parts, 0, int(base["rarity"]), func(sc: Dictionary):
 		NetworkManager.send_register_custom_weapon_scored(weapon_name, pieces, forge._score_list(sc))
 	)

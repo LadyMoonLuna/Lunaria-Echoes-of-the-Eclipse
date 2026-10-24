@@ -23,3 +23,11 @@ func TestRegisterWeaponAndPuzzleStateRoundTrip(t *testing.T) {
 		t.Fatalf("0x57: %v %v %+v", err, u, list)
 	}
 }
+
+func TestPartResultRoundTrip(t *testing.T) {
+	in := PartResult{BlueprintID: 1, Part: 2, Status: PartResultReforged, Reforges: 1, MaxReforges: 3, Scores: [7]uint8{194, 0, 200, 210, 220, 230, 170}, Message: "🔁 Reforja 1/3"}
+	out, err := DeserializePartResult(SerializePartResult(in))
+	if err != nil || out != in {
+		t.Fatalf("%v %+v", err, out)
+	}
+}
