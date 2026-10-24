@@ -25,6 +25,7 @@ var raceHeatTolerance = map[uint8]float32{
 var FoodValue = map[uint8]float32{
 	protocol.ItemRawWolfMeat:     20,
 	protocol.ItemCookedNobleMeat: 50,
+	uint8(MatGameMeat):           30,
 }
 
 // SurvivalState é o que o HUD mostra (0x50).

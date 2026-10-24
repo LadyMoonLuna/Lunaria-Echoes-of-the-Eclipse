@@ -209,6 +209,11 @@ type Corpse struct {
 	MobLevel       uint8
 	MobMaxHP       uint16
 
+	// Arrastar o corpo (drag.go): peso, quem arrasta e quanto o couro já se estragou
+	MassKg        float32
+	HideIntegrity float32 // 1.0 = couro intacto; cai ao arrastar pelo chão
+	DraggedBy     uint32
+
 	Organs []CorpseOrgan
 }
 
@@ -251,6 +256,8 @@ func NewCorpse(corpseID, mobID uint32, mobType uint8, mobName string, x, y, z, r
 		DifficultySeed: seed,
 		KillerPlayerID: killerID,
 		Organs:         generateCorpseOrgans(mobType, luckBonus),
+		MassKg:         CorpseMassKg(mobType),
+		HideIntegrity:  1,
 	}
 	return c
 }
@@ -258,6 +265,9 @@ func NewCorpse(corpseID, mobID uint32, mobType uint8, mobName string, x, y, z, r
 // generateCorpseOrgans gera a lista de órgãos vitais passíveis de corte na autópsia conforme o tipo de criatura.
 func generateCorpseOrgans(mobType uint8, luckBonus float64) []CorpseOrgan {
 	var organs []CorpseOrgan
+	if d, ok := FaunaByType(mobType); ok {
+		return faunaOrgans(d) // anatomia da espécie (couro, carne, órgãos pela massa e pelo corpo)
+	}
 
 	switch mobType {
 	case protocol.MobTypeMistWolf: // Lobo da Bruma

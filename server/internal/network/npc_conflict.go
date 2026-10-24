@@ -588,6 +588,9 @@ func (s *Server) tickMobsVersusNPCs(npcs []*world.NPC) {
 	for _, mob := range s.mobManager.GetAllMobs() {
 		mob.Mu.RLock()
 		alive := mob.IsAlive && mob.IsActive && now.After(mob.PolymorphUntil) && !mob.Undead // zumbis têm IA própria
+		if d, ok := world.FaunaByType(mob.MobType); ok && d.Temper != world.TemperAggressive {
+			alive = false // só a fauna predadora ataca moradores
+		}
 		mx, mz, zone, maxHP, name := mob.PosX, mob.PosZ, mob.ZoneID, mob.MaxHP, mob.Name
 		mob.Mu.RUnlock()
 		if !alive {

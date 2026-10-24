@@ -68,8 +68,8 @@ func main() {
 	// Covis de criaturas: raio maior para chefes (estradas passam bem longe, até de noite)
 	var dangers []dangerOut
 	for _, m := range world.NewMobManager().GetAllMobs() {
-		if _, ok := world.ZoneGrid[m.ZoneID]; !ok {
-			continue
+		if _, ok := world.ZoneGrid[m.ZoneID]; !ok || world.IsFauna(m.MobType) {
+			continue // a fauna anda por toda parte: estradas desviam só dos covis de monstros
 		}
 		r := 38.0
 		if m.MaxHP >= 2500 {
@@ -163,6 +163,30 @@ func main() {
 		"puzzle": map[string]interface{}{"modules": puzzleModules(), "grip": world.PuzzleGripModules, "grid": world.PuzzleGridSize,
 			"max_pieces": world.PuzzleMaxPieces, "base_atk": 12, "mass_per_cell": 0.18, "dur_scale": 1.1, "bonus": world.MasterpieceBonus,
 			"max_name": world.PuzzleMaxNameLen}}
+	// Fauna (fauna.go): espécies e lagoas das regiões sem rio
+	type faunaOut struct {
+		Type    uint8   `json:"type"`
+		Zone    uint8   `json:"zone"`
+		Name    string  `json:"name"`
+		Body    uint8   `json:"body"`
+		Temper  uint8   `json:"temper"`
+		Scale   float32 `json:"scale"`
+		Mass    float32 `json:"mass"`
+		Color   string  `json:"color"`
+		Habitat uint8   `json:"habitat"`
+	}
+	var fauna []faunaOut
+	for _, d := range world.FaunaCatalog {
+		fauna = append(fauna, faunaOut{d.Type, d.Zone, d.Name, d.Body, d.Temper, d.Scale, d.MassKg, d.Color, d.Habitat})
+	}
+	out["fauna"] = fauna
+	ponds := map[string][]world.FaunaPond{}
+	for z := uint8(0); z < world.ZoneCount; z++ {
+		if p := world.FaunaPonds(z); len(p) > 0 {
+			ponds[fmt.Sprint(z)] = p
+		}
+	}
+	out["ponds"] = ponds
 	out["river"] = map[string]float64{
 		"source_gz": world.RiverSourceGZ, "mouth_gz": world.RiverMouthGZ, "mouth_lake_r": world.RiverMouthLakeR,
 		"span": world.ZoneSpan,

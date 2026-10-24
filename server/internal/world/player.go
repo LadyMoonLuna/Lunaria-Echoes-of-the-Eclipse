@@ -2396,6 +2396,11 @@ func (p *Player) UseConsumable(itemID uint8) (bool, string) {
 	}
 
 	switch itemID {
+	case uint8(MatGameMeat): // Carne de Caça crua: mata a fome e cura um pouco
+		p.consumeOneItemLocked(itemID)
+		p.feedLocked(itemID)
+		p.HP = min(p.MaxHP, p.HP+25)
+		return true, "Você comeu Carne de Caça crua (+25 HP, fome saciada)."
 	case protocol.ItemRawWolfMeat: // 2: Carne Crua de Lobo (+45 HP / +90 HP Chimeryth)
 		p.consumeOneItemLocked(itemID)
 		p.feedLocked(itemID)

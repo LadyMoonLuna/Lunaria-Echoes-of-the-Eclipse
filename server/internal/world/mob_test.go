@@ -10,8 +10,12 @@ import (
 
 func TestMobCreationAndSpawns(t *testing.T) {
 	mm := NewMobManager()
-	if len(mm.Mobs) != 72 { // 37 originais + 35 nas zonas de transição
-		t.Fatalf("esperava 72 mobs registrados, obteve %d", len(mm.Mobs))
+	fauna := 0
+	for _, d := range FaunaCatalog {
+		fauna += d.Group
+	}
+	if len(mm.Mobs) != 72+fauna { // 37 originais + 35 nas zonas de transição + fauna
+		t.Fatalf("esperava %d mobs registrados, obteve %d", 72+fauna, len(mm.Mobs))
 	}
 
 	wolf1 := mm.GetMob(201)

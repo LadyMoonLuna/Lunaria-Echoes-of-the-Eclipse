@@ -642,6 +642,7 @@ func _ready() -> void:
 	NetworkManager.discovered_materials_received.connect(_on_discovered_materials_received)
 	NetworkManager.quest_state_received.connect(_on_quest_state_received)
 	NetworkManager.survival_received.connect(_on_survival_received)
+	NetworkManager.corpse_drag_state_received.connect(_on_corpse_drag_state)
 	for mid in ItemDataScript.STARTING_DISCOVERED:
 		discovered_materials[mid] = true
 	NetworkManager.player_attributes_received.connect(_on_player_attributes_received)
@@ -686,6 +687,7 @@ func _process(delta: float) -> void:
 		world_map_ui.update_player(current_zone_id, local_player.global_position)
 	if portal_cooldown > 0.0:
 		portal_cooldown -= delta
+	_update_drag_rope()
 
 	# 1. Lógica de atualização de tempo, clima e iluminação do mundo
 	_update_world_environment(delta)
@@ -785,6 +787,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_G:
 			_try_pickup_nearest_ground_item()
+		elif event.keycode == KEY_T:
+			_toggle_corpse_drag()
 		elif event.keycode == KEY_E:
 			if _try_interact_corpse():
 				pass
@@ -2083,6 +2087,108 @@ func _on_dev_drop_rates_received(report_text: String) -> void:
 		dev_drop_rates_ui.set_report_text(report_text)
 	show_loot_toast("Taxas de Drop sincronizadas com o Servidor (F9)!")
 
+# --- Arrastar corpos (T): o servidor decide peso, velocidade e o desgaste do couro ---
+var dragging_corpse_id: int = 0
+var drag_rope: MeshInstance3D = null
+var drag_hud: Label = null
+
+func _toggle_corpse_drag() -> void:
+	if local_player == null or not is_instance_valid(local_player):
+		return
+	if dragging_corpse_id > 0:
+		NetworkManager.send_corpse_drag(dragging_corpse_id, 0)
+		return
+	var player_pos: Vector3 = local_player.global_position
+	var best_id: int = 0
+	var best_dist: float = 2.8
+	for cid in corpses.keys():
+		var corpse_node = corpses[cid]
+		if is_instance_valid(corpse_node) and not corpse_node.is_looted:
+			var dist: float = player_pos.distance_to(corpse_node.global_position)
+			if dist <= best_dist:
+				best_dist = dist
+				best_id = cid
+	if best_id > 0:
+		NetworkManager.send_corpse_drag(best_id, 1)
+	else:
+		show_loot_toast("Nenhum corpo ao alcance para arrastar.")
+
+func _on_corpse_drag_state(corpse_id: int, pos: Vector3, rot_y: float, integrity: int, dragger_id: int, speed_pct: int, mass_kg: int) -> void:
+	var corpse_node = corpses.get(corpse_id)
+	if corpse_node != null and is_instance_valid(corpse_node):
+		corpse_node.apply_drag_state(on_ground(pos), rot_y, integrity, dragger_id)
+	var mine: bool = dragger_id != 0 and dragger_id == NetworkManager.my_player_id
+	if mine:
+		dragging_corpse_id = corpse_id
+	elif dragging_corpse_id == corpse_id:
+		dragging_corpse_id = 0
+	if local_player and is_instance_valid(local_player) and "drag_speed_mult" in local_player:
+		if mine:
+			local_player.drag_speed_mult = clampf(speed_pct / 100.0, 0.1, 1.0)
+		elif dragging_corpse_id == 0:
+			local_player.drag_speed_mult = 1.0
+	_update_drag_hud(mine, integrity, mass_kg, speed_pct)
+
+func _update_drag_hud(mine: bool, integrity: int, mass_kg: int, speed_pct: int) -> void:
+	if drag_hud == null:
+		var layer := CanvasLayer.new()
+		layer.layer = 5
+		add_child(layer)
+		drag_hud = Label.new()
+		drag_hud.add_theme_font_size_override("font_size", 18)
+		drag_hud.add_theme_color_override("font_outline_color", Color.BLACK)
+		drag_hud.add_theme_constant_override("outline_size", 6)
+		drag_hud.anchor_left = 0.5
+		drag_hud.anchor_right = 0.5
+		drag_hud.offset_left = -220
+		drag_hud.offset_right = 220
+		drag_hud.offset_top = 90
+		drag_hud.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		layer.add_child(drag_hud)
+	drag_hud.visible = mine
+	if mine:
+		drag_hud.text = "🪢 Arrastando corpo: %d kg · Velocidade %d%%\nIntegridade do couro: %d%%  [T] soltar" % [mass_kg, speed_pct, integrity]
+		drag_hud.modulate = Color(1, 1, 1) if integrity >= 80 else (Color(1, 0.85, 0.4) if integrity >= 55 else Color(1, 0.45, 0.35))
+
+func _update_drag_rope() -> void:
+	var active: bool = dragging_corpse_id > 0 and corpses.has(dragging_corpse_id) and is_instance_valid(corpses[dragging_corpse_id]) \
+			and local_player != null and is_instance_valid(local_player)
+	if not active:
+		if drag_rope:
+			drag_rope.visible = false
+		if dragging_corpse_id > 0 and not corpses.has(dragging_corpse_id):
+			dragging_corpse_id = 0
+			if local_player and is_instance_valid(local_player) and "drag_speed_mult" in local_player:
+				local_player.drag_speed_mult = 1.0
+			if drag_hud:
+				drag_hud.visible = false
+		return
+	if drag_rope == null:
+		drag_rope = MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 0.025
+		cyl.bottom_radius = 0.025
+		cyl.height = 1.0
+		cyl.radial_segments = 6
+		drag_rope.mesh = cyl
+		var rope_mat := StandardMaterial3D.new()
+		rope_mat.albedo_color = Color(0.55, 0.42, 0.25)
+		drag_rope.material_override = rope_mat
+		add_child(drag_rope)
+	var a: Vector3 = local_player.global_position + Vector3(0, 1.0, 0)
+	var b: Vector3 = corpses[dragging_corpse_id].global_position + Vector3(0, 0.35, 0)
+	var length: float = a.distance_to(b)
+	if length < 0.05:
+		drag_rope.visible = false
+		return
+	drag_rope.visible = true
+	var mid: Vector3 = (a + b) * 0.5
+	var dir: Vector3 = (b - a) / length
+	var basis_y: Vector3 = dir
+	var basis_x: Vector3 = basis_y.cross(Vector3.FORWARD if absf(basis_y.dot(Vector3.FORWARD)) < 0.95 else Vector3.RIGHT).normalized()
+	var basis_z: Vector3 = basis_x.cross(basis_y).normalized()
+	drag_rope.global_transform = Transform3D(Basis(basis_x, basis_y * length, basis_z), mid)
+
 func _try_interact_corpse() -> bool:
 	if not local_player:
 		return false
@@ -2112,7 +2218,7 @@ func _on_corpse_snapshot_received(corpses_dict: Dictionary) -> void:
 		if corpses.has(cid):
 			var corpse_node = corpses[cid]
 			if is_instance_valid(corpse_node):
-				corpse_node.update_data(cdata.position, cdata.rotation_y, cdata.is_looted, cdata.remaining_sec)
+				corpse_node.update_data(on_ground(cdata.position), cdata.rotation_y, cdata.is_looted, cdata.remaining_sec)
 				if cdata.is_looted:
 					corpses.erase(cid)
 					corpse_node.queue_free()
@@ -2717,6 +2823,13 @@ func _node_color(mat_id: int, kind: int) -> Color:
 			return Color(0.88, 0.85, 0.76)
 	return ItemDataScript.rarity_color(r)
 
+## Flora coletável (materials.go): cor das flores de cada planta.
+const FLORA_COLORS := {
+	98: Color(0.85, 0.88, 1.0), 99: Color(1.0, 0.9, 0.95), 191: Color(0.75, 0.8, 0.82), 192: Color(0.7, 0.1, 0.2),
+	193: Color(1.0, 0.45, 0.1), 194: Color(0.65, 0.85, 1.0), 195: Color(0.75, 0.4, 0.85), 196: Color(0.5, 0.7, 0.4),
+	197: Color(0.25, 0.55, 0.2), 198: Color(1.0, 0.82, 0.2),
+}
+
 func _create_resource_node(nd: Dictionary) -> Node3D:
 	var kind: int = int(nd["kind"])
 	var mat_id: int = int(nd["material"])
@@ -2770,6 +2883,22 @@ func _create_resource_node(nd: Dictionary) -> Node3D:
 			sph.radius = 0.95
 			shape.shape = sph
 			shape.position = Vector3(0, 0.5, 0)
+		5 when FLORA_COLORS.has(mat_id): # Flora coletável: tufo baixo com flores da cor da planta
+			var leaf := SphereMesh.new()
+			leaf.radius = 0.45
+			leaf.height = 0.45
+			_add_mesh(model, leaf, _mat(Color(0.22, 0.42, 0.18), 0.0, 0.9, "leaf"), Vector3(0, 0.2, 0), Vector3.ZERO, Vector3(1.2, 0.8, 1.2))
+			var petal := SphereMesh.new()
+			petal.radius = 0.12
+			petal.height = 0.12
+			var flower_mat := _mat(FLORA_COLORS[mat_id], glow + 0.15, 0.6)
+			for i in range(6):
+				var a3: float = float(i) * 1.05
+				_add_mesh(model, petal, flower_mat, Vector3(cos(a3) * 0.32, 0.45 + 0.05 * (i % 2), sin(a3) * 0.32))
+			var sph5 := SphereShape3D.new()
+			sph5.radius = 0.45
+			shape.shape = sph5
+			shape.position = Vector3(0, 0.3, 0)
 		5: # Vinha / arbusto / cogumelo
 			var bush := SphereMesh.new()
 			bush.radius = 0.7

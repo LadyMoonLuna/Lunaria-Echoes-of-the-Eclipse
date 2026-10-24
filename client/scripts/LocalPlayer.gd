@@ -46,6 +46,8 @@ var is_menu_open: bool = false
 var current_weight: float = 0.0
 var max_weight: float = 75.0
 var weight_speed_mult: float = 1.0
+## Arrastando um corpo pesado (o servidor manda a fração da velocidade).
+var drag_speed_mult: float = 1.0
 var skill_slot_bindings: Dictionary = {
 	"LMB": 1,
 	"Q": 3,
@@ -4036,7 +4038,7 @@ func _create_emissive_mat(col: Color, energy: float) -> StandardMaterial3D:
 	return m
 
 func _physics_process(delta: float) -> void:
-	weight_speed_mult = get_weight_speed_mult()
+	weight_speed_mult = get_weight_speed_mult() * drag_speed_mult
 
 	# Proteção contra o Abismo / Void
 	if global_position.y < -10.0:

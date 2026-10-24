@@ -320,3 +320,36 @@ func DeserializePartResult(data []byte) (PartResult, error) {
 	r.Message = string(data[i+2 : i+2+l])
 	return r, nil
 }
+
+// Arrastar corpos
+const (
+	PacketTypeCorpseDrag      uint8 = 0x5F // [C->S] op | corpo u32 | ação (1 agarrar, 0 soltar) (6 bytes)
+	PacketTypeCorpseDragState uint8 = 0x60 // [S->C] op | corpo u32 | X f32 | Z f32 | rotY f32 | integridade % | quem arrasta u32 | velocidade % | massa u16 (25 bytes)
+
+	CorpseDragPacketSize      = 6
+	CorpseDragStatePacketSize = 25
+)
+
+// CorpseDragState: posição do corpo arrastado e estado do couro.
+type CorpseDragState struct {
+	CorpseID   uint32
+	X, Z, RotY float32
+	Integrity  uint8 // 0-100
+	DraggerID  uint32
+	SpeedPct   uint8 // velocidade do jogador que arrasta (%)
+	MassKg     uint16
+}
+
+func SerializeCorpseDragState(st CorpseDragState) []byte {
+	buf := make([]byte, CorpseDragStatePacketSize)
+	buf[0] = PacketTypeCorpseDragState
+	binary.LittleEndian.PutUint32(buf[1:], st.CorpseID)
+	binary.LittleEndian.PutUint32(buf[5:], math.Float32bits(st.X))
+	binary.LittleEndian.PutUint32(buf[9:], math.Float32bits(st.Z))
+	binary.LittleEndian.PutUint32(buf[13:], math.Float32bits(st.RotY))
+	buf[17] = st.Integrity
+	binary.LittleEndian.PutUint32(buf[18:], st.DraggerID)
+	buf[22] = st.SpeedPct
+	binary.LittleEndian.PutUint16(buf[23:], st.MassKg)
+	return buf
+}

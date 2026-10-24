@@ -3,6 +3,7 @@ extends Node3D
 
 const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
 const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
+const FaunaModel = preload("res://scripts/world/FaunaModel.gd")
 ## Textura do corpo principal de cada tipo de mob
 const MOB_TEXTURES := {
 	1: "fur", 25: "fur", 26: "cloth", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
@@ -164,6 +165,15 @@ func _build_visuals() -> void:
 	main_mesh.material_override = main_mat
 	LunariaTextures.apply(main_mat, MOB_TEXTURES.get(mob_type, ""))
 
+	if FaunaModel.is_fauna(mob_type):
+		main_mat = FaunaModel.build(body_pivot, mob_type)
+		main_mesh.queue_free()
+		main_mesh = null
+	else:
+		_build_monster_shapes()
+	_finish_visuals()
+
+func _build_monster_shapes() -> void:
 	match mob_type:
 		1: # Lobo da Bruma (Quadrúpede ágil, malha baixa e alongada)
 			body_pivot.scale = Vector3(0.9, 0.7, 1.3)
@@ -1438,6 +1448,7 @@ func _build_visuals() -> void:
 
 	_apply_creature_model()
 
+func _finish_visuals() -> void:
 	# Label 3D Billboard para Nome e HP
 	if name_tag == null:
 		name_tag = Label3D.new()
@@ -1484,6 +1495,8 @@ func _build_visuals() -> void:
 		tag_height = 2.7
 	elif mob_type == 24:
 		tag_height = 5.2
+	if FaunaModel.is_fauna(mob_type):
+		tag_height = FaunaModel.tag_height(mob_type)
 	name_tag.position = Vector3(0, tag_height, 0)
 
 	_apply_lunar_glow()
@@ -1591,6 +1604,8 @@ func _update_tags() -> void:
 		return
 
 	var m_name: String = MOB_NAMES.get(mob_type, "Monstro")
+	if FaunaModel.is_fauna(mob_type):
+		m_name = FaunaModel.species_name(mob_type)
 	var status_suffix := ""
 	var tag_color := Color(1.0, 0.9, 0.9, 1.0)
 

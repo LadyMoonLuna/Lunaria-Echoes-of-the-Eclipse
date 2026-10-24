@@ -6,6 +6,7 @@ extends RefCounted
 
 const Terrain = preload("res://scripts/world/Terrain.gd")
 const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
+const FaunaData = preload("res://scripts/world/FaunaData.gd")
 
 const VEG_LIMIT := 2600
 const GRASS_LIMIT := 2400
@@ -24,6 +25,7 @@ static func build(zone: int, parent: Node3D) -> Node3D:
 	_build_vegetation(zone, root)
 	_build_caves(zone, root)
 	_build_river_life(zone, root)
+	_build_fauna_ponds(zone, root)
 	_build_volcano_glow(zone, root)
 	return root
 
@@ -683,6 +685,47 @@ static func _water_spots(zone: int, rng: RandomNumberGenerator, n: int) -> Array
 				spots.append([x2, z2, rng.randf() * TAU, 6.0])
 	return spots
 
+## Lagoas da fauna nas regiões sem rio (mesmas de server/internal/world/fauna.go FaunaPonds).
+static func _build_fauna_ponds(zone: int, root: Node3D) -> void:
+	var ponds: Array = FaunaData.PONDS.get(zone, [])
+	if ponds.is_empty():
+		return
+	var holder := Node3D.new()
+	holder.name = "LagoasDaFauna"
+	root.add_child(holder)
+	var water := StandardMaterial3D.new()
+	water.albedo_color = Color(0.18, 0.38, 0.48, 0.82)
+	water.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	water.roughness = 0.08
+	water.metallic = 0.3
+	var mud := StandardMaterial3D.new()
+	mud.albedo_color = Color(0.28, 0.22, 0.15)
+	for p in ponds:
+		var px: float = p[0]
+		var pz: float = p[1]
+		var pr: float = p[2]
+		var gy: float = Terrain.height(zone, px, pz)
+		var bank := MeshInstance3D.new()
+		var bank_mesh := CylinderMesh.new()
+		bank_mesh.top_radius = pr + 1.5
+		bank_mesh.bottom_radius = pr + 2.0
+		bank_mesh.height = 0.3
+		bank_mesh.radial_segments = 32
+		bank.mesh = bank_mesh
+		bank.material_override = mud
+		bank.position = Vector3(px, gy - 0.05, pz)
+		holder.add_child(bank)
+		var surf := MeshInstance3D.new()
+		var surf_mesh := CylinderMesh.new()
+		surf_mesh.top_radius = pr
+		surf_mesh.bottom_radius = pr
+		surf_mesh.height = 0.05
+		surf_mesh.radial_segments = 32
+		surf.mesh = surf_mesh
+		surf.material_override = water
+		surf.position = Vector3(px, gy + 0.2, pz)
+		holder.add_child(surf)
+
 static func _build_river_life(zone: int, root: Node3D) -> void:
 	var has_water: bool = Terrain.has_river(zone) or not Terrain.lakes(zone).is_empty() or bool(Terrain.biome(zone).get("marsh", false))
 	if not has_water:
@@ -695,27 +738,11 @@ static func _build_river_life(zone: int, root: Node3D) -> void:
 	var wy := Terrain.water_y(zone)
 	var warm: bool = zone in [10, 11, 12, 16]
 	var cold: bool = zone in [2, 13, 14]
-	# Cardumes de lambaris (todas as águas) e piranhas (águas quentes)
-	for spot in _water_spots(zone, rng, 10):
-		_fish_school(life, spot, wy, Color("#c7d3dc"), 6, 0.22, rng)
-	if warm:
-		for spot in _water_spots(zone, rng, 5):
-			_fish_school(life, spot, wy, Color("#d8452f"), 5, 0.3, rng, true)
-	if cold:
-		for spot in _water_spots(zone, rng, 4):
-			_fish_school(life, spot, wy, Color("#8fa5b8"), 3, 0.45, rng) # trutas
-	# Tartarugas nas margens (águas mornas e temperadas)
-	if not cold:
-		for spot in _water_spots(zone, rng, 4):
-			_turtle(life, zone, spot, rng)
+	# Peixes, tartarugas, garças e caranguejos agora são criaturas de verdade no servidor (FaunaData):
+	# têm vida e deixam corpo. Aqui ficam só plantas d'água e insetos de enfeite.
 	# Rãs e vitórias-régias (lagos e brejo), garças nas águas rasas, caranguejos de rio
 	for spot in _water_spots(zone, rng, 6 if zone == 16 else 3):
 		_lily_and_frog(life, spot, wy, rng)
-	if not cold:
-		for spot in _water_spots(zone, rng, 3):
-			_heron(life, zone, spot)
-		for spot in _water_spots(zone, rng, 4):
-			_crab(life, zone, spot, rng)
 	if warm or zone in [0, 1, 9]:
 		for spot in _water_spots(zone, rng, 5):
 			_dragonfly(life, spot, wy, rng)

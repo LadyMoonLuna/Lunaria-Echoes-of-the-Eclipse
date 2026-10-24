@@ -602,6 +602,1548 @@
       "name": "Aranha Tecelã da Bruma"
     }
   ],
+  "fauna": [
+    {
+      "type": 100,
+      "zone": 0,
+      "name": "Coelho-do-Campo",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.35,
+      "mass": 2.5,
+      "color": "#b49a7a",
+      "habitat": 0
+    },
+    {
+      "type": 101,
+      "zone": 0,
+      "name": "Raposa Vermelha",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.6,
+      "mass": 7,
+      "color": "#c8562a",
+      "habitat": 0
+    },
+    {
+      "type": 102,
+      "zone": 0,
+      "name": "Cervo-Galheiro",
+      "body": 1,
+      "temper": 1,
+      "scale": 1.25,
+      "mass": 140,
+      "color": "#8a6240",
+      "habitat": 0
+    },
+    {
+      "type": 103,
+      "zone": 0,
+      "name": "Ouriço-Cacheiro",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.3,
+      "mass": 1.2,
+      "color": "#6b5a48",
+      "habitat": 0
+    },
+    {
+      "type": 104,
+      "zone": 0,
+      "name": "Texugo-das-Tocas",
+      "body": 1,
+      "temper": 4,
+      "scale": 0.55,
+      "mass": 12,
+      "color": "#5b5b5b",
+      "habitat": 0
+    },
+    {
+      "type": 105,
+      "zone": 0,
+      "name": "Pombo-Torcaz",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.35,
+      "mass": 0.5,
+      "color": "#9aa3ad",
+      "habitat": 0
+    },
+    {
+      "type": 106,
+      "zone": 0,
+      "name": "Corvo-Carniceiro",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.4,
+      "mass": 1.2,
+      "color": "#1d1d24",
+      "habitat": 0
+    },
+    {
+      "type": 107,
+      "zone": 0,
+      "name": "Cobra-d'Água",
+      "body": 3,
+      "temper": 4,
+      "scale": 0.6,
+      "mass": 2,
+      "color": "#4d6b3a",
+      "habitat": 0
+    },
+    {
+      "type": 108,
+      "zone": 0,
+      "name": "Lontra-do-Rio",
+      "body": 7,
+      "temper": 2,
+      "scale": 0.6,
+      "mass": 9,
+      "color": "#6a4a32",
+      "habitat": 1
+    },
+    {
+      "type": 109,
+      "zone": 0,
+      "name": "Truta Prateada",
+      "body": 6,
+      "temper": 1,
+      "scale": 0.45,
+      "mass": 2,
+      "color": "#b8c6d0",
+      "habitat": 1
+    },
+    {
+      "type": 110,
+      "zone": 1,
+      "name": "Urso-Pardo do Bosque",
+      "body": 1,
+      "temper": 4,
+      "scale": 1.8,
+      "mass": 320,
+      "color": "#5a3d26",
+      "habitat": 0
+    },
+    {
+      "type": 111,
+      "zone": 1,
+      "name": "Lince Cinzento",
+      "body": 1,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 22,
+      "color": "#8a8478",
+      "habitat": 0
+    },
+    {
+      "type": 112,
+      "zone": 1,
+      "name": "Alce-Real",
+      "body": 1,
+      "temper": 2,
+      "scale": 1.7,
+      "mass": 450,
+      "color": "#6b4a30",
+      "habitat": 0
+    },
+    {
+      "type": 113,
+      "zone": 1,
+      "name": "Esquilo-Ruivo",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.25,
+      "mass": 0.4,
+      "color": "#b5541e",
+      "habitat": 0
+    },
+    {
+      "type": 114,
+      "zone": 1,
+      "name": "Coruja-das-Torres",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.5,
+      "mass": 0.6,
+      "color": "#cdb38a",
+      "habitat": 0
+    },
+    {
+      "type": 115,
+      "zone": 1,
+      "name": "Pica-Pau-Verde",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.3,
+      "mass": 0.2,
+      "color": "#4f8a3a",
+      "habitat": 0
+    },
+    {
+      "type": 116,
+      "zone": 1,
+      "name": "Víbora-do-Musgo",
+      "body": 3,
+      "temper": 3,
+      "scale": 0.6,
+      "mass": 1.5,
+      "color": "#3d5a2a",
+      "habitat": 0
+    },
+    {
+      "type": 117,
+      "zone": 1,
+      "name": "Besouro-Chifrudo",
+      "body": 4,
+      "temper": 2,
+      "scale": 0.6,
+      "mass": 1.5,
+      "color": "#2b1d12",
+      "habitat": 0
+    },
+    {
+      "type": 118,
+      "zone": 1,
+      "name": "Castor-Construtor",
+      "body": 7,
+      "temper": 1,
+      "scale": 0.7,
+      "mass": 25,
+      "color": "#6a4426",
+      "habitat": 1
+    },
+    {
+      "type": 119,
+      "zone": 1,
+      "name": "Salmão-do-Bosque",
+      "body": 6,
+      "temper": 1,
+      "scale": 0.6,
+      "mass": 5,
+      "color": "#d07a5a",
+      "habitat": 1
+    },
+    {
+      "type": 120,
+      "zone": 9,
+      "name": "Javali-Malhado",
+      "body": 1,
+      "temper": 4,
+      "scale": 0.95,
+      "mass": 85,
+      "color": "#5a4630",
+      "habitat": 0
+    },
+    {
+      "type": 121,
+      "zone": 9,
+      "name": "Corça-Ligeira",
+      "body": 1,
+      "temper": 1,
+      "scale": 1,
+      "mass": 60,
+      "color": "#a5784a",
+      "habitat": 0
+    },
+    {
+      "type": 122,
+      "zone": 9,
+      "name": "Lebre-Saltadora",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.38,
+      "mass": 3,
+      "color": "#a59070",
+      "habitat": 0
+    },
+    {
+      "type": 123,
+      "zone": 9,
+      "name": "Furão-Selvagem",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.4,
+      "mass": 1.5,
+      "color": "#4a3a2a",
+      "habitat": 0
+    },
+    {
+      "type": 124,
+      "zone": 9,
+      "name": "Gavião-Caçador",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.55,
+      "mass": 1.4,
+      "color": "#7a5a3a",
+      "habitat": 0
+    },
+    {
+      "type": 125,
+      "zone": 9,
+      "name": "Perdiz-Cinzenta",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.35,
+      "mass": 0.5,
+      "color": "#8a7f6a",
+      "habitat": 0
+    },
+    {
+      "type": 126,
+      "zone": 9,
+      "name": "Cobra-Coral",
+      "body": 3,
+      "temper": 4,
+      "scale": 0.5,
+      "mass": 0.8,
+      "color": "#c43a2a",
+      "habitat": 0
+    },
+    {
+      "type": 127,
+      "zone": 9,
+      "name": "Aranha-Lobo",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.6,
+      "mass": 0.8,
+      "color": "#4a3a30",
+      "habitat": 0
+    },
+    {
+      "type": 128,
+      "zone": 9,
+      "name": "Sapo-Cururu",
+      "body": 7,
+      "temper": 1,
+      "scale": 0.4,
+      "mass": 1.2,
+      "color": "#6a6a32",
+      "habitat": 1
+    },
+    {
+      "type": 129,
+      "zone": 9,
+      "name": "Carpa-Dourada",
+      "body": 6,
+      "temper": 1,
+      "scale": 0.55,
+      "mass": 4,
+      "color": "#d8a032",
+      "habitat": 1
+    },
+    {
+      "type": 130,
+      "zone": 10,
+      "name": "Bisão-das-Planícies",
+      "body": 1,
+      "temper": 2,
+      "scale": 1.9,
+      "mass": 700,
+      "color": "#4a3424",
+      "habitat": 0
+    },
+    {
+      "type": 131,
+      "zone": 10,
+      "name": "Cavalo-Selvagem",
+      "body": 1,
+      "temper": 1,
+      "scale": 1.5,
+      "mass": 420,
+      "color": "#8a5a3a",
+      "habitat": 0
+    },
+    {
+      "type": 132,
+      "zone": 10,
+      "name": "Coiote-Uivante",
+      "body": 1,
+      "temper": 3,
+      "scale": 0.7,
+      "mass": 14,
+      "color": "#a5865a",
+      "habitat": 0
+    },
+    {
+      "type": 133,
+      "zone": 10,
+      "name": "Marmota-da-Pradaria",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.35,
+      "mass": 4,
+      "color": "#9a7a52",
+      "habitat": 0
+    },
+    {
+      "type": 134,
+      "zone": 10,
+      "name": "Abetarda-Real",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.8,
+      "mass": 12,
+      "color": "#b8a07a",
+      "habitat": 0
+    },
+    {
+      "type": 135,
+      "zone": 10,
+      "name": "Falcão-Peregrino",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 1,
+      "color": "#6a6a72",
+      "habitat": 0
+    },
+    {
+      "type": 136,
+      "zone": 10,
+      "name": "Cascavel-do-Capim",
+      "body": 3,
+      "temper": 4,
+      "scale": 0.65,
+      "mass": 2,
+      "color": "#a58a5a",
+      "habitat": 0
+    },
+    {
+      "type": 137,
+      "zone": 10,
+      "name": "Gafanhoto-Gigante",
+      "body": 4,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 0.6,
+      "color": "#7a9a3a",
+      "habitat": 0
+    },
+    {
+      "type": 138,
+      "zone": 10,
+      "name": "Garça-Branca",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.8,
+      "mass": 2,
+      "color": "#eeeeea",
+      "habitat": 1
+    },
+    {
+      "type": 139,
+      "zone": 10,
+      "name": "Bagre-Barbudo",
+      "body": 6,
+      "temper": 1,
+      "scale": 0.7,
+      "mass": 8,
+      "color": "#6a6a5a",
+      "habitat": 1
+    },
+    {
+      "type": 140,
+      "zone": 11,
+      "name": "Leão-Dourado",
+      "body": 1,
+      "temper": 3,
+      "scale": 1.6,
+      "mass": 190,
+      "color": "#c89a4a",
+      "habitat": 0
+    },
+    {
+      "type": 141,
+      "zone": 11,
+      "name": "Zebra-Listrada",
+      "body": 1,
+      "temper": 1,
+      "scale": 1.4,
+      "mass": 320,
+      "color": "#e6e6e6",
+      "habitat": 0
+    },
+    {
+      "type": 142,
+      "zone": 11,
+      "name": "Girafa-Manchada",
+      "body": 1,
+      "temper": 1,
+      "scale": 2.6,
+      "mass": 1100,
+      "color": "#d8a85a",
+      "habitat": 0
+    },
+    {
+      "type": 143,
+      "zone": 11,
+      "name": "Hiena-Risonha",
+      "body": 1,
+      "temper": 3,
+      "scale": 0.9,
+      "mass": 55,
+      "color": "#8a7a5a",
+      "habitat": 0
+    },
+    {
+      "type": 144,
+      "zone": 11,
+      "name": "Elefante-da-Savana",
+      "body": 1,
+      "temper": 4,
+      "scale": 3.2,
+      "mass": 5000,
+      "color": "#7a7a7a",
+      "habitat": 0
+    },
+    {
+      "type": 145,
+      "zone": 11,
+      "name": "Abutre-Calvo",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.8,
+      "mass": 8,
+      "color": "#4a3a32",
+      "habitat": 0
+    },
+    {
+      "type": 146,
+      "zone": 11,
+      "name": "Avestruz",
+      "body": 2,
+      "temper": 2,
+      "scale": 1.5,
+      "mass": 110,
+      "color": "#3a3230",
+      "habitat": 0
+    },
+    {
+      "type": 147,
+      "zone": 11,
+      "name": "Escorpião-Amarelo",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.5,
+      "mass": 0.4,
+      "color": "#c8a032",
+      "habitat": 0
+    },
+    {
+      "type": 148,
+      "zone": 11,
+      "name": "Hipopótamo-do-Lago",
+      "body": 7,
+      "temper": 4,
+      "scale": 2.4,
+      "mass": 1800,
+      "color": "#7a6a7a",
+      "habitat": 1
+    },
+    {
+      "type": 149,
+      "zone": 11,
+      "name": "Crocodilo-do-Lago",
+      "body": 8,
+      "temper": 3,
+      "scale": 2,
+      "mass": 500,
+      "color": "#4a5a32",
+      "habitat": 1
+    },
+    {
+      "type": 150,
+      "zone": 12,
+      "name": "Camelo-do-Sal",
+      "body": 1,
+      "temper": 1,
+      "scale": 2,
+      "mass": 600,
+      "color": "#c8a06a",
+      "habitat": 0
+    },
+    {
+      "type": 151,
+      "zone": 12,
+      "name": "Raposa-do-Deserto",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.45,
+      "mass": 1.5,
+      "color": "#e0c08a",
+      "habitat": 0
+    },
+    {
+      "type": 152,
+      "zone": 12,
+      "name": "Lagarto-de-Chifres",
+      "body": 8,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 0.5,
+      "color": "#b08a5a",
+      "habitat": 0
+    },
+    {
+      "type": 153,
+      "zone": 12,
+      "name": "Escaravelho-de-Sal",
+      "body": 4,
+      "temper": 1,
+      "scale": 0.45,
+      "mass": 0.3,
+      "color": "#3a6a7a",
+      "habitat": 0
+    },
+    {
+      "type": 154,
+      "zone": 12,
+      "name": "Escorpião-Pálido",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.6,
+      "mass": 0.5,
+      "color": "#e8dcc0",
+      "habitat": 0
+    },
+    {
+      "type": 155,
+      "zone": 12,
+      "name": "Serpente-das-Dunas",
+      "body": 3,
+      "temper": 3,
+      "scale": 0.9,
+      "mass": 6,
+      "color": "#d8b880",
+      "habitat": 0
+    },
+    {
+      "type": 156,
+      "zone": 12,
+      "name": "Abutre-das-Salinas",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.8,
+      "mass": 7,
+      "color": "#8a7a6a",
+      "habitat": 0
+    },
+    {
+      "type": 157,
+      "zone": 12,
+      "name": "Gerbo-Saltador",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.25,
+      "mass": 0.1,
+      "color": "#d8b88a",
+      "habitat": 0
+    },
+    {
+      "type": 158,
+      "zone": 12,
+      "name": "Tartaruga-do-Sal",
+      "body": 8,
+      "temper": 1,
+      "scale": 0.9,
+      "mass": 40,
+      "color": "#8a7a5a",
+      "habitat": 0
+    },
+    {
+      "type": 159,
+      "zone": 12,
+      "name": "Verme-de-Areia",
+      "body": 3,
+      "temper": 4,
+      "scale": 2.2,
+      "mass": 900,
+      "color": "#c8a87a",
+      "habitat": 0
+    },
+    {
+      "type": 160,
+      "zone": 13,
+      "name": "Cabra-Montesa",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.9,
+      "mass": 80,
+      "color": "#d8d0c0",
+      "habitat": 0
+    },
+    {
+      "type": 161,
+      "zone": 13,
+      "name": "Lobo-dos-Ventos",
+      "body": 1,
+      "temper": 3,
+      "scale": 0.95,
+      "mass": 45,
+      "color": "#9aa0a8",
+      "habitat": 0
+    },
+    {
+      "type": 162,
+      "zone": 13,
+      "name": "Águia-Real",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.8,
+      "mass": 6,
+      "color": "#5a3a22",
+      "habitat": 0
+    },
+    {
+      "type": 163,
+      "zone": 13,
+      "name": "Marmota-das-Rochas",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.4,
+      "mass": 5,
+      "color": "#8a7050",
+      "habitat": 0
+    },
+    {
+      "type": 164,
+      "zone": 13,
+      "name": "Carneiro-Selvagem",
+      "body": 1,
+      "temper": 4,
+      "scale": 1.1,
+      "mass": 120,
+      "color": "#c8b89a",
+      "habitat": 0
+    },
+    {
+      "type": 165,
+      "zone": 13,
+      "name": "Andorinha-das-Escarpas",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.25,
+      "mass": 0.1,
+      "color": "#2a3a5a",
+      "habitat": 0
+    },
+    {
+      "type": 166,
+      "zone": 13,
+      "name": "Lagarto-das-Pedras",
+      "body": 8,
+      "temper": 1,
+      "scale": 0.4,
+      "mass": 0.6,
+      "color": "#7a7a6a",
+      "habitat": 0
+    },
+    {
+      "type": 167,
+      "zone": 13,
+      "name": "Grilo-do-Vento",
+      "body": 4,
+      "temper": 1,
+      "scale": 0.3,
+      "mass": 0.1,
+      "color": "#6a5a3a",
+      "habitat": 0
+    },
+    {
+      "type": 168,
+      "zone": 13,
+      "name": "Martim-Pescador",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.3,
+      "mass": 0.2,
+      "color": "#2a8ab8",
+      "habitat": 1
+    },
+    {
+      "type": 169,
+      "zone": 13,
+      "name": "Truta-das-Corredeiras",
+      "body": 6,
+      "temper": 1,
+      "scale": 0.5,
+      "mass": 3,
+      "color": "#9ab0b8",
+      "habitat": 1
+    },
+    {
+      "type": 170,
+      "zone": 2,
+      "name": "Rato-das-Ruínas",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.3,
+      "mass": 0.5,
+      "color": "#5a5048",
+      "habitat": 0
+    },
+    {
+      "type": 171,
+      "zone": 2,
+      "name": "Morcego-das-Criptas",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.35,
+      "mass": 0.3,
+      "color": "#2a2228",
+      "habitat": 0
+    },
+    {
+      "type": 172,
+      "zone": 2,
+      "name": "Gato-Selvagem",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 5,
+      "color": "#7a6a5a",
+      "habitat": 0
+    },
+    {
+      "type": 173,
+      "zone": 2,
+      "name": "Lobo-Cinzento do Norte",
+      "body": 1,
+      "temper": 3,
+      "scale": 1,
+      "mass": 55,
+      "color": "#b0b4b8",
+      "habitat": 0
+    },
+    {
+      "type": 174,
+      "zone": 2,
+      "name": "Coruja-das-Neves",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.55,
+      "mass": 2,
+      "color": "#f0f0f2",
+      "habitat": 0
+    },
+    {
+      "type": 175,
+      "zone": 2,
+      "name": "Raposa-Ártica",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 4,
+      "color": "#f4f4f4",
+      "habitat": 0
+    },
+    {
+      "type": 176,
+      "zone": 2,
+      "name": "Centopeia-Gigante",
+      "body": 4,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 2,
+      "color": "#7a3a2a",
+      "habitat": 0
+    },
+    {
+      "type": 177,
+      "zone": 2,
+      "name": "Aranha-das-Muralhas",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.6,
+      "mass": 1,
+      "color": "#3a3a3a",
+      "habitat": 0
+    },
+    {
+      "type": 178,
+      "zone": 2,
+      "name": "Arminho",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.28,
+      "mass": 0.3,
+      "color": "#e8e2d8",
+      "habitat": 0
+    },
+    {
+      "type": 179,
+      "zone": 2,
+      "name": "Lúcio-Gelado",
+      "body": 6,
+      "temper": 2,
+      "scale": 0.7,
+      "mass": 6,
+      "color": "#8aa0a0",
+      "habitat": 1
+    },
+    {
+      "type": 180,
+      "zone": 14,
+      "name": "Urso-Polar",
+      "body": 1,
+      "temper": 3,
+      "scale": 2,
+      "mass": 500,
+      "color": "#f2f2ee",
+      "habitat": 0
+    },
+    {
+      "type": 181,
+      "zone": 14,
+      "name": "Iaque-das-Neves",
+      "body": 1,
+      "temper": 2,
+      "scale": 1.8,
+      "mass": 600,
+      "color": "#4a3a32",
+      "habitat": 0
+    },
+    {
+      "type": 182,
+      "zone": 14,
+      "name": "Leopardo-das-Neves",
+      "body": 1,
+      "temper": 3,
+      "scale": 1,
+      "mass": 50,
+      "color": "#e8e4dc",
+      "habitat": 0
+    },
+    {
+      "type": 183,
+      "zone": 14,
+      "name": "Lebre-Alpina",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.4,
+      "mass": 4,
+      "color": "#f4f4f4",
+      "habitat": 0
+    },
+    {
+      "type": 184,
+      "zone": 14,
+      "name": "Bode-Glacial",
+      "body": 1,
+      "temper": 4,
+      "scale": 1.1,
+      "mass": 110,
+      "color": "#d8d8d8",
+      "habitat": 0
+    },
+    {
+      "type": 185,
+      "zone": 14,
+      "name": "Águia-das-Geleiras",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.85,
+      "mass": 7,
+      "color": "#d8d8e0",
+      "habitat": 0
+    },
+    {
+      "type": 186,
+      "zone": 14,
+      "name": "Pinguim-dos-Picos",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.6,
+      "mass": 25,
+      "color": "#1a1a22",
+      "habitat": 1
+    },
+    {
+      "type": 187,
+      "zone": 14,
+      "name": "Verme-de-Gelo",
+      "body": 3,
+      "temper": 4,
+      "scale": 0.9,
+      "mass": 8,
+      "color": "#b0d8f0",
+      "habitat": 0
+    },
+    {
+      "type": 188,
+      "zone": 14,
+      "name": "Foca-do-Lago Glacial",
+      "body": 7,
+      "temper": 1,
+      "scale": 1.3,
+      "mass": 130,
+      "color": "#8a8a92",
+      "habitat": 1
+    },
+    {
+      "type": 189,
+      "zone": 14,
+      "name": "Peixe-Gelo",
+      "body": 6,
+      "temper": 1,
+      "scale": 0.45,
+      "mass": 1.5,
+      "color": "#d0e8f4",
+      "habitat": 1
+    },
+    {
+      "type": 190,
+      "zone": 15,
+      "name": "Javali-de-Basalto",
+      "body": 1,
+      "temper": 4,
+      "scale": 1.05,
+      "mass": 120,
+      "color": "#3a3230",
+      "habitat": 0
+    },
+    {
+      "type": 191,
+      "zone": 15,
+      "name": "Lagarto-de-Lava",
+      "body": 8,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 15,
+      "color": "#c8502a",
+      "habitat": 0
+    },
+    {
+      "type": 192,
+      "zone": 15,
+      "name": "Cabra-das-Cinzas",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.9,
+      "mass": 70,
+      "color": "#6a6060",
+      "habitat": 0
+    },
+    {
+      "type": 193,
+      "zone": 15,
+      "name": "Falcão-de-Fogo",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.55,
+      "mass": 1.2,
+      "color": "#c8642a",
+      "habitat": 0
+    },
+    {
+      "type": 194,
+      "zone": 15,
+      "name": "Escorpião-de-Obsidiana",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 2,
+      "color": "#1a1418",
+      "habitat": 0
+    },
+    {
+      "type": 195,
+      "zone": 15,
+      "name": "Toupeira-Gigante",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.7,
+      "mass": 20,
+      "color": "#4a3a32",
+      "habitat": 0
+    },
+    {
+      "type": 196,
+      "zone": 15,
+      "name": "Cobra-de-Cinzas",
+      "body": 3,
+      "temper": 3,
+      "scale": 0.7,
+      "mass": 3,
+      "color": "#5a5250",
+      "habitat": 0
+    },
+    {
+      "type": 197,
+      "zone": 15,
+      "name": "Besouro-Bombardeiro",
+      "body": 4,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 0.4,
+      "color": "#3a5a2a",
+      "habitat": 0
+    },
+    {
+      "type": 198,
+      "zone": 15,
+      "name": "Morcego-das-Fendas",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.35,
+      "mass": 0.3,
+      "color": "#2a2020",
+      "habitat": 0
+    },
+    {
+      "type": 199,
+      "zone": 15,
+      "name": "Salamandra-de-Basalto",
+      "body": 7,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 1,
+      "color": "#8a2a1a",
+      "habitat": 0
+    },
+    {
+      "type": 200,
+      "zone": 4,
+      "name": "Salamandra-Ígnea",
+      "body": 7,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 4,
+      "color": "#e8602a",
+      "habitat": 0
+    },
+    {
+      "type": 201,
+      "zone": 4,
+      "name": "Cão-das-Cinzas",
+      "body": 1,
+      "temper": 3,
+      "scale": 0.95,
+      "mass": 40,
+      "color": "#3a2a2a",
+      "habitat": 0
+    },
+    {
+      "type": 202,
+      "zone": 4,
+      "name": "Fênix-Menor",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.9,
+      "mass": 5,
+      "color": "#f0902a",
+      "habitat": 0
+    },
+    {
+      "type": 203,
+      "zone": 4,
+      "name": "Lagarto-Brasa",
+      "body": 8,
+      "temper": 4,
+      "scale": 0.9,
+      "mass": 20,
+      "color": "#a03a1a",
+      "habitat": 0
+    },
+    {
+      "type": 204,
+      "zone": 4,
+      "name": "Besouro-de-Magma",
+      "body": 4,
+      "temper": 2,
+      "scale": 0.7,
+      "mass": 2,
+      "color": "#5a1a12",
+      "habitat": 0
+    },
+    {
+      "type": 205,
+      "zone": 4,
+      "name": "Aranha-de-Cinzas",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 1.5,
+      "color": "#4a4040",
+      "habitat": 0
+    },
+    {
+      "type": 206,
+      "zone": 4,
+      "name": "Abutre-de-Fuligem",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.85,
+      "mass": 8,
+      "color": "#2a2222",
+      "habitat": 0
+    },
+    {
+      "type": 207,
+      "zone": 4,
+      "name": "Serpente-de-Enxofre",
+      "body": 3,
+      "temper": 3,
+      "scale": 1.1,
+      "mass": 10,
+      "color": "#d8c83a",
+      "habitat": 0
+    },
+    {
+      "type": 208,
+      "zone": 4,
+      "name": "Javali-Infernal",
+      "body": 1,
+      "temper": 4,
+      "scale": 1.2,
+      "mass": 180,
+      "color": "#5a1a12",
+      "habitat": 0
+    },
+    {
+      "type": 209,
+      "zone": 4,
+      "name": "Tatu-de-Obsidiana",
+      "body": 1,
+      "temper": 1,
+      "scale": 0.8,
+      "mass": 30,
+      "color": "#2a2228",
+      "habitat": 0
+    },
+    {
+      "type": 210,
+      "zone": 3,
+      "name": "Mariposa-do-Eclipse",
+      "body": 4,
+      "temper": 1,
+      "scale": 0.6,
+      "mass": 0.2,
+      "color": "#7a4ab8",
+      "habitat": 0
+    },
+    {
+      "type": 211,
+      "zone": 3,
+      "name": "Corvo-Sombrio",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.45,
+      "mass": 1.3,
+      "color": "#1a1222",
+      "habitat": 0
+    },
+    {
+      "type": 212,
+      "zone": 3,
+      "name": "Cervo-Espectral",
+      "body": 1,
+      "temper": 1,
+      "scale": 1.3,
+      "mass": 150,
+      "color": "#c8c8f0",
+      "habitat": 0
+    },
+    {
+      "type": 213,
+      "zone": 3,
+      "name": "Lobo-Sombra",
+      "body": 1,
+      "temper": 3,
+      "scale": 1,
+      "mass": 50,
+      "color": "#2a2238",
+      "habitat": 0
+    },
+    {
+      "type": 214,
+      "zone": 3,
+      "name": "Morcego-Vampiro",
+      "body": 2,
+      "temper": 3,
+      "scale": 0.4,
+      "mass": 0.4,
+      "color": "#3a1a22",
+      "habitat": 0
+    },
+    {
+      "type": 215,
+      "zone": 3,
+      "name": "Aranha-do-Crepúsculo",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 1.5,
+      "color": "#4a2a5a",
+      "habitat": 0
+    },
+    {
+      "type": 216,
+      "zone": 3,
+      "name": "Serpente-Lunar",
+      "body": 3,
+      "temper": 4,
+      "scale": 1,
+      "mass": 8,
+      "color": "#c8d0f0",
+      "habitat": 0
+    },
+    {
+      "type": 217,
+      "zone": 3,
+      "name": "Gato-das-Sombras",
+      "body": 1,
+      "temper": 2,
+      "scale": 0.55,
+      "mass": 6,
+      "color": "#1a1a24",
+      "habitat": 0
+    },
+    {
+      "type": 218,
+      "zone": 3,
+      "name": "Coruja-Fantasma",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.6,
+      "mass": 1,
+      "color": "#e8e8f8",
+      "habitat": 0
+    },
+    {
+      "type": 219,
+      "zone": 3,
+      "name": "Sapo-de-Névoa",
+      "body": 7,
+      "temper": 1,
+      "scale": 0.45,
+      "mass": 1,
+      "color": "#6a7aa0",
+      "habitat": 0
+    },
+    {
+      "type": 220,
+      "zone": 16,
+      "name": "Crocodilo-do-Brejo",
+      "body": 8,
+      "temper": 3,
+      "scale": 1.9,
+      "mass": 450,
+      "color": "#3a4a2a",
+      "habitat": 2
+    },
+    {
+      "type": 221,
+      "zone": 16,
+      "name": "Sapo-Gigante do Pântano",
+      "body": 7,
+      "temper": 2,
+      "scale": 0.9,
+      "mass": 15,
+      "color": "#4a6a2a",
+      "habitat": 2
+    },
+    {
+      "type": 222,
+      "zone": 16,
+      "name": "Garça-Azul",
+      "body": 2,
+      "temper": 1,
+      "scale": 0.8,
+      "mass": 2.5,
+      "color": "#6a8ab0",
+      "habitat": 2
+    },
+    {
+      "type": 223,
+      "zone": 16,
+      "name": "Sanguessuga-Gigante",
+      "body": 3,
+      "temper": 3,
+      "scale": 0.6,
+      "mass": 1,
+      "color": "#3a2a22",
+      "habitat": 2
+    },
+    {
+      "type": 224,
+      "zone": 16,
+      "name": "Mosquito-Pestilento",
+      "body": 4,
+      "temper": 3,
+      "scale": 0.35,
+      "mass": 0.1,
+      "color": "#5a5a3a",
+      "habitat": 0
+    },
+    {
+      "type": 225,
+      "zone": 16,
+      "name": "Cobra-do-Lodo",
+      "body": 3,
+      "temper": 3,
+      "scale": 0.9,
+      "mass": 5,
+      "color": "#4a5a32",
+      "habitat": 0
+    },
+    {
+      "type": 226,
+      "zone": 16,
+      "name": "Tartaruga-Mordedora",
+      "body": 8,
+      "temper": 4,
+      "scale": 1,
+      "mass": 60,
+      "color": "#4a4a32",
+      "habitat": 2
+    },
+    {
+      "type": 227,
+      "zone": 16,
+      "name": "Javali-do-Brejo",
+      "body": 1,
+      "temper": 4,
+      "scale": 1,
+      "mass": 95,
+      "color": "#3a3228",
+      "habitat": 0
+    },
+    {
+      "type": 228,
+      "zone": 16,
+      "name": "Enguia-Elétrica",
+      "body": 6,
+      "temper": 4,
+      "scale": 0.9,
+      "mass": 15,
+      "color": "#3a4a5a",
+      "habitat": 2
+    },
+    {
+      "type": 229,
+      "zone": 16,
+      "name": "Libélula-Gigante",
+      "body": 4,
+      "temper": 1,
+      "scale": 0.5,
+      "mass": 0.1,
+      "color": "#3ab8a0",
+      "habitat": 0
+    },
+    {
+      "type": 230,
+      "zone": 8,
+      "name": "Ratazana-dos-Esgotos",
+      "body": 1,
+      "temper": 3,
+      "scale": 0.45,
+      "mass": 1.2,
+      "color": "#4a4038",
+      "habitat": 0
+    },
+    {
+      "type": 231,
+      "zone": 8,
+      "name": "Barata-Gigante",
+      "body": 4,
+      "temper": 2,
+      "scale": 0.45,
+      "mass": 0.2,
+      "color": "#5a3a1a",
+      "habitat": 0
+    },
+    {
+      "type": 232,
+      "zone": 8,
+      "name": "Crocodilo-Albino",
+      "body": 8,
+      "temper": 3,
+      "scale": 1.8,
+      "mass": 400,
+      "color": "#e8e0d0",
+      "habitat": 2
+    },
+    {
+      "type": 233,
+      "zone": 8,
+      "name": "Morcego-dos-Túneis",
+      "body": 2,
+      "temper": 2,
+      "scale": 0.35,
+      "mass": 0.3,
+      "color": "#2a2220",
+      "habitat": 0
+    },
+    {
+      "type": 234,
+      "zone": 8,
+      "name": "Centopeia-dos-Canos",
+      "body": 4,
+      "temper": 3,
+      "scale": 0.8,
+      "mass": 1.5,
+      "color": "#6a3a22",
+      "habitat": 0
+    },
+    {
+      "type": 235,
+      "zone": 8,
+      "name": "Aranha-das-Galerias",
+      "body": 5,
+      "temper": 3,
+      "scale": 0.7,
+      "mass": 1,
+      "color": "#2a2a22",
+      "habitat": 0
+    },
+    {
+      "type": 236,
+      "zone": 8,
+      "name": "Sanguessuga-dos-Esgotos",
+      "body": 3,
+      "temper": 2,
+      "scale": 0.5,
+      "mass": 0.6,
+      "color": "#3a3a22",
+      "habitat": 2
+    },
+    {
+      "type": 237,
+      "zone": 8,
+      "name": "Sapo-Tóxico",
+      "body": 7,
+      "temper": 2,
+      "scale": 0.45,
+      "mass": 0.8,
+      "color": "#6ab83a",
+      "habitat": 0
+    },
+    {
+      "type": 238,
+      "zone": 8,
+      "name": "Enguia-de-Lodo",
+      "body": 6,
+      "temper": 2,
+      "scale": 0.8,
+      "mass": 6,
+      "color": "#4a4a32",
+      "habitat": 2
+    },
+    {
+      "type": 239,
+      "zone": 8,
+      "name": "Caranguejo-de-Esgoto",
+      "body": 9,
+      "temper": 4,
+      "scale": 0.7,
+      "mass": 4,
+      "color": "#8a5a3a",
+      "habitat": 0
+    }
+  ],
   "forge": {
     "anvil": [
       0,
@@ -2329,9 +3871,23 @@
       "190": [
         "metal"
       ],
+      "191": null,
+      "192": null,
+      "193": null,
+      "194": null,
+      "195": null,
+      "196": null,
+      "197": null,
+      "198": null,
       "86": [
         "osso"
-      ]
+      ],
+      "94": null,
+      "95": null,
+      "96": null,
+      "97": null,
+      "98": null,
+      "99": null
     }
   },
   "interior": {
@@ -2341,6 +3897,93 @@
     "forge_fire_x": -7,
     "forge_fire_z": 7,
     "half": 13
+  },
+  "ponds": {
+    "15": [
+      {
+        "X": 175.44116,
+        "Z": -106.243576,
+        "R": 18.995604
+      },
+      {
+        "X": 138.69304,
+        "Z": 23.754078,
+        "R": 14.538641
+      },
+      {
+        "X": 123.909134,
+        "Z": 92.88956,
+        "R": 19.108532
+      }
+    ],
+    "16": [
+      {
+        "X": -112.00257,
+        "Z": -117.534195,
+        "R": 17.662476
+      },
+      {
+        "X": 161.74823,
+        "Z": -83.55324,
+        "R": 18.361187
+      },
+      {
+        "X": 132.12871,
+        "Z": 17.24398,
+        "R": 20.896244
+      }
+    ],
+    "3": [
+      {
+        "X": 212.20544,
+        "Z": -103.4216,
+        "R": 17.167223
+      },
+      {
+        "X": 112.94798,
+        "Z": 163.24393,
+        "R": 21.995224
+      },
+      {
+        "X": 141.83374,
+        "Z": -119.86499,
+        "R": 17.088974
+      }
+    ],
+    "4": [
+      {
+        "X": 67.30149,
+        "Z": 192.07211,
+        "R": 14.163659
+      },
+      {
+        "X": -95.20071,
+        "Z": 84.43107,
+        "R": 17.767502
+      },
+      {
+        "X": 197.82251,
+        "Z": 38.85138,
+        "R": 15.238537
+      }
+    ],
+    "8": [
+      {
+        "X": -162.6278,
+        "Z": -57.80379,
+        "R": 17.567892
+      },
+      {
+        "X": 142.33562,
+        "Z": 109.54844,
+        "R": 18.079235
+      },
+      {
+        "X": 219.46419,
+        "Z": -62.21828,
+        "R": 17.876299
+      }
+    ]
   },
   "portals": [
     {

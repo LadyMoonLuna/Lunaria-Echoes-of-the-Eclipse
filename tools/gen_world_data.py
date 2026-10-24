@@ -87,3 +87,20 @@ fo = ROOT / "client/scripts/forge/ForgeData.gd"
 fo.parent.mkdir(parents=True, exist_ok=True)
 fo.write_text("\n".join(fl))
 print("ForgeData.gd: %d receitas, %d blueprints" % (len(f["recipes"]), len(f["blueprints"])))
+
+# FaunaData.gd: espécies (corpo, tamanho, cor, habitat) e lagoas (server/internal/world/fauna.go)
+fd = ["# ARQUIVO GERADO por tools/gen_world_data.py a partir de tools/world_dump.json — não edite à mão.",
+      "# Fonte: server/internal/world/fauna.go e fauna_data.go (tools/gen_fauna.py).",
+      "extends RefCounted", "",
+      "## Corpo: 1 quadrúpede, 2 ave, 3 serpente, 4 inseto, 5 aracnídeo, 6 peixe, 7 anfíbio, 8 réptil, 9 caranguejo.",
+      "## Temperamento: 1 passivo, 2 neutro, 3 agressivo, 4 territorial. Habitat: 0 terra, 1 rio, 2 lagoa.",
+      "const SPECIES := {"]
+for f in d["fauna"]:
+    fd.append('\t%d: {"name": "%s", "zone": %d, "body": %d, "temper": %d, "scale": %.2f, "mass": %.1f, "color": Color("%s"), "habitat": %d},' % (
+        f["type"], f["name"], f["zone"], f["body"], f["temper"], f["scale"], f["mass"], f["color"], f["habitat"]))
+fd += ["}", "", "## Lagoas das regiões sem rio (onde vivem os bichos d'água delas).", "const PONDS := {"]
+for z, ps in sorted(d["ponds"].items(), key=lambda kv: int(kv[0])):
+    fd.append("\t%s: [%s]," % (z, ", ".join("Vector3(%.1f, %.1f, %.1f)" % (p["X"], p["Z"], p["R"]) for p in ps)))
+fd += ["}", ""]
+(ROOT / "client/scripts/world/FaunaData.gd").write_text("\n".join(fd))
+print("FaunaData.gd: %d espécies" % len(d["fauna"]))

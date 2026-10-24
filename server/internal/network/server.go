@@ -893,6 +893,16 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				}
 				s.handleConflictPacket(playerID, full)
 
+			case protocol.PacketTypeCorpseDrag:
+				// Pacote 0x5F: agarrar / soltar um corpo para arrastar
+				full := make([]byte, protocol.CorpseDragPacketSize)
+				full[0] = header[0]
+				if _, err := io.ReadFull(conn, full[1:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				s.handleCorpseDrag(playerID, full)
+
 			case protocol.PacketTypeRegisterCustomWeapon:
 				// Pacote 0x55: op | len u16 | corpo (nome + peças do Criador Quebra-Cabeça)
 				var lenBuf [2]byte
@@ -1026,7 +1036,7 @@ func (s *Server) handleUseOrEquipItem(pkt protocol.UseOrEquipItemPacket) {
 	case protocol.ItemRawWolfMeat, protocol.ItemCookedNobleMeat, protocol.ItemWolfBloodPotion,
 		protocol.ItemBeastProgenitorBlood, protocol.ItemEclipseScytheTome, protocol.ItemStarforgeCore,
 		protocol.ItemRunicWarhammerRecipe, protocol.ItemOrganicTrash, protocol.ItemRunicHourglass, protocol.ItemSilverSilkCocoon,
-		protocol.ItemHealingPotion, protocol.ItemManaPotion:
+		protocol.ItemHealingPotion, protocol.ItemManaPotion, uint8(world.MatGameMeat):
 		ok, msg := player.UseConsumable(itemID)
 		if ok {
 			log.Printf("[ITEM] Jogador #%d usou item ID %d: %s\n", pkt.PlayerID, itemID, msg)
@@ -3906,6 +3916,8 @@ func (s *Server) handleSubmitAutopsyResult(pkt protocol.SubmitAutopsyResultPacke
 	if pkt.Quality > 100 {
 		pkt.Quality = 100
 	}
+	// Couro arrastado pelo chão chega estragado (e os órgãos, um pouco machucados)
+	pkt.Quality = uint8(float32(pkt.Quality)*dragQualityFactor(corpse, pendingType) + 0.5)
 	switch {
 	case pkt.Quality >= world.PerfectQuality:
 		pkt.ResultTier = protocol.QualityPerfect
@@ -4667,6 +4679,9 @@ func (s *Server) runGameLoop() {
 			// Resolução de colisão física cilindro-cilindro (Body Blocking) a 30 Hz
 			s.resolveBodyBlocking()
 
+			// Corpos sendo arrastados seguem quem os puxa ou empurra
+			s.updateCorpseDrags(dt)
+
 			// 4.5. Atualização física e colisões dos Projéteis 3D (30 Hz)
 			if s.projManager != nil {
 				s.updateProjectiles(dt)
@@ -4686,6 +4701,10 @@ func (s *Server) runGameLoop() {
 					}
 					if mob.Undead {
 						s.updateZombieAI(mob, dt) // zumbis: IA própria, bem menos esperta
+						continue
+					}
+					if world.IsFauna(mob.MobType) {
+						s.updateFaunaAI(mob, dt) // bichos: fogem, revidam, caçam ou defendem território
 						continue
 					}
 

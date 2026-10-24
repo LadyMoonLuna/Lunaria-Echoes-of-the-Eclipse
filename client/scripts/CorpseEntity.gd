@@ -3,6 +3,7 @@ extends Node3D
 
 const LunariaTextures = preload("res://scripts/models/LunariaTextures.gd")
 const LunariaModel = preload("res://scripts/models/LunariaModel.gd")
+const FaunaModel = preload("res://scripts/world/FaunaModel.gd")
 ## Textura do corpo principal de cada tipo de mob
 const MOB_TEXTURES := {
 	1: "fur", 2: "leather", 3: "cloth", 4: "cloth", 5: "metal_hammered", 6: "fur", 7: "fur",
@@ -55,7 +56,7 @@ func setup(p_corpse_id: int, p_mob_id: int, p_mob_type: int, p_pos: Vector3, p_r
 	corpse_id = p_corpse_id
 	mob_id = p_mob_id
 	mob_type = p_mob_type
-	position = Vector3(p_pos.x, 0.1, p_pos.z) # Deitado no chão em Y = 0.1
+	position = Vector3(p_pos.x, p_pos.y + 0.1, p_pos.z)
 	rotation.y = p_rot_y
 	is_looted = p_is_looted
 	remaining_seconds = p_rem_sec
@@ -65,10 +66,21 @@ func setup(p_corpse_id: int, p_mob_id: int, p_mob_type: int, p_pos: Vector3, p_r
 		_update_label()
 
 func update_data(p_pos: Vector3, p_rot_y: float, p_is_looted: bool, p_rem_sec: int) -> void:
-	position = Vector3(p_pos.x, 0.1, p_pos.z)
+	position = Vector3(p_pos.x, p_pos.y + 0.1, p_pos.z)
 	rotation.y = p_rot_y
 	is_looted = p_is_looted
 	remaining_seconds = p_rem_sec
+	_update_label()
+
+## Estado do arrasto vindo do servidor (0x60): posição nova, giro e quanto do couro ainda está inteiro.
+var hide_integrity: int = 100
+var dragged_by: int = 0
+
+func apply_drag_state(p_pos: Vector3, p_rot_y: float, integrity: int, dragger_id: int) -> void:
+	position = p_pos + Vector3(0, 0.1, 0)
+	rotation.y = p_rot_y
+	hide_integrity = integrity
+	dragged_by = dragger_id
 	_update_label()
 
 func update_player_distance(dist: float) -> void:
@@ -178,6 +190,18 @@ func _build_visuals() -> void:
 			primary.albedo_color = primary.albedo_color.darkened(0.35)
 			primary.emission_enabled = false
 
+	if FaunaModel.is_fauna(mob_type):
+		# Bicho da fauna tombado de lado, no tamanho real da espécie
+		for c in body_pivot.get_children():
+			c.queue_free()
+		body_pivot.rotation = Vector3.ZERO
+		body_pivot.position = Vector3.ZERO
+		var fauna_root := Node3D.new()
+		body_pivot.add_child(fauna_root)
+		main_mat = FaunaModel.build(fauna_root, mob_type, true)
+		fauna_root.rotation.z = deg_to_rad(80.0)
+		fauna_root.position.y = 0.25 * fauna_root.scale.y
+
 	# Label 3D Flutuante no topo do corpo
 	if label_3d == null:
 		label_3d = Label3D.new()
@@ -191,6 +215,8 @@ func _build_visuals() -> void:
 	var label_height := 1.1
 	if mob_type in [5, 7, 13, 14]:
 		label_height = 1.6
+	if FaunaModel.is_fauna(mob_type):
+		label_height = FaunaModel.tag_height(mob_type) * 0.7
 	label_3d.position = Vector3(0, label_height, 0)
 
 func _update_label() -> void:
@@ -198,7 +224,11 @@ func _update_label() -> void:
 		return
 
 	var m_name: String = MOB_NAMES.get(mob_type, "Criatura")
+	if FaunaModel.is_fauna(mob_type):
+		m_name = FaunaModel.species_name(mob_type)
 
+	if hide_integrity < 100:
+		m_name += " (couro %d%%)" % hide_integrity
 	if is_looted:
 		label_3d.text = "Cadáver de %s\n[Completamente Desmantelado]" % m_name
 		label_3d.modulate = Color(0.5, 0.5, 0.5, 0.8)

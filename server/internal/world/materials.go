@@ -117,6 +117,24 @@ const (
 	MatGold           uint16 = 159 // Ouro
 	MatBones          uint16 = 86  // Ossos de Fera (ossadas pelo mundo)
 
+	// Fauna (fauna.go): o que os bichos rendem na autópsia
+	MatScales   uint16 = 94 // Escamas (peixes, cobras, lagartos)
+	MatFeathers uint16 = 95 // Penas
+	MatRawHide  uint16 = 96 // Pele Crua (anfíbios, morcegos, vermes)
+	MatGameMeat uint16 = 97 // Carne de Caça (come crua ou cozida)
+
+	// Flora coletável
+	MatMoonflower   uint16 = 98  // Flor-da-Lua
+	MatRiverLily    uint16 = 99  // Lírio-do-Rio
+	MatSilverMoss   uint16 = 191 // Musgo-Prateado
+	MatBloodThistle uint16 = 192 // Cardo-Sangrento
+	MatFirebloom    uint16 = 193 // Erva-de-Fogo
+	MatFrostRoot    uint16 = 194 // Raiz-de-Gelo
+	MatMarshOrchid  uint16 = 195 // Orquídea-do-Brejo
+	MatSaltCactus   uint16 = 196 // Cacto-Salgado
+	MatGiantFern    uint16 = 197 // Samambaia-Gigante
+	MatGoldenClover uint16 = 198 // Trevo-Dourado
+
 	// Ligas da Fornalha (forge.go): IDs 175 a 190
 	MatTemperedSteel   uint16 = 175
 	MatBronze          uint16 = 176
@@ -201,9 +219,24 @@ var MaterialsDB = map[uint16]MaterialDef{
 	MatCharcoal:       {MatCharcoal, "Carvão", MatStone, RarityCommon, 10, 1.0, "Fogo +10%", "Combustível da forja; queima mais quente que a madeira.", 90, 30, 5},
 	MatMud:            {MatMud, "Barro", MatStone, RarityCommon, 10, 1.2, "Vedação +10%", "Lama grossa das margens do Rio Prateado; tapa frestas e molda tijolos.", 20, 10, 5},
 	MatClay:           {MatClay, "Argila", MatStone, RarityUncommon, 25, 1.0, "Cerâmica +20%", "Argila fina e plástica que vira cerâmica, moldes de fundição e cadinhos.", 45, 15, 10},
-	MatZinc:           {MatZinc, "Zinco", MatMetal, RarityCommon, 50, 4.2, "Ácido +10%", "Metal azulado e quebradiço; com Cobre vira Latão.", 65, 75, 15},
-	MatGold:           {MatGold, "Ouro", MatMetal, RarityRare, 60, 7.0, "Magia +20%, Sorte +10%", "Macio e pesado; conduz mana melhor que qualquer metal comum.", 75, 95, 80},
-	MatBones:          {MatBones, "Ossos de Fera", MatBone, RarityCommon, 55, 1.5, "Impacto +10%", "Ossos grandes e secos; cabos, guardas e reforços de arco.", 15, 5, 35},
+	MatScales:         {MatScales, "Escamas", MatHideThread, RarityCommon, 45, 0.4, "Corte +10%, Água +15%", "Escamas sobrepostas e leves; viram couraças flexíveis.", 15, 5, 20},
+	MatFeathers:       {MatFeathers, "Penas", MatHideThread, RarityCommon, 10, 0.1, "Vento +15%", "Penas firmes para emplumar flechas e forrar mantos.", 5, 5, 25},
+	MatRawHide:        {MatRawHide, "Pele Crua", MatHideThread, RarityCommon, 30, 0.8, "Água +10%", "Pele fina e úmida; precisa curtir antes de virar couro bom.", 10, 5, 15},
+	MatGameMeat:       {MatGameMeat, "Carne de Caça", MatOrganBlood, RarityCommon, 0, 0.8, "—", "Carne fresca de caça; mata a fome e estraga se demorar.", 30, 20, 10},
+
+	MatMoonflower:   {MatMoonflower, "Flor-da-Lua", MatPlantLiquid, RarityRare, 0, 0.1, "Magia +30%", "Só abre as pétalas prateadas à noite.", 10, 20, 85},
+	MatRiverLily:    {MatRiverLily, "Lírio-do-Rio", MatPlantLiquid, RarityUncommon, 0, 0.1, "Cura +20%", "Cresce na beira d'água; acalma febres.", 15, 10, 45},
+	MatSilverMoss:   {MatSilverMoss, "Musgo-Prateado", MatPlantLiquid, RarityCommon, 0, 0.1, "Cura +10%", "Musgo das pedras úmidas; estanca sangramentos.", 10, 10, 30},
+	MatBloodThistle: {MatBloodThistle, "Cardo-Sangrento", MatPlantLiquid, RarityUncommon, 15, 0.2, "Sangramento +25%", "Espinhos vermelhos; seu suco engrossa o sangue.", 20, 10, 40},
+	MatFirebloom:    {MatFirebloom, "Erva-de-Fogo", MatPlantLiquid, RarityRare, 0, 0.1, "Fogo +35%", "Folhas quentes ao toque; nasce nas cinzas.", 90, 20, 50},
+	MatFrostRoot:    {MatFrostRoot, "Raiz-de-Gelo", MatPlantLiquid, RarityRare, 0, 0.3, "Gelo +35%", "Raiz azulada que nunca degela.", 5, 15, 55},
+	MatMarshOrchid:  {MatMarshOrchid, "Orquídea-do-Brejo", MatPlantLiquid, RarityEpic, 0, 0.1, "Veneno +30%, Magia +20%", "Linda e traiçoeira: o néctar é tóxico.", 15, 20, 70},
+	MatSaltCactus:   {MatSaltCactus, "Cacto-Salgado", MatPlantLiquid, RarityUncommon, 0, 0.6, "Água +20%", "Guarda água salobra; salva viajantes no deserto.", 40, 15, 20},
+	MatGiantFern:    {MatGiantFern, "Samambaia-Gigante", MatPlantLiquid, RarityCommon, 10, 0.3, "Natureza +15%", "Folhas enormes; boas para forrar e embrulhar.", 15, 5, 25},
+	MatGoldenClover: {MatGoldenClover, "Trevo-Dourado", MatPlantLiquid, RarityEpic, 0, 0.05, "Sorte +25%", "Raríssimo trevo de quatro folhas que brilha ao sol.", 10, 30, 80},
+	MatZinc:         {MatZinc, "Zinco", MatMetal, RarityCommon, 50, 4.2, "Ácido +10%", "Metal azulado e quebradiço; com Cobre vira Latão.", 65, 75, 15},
+	MatGold:         {MatGold, "Ouro", MatMetal, RarityRare, 60, 7.0, "Magia +20%, Sorte +10%", "Macio e pesado; conduz mana melhor que qualquer metal comum.", 75, 95, 80},
+	MatBones:        {MatBones, "Ossos de Fera", MatBone, RarityCommon, 55, 1.5, "Impacto +10%", "Ossos grandes e secos; cabos, guardas e reforços de arco.", 15, 5, 35},
 
 	MatTemperedSteel:   {MatTemperedSteel, "Aço Temperado", MatAlloy, RarityUncommon, 140, 5.0, "Corte +25%, Impacto +15%", "Ferro e carvão temperados na água pura: o aço de todo ferreiro.", 70, 55, 15},
 	MatBronze:          {MatBronze, "Bronze", MatAlloy, RarityCommon, 90, 4.6, "Impacto +15%", "Cobre endurecido com estanho; não enferruja.", 80, 80, 25},

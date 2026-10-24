@@ -33,6 +33,7 @@ signal projectile_spawned(proj_id: int, owner_id: int, proj_type: int, start_pos
 signal evolution_offer_received(offer_type: int, option_a: int, option_b: int)
 signal dev_drop_rates_received(report_text: String)
 signal corpse_snapshot_received(corpses_dict: Dictionary)
+signal corpse_drag_state_received(corpse_id: int, pos: Vector3, rot_y: float, integrity: int, dragger_id: int, speed_pct: int, mass_kg: int)
 signal open_autopsy_ui_received(corpse_id: int, mob_type: int, difficulty_seed: int, organs: Array)
 signal zone_change_received(target_zone_id: int, portal_id: int)
 signal npc_friendship_received(npc_id: int, points: int, level: int)
@@ -287,6 +288,24 @@ func _process_tcp() -> void:
 				var al_msg: String = tcp_rx_buffer.slice(4, 4 + al_len).get_string_from_utf8()
 				tcp_rx_buffer = tcp_rx_buffer.slice(4 + al_len)
 				forge_alert_received.emit(al_kind, al_msg)
+
+			elif opcode == 0x60: # CORPSE_DRAG_STATE: op | corpo u32 | X f32 | Z f32 | rotY f32 | integridade% | arrastador u32 | velocidade% | massa u16
+				if tcp_rx_buffer.size() < 25:
+					break
+				var ds := StreamPeerBuffer.new()
+				ds.data_array = tcp_rx_buffer.slice(0, 25)
+				ds.big_endian = false
+				ds.seek(1)
+				var ds_id: int = ds.get_u32()
+				var ds_x: float = ds.get_float()
+				var ds_z: float = ds.get_float()
+				var ds_rot: float = ds.get_float()
+				var ds_int: int = ds.get_u8()
+				var ds_by: int = ds.get_u32()
+				var ds_spd: int = ds.get_u8()
+				var ds_mass: int = ds.get_u16()
+				tcp_rx_buffer = tcp_rx_buffer.slice(25)
+				corpse_drag_state_received.emit(ds_id, Vector3(ds_x, 0.0, ds_z), ds_rot, ds_int, ds_by, ds_spd, ds_mass)
 
 			elif opcode == 0x5E: # PART_RESULT: op | blueprint | peça | status | reforjas | máx | 7 notas | len u16 | mensagem
 				if tcp_rx_buffer.size() < 15:
@@ -1139,6 +1158,17 @@ func send_register_custom_weapon_scored(weapon_name: String, pieces: Array, scor
 	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
 	data.append_array(body)
 	tcp.put_data(data)
+
+## 0x5F: agarrar (action 1) ou soltar (action 0) um corpo para arrastá-lo.
+func send_corpse_drag(corpse_id: int, action: int) -> void:
+	if my_player_id == 0:
+		return
+	var buf := StreamPeerBuffer.new()
+	buf.big_endian = false
+	buf.put_u8(0x5F)
+	buf.put_u32(corpse_id)
+	buf.put_u8(action)
+	tcp.put_data(buf.data_array)
 
 ## 0x5A: notas de uma peça (primeira vez) ou Reforja (de novo, mesmo material de Metal/Liga).
 func send_reforge_part(bp_id: int, part_idx: int, mat_id: int, scores: Array) -> void:

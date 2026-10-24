@@ -574,6 +574,9 @@ func NewMobManager() *MobManager {
 		mm.Mobs[id] = NewMobWithZone(id, sp.name, sp.kind, sp.zone, sp.x, 0.0, sp.z, sp.hp, sp.speed)
 	}
 
+	// 6. Fauna: 10 espécies por região (bichos de terra, aves e criaturas d'água)
+	mm.spawnFauna()
+
 	return mm
 }
 
