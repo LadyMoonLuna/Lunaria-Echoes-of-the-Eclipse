@@ -618,6 +618,12 @@ func (s *Server) shopBuy(p *world.Player, npc *world.NPC, item, qty uint8) strin
 
 // shopSell: o jogador vende matérias-primas; o NPC paga com o próprio ouro e volta a produzir.
 func (s *Server) shopSell(p *world.Player, npc *world.NPC, item, quality, qty uint8) string {
+	if p.IsSoulbound(item) {
+		return "📘 Blueprint Exclusiva é Soulbound: não pode ser vendida."
+	}
+	if item >= world.CustomItemFirstID {
+		return "Não compro peças forjadas únicas."
+	}
 	prof, ok := world.NPCProfiles[npc.Profession]
 	if !ok {
 		return "Não preciso disso."

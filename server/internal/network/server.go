@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -115,6 +116,11 @@ func (s *Server) Start() error {
 	}
 	s.udpConn = udpConn
 	log.Printf("[UDP] Listener ativo na porta %s para movimentacao, combate e snapshots\n", UDPPort)
+
+	// Patentes das armas autorais (Criador Quebra-Cabeça) sobrevivem aos reinícios
+	if err := world.LoadPatents(); err != nil {
+		log.Printf("[AVISO] Não foi possível carregar as patentes: %v\n", err)
+	}
 
 	// 3. Inicializa NPCs, Bonecos de Treino e Mobs
 	scriptsDir := luaengine.FindNPCScriptsDir()
@@ -887,6 +893,25 @@ func (s *Server) handleNewTCPConnection(conn *net.TCPConn) {
 				}
 				s.handleConflictPacket(playerID, full)
 
+			case protocol.PacketTypeRegisterCustomWeapon:
+				// Pacote 0x55: op | len u16 | corpo (nome + peças do Criador Quebra-Cabeça)
+				var lenBuf [2]byte
+				if _, err := io.ReadFull(conn, lenBuf[:]); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				n := int(binary.LittleEndian.Uint16(lenBuf[:]))
+				if n > protocol.MaxRegisterWeaponBody {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				body := make([]byte, n)
+				if _, err := io.ReadFull(conn, body); err != nil {
+					s.removePlayerAndNotify(playerID)
+					return
+				}
+				s.handleRegisterCustomWeapon(playerID, body)
+
 			case protocol.PacketTypeForgeAlloy, protocol.PacketTypeForgeBlueprint, protocol.PacketTypeForgeAction:
 				// Pacotes 0x51 / 0x52 / 0x53: Fornalha de Ligas e Forja por Blueprints
 				size := protocol.ForgeAlloyPacketSize
@@ -1219,6 +1244,39 @@ func (s *Server) handleDevWorldControl(senderID uint32, cmdType, val uint8) {
 		}
 		s.devItemQuality[player.ID] = min(val, 100)
 		s.mu.Unlock()
+
+	case protocol.DevCmdForgeKit:
+		if player == nil {
+			return
+		}
+		for _, id := range []uint8{world.ItemIronAxe, world.ItemIronPickaxe, world.ItemHerbalShears} {
+			player.AddItem(id, 1)
+		}
+		for _, mid := range []uint16{world.MatIron, world.MatCopper, world.MatTin, world.MatCharcoal, world.MatPureWater,
+			world.MatPineRefuge, world.MatBoarLeather, world.MatBones, world.MatQuartz} {
+			player.AddItemWithQuality(uint8(mid), 5, 80)
+		}
+		s.sendInventorySync(player)
+		s.sendDiscoveries(player, false)
+		s.sendPlayerNPCSay(player, 0, "[DEV] Kit de ferramentas (Machado, Picareta e Tesoura) + 5 unidades de 9 materiais básicos.")
+
+	case protocol.DevCmdRevealMaterials:
+		if player == nil {
+			return
+		}
+		player.RevealAllMaterials()
+		s.sendDiscoveries(player, true)
+		s.sendForgeState(player)
+		s.sendPlayerNPCSay(player, 0, "[DEV] Todos os materiais foram revelados neste personagem (apenas teste).")
+
+	case protocol.DevCmdForgeAccess:
+		if player == nil {
+			return
+		}
+		player.Mu.Lock()
+		player.DevForgeAccess = true
+		player.Mu.Unlock()
+		s.sendForgeState(player)
 
 	case protocol.DevCmdGoToZone:
 		if player == nil || val >= world.ZoneCount {

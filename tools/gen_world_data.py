@@ -71,6 +71,16 @@ fl = ["# ARQUIVO GERADO por tools/gen_world_data.py a partir de tools/world_dump
       "const TAG_NAMES := " + gd(f["tag_names"]), "",
       "## Características especiais que as ligas passam para o equipamento.",
       "const SPECIALS := {" + ", ".join('%s: %s' % (k, gd(v)) for k, v in sorted(f["specials"].items(), key=lambda kv: int(kv[0]))) + "}", "",
+      "## Criador Quebra-Cabeça (server/internal/world/patent.go): módulos com as células na rotação 0.",
+      "const PUZZLE_MODULES := " + gd(f["puzzle"]["modules"]),
+      "const PUZZLE_GRIP_MODULES := " + gd(sorted(int(k) for k in f["puzzle"]["grip"])),
+      "const PUZZLE_GRID := %d" % f["puzzle"]["grid"],
+      "const PUZZLE_MAX_PIECES := %d" % f["puzzle"]["max_pieces"],
+      "const PUZZLE_MAX_NAME := %d" % f["puzzle"]["max_name"],
+      "const PUZZLE_BASE_ATK := %d" % f["puzzle"]["base_atk"],
+      "const PUZZLE_MASS_PER_CELL := %s" % f["puzzle"]["mass_per_cell"],
+      "const PUZZLE_DUR_SCALE := %s" % f["puzzle"]["dur_scale"],
+      "const MASTERPIECE_BONUS := %s" % f["puzzle"]["bonus"], "",
       "const STAT_CAP := %d" % f["stat_cap"],
       "const ANVIL := Vector3(%.1f, 0.0, %.1f)" % (f["anvil"][0], f["anvil"][1]), ""]
 fo = ROOT / "client/scripts/forge/ForgeData.gd"

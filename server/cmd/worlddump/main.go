@@ -159,7 +159,10 @@ func main() {
 		specials[fmt.Sprint(id)] = sp
 	}
 	out["forge"] = map[string]interface{}{"blueprints": bps, "recipes": recipes, "tags": tags, "tag_names": world.TagNames,
-		"specials": specials, "stat_cap": 600, "anvil": world.ForgeAnvilPos}
+		"specials": specials, "stat_cap": 600, "anvil": world.ForgeAnvilPos,
+		"puzzle": map[string]interface{}{"modules": puzzleModules(), "grip": world.PuzzleGripModules, "grid": world.PuzzleGridSize,
+			"max_pieces": world.PuzzleMaxPieces, "base_atk": 12, "mass_per_cell": 0.18, "dur_scale": 1.1, "bonus": world.MasterpieceBonus,
+			"max_name": world.PuzzleMaxNameLen}}
 	out["river"] = map[string]float64{
 		"source_gz": world.RiverSourceGZ, "mouth_gz": world.RiverMouthGZ, "mouth_lake_r": world.RiverMouthLakeR,
 		"span": world.ZoneSpan,
@@ -167,4 +170,21 @@ func main() {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	_ = enc.Encode(out)
+}
+
+type moduleOut struct {
+	ID       uint8    `json:"id"`
+	Name     string   `json:"name"`
+	Category string   `json:"category"`
+	Cells    [][2]int `json:"cells"`
+	Tags     []string `json:"tags"`
+	Role     string   `json:"role"`
+}
+
+func puzzleModules() []moduleOut {
+	var out []moduleOut
+	for _, m := range world.PuzzleModules {
+		out = append(out, moduleOut{m.ID, m.Name, m.Category, m.Cells, m.Tags, m.Role})
+	}
+	return out
 }

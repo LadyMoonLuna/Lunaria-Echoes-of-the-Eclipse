@@ -6,6 +6,7 @@ extends CanvasLayer
 const LunariaUI = preload("res://scripts/ui/LunariaUI.gd")
 const ItemData = preload("res://scripts/ItemData.gd")
 const ForgeData = preload("res://scripts/forge/ForgeData.gd")
+const ForgePuzzleTab = preload("res://scripts/forge/ForgePuzzleTab.gd")
 
 const SLOT_LABELS := {0: "Elmo", 1: "Peitoral", 4: "Luvas", 12: "Mão Principal", 13: "Mão Secundária"}
 const TOOL_LABELS := {1: "Machado", 2: "Picareta", 3: "Tesoura"}
@@ -24,12 +25,18 @@ var bp_preview: RichTextLabel
 var forge_btn: Button
 var buy_btn: Button
 var current_bp: Dictionary = {}
+var puzzle_tab: Control
+# Alerta grande (patente negada em vermelho; obra-prima em dourado)
+var alert_layer: CanvasLayer
+var alert_panel: PanelContainer
+var alert_label: Label
 
 func _ready() -> void:
 	layer = 24
 	visible = false
 	_build_ui()
 	LunariaUI.watch(self) # mesmo estilo do inventário
+	NetworkManager.forge_alert_received.connect(show_alert)
 	NetworkManager.forge_state_received.connect(func(_bps: Array): _refresh.call_deferred())
 	NetworkManager.inventory_updated.connect(func(_slots: Array, _items: Array): _refresh.call_deferred())
 
@@ -127,6 +134,10 @@ func _build_ui() -> void:
 	root.add_child(tabs)
 	tabs.add_child(_build_alloy_tab())
 	tabs.add_child(_build_blueprint_tab())
+	puzzle_tab = ForgePuzzleTab.new()
+	puzzle_tab.forge = self
+	tabs.add_child(puzzle_tab)
+	_build_alert()
 
 func _label(text: String, size: int = 13, col: Color = Color(0.92, 0.88, 0.8)) -> Label:
 	var l := Label.new()
@@ -239,6 +250,8 @@ func _refresh() -> void:
 	_fill_blueprints()
 	_update_alloy_preview()
 	_update_bp_preview()
+	if puzzle_tab:
+		puzzle_tab.refresh()
 
 func _fill_crucible() -> void:
 	var bag := _bag()
@@ -559,3 +572,50 @@ func _on_forge() -> void:
 func _on_buy() -> void:
 	if not current_bp.is_empty():
 		NetworkManager.send_forge_action(1, int(current_bp["id"]))
+
+
+# ---------------------------------------------------------------------------
+# Alerta grande na tela (0x56)
+# ---------------------------------------------------------------------------
+
+func _build_alert() -> void:
+	alert_layer = CanvasLayer.new()
+	alert_layer.layer = 140
+	add_child(alert_layer)
+	var holder := CenterContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	alert_layer.add_child(holder)
+	alert_panel = PanelContainer.new()
+	alert_panel.visible = false
+	alert_panel.custom_minimum_size = Vector2(760, 0)
+	holder.add_child(alert_panel)
+	alert_label = Label.new()
+	alert_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	alert_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	alert_label.add_theme_font_size_override("font_size", 34)
+	alert_label.add_theme_constant_override("outline_size", 8)
+	alert_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	alert_panel.add_child(alert_label)
+
+func show_alert(kind: int, message: String) -> void:
+	var denied := kind == 1
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.35, 0.02, 0.02, 0.95) if denied else Color(0.18, 0.13, 0.03, 0.95)
+	sb.border_color = Color(1.0, 0.15, 0.15) if denied else Color(1.0, 0.8, 0.3)
+	sb.set_border_width_all(4)
+	sb.set_corner_radius_all(12)
+	sb.content_margin_left = 28
+	sb.content_margin_right = 28
+	sb.content_margin_top = 22
+	sb.content_margin_bottom = 22
+	alert_panel.add_theme_stylebox_override("panel", sb)
+	alert_label.text = message
+	alert_label.add_theme_font_size_override("font_size", 34 if denied else 24)
+	alert_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3) if denied else Color(1.0, 0.88, 0.5))
+	alert_panel.visible = true
+	alert_panel.modulate.a = 1.0
+	var tw := alert_panel.create_tween()
+	tw.tween_interval(3.5)
+	tw.tween_property(alert_panel, "modulate:a", 0.0, 0.6)
+	tw.tween_callback(func(): alert_panel.visible = false)

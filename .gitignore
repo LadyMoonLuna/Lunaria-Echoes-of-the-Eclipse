@@ -25,3 +25,4 @@ Thumbs.db
 # Backups grandes e pacotes gerados (não versionar)
 client/assets/bundles/
 *.bundle
+server/patents.json

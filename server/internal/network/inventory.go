@@ -110,6 +110,15 @@ func (s *Server) handleDropItemGround(connPlayerID uint32, pkt protocol.DropItem
 		qty = 1
 	}
 	itemID := pkt.ItemID
+	if player.IsSoulbound(itemID) {
+		s.sendPlayerNPCSay(player, 0, "📘 Blueprint Exclusiva é Soulbound: não pode ser largada no chão, vendida nem trocada.")
+		return
+	}
+	if itemID >= world.CustomItemFirstID {
+		// Peças únicas só existem na mochila do dono: no chão outro jogador leria a peça dele
+		s.sendPlayerNPCSay(player, 0, "Peças forjadas únicas não podem ser largadas no chão.")
+		return
+	}
 	taken := player.TakeItemUnits(itemID, pkt.Quality, qty)
 	if taken == 0 {
 		return

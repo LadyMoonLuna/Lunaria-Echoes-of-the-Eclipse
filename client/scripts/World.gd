@@ -1848,6 +1848,26 @@ func _build_dev_tab_items(tabs: TabContainer) -> void:
 		show_loot_toast("Itens pesados (10 kg+) removidos da mochila.")
 	))
 
+	# Testes rápidos da Forja (Etapas 2 e 3)
+	var forge_hb := HBoxContainer.new()
+	forge_hb.add_theme_constant_override("separation", 8)
+	tab.add_child(forge_hb)
+	forge_hb.add_child(_dev_create_btn("⛏️ Kit de Ferramentas + 5 Materiais Básicos (Testar Coleta e Forja)", Color(0.55, 0.4, 0.2), func():
+		NetworkManager.send_world_control(16, 0)
+		show_loot_toast("Machado, Picareta, Tesoura e 5 unidades de 9 materiais básicos!")
+	))
+	forge_hb.add_child(_dev_create_btn("👁️ Revelar Todos os Materiais no Meu Personagem (Apenas Teste Dev)", Color(0.35, 0.45, 0.7), func():
+		NetworkManager.send_world_control(17, 0)
+		show_loot_toast("Todos os materiais revelados neste personagem (teste). O normal continua: só o que você viu/coletou.")
+	))
+	forge_hb.add_child(_dev_create_btn("🔨 Abrir Bancada de Forja & Criador Quebra-Cabeça", Color(0.8, 0.45, 0.15), func():
+		NetworkManager.send_world_control(18, 0) # acesso Dev: forja e quebra-cabeça em qualquer lugar
+		_toggle_dev_manager()
+		if forge_ui and not forge_ui.is_open:
+			forge_ui.open_menu()
+			forge_ui.tabs.current_tab = 2
+	))
+
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL

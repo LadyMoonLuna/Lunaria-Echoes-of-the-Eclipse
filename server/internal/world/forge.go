@@ -437,6 +437,8 @@ type CustomItem struct {
 	Tool      ToolDef
 	Stats     ForgedStats
 	Signature string // ligas: ingredientes ordenados (a mesma mistura reaproveita a peça)
+	Soulbound bool   // Blueprint Exclusiva: não vai ao chão, não se vende nem se troca
+	PatentKey string // Blueprint Exclusiva: patente (formato + materiais) registrada
 }
 
 // itemInfoLocked: catálogo com as peças únicas do jogador por cima (chamar com p.Mu travado).

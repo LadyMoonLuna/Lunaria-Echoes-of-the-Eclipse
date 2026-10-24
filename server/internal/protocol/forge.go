@@ -115,3 +115,122 @@ func DeserializeForgeState(data []byte) ([]uint8, []ForgeCustomEntry, error) {
 	}
 	return bps, out, nil
 }
+
+// Forja — Etapa 3 (Criador Quebra-Cabeça e Patentes). O 0x3D já é o SUBMIT_AUTOPSY_RESULT,
+// então o registro de arma autoral usa o 0x55.
+const (
+	PacketTypeRegisterCustomWeapon uint8 = 0x55 // [Client -> Server] op | len u16 | nome + peças (tamanho variável)
+	PacketTypeForgeAlert           uint8 = 0x56 // [Server -> Client] op | tipo | len u16 | mensagem (alerta grande)
+	PacketTypePuzzleState          uint8 = 0x57 // [Server -> Client] op | liberado | blueprints exclusivas
+
+	ForgeAlertPatentDenied uint8 = 1 // alerta vermelho: sem direitos autorais
+	ForgeAlertInfo         uint8 = 2
+	MaxRegisterWeaponBody        = 1 + 64 + 1 + 20*5
+)
+
+// PuzzlePiece: módulo, âncora x/y, rotação e material (5 bytes no fio).
+type PuzzlePiece struct{ Module, X, Y, Rot, Material uint8 }
+
+// RegisterCustomWeapon: nome digitado e peças montadas na grade.
+type RegisterCustomWeapon struct {
+	Name   string
+	Pieces []PuzzlePiece
+}
+
+func appendPieces(buf []byte, pieces []PuzzlePiece) []byte {
+	buf = append(buf, uint8(len(pieces)))
+	for _, p := range pieces {
+		buf = append(buf, p.Module, p.X, p.Y, p.Rot, p.Material)
+	}
+	return buf
+}
+
+func readPieces(data []byte, i int) ([]PuzzlePiece, int, error) {
+	if len(data) < i+1 {
+		return nil, i, errors.New("peças ausentes")
+	}
+	n := int(data[i])
+	i++
+	if len(data) < i+n*5 {
+		return nil, i, errors.New("peças curtas")
+	}
+	out := make([]PuzzlePiece, n)
+	for k := 0; k < n; k++ {
+		b := data[i+k*5:]
+		out[k] = PuzzlePiece{b[0], b[1], b[2], b[3], b[4]}
+	}
+	return out, i + n*5, nil
+}
+
+// SerializeRegisterCustomWeapon (cliente -> servidor; usado nos testes).
+func SerializeRegisterCustomWeapon(pkt RegisterCustomWeapon) []byte {
+	body := []byte{uint8(len(pkt.Name))}
+	body = append(body, pkt.Name...)
+	body = appendPieces(body, pkt.Pieces)
+	buf := []byte{PacketTypeRegisterCustomWeapon}
+	buf = binary.LittleEndian.AppendUint16(buf, uint16(len(body)))
+	return append(buf, body...)
+}
+
+// DeserializeRegisterCustomWeaponBody lê o corpo (depois de op e tamanho).
+func DeserializeRegisterCustomWeaponBody(body []byte) (RegisterCustomWeapon, error) {
+	var pkt RegisterCustomWeapon
+	if len(body) < 1 || len(body) < 1+int(body[0]) {
+		return pkt, errors.New("nome ausente")
+	}
+	pkt.Name = string(body[1 : 1+int(body[0])])
+	pieces, _, err := readPieces(body, 1+int(body[0]))
+	pkt.Pieces = pieces
+	return pkt, err
+}
+
+// SerializeForgeAlert: alerta grande na tela do cliente.
+func SerializeForgeAlert(kind uint8, msg string) []byte {
+	return putString([]byte{PacketTypeForgeAlert, kind}, msg)
+}
+
+// ExclusiveEntry: Blueprint Exclusiva (nome + desenho) para recarregar no quebra-cabeça.
+type ExclusiveEntry struct {
+	Name   string
+	Pieces []PuzzlePiece
+}
+
+// SerializePuzzleState: op | liberado u8 | n u8 | n × (len u8 + nome, peças).
+func SerializePuzzleState(unlocked bool, list []ExclusiveEntry) []byte {
+	u := uint8(0)
+	if unlocked {
+		u = 1
+	}
+	buf := []byte{PacketTypePuzzleState, u, uint8(len(list))}
+	for _, e := range list {
+		name := e.Name
+		if len(name) > 255 {
+			name = name[:255]
+		}
+		buf = append(buf, uint8(len(name)))
+		buf = append(buf, name...)
+		buf = appendPieces(buf, e.Pieces)
+	}
+	return buf
+}
+
+// DeserializePuzzleState lê o 0x57 (testes).
+func DeserializePuzzleState(data []byte) (bool, []ExclusiveEntry, error) {
+	if len(data) < 3 || data[0] != PacketTypePuzzleState {
+		return false, nil, errors.New("pacote inválido")
+	}
+	i := 3
+	var out []ExclusiveEntry
+	for k := 0; k < int(data[2]); k++ {
+		if len(data) < i+1 || len(data) < i+1+int(data[i]) {
+			return false, nil, errors.New("nome curto")
+		}
+		e := ExclusiveEntry{Name: string(data[i+1 : i+1+int(data[i])])}
+		var err error
+		if e.Pieces, i, err = readPieces(data, i+1+int(data[i])); err != nil {
+			return false, nil, err
+		}
+		out = append(out, e)
+	}
+	return data[1] == 1, out, nil
+}

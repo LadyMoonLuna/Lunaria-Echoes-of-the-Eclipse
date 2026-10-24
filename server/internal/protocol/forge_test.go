@@ -10,3 +10,16 @@ func TestForgeStateRoundTrip(t *testing.T) {
 		t.Fatalf("ida e volta falhou: %v %v %+v", err, bps, out)
 	}
 }
+
+func TestRegisterWeaponAndPuzzleStateRoundTrip(t *testing.T) {
+	pkt := RegisterCustomWeapon{Name: "Eclipse Cortante", Pieces: []PuzzlePiece{{1, 3, 0, 0, 175}, {15, 3, 3, 0, 102}}}
+	raw := SerializeRegisterCustomWeapon(pkt)
+	got, err := DeserializeRegisterCustomWeaponBody(raw[3:])
+	if err != nil || got.Name != pkt.Name || len(got.Pieces) != 2 || got.Pieces[1] != pkt.Pieces[1] {
+		t.Fatalf("0x55: %v %+v", err, got)
+	}
+	u, list, err := DeserializePuzzleState(SerializePuzzleState(true, []ExclusiveEntry{{Name: pkt.Name, Pieces: pkt.Pieces}}))
+	if err != nil || !u || len(list) != 1 || list[0].Pieces[0] != pkt.Pieces[0] {
+		t.Fatalf("0x57: %v %v %+v", err, u, list)
+	}
+}

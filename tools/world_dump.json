@@ -1340,6 +1340,508 @@
         ]
       }
     ],
+    "puzzle": {
+      "base_atk": 12,
+      "bonus": 1.2,
+      "dur_scale": 1.1,
+      "grid": 7,
+      "grip": {
+        "15": true,
+        "16": true,
+        "17": true
+      },
+      "mass_per_cell": 0.18,
+      "max_name": 32,
+      "max_pieces": 20,
+      "modules": [
+        {
+          "id": 1,
+          "name": "Ponta Reta",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 2,
+          "name": "Ponta Curva de Katana",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 3,
+          "name": "Ponta Dupla de Lança",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 4,
+          "name": "Gume Largo de Espadão",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 5,
+          "name": "Gume Serrilhado",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 6,
+          "name": "Lâmina de Foice",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 7,
+          "name": "Cabeça de Martelo",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 8,
+          "name": "Cabeça de Machado Duplo",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 9,
+          "name": "Gancho Vorpal",
+          "category": "lamina",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "pedra",
+            "presa"
+          ],
+          "role": "dano"
+        },
+        {
+          "id": 10,
+          "name": "Guarda Cruzada",
+          "category": "guarda",
+          "cells": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "tags": [
+            "metal",
+            "osso",
+            "cristal"
+          ],
+          "role": "estrutura"
+        },
+        {
+          "id": 11,
+          "name": "Guarda em Anel",
+          "category": "guarda",
+          "cells": [
+            [
+              0,
+              0
+            ]
+          ],
+          "tags": [
+            "metal",
+            "osso",
+            "cristal"
+          ],
+          "role": "estrutura"
+        },
+        {
+          "id": 12,
+          "name": "Guarda de Asas",
+          "category": "guarda",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "tags": [
+            "metal",
+            "osso",
+            "cristal"
+          ],
+          "role": "estrutura"
+        },
+        {
+          "id": 13,
+          "name": "Engaste de Olho / Coração",
+          "category": "nucleo",
+          "cells": [
+            [
+              0,
+              0
+            ]
+          ],
+          "tags": [
+            "cristal",
+            "olho",
+            "coracao"
+          ],
+          "role": "nucleo"
+        },
+        {
+          "id": 14,
+          "name": "Reator Rúnico",
+          "category": "nucleo",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "tags": [
+            "cristal",
+            "coracao"
+          ],
+          "role": "nucleo"
+        },
+        {
+          "id": 15,
+          "name": "Cabo Curto",
+          "category": "cabo",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "tags": [
+            "madeira",
+            "osso"
+          ],
+          "role": "estrutura"
+        },
+        {
+          "id": 16,
+          "name": "Haste Longa de Alabarda",
+          "category": "cabo",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              3
+            ]
+          ],
+          "tags": [
+            "madeira",
+            "osso",
+            "metal"
+          ],
+          "role": "estrutura"
+        },
+        {
+          "id": 17,
+          "name": "Elo de Corrente Flexível",
+          "category": "cabo",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "tags": [
+            "metal"
+          ],
+          "role": "estrutura"
+        },
+        {
+          "id": 18,
+          "name": "Contrapeso de Pomo",
+          "category": "cabo",
+          "cells": [
+            [
+              0,
+              0
+            ]
+          ],
+          "tags": [
+            "metal",
+            "cristal",
+            "pedra"
+          ],
+          "role": "nucleo"
+        },
+        {
+          "id": 19,
+          "name": "Bainha Lateral",
+          "category": "bainha",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "tags": [
+            "couro",
+            "madeira",
+            "metal_leve",
+            "seda"
+          ],
+          "role": "estrutura"
+        }
+      ]
+    },
     "recipes": [
       {
         "output": 175,

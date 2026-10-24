@@ -83,6 +83,8 @@ type Player struct {
 	DiscoveredMaterials map[uint16]bool                // Materiais já vistos pelo jogador (Forja)
 	CustomItems         map[uint8]*CustomItem          // Ligas sintéticas e equipamentos forjados (IDs 200-254)
 	KnownBlueprints     map[uint8]bool                 // Blueprints avançadas aprendidas (as básicas todos sabem)
+	ExclusiveBlueprints []ExclusiveBlueprint           // Desenhos patenteados no Criador Quebra-Cabeça (Soulbound)
+	DevForgeAccess      bool                           // Dev: forja e Quebra-Cabeça liberados em qualquer lugar
 	ItemUnits           map[uint8][]uint8              // Qualidade de cada unidade da mochila (melhor -> pior)
 	EquippedQuality     [protocol.EquipSlotCount]uint8 // Condição de cada item equipado
 	EquippedQualitySet  [protocol.EquipSlotCount]bool  // slot com Condição registrada (senão vale a padrão do item)

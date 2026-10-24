@@ -20,7 +20,7 @@ const (
 func canUseForge(p *world.Player) bool {
 	p.Mu.RLock()
 	defer p.Mu.RUnlock()
-	if p.ClassID == smithClassID {
+	if p.ClassID == smithClassID || p.DevForgeAccess {
 		return true
 	}
 	if p.ZoneID != world.ZoneForgeInterior {
@@ -140,6 +140,7 @@ func (s *Server) sendForgeState(p *world.Player) {
 		entries = append(entries, e)
 	}
 	writeTCP(p, protocol.SerializeForgeState(p.KnownBlueprintIDs(), entries))
+	s.sendPuzzleState(p)
 }
 
 // Chances de Blueprint Antiga: chefes (900+ de vida) e criaturas das Ruínas da Vigília
@@ -176,4 +177,54 @@ func (s *Server) rollBlueprintScroll(p *world.Player, mob *world.Mob) {
 	p.AddItem(b.ScrollID, 1)
 	s.sendInventorySync(p)
 	s.sendPlayerNPCSay(p, 0, fmt.Sprintf("📜 Entre os restos você encontrou uma Blueprint Antiga: %s! (use-a no inventário)", b.Name))
+}
+
+// handleRegisterCustomWeapon (0x55): Criador Quebra-Cabeça — confere a patente e forja a Obra-Prima.
+func (s *Server) handleRegisterCustomWeapon(playerID uint32, body []byte) {
+	s.mu.RLock()
+	player := s.players[playerID]
+	s.mu.RUnlock()
+	if player == nil {
+		return
+	}
+	pkt, err := protocol.DeserializeRegisterCustomWeaponBody(body)
+	if err != nil {
+		return
+	}
+	if !canUseForge(player) {
+		s.sendPlayerNPCSay(player, 0, "🔨 Use a bigorna dentro da Forja do Garrick (ou seja um Forjador de Estrelas).")
+		return
+	}
+	pl := make([]world.PuzzlePlacement, len(pkt.Pieces))
+	for i, pc := range pkt.Pieces {
+		pl[i] = world.PuzzlePlacement{Module: pc.Module, X: pc.X, Y: pc.Y, Rot: pc.Rot, Material: pc.Material}
+	}
+	res, err, denied := player.ForgePuzzle(pkt.Name, pl, playerName(player))
+	if denied {
+		log.Printf("[PATENTE] Jogador #%d tentou forjar um desenho patenteado por %s\n", player.ID, world.PatentOwner(world.PatentKey(pl)))
+		writeTCP(player, protocol.SerializeForgeAlert(protocol.ForgeAlertPatentDenied, world.PatentDeniedMessage))
+		return
+	}
+	if err != nil {
+		s.sendPlayerNPCSay(player, 0, "⚠️ "+err.Error()+".")
+		return
+	}
+	log.Printf("[PATENTE] %s registrou/forjou \"%s\" (%s)\n", playerName(player), res.Name, world.ShapeSignature(pl))
+	writeTCP(player, protocol.SerializeForgeAlert(protocol.ForgeAlertInfo, res.Message))
+	s.sendPlayerNPCSay(player, 0, res.Message)
+	s.sendForgeState(player)
+	s.sendInventorySync(player)
+}
+
+// sendPuzzleState (0x57): se o Quebra-Cabeça está liberado e as Blueprints Exclusivas do jogador.
+func (s *Server) sendPuzzleState(p *world.Player) {
+	var list []protocol.ExclusiveEntry
+	for _, b := range p.GetExclusiveBlueprints() {
+		e := protocol.ExclusiveEntry{Name: b.Name}
+		for _, pc := range b.Placements {
+			e.Pieces = append(e.Pieces, protocol.PuzzlePiece{Module: pc.Module, X: pc.X, Y: pc.Y, Rot: pc.Rot, Material: pc.Material})
+		}
+		list = append(list, e)
+	}
+	writeTCP(p, protocol.SerializePuzzleState(p.CanUsePuzzleForge(), list))
 }

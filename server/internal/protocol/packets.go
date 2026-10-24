@@ -874,21 +874,24 @@ func DeserializeWorldTime(data []byte, out *WorldTimePacket) error {
 // --- 0x22: DEV_WORLD_CONTROL (TCP: Client -> Server, 3 bytes) ---
 
 const (
-	DevCmdAdvanceHours uint8 = 1  // Avança +Value horas
-	DevCmdCycleMoon    uint8 = 2  // Cicla para próxima fase da lua
-	DevCmdCycleWeather uint8 = 3  // Cicla para próximo clima
-	DevCmdSetHour      uint8 = 4  // Define hora exata (Value % 24)
-	DevCmdSetMoon      uint8 = 5  // Define fase da lua exata (0 a 9)
-	DevCmdSetWeather   uint8 = 6  // Define clima exato (0 a 3)
-	DevCmdGiveItem     uint8 = 7  // Dá item (Value) ou kit 12 slots (255)
-	DevCmdLevelStats   uint8 = 8  // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
-	DevCmdTeleport     uint8 = 9  // Teleporte rápido (0..6)
-	DevCmdPortalTravel uint8 = 10 // Travessia de Portal / Mudança de Zona (Value = PortalID)
-	DevCmdGiveMoney    uint8 = 11 // +1.000 Sollares e +50 Moedas do Eclipse
-	DevCmdClearHeavy   uint8 = 12 // Remove da mochila os itens de 10 kg ou mais por unidade
-	DevCmdWorldEvent   uint8 = 13 // Evento climático/do Mundo Vivo (Value = DevEvent*)
-	DevCmdGoToZone     uint8 = 14 // Viaja direto para a zona Value (entrada padrão da zona)
-	DevCmdItemQuality  uint8 = 15 // Qualidade (1..100) dos próximos itens dados pelo Dev (0 = padrão)
+	DevCmdAdvanceHours    uint8 = 1  // Avança +Value horas
+	DevCmdCycleMoon       uint8 = 2  // Cicla para próxima fase da lua
+	DevCmdCycleWeather    uint8 = 3  // Cicla para próximo clima
+	DevCmdSetHour         uint8 = 4  // Define hora exata (Value % 24)
+	DevCmdSetMoon         uint8 = 5  // Define fase da lua exata (0 a 9)
+	DevCmdSetWeather      uint8 = 6  // Define clima exato (0 a 3)
+	DevCmdGiveItem        uint8 = 7  // Dá item (Value) ou kit 12 slots (255)
+	DevCmdLevelStats      uint8 = 8  // Controle de nível/status dev (1=+1, 5=+5, 50=lvl 50, 99=full heal+20pts, 0=reset)
+	DevCmdTeleport        uint8 = 9  // Teleporte rápido (0..6)
+	DevCmdPortalTravel    uint8 = 10 // Travessia de Portal / Mudança de Zona (Value = PortalID)
+	DevCmdGiveMoney       uint8 = 11 // +1.000 Sollares e +50 Moedas do Eclipse
+	DevCmdClearHeavy      uint8 = 12 // Remove da mochila os itens de 10 kg ou mais por unidade
+	DevCmdWorldEvent      uint8 = 13 // Evento climático/do Mundo Vivo (Value = DevEvent*)
+	DevCmdGoToZone        uint8 = 14 // Viaja direto para a zona Value (entrada padrão da zona)
+	DevCmdItemQuality     uint8 = 15 // Qualidade (1..100) dos próximos itens dados pelo Dev (0 = padrão)
+	DevCmdForgeKit        uint8 = 16 // Kit de ferramentas + 5 materiais básicos
+	DevCmdRevealMaterials uint8 = 17 // Revela todos os materiais no personagem (teste)
+	DevCmdForgeAccess     uint8 = 18 // Libera a Forja e o Quebra-Cabeça em qualquer lugar (teste)
 )
 
 // DevWorldControlPacket representa o comando de depuração para testes (F6=+Horas, F7=Fase Lua, F8=Clima, Dev Menu F10).

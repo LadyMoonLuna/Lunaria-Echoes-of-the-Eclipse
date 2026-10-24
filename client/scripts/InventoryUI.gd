@@ -1063,6 +1063,8 @@ func _update_inspector() -> void:
 	var cat_text: String = data.get("category", "Item")
 	if ItemData.is_material(item_id):
 		cat_text = "Material de Forja — %s" % ItemData.CATEGORY_NAMES.get(ItemData.material(item_id)["category"], "")
+	elif ItemData.FORGED.has(item_id) and int(ItemData.FORGED[item_id]["kind"]) == 3:
+		cat_text = "📘 Blueprint Exclusiva — Soulbound (Inegociável / Introcável)"
 	elif ItemData.FORGED.has(item_id):
 		var fslot: int = int(ItemData.info(item_id).get("slot", -1))
 		cat_text = "Forjado por Blueprint — %s" % (SLOT_NAMES[fslot] if fslot >= 0 else "Ferramenta Tier %d" % int(ItemData.FORGED[item_id]["tool_tier"]))
@@ -1117,7 +1119,8 @@ func _update_inspector() -> void:
 	unequip_btn.visible = is_equipped
 	use_btn.visible = not is_equipped and (data.get("usable", false) or ItemData.slot_of(item_id) >= 0 or ItemData.info(item_id).has("blueprint"))
 	use_btn.text = "⬆️ Equipar" if ItemData.slot_of(item_id) >= 0 else "⬆️ Usar"
-	drop_btn.get_parent().visible = not is_equipped
+	# Peças forjadas únicas e Blueprints Exclusivas (Soulbound) não vão para o chão
+	drop_btn.get_parent().visible = not is_equipped and item_id < 200
 	drop_qty.max_value = max(1, qty)
 	drop_qty.value = clampi(int(drop_qty.value), 1, max(1, qty))
 	drop_qty.editable = qty > 1

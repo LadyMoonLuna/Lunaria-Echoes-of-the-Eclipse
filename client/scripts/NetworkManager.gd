@@ -20,6 +20,8 @@ signal wallet_weight_updated(gold: int, eclipse_coins: int, current_weight: floa
 signal ground_items_received(items: Array) # Array de {"drop_id", "id", "quantity", "x", "z"}
 signal resource_nodes_received(nodes: Array) # Array de {"node_id", "kind", "material", "tier", "available", "x", "z"}
 signal forge_state_received(blueprints: Array)
+signal forge_alert_received(kind: int, message: String)
+signal puzzle_state_received(unlocked: bool, exclusives: Array)
 signal discovered_materials_received(mode: int, material_ids: Array) # mode 0 = lista completa, 1 = novas descobertas
 signal quest_state_received(quest_id: int, stage: int, have: int, need: int) # stage 255 = concluída
 signal player_respawn_received(player_id: int, respawn_pos: Vector3)
@@ -273,6 +275,26 @@ func _process_tcp() -> void:
 					break
 				tcp_rx_buffer = tcp_rx_buffer.slice(int(fs["size"]))
 				forge_state_received.emit(fs["blueprints"])
+
+			elif opcode == 0x56: # FORGE_ALERT: op | tipo | len u16 | mensagem
+				if tcp_rx_buffer.size() < 4:
+					break
+				var al_len: int = tcp_rx_buffer[2] | (tcp_rx_buffer[3] << 8)
+				if tcp_rx_buffer.size() < 4 + al_len:
+					break
+				var al_kind: int = tcp_rx_buffer[1]
+				var al_msg: String = tcp_rx_buffer.slice(4, 4 + al_len).get_string_from_utf8()
+				tcp_rx_buffer = tcp_rx_buffer.slice(4 + al_len)
+				forge_alert_received.emit(al_kind, al_msg)
+
+			elif opcode == 0x57: # PUZZLE_STATE: op | liberado | n | n × (len + nome, peças)
+				var ps := _parse_puzzle_state()
+				if ps.is_empty():
+					break
+				tcp_rx_buffer = tcp_rx_buffer.slice(int(ps["size"]))
+				puzzle_unlocked = bool(ps["unlocked"])
+				exclusive_blueprints = ps["list"]
+				puzzle_state_received.emit(puzzle_unlocked, exclusive_blueprints)
 
 			elif opcode == 0x50: # PLAYER_SURVIVAL: op | fome | frio | calor | temp. sentida i8 | temp. ambiente i8
 				if tcp_rx_buffer.size() < 6:
@@ -1018,3 +1040,48 @@ func send_forge_blueprint(bp_id: int, picks: Array) -> void:
 
 func send_forge_action(action: int, bp_id: int = 0) -> void:
 	tcp.put_data(PackedByteArray([0x53, action, bp_id]))
+
+
+# Criador Quebra-Cabeça (Forja Etapa 3)
+var puzzle_unlocked := false
+var exclusive_blueprints: Array = [] # [{"name", "pieces": [[módulo, x, y, rot, material], ...]}]
+
+func _parse_puzzle_state() -> Dictionary:
+	var buf := tcp_rx_buffer
+	if buf.size() < 3:
+		return {}
+	var i := 3
+	var list: Array = []
+	for k in range(buf[2]):
+		if buf.size() < i + 1 or buf.size() < i + 1 + buf[i]:
+			return {}
+		var nm: String = buf.slice(i + 1, i + 1 + buf[i]).get_string_from_utf8()
+		i += 1 + buf[i]
+		if buf.size() < i + 1:
+			return {}
+		var n: int = buf[i]
+		i += 1
+		if buf.size() < i + n * 5:
+			return {}
+		var pieces: Array = []
+		for pc in range(n):
+			pieces.append([buf[i], buf[i + 1], buf[i + 2], buf[i + 3], buf[i + 4]])
+			i += 5
+		list.append({"name": nm, "pieces": pieces})
+	return {"size": i, "unlocked": buf[1] == 1, "list": list}
+
+## 0x55 REGISTER_CUSTOM_WEAPON: op | len u16 | nome (len u8 + bytes) | n | n × (módulo, x, y, rot, material).
+## O servidor monta ShapeSignature e MaterialSignature a partir das peças (fonte da verdade).
+func send_register_custom_weapon(weapon_name: String, pieces: Array) -> void:
+	var name_bytes := weapon_name.to_utf8_buffer()
+	if name_bytes.size() > 64:
+		name_bytes = name_bytes.slice(0, 64)
+	var body := PackedByteArray([name_bytes.size()])
+	body.append_array(name_bytes)
+	body.append(pieces.size())
+	for pc in pieces:
+		for v in pc:
+			body.append(int(v))
+	var data := PackedByteArray([0x55, body.size() & 0xFF, (body.size() >> 8) & 0xFF])
+	data.append_array(body)
+	tcp.put_data(data)
