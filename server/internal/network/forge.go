@@ -38,6 +38,9 @@ func (s *Server) handleForgePacket(playerID uint32, data []byte) {
 		return
 	}
 	switch data[0] {
+	case protocol.PacketTypeFusionQuery:
+		s.sendFusionInfo(player, data[1:protocol.FusionQueryPacketSize])
+		return
 	case protocol.PacketTypeForgeAction:
 		switch data[1] {
 		case protocol.ForgeActionBuyBlueprint:
@@ -68,6 +71,34 @@ func (s *Server) handleForgePacket(playerID uint32, data []byte) {
 		}
 		picks := append([]uint8(nil), data[2:2+len(bp.Parts)]...)
 		res, err = player.ForgeBlueprint(bp.ID, picks)
+	case protocol.PacketTypeForgeAlloyScored:
+		var ings []uint8
+		for _, id := range data[1:5] {
+			if id != 0 {
+				ings = append(ings, id)
+			}
+		}
+		res, err = player.SmeltAlloyScored(ings, world.ScoresFromBytes(data[5:]))
+	case protocol.PacketTypeForgeBlueprintScored:
+		bp, ok := world.GetBlueprint(data[1])
+		if !ok {
+			return
+		}
+		picks := append([]uint8(nil), data[2:2+len(bp.Parts)]...)
+		res, err = player.ForgeBlueprintScored(bp.ID, picks, world.ScoresFromBytes(data[2+protocol.ForgeMaxParts:]))
+	case protocol.PacketTypeReforgePart:
+		reforged, rerr := player.WorkPart(data[1], int(data[2]), data[3], world.ScoresFromBytes(data[4:]))
+		if rerr != nil {
+			s.sendPlayerNPCSay(player, 0, "⚠️ "+rerr.Error())
+			return
+		}
+		msg := "🔨 Peça trabalhada: a nota foi guardada para a montagem final."
+		if reforged {
+			msg = "🔁 Reforja concluída: o metal voltou ao fogo (-15 de Stamina) e a nova nota substituiu a anterior."
+			s.sendPlayerStats(player)
+		}
+		s.sendPlayerNPCSay(player, 0, msg)
+		return
 	default:
 		return
 	}
@@ -199,7 +230,7 @@ func (s *Server) handleRegisterCustomWeapon(playerID uint32, body []byte) {
 	for i, pc := range pkt.Pieces {
 		pl[i] = world.PuzzlePlacement{Module: pc.Module, X: pc.X, Y: pc.Y, Rot: pc.Rot, Material: pc.Material}
 	}
-	res, err, denied := player.ForgePuzzle(pkt.Name, pl, playerName(player))
+	res, err, denied := player.ForgePuzzleScored(pkt.Name, pl, playerName(player), scoresOf(pkt))
 	if denied {
 		log.Printf("[PATENTE] Jogador #%d tentou forjar um desenho patenteado por %s\n", player.ID, world.PatentOwner(world.PatentKey(pl)))
 		writeTCP(player, protocol.SerializeForgeAlert(protocol.ForgeAlertPatentDenied, world.PatentDeniedMessage))
@@ -227,4 +258,26 @@ func (s *Server) sendPuzzleState(p *world.Player) {
 		list = append(list, e)
 	}
 	writeTCP(p, protocol.SerializePuzzleState(p.CanUsePuzzleForge(), list))
+}
+
+// sendFusionInfo (0x5C): dificuldade do Mini-game 2 para os ingredientes do cadinho.
+func (s *Server) sendFusionInfo(p *world.Player, ids []uint8) {
+	var mats []world.MaterialDef
+	for _, id := range ids {
+		if id == 0 {
+			continue
+		}
+		if m, ok := p.MaterialFor(id); ok {
+			mats = append(mats, m)
+		}
+	}
+	writeTCP(p, protocol.SerializeFusionInfo(world.FusionDifficulty(mats), world.ConductivityDiff(mats)))
+}
+
+// scoresOf: notas opcionais do 0x55 (sem notas = forja antiga).
+func scoresOf(pkt protocol.RegisterCustomWeapon) world.CraftScores {
+	if !pkt.HasScore {
+		return world.CraftScores{}
+	}
+	return world.ScoresFromBytes(pkt.Scores[:])
 }

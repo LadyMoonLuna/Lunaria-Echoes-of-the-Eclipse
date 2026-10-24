@@ -605,7 +605,15 @@ func (p *Player) hasEachLocked(ids []uint8) bool {
 }
 
 // SmeltAlloy funde até 4 ingredientes no cadinho: receita fixa ou Liga Sintética Customizada.
+// (Forja antiga, sem mini-games.)
 func (p *Player) SmeltAlloy(ings []uint8) (ForgeResult, error) {
+	return p.SmeltAlloyScored(ings, CraftScores{})
+}
+
+// SmeltAlloyScored: como SmeltAlloy, com as notas dos mini-games. Ponto de Fusão >= 0,95 dá o
+// Bônus de Harmonia Híbrida e a Nota de Criação define a Qualidade das unidades.
+func (p *Player) SmeltAlloyScored(ings []uint8, cs CraftScores) (ForgeResult, error) {
+	cs = cs.Clamp()
 	if len(ings) < 2 || len(ings) > MaxCrucibleSlots {
 		return ForgeResult{}, fmt.Errorf("coloque de 2 a 4 ingredientes no cadinho")
 	}
@@ -628,20 +636,49 @@ func (p *Player) SmeltAlloy(ings []uint8) (ForgeResult, error) {
 			hasBase = true
 		}
 	}
-	if r, ok := MatchAlloyRecipe(ids16); ok {
-		q := p.takeIngredientsLocked(ings)
+	harmony := cs.FromClient && cs.FusionPt >= HarmonyFusionScore
+	craftNote := ""
+	unitQ := func(q uint8) uint8 { return q }
+	if cs.FromClient {
+		cq := craftQualityFor(cs, p.MAS, p.STR, p.DEX)
+		craftNote = fmt.Sprintf(" [%s, nota %.2f]", CraftTier(cq), cq)
+		unitQ = func(uint8) uint8 { return UnitQualityFromCraft(cq) }
+	}
+	if harmony {
+		craftNote += " ✨ Harmonia Híbrida: +25% condutividades e +20% durabilidade!"
+	}
+	if r, ok := MatchAlloyRecipe(ids16); ok && !harmony {
+		q := unitQ(p.takeIngredientsLocked(ings))
 		out := uint8(r.Output)
 		p.markDiscoveredLocked(out)
 		p.addUnitsLocked(out, r.Qty, q)
 		name := MaterialsDB[r.Output].Name
 		return ForgeResult{ItemID: out, Qty: r.Qty, Quality: q, Name: name,
-			Message: fmt.Sprintf("🔥 A Fornalha rugiu: %dx %s (Qualidade %d)!", r.Qty, name, q)}, nil
+			Message: fmt.Sprintf("🔥 A Fornalha rugiu: %dx %s (Qualidade %d)!%s", r.Qty, name, q, craftNote)}, nil
+	} else if ok && harmony {
+		// Receita fixa com Ponto de Fusão perfeito: vira uma versão Harmônica única da liga
+		base := ApplyHarmony(MaterialsDB[r.Output])
+		base.Name += " Harmônico"
+		if strings.HasSuffix(MaterialsDB[r.Output].Name, "a") || strings.HasPrefix(MaterialsDB[r.Output].Name, "Liga") {
+			base.Name = MaterialsDB[r.Output].Name + " Harmônica"
+		}
+		return p.storeCustomAlloyLocked(base, "H:"+alloySignature(ids16), ings, r.Qty, unitQ, craftNote, "🔥 A Fornalha cantou em harmonia")
 	}
 	if !hasBase {
 		return ForgeResult{}, fmt.Errorf("a mistura precisa de uma base mineral (metal, liga, pedra ou cristal)")
 	}
 	syn := SyntheticAlloy(mats)
 	sig := alloySignature(ids16)
+	if harmony {
+		syn = ApplyHarmony(syn)
+		syn.Name += " Harmônica"
+		sig = "H:" + sig
+	}
+	return p.storeCustomAlloyLocked(syn, sig, ings, 1, unitQ, craftNote, "⚗️ Fusão livre: nasceu a")
+}
+
+// storeCustomAlloyLocked guarda a liga única (reaproveita a mesma mistura) e consome os ingredientes.
+func (p *Player) storeCustomAlloyLocked(syn MaterialDef, sig string, ings []uint8, qty uint8, unitQ func(uint8) uint8, note, verb string) (ForgeResult, error) {
 	id := uint8(0)
 	for cid, c := range p.CustomItems {
 		if c.Kind == CustomAlloy && c.Signature == sig && (p.Inventory[cid] > 0) {
@@ -656,14 +693,14 @@ func (p *Player) SmeltAlloy(ings []uint8) (ForgeResult, error) {
 		syn.ID = uint16(id)
 		p.CustomItems[id] = &CustomItem{ID: id, Kind: CustomAlloy, Name: syn.Name, Desc: syn.Trait, Material: syn, Signature: sig}
 	}
-	q := p.takeIngredientsLocked(ings)
+	q := unitQ(p.takeIngredientsLocked(ings))
 	if p.DiscoveredMaterials == nil {
 		p.DiscoveredMaterials = make(map[uint16]bool)
 	}
 	p.DiscoveredMaterials[uint16(id)] = true
-	p.addUnitsLocked(id, 1, q)
-	return ForgeResult{ItemID: id, Qty: 1, Quality: q, Name: syn.Name,
-		Message: fmt.Sprintf("⚗️ Fusão livre: nasceu a %s (Qualidade %d)!", syn.Name, q)}, nil
+	p.addUnitsLocked(id, qty, q)
+	return ForgeResult{ItemID: id, Qty: qty, Quality: q, Name: syn.Name,
+		Message: fmt.Sprintf("%s %dx %s (Qualidade %d)!%s", verb, qty, syn.Name, q, note)}, nil
 }
 
 func alloySignature(ids []uint16) string {
@@ -724,7 +761,14 @@ func SyntheticAlloy(mats []MaterialDef) MaterialDef {
 }
 
 // ForgeBlueprint monta o equipamento: picks[i] = item usado na peça i (0 = peça opcional vazia).
+// (Forja antiga, sem mini-games.)
 func (p *Player) ForgeBlueprint(bpID uint8, picks []uint8) (ForgeResult, error) {
+	return p.ForgeBlueprintScored(bpID, picks, CraftScores{})
+}
+
+// ForgeBlueprintScored: montagem final com as notas dos mini-games (peças reforjadas usam a nota
+// da sessão); a Nota de Criação mexe em atributos, durabilidade, peso, raridade e nome.
+func (p *Player) ForgeBlueprintScored(bpID uint8, picks []uint8, cs CraftScores) (ForgeResult, error) {
 	bp, ok := GetBlueprint(bpID)
 	if !ok {
 		return ForgeResult{}, fmt.Errorf("blueprint desconhecida")
@@ -765,11 +809,24 @@ func (p *Player) ForgeBlueprint(bpID uint8, picks []uint8) (ForgeResult, error) 
 		return ForgeResult{}, fmt.Errorf("faltam materiais na mochila")
 	}
 	st := ComputeForged(bp, mats, specials)
+	craftNote := ""
+	var craftQ float32
+	if cs.FromClient {
+		final := p.SessionScores(bp, picks, cs.Clamp())
+		craftQ = craftQualityFor(final, p.MAS, p.STR, p.DEX)
+		st = ApplyCraftQuality(st, craftQ)
+		st.Specials = append(st.Specials, fmt.Sprintf("Forja %s (nota %.2f)", CraftTier(craftQ), craftQ))
+		craftNote = fmt.Sprintf(" [%s, nota %.2f]", CraftTier(craftQ), craftQ)
+	}
 	id, ok := p.allocCustomLocked()
 	if !ok {
 		return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais (máx. 55)")
 	}
 	q := p.takeIngredientsLocked(used)
+	if cs.FromClient {
+		q = UnitQualityFromCraft(craftQ)
+		defer p.EndForgeSession()
+	}
 	info := ItemInfo{Name: st.Name, Weight: st.Weight, Slot: bp.Slot, BonusATK: uint16(st.ATK), BonusDEF: uint16(st.DEF), BonusHP: uint16(st.HP)}
 	c := &CustomItem{ID: id, Kind: CustomEquip, Name: st.Name, Info: info, Stats: st, Desc: ForgedDescription(st)}
 	if bp.Tool != ToolNone {
@@ -778,7 +835,7 @@ func (p *Player) ForgeBlueprint(bpID uint8, picks []uint8) (ForgeResult, error) 
 	p.CustomItems[id] = c
 	p.addUnitsLocked(id, 1, q)
 	return ForgeResult{ItemID: id, Qty: 1, Quality: q, Name: st.Name,
-		Message: fmt.Sprintf("🔨 Você forjou: %s (Qualidade %d)!", st.Name, q)}, nil
+		Message: fmt.Sprintf("🔨 Você forjou: %s (Qualidade %d)!%s", st.Name, q, craftNote)}, nil
 }
 
 // ForgedDescription: texto completo das peças e atributos (inventário).

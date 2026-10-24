@@ -309,6 +309,11 @@ type ExclusiveBlueprint struct {
 // ForgePuzzle: valida, confere a patente e forja a Obra-Prima Autoral (+20%), entregando também a
 // Blueprint Exclusiva Soulbound na primeira vez.
 func (p *Player) ForgePuzzle(name string, pl []PuzzlePlacement, owner string) (ForgeResult, error, bool) {
+	return p.ForgePuzzleScored(name, pl, owner, CraftScores{})
+}
+
+// ForgePuzzleScored: como ForgePuzzle, com as notas dos mini-games (Nota de Criação no item).
+func (p *Player) ForgePuzzleScored(name string, pl []PuzzlePlacement, owner string, cs CraftScores) (ForgeResult, error, bool) {
 	name = strings.TrimSpace(name)
 	if name == "" || len([]rune(name)) > PuzzleMaxNameLen {
 		return ForgeResult{}, fmt.Errorf("dê um nome de 1 a %d letras para a arma", PuzzleMaxNameLen), false
@@ -364,17 +369,26 @@ func (p *Player) ForgePuzzle(name string, pl []PuzzlePlacement, owner string) (F
 	st = ApplyMasterpiece(st)
 	st.Name = name
 	st.Specials = append(st.Specials, fmt.Sprintf("Obra-Prima Autoral de %s (+20%% atributos)", owner))
+	var craftQ float32
+	if cs.FromClient {
+		craftQ = craftQualityFor(cs.Clamp(), p.MAS, p.STR, p.DEX)
+		st = ApplyCraftQuality(st, craftQ)
+		st.Specials = append(st.Specials, fmt.Sprintf("Forja %s (nota %.2f)", CraftTier(craftQ), craftQ))
+	}
 
 	weaponID, ok := p.allocCustomLocked()
 	if !ok {
 		return ForgeResult{}, fmt.Errorf("você já guarda peças únicas demais (máx. 55)"), false
 	}
 	q := p.takeIngredientsLocked(used)
-	info := ItemInfo{Name: name, Weight: st.Weight, Slot: protocol.SlotMainHand, BonusATK: uint16(st.ATK), BonusDEF: uint16(st.DEF), BonusHP: uint16(st.HP)}
-	p.CustomItems[weaponID] = &CustomItem{ID: weaponID, Kind: CustomEquip, Name: name, Info: info, Stats: st, Desc: ForgedDescription(st)}
+	if cs.FromClient {
+		q = UnitQualityFromCraft(craftQ)
+	}
+	info := ItemInfo{Name: st.Name, Weight: st.Weight, Slot: protocol.SlotMainHand, BonusATK: uint16(st.ATK), BonusDEF: uint16(st.DEF), BonusHP: uint16(st.HP)}
+	p.CustomItems[weaponID] = &CustomItem{ID: weaponID, Kind: CustomEquip, Name: st.Name, Info: info, Stats: st, Desc: ForgedDescription(st)}
 	p.addUnitsLocked(weaponID, 1, q)
 
-	msg := fmt.Sprintf("🏆 Obra-Prima forjada: %s (Qualidade %d)!", name, q)
+	msg := fmt.Sprintf("🏆 Obra-Prima forjada: %s (Qualidade %d)!", st.Name, q)
 	if p.exclusiveIndexLocked(key) < 0 {
 		p.ExclusiveBlueprints = append(p.ExclusiveBlueprints, ExclusiveBlueprint{Name: name, Key: key, Placements: append([]PuzzlePlacement(nil), pl...)})
 		if bpID, ok := p.allocCustomLocked(); ok {

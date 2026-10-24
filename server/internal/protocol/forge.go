@@ -125,7 +125,7 @@ const (
 
 	ForgeAlertPatentDenied uint8 = 1 // alerta vermelho: sem direitos autorais
 	ForgeAlertInfo         uint8 = 2
-	MaxRegisterWeaponBody        = 1 + 64 + 1 + 20*5
+	MaxRegisterWeaponBody        = 1 + 64 + 1 + 20*5 + MiniGameCount
 )
 
 // PuzzlePiece: módulo, âncora x/y, rotação e material (5 bytes no fio).
@@ -133,8 +133,10 @@ type PuzzlePiece struct{ Module, X, Y, Rot, Material uint8 }
 
 // RegisterCustomWeapon: nome digitado e peças montadas na grade.
 type RegisterCustomWeapon struct {
-	Name   string
-	Pieces []PuzzlePiece
+	Name     string
+	Pieces   []PuzzlePiece
+	Scores   [MiniGameCount]uint8 // notas opcionais no fim do corpo (Mini-Games da Forja)
+	HasScore bool
 }
 
 func appendPieces(buf []byte, pieces []PuzzlePiece) []byte {
@@ -179,8 +181,12 @@ func DeserializeRegisterCustomWeaponBody(body []byte) (RegisterCustomWeapon, err
 		return pkt, errors.New("nome ausente")
 	}
 	pkt.Name = string(body[1 : 1+int(body[0])])
-	pieces, _, err := readPieces(body, 1+int(body[0]))
+	pieces, end, err := readPieces(body, 1+int(body[0]))
 	pkt.Pieces = pieces
+	if err == nil && len(body) >= end+MiniGameCount {
+		copy(pkt.Scores[:], body[end:end+MiniGameCount])
+		pkt.HasScore = true
+	}
 	return pkt, err
 }
 
@@ -233,4 +239,42 @@ func DeserializePuzzleState(data []byte) (bool, []ExclusiveEntry, error) {
 		out = append(out, e)
 	}
 	return data[1] == 1, out, nil
+}
+
+// Forja — Mini-Games (Parte 1). As notas dos 7 mini-games viajam como u8 (nota × 200, 0 a 240 = 0.0 a 1.20)
+// na ordem: Derreter, Ponto de Fusão, Formas, Escória, Bigorna, Têmpera, Montagem. Os pacotes antigos
+// (0x51/0x52/0x55 sem notas) continuam valendo como forja sem mini-games.
+const (
+	PacketTypeForgeAlloyScored     uint8 = 0x58 // [C->S] op | 4 ingredientes | 7 notas (12 bytes)
+	PacketTypeForgeBlueprintScored uint8 = 0x59 // [C->S] op | blueprint | 6 materiais | 7 notas (15 bytes)
+	PacketTypeReforgePart          uint8 = 0x5A // [C->S] op | blueprint | peça | material | 7 notas (11 bytes)
+	PacketTypeFusionQuery          uint8 = 0x5B // [C->S] op | 4 ingredientes (5 bytes)
+	PacketTypeFusionInfo           uint8 = 0x5C // [S->C] op | dificuldade u16 (×1000) | diferença u16 (×10) (5 bytes)
+
+	MiniGameCount                  = 7
+	ForgeAlloyScoredPacketSize     = 1 + 4 + MiniGameCount
+	ForgeBlueprintScoredPacketSize = 1 + 1 + ForgeMaxParts + MiniGameCount
+	ReforgePartPacketSize          = 1 + 3 + MiniGameCount
+	FusionQueryPacketSize          = 5
+	FusionInfoPacketSize           = 5
+	ScoreWireScale                 = 200
+)
+
+// ScoreToWire converte a nota (0.0 a 1.20) para o byte do pacote.
+func ScoreToWire(v float32) uint8 {
+	w := v*ScoreWireScale + 0.5
+	if w < 0 {
+		return 0
+	}
+	if w > 240 {
+		return 240
+	}
+	return uint8(w)
+}
+
+// SerializeFusionInfo: dificuldade do Ponto de Fusão (0-1) e diferença média de condutividade (0-100).
+func SerializeFusionInfo(difficulty, condDiff float32) []byte {
+	buf := []byte{PacketTypeFusionInfo}
+	buf = binary.LittleEndian.AppendUint16(buf, uint16(difficulty*1000+0.5))
+	return binary.LittleEndian.AppendUint16(buf, uint16(condDiff*10+0.5))
 }
