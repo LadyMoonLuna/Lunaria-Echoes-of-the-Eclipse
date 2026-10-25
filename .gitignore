@@ -26,3 +26,7 @@ Thumbs.db
 client/assets/bundles/
 *.bundle
 server/patents.json
+
+# Gerados pelo importador do Godot (recriados ao abrir o projeto)
+*.import
+client/assets/models/hd/*_[0-9].jpg
